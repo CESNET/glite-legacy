@@ -33,6 +33,12 @@
 					build="@org.glite.lb.server.build@"
 					arch="i386"/>
 					   
+				<component name="glite-lb-server-bones"
+					version="@org.glite.lb.server-bones.version@"
+					age="@org.glite.lb.server-bones.age@"
+					build="@org.glite.lb.server-bones.build@"
+					arch="i386"/>
+					   
 				<component name="glite-wms-utils-jobid"
 					version="@org.glite.wms-utils.jobid.version@"
 					age="@org.glite.wms-utils.jobid.age@"
