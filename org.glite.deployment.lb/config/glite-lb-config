@@ -203,7 +203,7 @@ def configure():
    print '#-------------------------------------------------------------------'
    print ('Updating %s/etc/init.d/glite-lb-bkserverd' % config['glite_location'])
    print '#-------------------------------------------------------------------'
-   os.system('/bin/cp glite-lb-bkserverd %s/etc/init.d/' % config['glite_location'])
+   os.system('/bin/cp glite-lb-bkserverd-config %s/etc/init.d/glite-lb-bkserverd' % config['glite_location'])
    print '\n'
 
 
@@ -300,7 +300,7 @@ if __name__ == '__main__':
       sys.exit("\nThis script must be run as root\n")
     
    # Read service configuration information from a file
-   configFile = "glite-%s-config.xml" % nodeType
+   configFile = "../glite-%s.cfg.xml" % nodeType
    config = LoadParameterFile(configFile)
 
    # Create user account
