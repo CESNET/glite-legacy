@@ -27,8 +27,6 @@ start()
 	#
 	echo -n Starting glite-lb-proxy ...
 	su - $GLITE_USER -c "$GLITE_LOCATION/bin/glite-lb-proxy \
-        --proxy-il-sock=/tmp/glite-lbproxy-ilog.sock \
-		--proxy-il-fprefix=/tmp/glite-lbproxy-ilog_events \
 		-i $pidfile " && echo " done" || echo " FAILED"
 }
 
