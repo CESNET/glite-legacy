@@ -43,6 +43,8 @@ typedef enum _edg_wll_ContextParam {
 	EDG_WLL_PARAM_X509_PROXY,	/**< proxy file to use for authentication */
 	EDG_WLL_PARAM_X509_KEY,		/**< key file to use for authentication */
 	EDG_WLL_PARAM_X509_CERT,	/**< certificate file to use for authentication */
+	EDG_WLL_PARAM_LBPROXY_STORE_SOCK,/**< lbproxy store socket path */
+	EDG_WLL_PARAM_LBPROXY_SERVE_SOCK,/**<  lbproxy serve socket path */
 	EDG_WLL_PARAM__LAST,		/**< marker, LB internal use only */
 } edg_wll_ContextParam;
 
