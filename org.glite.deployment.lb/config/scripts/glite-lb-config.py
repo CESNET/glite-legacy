@@ -126,11 +126,11 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         glib.add_user(params['GLITE_USER'],params['GLITE_USER'])
         (uid,gid) = glib.get_user_info(params['GLITE_USER'])
         glib.check_dir(os.environ['GLITE_LOCATION_VAR'],0755, uid, gid)
-        
+        glib.check_dir("/home/%s/.certs" % params['GLITE_USER'],0755, uid, gid)
         # Copy certificates
         os.system("cp %s %s ~%s/.certs/" % (params['host.certificate.file'], params['host.key.file'], params['GLITE_USER']))
-        os.chown("/home/%s/.certs" % params['GLITE_USER'], params['GLITE_USER'])
-        os.chown("/home/%s/.certs/*" % params['GLITE_USER'], params['GLITE_USER'])
+        os.chown(params['lb.certificate.file'], uid,gid)
+        os.chown(params['lb.key.file'],uid,gid)
                 
         # Create the MySQL database
         self.mysql.stop()
@@ -153,7 +153,7 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         os.system('/usr/bin/mysql < /tmp/mysql_ct')
         os.system('/bin/rm /tmp/mysql_ct')
         if not os.path.exists('/tmp/mysql.sock'):
-            os.link('/var/lib/mysql/mysql.sock', '/tmp/mysql.sock')
+            os.symlink('/var/lib/mysql/mysql.sock', '/tmp/mysql.sock')
         self.mysql.stop()
          
         return 0
