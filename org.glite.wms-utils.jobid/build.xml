@@ -21,20 +21,13 @@
 
 	Revision history:
 	$Log$
-	Revision 1.2  2004/06/14 18:14:35  eronchie
-	Added Configure options
-	WARNING work in progress
-	
-	Revision 1.1.1.1  2004/05/26 18:45:05  eronchie
-	Import of wms jobid
-	
 
 -->
 
 <project name="jobid" default="dist">
 	
 	<!-- =========================================
-		 Builds the GLite WMS jobid Module
+		 Builds the GLite WMS Utils Jobid Module
 	     ========================================= -->
 	
 	<!-- =========================================
