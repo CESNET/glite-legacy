@@ -127,10 +127,15 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         (uid,gid) = glib.get_user_info(params['GLITE_USER'])
         glib.check_dir(os.environ['GLITE_LOCATION_VAR'],0755, uid, gid)
         glib.check_dir("/home/%s/.certs" % params['GLITE_USER'],0755, uid, gid)
+        lb_cert_path = pwd.getpwnam(params['GLITE_USER'])[5] + "/" + params['user.certificate.path']
+
         # Copy certificates
-        os.system("cp %s %s ~%s/.certs/" % (params['host.certificate.file'], params['host.key.file'], params['GLITE_USER']))
-        os.chown(params['lb.certificate.file'], uid,gid)
-        os.chown(params['lb.key.file'],uid,gid)
+        glib.check_dir( lb_cert_path, 0755, uid, gid)
+        os.system("cp %s %s %s/" % (params['host.certificate.file'], params['host.key.file'], lb_cert_path))
+        os.chown("%s/hostcert.pem" % lb_cert_path, uid,gid)
+        os.chown("%s/hostkey.pem" % lb_cert_path, uid,gid)
+        glib.export('GLITE_HOST_CERT',"%s/hostcert.pem" % lb_cert_path)
+        glib.export('GLITE_HOST_KEY',"%s/hostkey.pem" % lb_cert_path)
                 
         # Create the MySQL database
         self.mysql.stop()
@@ -176,11 +181,12 @@ def set_env():
     if not os.path.exists(os.environ['GLITE_LOCATION_TMP']):
         os.mkdir(os.environ['GLITE_LOCATION_TMP'],0755)
 
-    glib.export('GLITE_HOST_CERT',params['lb.certificate.file'])
-    glib.export('GLITE_HOST_KEY',params['lb.key.file'])
-    glib.export('GLITE_USER','gproduct')
+    (uid,gid) = glib.add_user(params['GLITE_USER'])
+    lb_cert_path = pwd.getpwnam(params['GLITE_USER'])[5] + "/" + params['user.certificate.path']
+    glib.export('GLITE_HOST_CERT',"%s/hostcert.pem" % lb_cert_path)
+    glib.export('GLITE_HOST_KEY',"%s/hostkey.pem" % lb_cert_path)
     glib.export('GLOBUS_LOCATION',params['GLOBUS_LOCATION'])
-    glib.export('GLITE_CERT_DIR',params['GLITE_CERT_DIR'])
+    glib.export('GLITE_CERT_DIR',params['ca.certificates.dir'])
 
     # bin and lib paths
     glib.addEnvPath("PATH","/usr/bin/:%s/bin:%s/externals/bin:%s/bin" % (os.environ['GLOBUS_LOCATION'],os.environ['GLITE_LOCATION'],os.environ['GLITE_LOCATION']))
