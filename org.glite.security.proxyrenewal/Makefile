@@ -112,19 +112,32 @@ ${THRLIBOBJ}: %.thr.o: %.c
 %.o: %.c
 	${COMPILE} ${GLOBUSINC} -c $<
 
-install:
-	-mkdir -p ${PREFIX}/bin ${PREFIX}/lib ${PREFIX}/include/glite/security
-	${INSTALL} -m 644 ${LIB} ${THRLIB} ${PREFIX}/lib
-	${INSTALL} -m 755 ${DAEMON} ${CLIENT} ${PREFIX}/bin
-	cd ${top_srcdir}/interface && ${INSTALL} -m 644 renewal.h ${PREFIX}/include/glite/security
-
-
 stage: compile
 	$(MAKE) install PREFIX=${stagedir}
 
 
 check:
 	echo No unit tests
+
+dist: distsrc distbin
+
+distsrc:
+	mkdir -p ${top_srcdir}/${package}-${version}
+	cd ${top_srcdir} && GLOBIGNORE="${package}-${version}" && cp -Rf * ${package}-${version}
+	cd ${top_srcdir} && tar -czf ${distdir}/${package}-${version}_src.tar.gz --exclude-from=project/tar_exclude ${package}-${version}
+	rm -rf ${top_srcdir}/${package}-${version}
+
+distbin:
+	$(MAKE) install PREFIX=`pwd`/tmpbuilddir
+	cd tmpbuilddir && tar -czf ../${top_srcdir}/${distdir}/${package}-${version}_bin.tar.gz *
+	rm -rf tmpbuilddir
+
+install:
+	-mkdir -p ${PREFIX}/bin ${PREFIX}/lib ${PREFIX}/include/glite/security
+	${INSTALL} -m 644 ${LIB} ${THRLIB} ${PREFIX}/lib
+	${INSTALL} -m 755 ${DAEMON} ${CLIENT} ${PREFIX}/bin
+	cd ${top_srcdir}/interface && ${INSTALL} -m 644 renewal.h ${PREFIX}/include/glite/security
+
 
 clean:
 	$(RM) $(LIB) $(DAEMON) $(CLIENT) *.o core 
