@@ -54,6 +54,10 @@ distbin:
 	cd ${top_srcdir}/tmpbuilddir && tar -czf ${top_srcdir}/${distdir}/${package}-${version}_bin.tar.gz *
 	rm -rf ${top_srcdir}/tmpbuilddir
 	
+doc:
+	doxygen C.dox
+	doxygen CPP.dox
+
 install:
 	-mkdir -p ${PREFIX}/${STAGETO}
 	-mkdir -p ${PREFIX}/share/doc/${package}-${version}
