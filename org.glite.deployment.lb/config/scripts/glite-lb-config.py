@@ -213,7 +213,7 @@ if __name__ == '__main__':
     # Load parameters
     params = {}
     if glib.loadConfiguration("%s/../glite-lb.cfg.xml" % glib.getScriptPath(),params):
-        print "Configuration files not found.\nPlease verify if the configuration files are copied from the templates directory\n"
+        print "An error occurred while configuring the service"
         sys.exit(1)
     
     verbose = 0
