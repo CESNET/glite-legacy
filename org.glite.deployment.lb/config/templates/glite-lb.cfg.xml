@@ -1,14 +1,36 @@
 <!--  Parameters for  configuring the org.glite.data.io-daemon service -->
 <config>
 	<parameters>
-		<glite.installer.verbose value='true'/>
-		<!-- host certificate -->
-		<glite.installer.checkcerts value='true'/>
-		<!-- user account -->
-		<glite.user.name value="glite"/>
-		<glite.group.name value="glite"/>
+
+		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
+		<!-- User-defined parameters - Please change them -->
+		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
+
+		<!-- gLite configuration -->
+		<glite.installer.verbose
+			description="Enable verbose output"
+			value="true"/>
+			
+		<glite.installer.checkcerts
+			description="Enable check of host certificates"
+			value="true"/>
+
 		<!-- MySQL DB -->
-		<lb.database.name value='lbserver20'/>
-		<lb.database.username value='lbserver'/>
+		<lb.database.name
+			description="The mySQL database name to create for storing LB data"
+			value="changeme"/>
+			
+		<lb.database.username
+			description="The username to be used to access the local mySQL server"
+			value="changeme"/>
+			
+		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
+		<!-- Optimization parameters - Change them if you know what you're doing -->
+		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
+
+		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
+		<!-- System parameters - You should leave these alone -->
+		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
+
 	</parameters>
 </config>
