@@ -9,11 +9,11 @@
 	<services>
 		<service name="glite-lb-service">
 			<components>
-                                <component name="glite-lb-config"
-                                        version="@module.version@"
-                                        age="@org.glite.deployment.lb.age@"
-                                        build="@org.glite.deployment.lb.build@"
-                                        arch="noarch"/>
+                <component name="glite-lb-config"
+                        version="@module.version@"
+                        age="@module.age@"
+                        build="@module.build@"
+                        arch="noarch"/>
 
 				<component name="glite-lb-client-interface"
 					version="@org.glite.lb.client-interface.version@"
