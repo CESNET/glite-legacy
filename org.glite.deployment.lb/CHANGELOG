@@ -1,3 +1,7 @@
+DATE: 09-03-2005 23:05
+[dimeglio] Moved creation of indices inside database creation (if database
+		   exists indices are not recreated)
+
 DATE: 02-03-2005 11:05
 [dimeglio] Started CHANGELOG
 [dimeglio] Fixed formatting, improved display of message using glib.printXxxMessage functions
