@@ -153,7 +153,7 @@ function install()
 	echo For more information refer to the gLite Installation and User Guides
 	echo or to the gLite web site \(http:\/\/www.glite.org\)
 	echo Please report problems and comments to the gLite Team at
-	echo project-eu-egee-middleware-integration-support@cern.ch
+	echo project-eu-egee-glite-bugs@cern.ch
 
 	cd ..
 }
