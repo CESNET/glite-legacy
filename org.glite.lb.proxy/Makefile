@@ -64,21 +64,34 @@ ifneq (${expat_prefix},/usr)
 	expatlib := -L${expat_prefix}/lib
 endif
 
+
+SRVBONES_LIB:= -L${stagedir}/lib -lglite_lb_server_bones
+LB_SERVER_SHARE_LIB:= -L${stagedir}/lib -lglite_lb_bkserver
+LB_PROXY_COMMON_LIB:= -L${stagedir}/lib -lglite_lb_common_${nothrflavour}
+COMMON_LIBS:= -L${stagedir}/lib -lglite_lb_common_${nothrflavour} -lglite_security_gss_${nothrflavour}
+GRIDSITE_LIBS = -lgridsite_globus `xml2-config --libs`
+
+
 EXT_LIBS:= -L${ares_prefix}/lib -lares \
 	${myslqlib} -lmysqlclient -lz\
 	${expatlib} -lexpat \
+	${GRIDSITE_LIBS} \
+	-lvomsc${vomsflavour} \
 	${GLOBUS_LIBS}
 
-SRVBONES_LIB:= -L${stagedir}/lib -lglite_lb_server_bones
-COMMON_LIB:= -L${stagedir}/lib -lglite_lb_common_${nothrflavour}
-LB_SERVER_SHARE_LIB:= -L${stagedir}/lib -lglite_lb_server
-LB_PROXY_COMMON_LIB:= -L${stagedir}/lib -lglite_lb_common_${nothrflavour}
 
 
-LB_PROXY_OBJS:= lbproxy.o
+LB_PROXY_LIBS:= \
+	${LB_SERVER_SHARE_LIB} \
+	${EXT_LIBS} \
+	${SRVBONES_LIB} \
+	-lglite_lb_common_${nothrflavour} \
+	-lglite_security_gss_${nothrflavour}
 
-glite_lb_proxy: ${LB_PROXY_OBJS} 
-	${LINK} -o $@ ${LB_PROXY_OBJS} ${LB_SERVER_SHARE_LIB} ${COMMON_LIB} ${SRVBONES_LIB} ${EXT_LIBS}
+
+
+glite_lb_proxy: lbproxy.o
+	${LINK} -o $@ lbproxy.o ${LB_PROXY_LIBS}
 
 default all: compile
 
