@@ -38,6 +38,9 @@ gLite Logging and Bookkeeping node installation package
 %files
 %attr(755,root,root) %{prefix}/etc/config/scripts/glite-lb-config.py
 %attr(644,root,root) %{prefix}/etc/config/templates/glite-lb.cfg.xml
+%attr(644,root,root) %{prefix}/doc/glite-lb/release_notes/release_notes.doc
+%attr(644,root,root) %{prefix}/doc/glite-lb/release_notes/release_notes.pdf
+%attr(644,root,root) %{prefix}/doc/glite-lb/release_notes/release_notes.html
 
 %changelog
 
