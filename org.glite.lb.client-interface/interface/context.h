@@ -39,12 +39,12 @@ typedef enum _edg_wll_ContextParam {
 	EDG_WLL_PARAM_NOTIF_SERVER,	/**< default notification server name */
 	EDG_WLL_PARAM_NOTIF_SERVER_PORT,/**< default notification server port */
 	EDG_WLL_PARAM_NOTIF_TIMEOUT,	/**< notif timeout */
-	EDG_WLL_PARAM_LBPROXY_STORE_SOCK,/**< lbproxy store socket path */
-	EDG_WLL_PARAM_LBPROXY_SERVE_SOCK,/**<  lbproxy serve socket path */
-	EDG_WLL_PARAM_LBPROXY_USER,	/**< user credentials when logging to L&B Proxy */
 	EDG_WLL_PARAM_X509_PROXY,	/**< proxy file to use for authentication */
 	EDG_WLL_PARAM_X509_KEY,		/**< key file to use for authentication */
 	EDG_WLL_PARAM_X509_CERT,	/**< certificate file to use for authentication */
+	EDG_WLL_PARAM_LBPROXY_STORE_SOCK,/**< lbproxy store socket path */
+	EDG_WLL_PARAM_LBPROXY_SERVE_SOCK,/**<  lbproxy serve socket path */
+	EDG_WLL_PARAM_LBPROXY_USER,	/**< user credentials when logging to L&B Proxy */
 	EDG_WLL_PARAM__LAST,		/**< marker, LB internal use only */
 } edg_wll_ContextParam;
 
@@ -133,8 +133,7 @@ typedef enum _edg_wll_ErrorCode {
 	EDG_WLL_ERROR_PARSE_MSG_INCOMPLETE, /**< Incomplete message (missing fields) */
 	EDG_WLL_ERROR_PARSE_KEY_DUPLICITY, /**< Duplicate entry in message */
 	EDG_WLL_ERROR_PARSE_KEY_MISUSE, /**< Entry not allowed for this message type */
-	EDG_WLL_ERROR_PARSE_OK_WITH_EXTRA_FIELDS, /**< Additional, not understood fields found in message */
-	EDG_WLL_ERROR_COMPARE_EVENTS, /**< Two compared events differ.
+	EDG_WLL_ERROR_PARSE_OK_WITH_EXTRA_FIELDS, /**< Additional, not understood fields found in message.
 		The rest is OK therefore this is not a true error. */
         EDG_WLL_ERROR_XML_PARSE, /**< Error in parsing XML protocol. */
         EDG_WLL_ERROR_SERVER_RESPONSE, /**< Generic failure on server. See syslog on the server machine for details. */
@@ -144,12 +143,13 @@ typedef enum _edg_wll_ErrorCode {
 	EDG_WLL_ERROR_URL_FORMAT, /**< Malformed URL */
 	EDG_WLL_ERROR_MD5_CLASH, /**< MD5 hash same for different strings. Very unlikely :-). */
 	EDG_WLL_ERROR_GSS, /**< Generic GSSAPI error. See errDesc returned by edg_wll_Error(). */
+	EDG_WLL_ERROR_DNS, /**< DNS resolver error. See errDesc returned by edg_wll_Error(). */
 	EDG_WLL_ERROR_NOJOBID,	/**< Attmepted call requires calling edg_wll_SetLoggingJob() first. */
 	EDG_WLL_ERROR_NOINDEX,	/**< Query does not contain any conidion on indexed attribute. */
 	EDG_WLL_IL_PROTO,	/**< Interlogger to lbserver communication protocol error. */
 	EDG_WLL_IL_SYS,         /**< Interlogger internal error. */
 	EDG_WLL_IL_EVENTS_WAITING, /**< Interlogger still has events pending delivery. */
-	EDG_WLL_ERROR_DNS, /**< DNS resolver error. See errDesc returned by edg_wll_Error(). */
+	EDG_WLL_ERROR_COMPARE_EVENTS, /**< Two compared events differ. */
 } edg_wll_ErrorCode;
 
 /**

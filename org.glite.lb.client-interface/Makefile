@@ -21,7 +21,7 @@ STAGETO=include/${globalprefix}/${lbprefix}
 STATIC_H=consumer.h context.h dump.h load.h notification.h notifid.h purge.h \
 	Notification.h CountRef.h Job.h LoggingExceptions.h ServerConnection.h \
 	consumer_fake.h producer_fake.h
-GEN_H=events.h jobstat.h producer.h Event.h JobStatus.h
+GEN_H=events.h jobstat.h producer.h Event.h JobStatus.h interface_version.h
 
 
 generate: ${GEN_H}
@@ -36,6 +36,8 @@ check:
 	${AT3} $< >$@ || rm -f $@
 	chmod -w $@ >/dev/null
 
+interface_version.h: ${top_srcdir}/project/version.properties
+	echo "#define GLITE_LB_CLIENT_INTERFACE \"${version}\"" >$@ 
 stage: generate
 	$(MAKE) install PREFIX=${top_srcdir}/${stagedir}
 
