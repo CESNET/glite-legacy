@@ -3,6 +3,9 @@
 #
 # Template script for configuring the gLite LB service
 # David Collados <david.collados@cern.ch>
+#   and
+# Robert Harakaly <robert.harakaly@cern.ch>
+#
 # $Id:
 #
 #####################################################################################
@@ -13,6 +16,14 @@
 #
 #####################################################################################
 
+#####################################################################################
+#
+#    Used configuration parameters
+#
+#    lb.database.name
+#    lb.database.username
+#
+#####################################################################################
 import os,string
 import sys, posix
 import getopt

@@ -102,5 +102,6 @@
 		</service>
 	</services>
 	<dependencies>
+	  <!-- glite service tool -->
 	</dependencies>
 </node>
