@@ -19,7 +19,8 @@ AT3=perl -I${top_srcdir}/project ${top_srcdir}/project/at3
 
 STAGETO=include/${globalprefix}/${lbprefix}
 STATIC_H=consumer.h context.h dump.h load.h notification.h notifid.h purge.h \
-	Notification.h CountRef.h Job.h LoggingExceptions.h ServerConnection.h
+	Notification.h CountRef.h Job.h LoggingExceptions.h ServerConnection.h \
+	consumer_fake.h
 GEN_H=events.h jobstat.h producer.h Event.h JobStatus.h
 
 
