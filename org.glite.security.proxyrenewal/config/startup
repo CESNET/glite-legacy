@@ -13,6 +13,7 @@ start()
 {
 	[ -n "$GLITE_HOST_CERT" ] && X509_USER_CERT="$GLITE_HOST_CERT"
 	[ -n "$GLITE_HOST_KEY" ] && X509_USER_KEY="$GLITE_HOST_KEY"
+	export X509_USER_CERT X509_USER_KEY
 
 	echo -n Starting ProxyRenewal Daemon: glite-proxy-renewd ...
 
