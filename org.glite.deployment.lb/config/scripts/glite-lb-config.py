@@ -187,7 +187,8 @@ def set_env():
     glib.export('GLITE_HOST_KEY',"%s/hostkey.pem" % lb_cert_path)
     glib.export('GLOBUS_LOCATION',params['GLOBUS_LOCATION'])
     glib.export('GLITE_CERT_DIR',params['ca.certificates.dir'])
-
+    glib.export('GLITE_USER',params['GLITE_USER'])
+    
     # bin and lib paths
     glib.addEnvPath("PATH","/usr/bin/:%s/bin:%s/externals/bin:%s/bin" % (os.environ['GLOBUS_LOCATION'],os.environ['GLITE_LOCATION'],os.environ['GLITE_LOCATION']))
     glib.addEnvPath("LD_LIBRARY_PATH","/usr/lib:%s/lib:%s/externals/lib:%s/lib" % (os.environ['GLOBUS_LOCATION'], os.environ['GLITE_LOCATION'],os.environ['GLITE_LOCATION']))
