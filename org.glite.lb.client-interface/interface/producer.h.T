@@ -367,7 +367,6 @@ extern int edg_wll_RegisterJobProxy(
 	edg_wll_Context		context,
 	const edg_wlc_JobId	job,
 	enum edg_wll_RegJobJobtype	type,
-	const char *		user,
 	const char *		jdl,
 	const char *		ns,
 	int			num_subjobs,
