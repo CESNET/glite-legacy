@@ -26,7 +26,6 @@ typedef enum _edg_wll_ContextParam {
 	EDG_WLL_PARAM_LEVEL,		/**< logging level */
 	EDG_WLL_PARAM_DESTINATION,	/**< logging destination host */
 	EDG_WLL_PARAM_DESTINATION_PORT, /**< logging destination port */
-	EDG_WLL_PARAM_USER_LBPROXY,	/**< user credentials when logging to L&B Proxy */
 	EDG_WLL_PARAM_LOG_TIMEOUT,	/**< logging timeout (asynchronous) */
 	EDG_WLL_PARAM_LOG_SYNC_TIMEOUT,	/**< logging timeout (synchronous) */
 	EDG_WLL_PARAM_QUERY_SERVER,	/**< default server name to query */
@@ -40,11 +39,12 @@ typedef enum _edg_wll_ContextParam {
 	EDG_WLL_PARAM_NOTIF_SERVER,	/**< default notification server name */
 	EDG_WLL_PARAM_NOTIF_SERVER_PORT,/**< default notification server port */
 	EDG_WLL_PARAM_NOTIF_TIMEOUT,	/**< notif timeout */
+	EDG_WLL_PARAM_LBPROXY_STORE_SOCK,/**< lbproxy store socket path */
+	EDG_WLL_PARAM_LBPROXY_SERVE_SOCK,/**<  lbproxy serve socket path */
+	EDG_WLL_PARAM_LBPROXY_USER,	/**< user credentials when logging to L&B Proxy */
 	EDG_WLL_PARAM_X509_PROXY,	/**< proxy file to use for authentication */
 	EDG_WLL_PARAM_X509_KEY,		/**< key file to use for authentication */
 	EDG_WLL_PARAM_X509_CERT,	/**< certificate file to use for authentication */
-	EDG_WLL_PARAM_LBPROXY_STORE_SOCK,/**< lbproxy store socket path */
-	EDG_WLL_PARAM_LBPROXY_SERVE_SOCK,/**<  lbproxy serve socket path */
 	EDG_WLL_PARAM__LAST,		/**< marker, LB internal use only */
 } edg_wll_ContextParam;
 
