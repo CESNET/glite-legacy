@@ -101,14 +101,29 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         mysql.start()
         os.system('%s/etc/init.d/glite-lb-bkserverd start' % os.environ['GLITE_LOCATION'])
         
+        return 0
+        
     def stop(self):
         os.system('%s/etc/init.d/glite-lb-bkserverd stop' % os.environ['GLITE_LOCATION'])
         mysql.stop()
         
+        return 0
+        
     def configure(self):
-        mysql.start()
+        
+        # Create the GLITE_USER if it doesn't exists
+        print "Creating/Verifying the GLITE_USER account %s" % os.environ['GLITE_USER']
+        (uid,gid) = glib.get_user_info(os.environ['GLITE_USER'])
+        if uid == -1:
+            glib.add_user(os.environ['GLITE_USER'],os.environ['GLITE_USER'])
+        (uid,gid) = glib.get_user_info(os.environ['GLITE_USER'])
+        glib.check_dir(os.environ['GLITE_LOCATION_VAR'],0755, uid, gid)
         
         # Create the MySQL database
+        mysql.stop()
+        time.sleep(5)
+        mysql.start()
+        
         print '#-------------------------------------------------------------------'
         print ('Creating MySQL %s database.' % params['lb.database.name'])
         print '#-------------------------------------------------------------------'
@@ -128,6 +143,8 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         mysql.stop()
         time.sleep(5)
         mysql.start()
+        
+        return 0
         
 #-------------------------------------------------------------------------------
 # Set all environment variables
@@ -149,6 +166,7 @@ def set_env():
 
     glib.export('GLITE_HOST_CERT',params['host.certificate.file'])
     glib.export('GLITE_HOST_KEY',params['host.key.file'])
+    glib.export('GLITE_USER','glite')
     glib.export('GLOBUS_LOCATION',params['GLOBUS_LOCATION'])
 
     # bin and lib paths
@@ -236,6 +254,7 @@ if __name__ == '__main__':
         sys.exit(1)
         
     # Start the service
+    service.stop()
     if service.start() != 0:
         print "An error occurred while starting the %s" % service.friendly_name
         sys.exit(1)

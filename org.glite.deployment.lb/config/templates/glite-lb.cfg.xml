@@ -32,6 +32,10 @@
 			description="The location of the Globus Toolkit"
 			value="/opt/globus"/>
 			
+		<GLITE_USER
+			description="The account used to run the LB daemons"
+			value="glite"/>
+			
 		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
 		<!-- System parameters - You should leave these alone -->
 		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
