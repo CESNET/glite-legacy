@@ -117,12 +117,15 @@
 			</dependencies>
 		</service>
 
+		<!-- Security Utilities -->
+        <service name="glite-security-utils">
+                <subservice name="glite-security-utils"/>
+        </service>
 		<!-- RGMA servicetool -->
-                <service name="glite-rgma-servicetool">
-                        <subservice name="glite-rgma-servicetool"/>
-                </service>
+        <service name="glite-rgma-servicetool">
+                <subservice name="glite-rgma-servicetool"/>
+        </service>
 	</services>
 	<dependencies>
-	  <!-- glite service tool -->
 	</dependencies>
 </node>

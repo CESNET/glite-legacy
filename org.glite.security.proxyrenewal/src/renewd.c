@@ -15,8 +15,7 @@ char *vomsdir = NULL;
 int voms_enabled = 0;
 char *cert = NULL;
 char *key = NULL;
-
-char *vomsconf = "/opt/edg/etc/vomses";
+char *vomsconf = NULL;
 
 static volatile int die = 0, child_died = 0;
 
