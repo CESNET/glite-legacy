@@ -2,7 +2,6 @@
 #define __EDG_WORKLOAD_LOGGING_CLIENT_EVENTS_H__
 
 /**
- * \file edg/workload/logging/client/events.h
  * \brief contains definition of event type codes for use both by lbapi.h and dglog.h
  */
 
@@ -243,6 +242,10 @@ for ($event->getFieldsOrdered) {
 gen "\n";
 @@@}
 
+/**
+ * \typedef edg_wll_AnyEvent
+ * common structure definition contained in all types of the events
+ */
 typedef struct _edg_wll_AnyEvent {
 _EDG_WLL_EVENT_COMMON
 } edg_wll_AnyEvent;
@@ -314,7 +317,7 @@ extern edg_wll_Event *edg_wll_InitEvent(edg_wll_EventCode eventcode);
 
 /**
  * Free the contents of event structure
- * \param IN event structure to be freed
+ * \param event IN structure to be freed
  * \warning As event structures are likely to be allocated in arrays,
  *      the structure itself is not freed.
  *      Its the responsibility of the caller to call free(event)

@@ -2,7 +2,6 @@
 #define __EDG_WORKLOAD_LOGGING_CLIENT_PRODUCER_H__
 
 /**
- * \file edg/workload/logging/client/producer.h
  * \brief client API for storing data into L&B service
  */
 
@@ -349,6 +348,8 @@ extern int edg_wll_RegisterJobSync(
  * Partitionable jobs should set num_subjobs=0 initially,
  * and re-register when number of subjobs becomes known.
  *
+ * \param context INOUT context to work with
+ * \param job IN registered job
  * \param type IN EDG_WLL_JOB_SIMPLE,  EDG_WLL_JOB_DAG, or EDG_WLL_JOB_PARTITIONABLE
  * \param user IN user credentials
  * \param jdl IN user-specified JDL
@@ -427,13 +428,14 @@ enum edg_wll_UserIdType {
 
 /**
  * Change ACL for given job.
- * \param specification of user's credential
- * \param user_id_type type of user_id,
+ * \param context INOUT context to workt with
+ * \param user_id IN: specification of user's credential
+ * \param user_id_type IN type of user_id,
  *    for EDG_WLL_USER_SUBJECT the user_id parameter is expected to be user's subject name
  *    for EDG_WLL_USER_VOMS_GROUP the user_id is expected to be of the form VO:group specifying required group membersip as managed by VOMS
- * \param permission ACL permission to change
- * \param permission_type type of given permission (allow or deny operation) 
- * \param operation operation to perform with ACL (add or remove record)
+ * \param permission IN ACL permission to change
+ * \param permission_type IN type of given permission (allow or deny operation) 
+ * \param operation IN operation to perform with ACL (add or remove record)
  */
  
 extern int edg_wll_ChangeACL(

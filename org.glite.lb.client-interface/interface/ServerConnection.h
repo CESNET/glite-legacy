@@ -17,7 +17,7 @@
 #include "glite/lb/JobStatus.h"
 #include "glite/lb/consumer.h"
 
-EWL_BEGIN_NAMESPACE;
+EWL_BEGIN_NAMESPACE
 
 /** Auxiliary class to hold an atomic query condition. */
 class QueryRecord {
@@ -301,6 +301,6 @@ private:
 	edg_wll_Context context;
 };
 
-EWL_END_NAMESPACE;
+EWL_END_NAMESPACE
 
 #endif

@@ -11,7 +11,7 @@
 
 #include <pthread.h>
 
-EWL_BEGIN_NAMESPACE;
+EWL_BEGIN_NAMESPACE
 
 class Exception: public glite::wmsutils::exception::Exception {
 public:
@@ -139,6 +139,6 @@ public:
 
 
 
-EWL_END_NAMESPACE;
+EWL_END_NAMESPACE
 
 #endif
