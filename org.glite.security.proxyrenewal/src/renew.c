@@ -161,14 +161,14 @@ renew_proxy(proxy_record *record, char *basename, char **new_proxy)
 	                        server_response, tmp_proxy);
    if (ret == 1) {
       ret = EDG_WLPR_ERROR_MYPROXY;
-      edg_wlpr_Log(LOG_ERR, "Error contacting MyProxy server for proxy %s",
-	           repository_file);
+      edg_wlpr_Log(LOG_ERR, "Error contacting MyProxy server for proxy %s: %s",
+	           repository_file, verror_get_string());
       goto end;
    }
 
    renewed_proxy = tmp_proxy;
 
-   if (voms_enabled) {
+   if (voms_enabled && record.voms_exts) {
       char tmp_voms_proxy[FILENAME_MAX];
       int tmp_voms_fd;
       
@@ -183,8 +183,10 @@ renew_proxy(proxy_record *record, char *basename, char **new_proxy)
       }
 
       ret = renew_voms_certs(repository_file, tmp_voms_proxy);
-      if (ret)
+      if (ret) {
+	 unlink(tmp_voms_proxy);
 	 goto end;
+      }
 
       renewed_proxy = tmp_voms_proxy;
    }
