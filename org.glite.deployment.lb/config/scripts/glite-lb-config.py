@@ -260,7 +260,8 @@ if __name__ == '__main__':
     if params.has_key('glite.installer.checkcerts'):
         if params['glite.installer.checkcerts'] == "true":
             if glib.check_certs(params) != 0:
-                print "Certificate files are not found\n" 
+                print "An error occurred while configuring the %s service" \
+                    % service.friendly_name
                 sys.exit(1)
     
     # Print configuration parameters
