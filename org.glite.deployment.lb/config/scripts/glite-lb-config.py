@@ -176,8 +176,8 @@ def set_env():
     if not os.path.exists(os.environ['GLITE_LOCATION_TMP']):
         os.mkdir(os.environ['GLITE_LOCATION_TMP'],0755)
 
-    glib.export('GLITE_HOST_CERT',params['host.certificate.file'])
-    glib.export('GLITE_HOST_KEY',params['host.key.file'])
+    glib.export('GLITE_HOST_CERT',params['lb.certificate.file'])
+    glib.export('GLITE_HOST_KEY',params['lb.key.file'])
     glib.export('GLITE_USER','gproduct')
     glib.export('GLOBUS_LOCATION',params['GLOBUS_LOCATION'])
     glib.export('GLITE_CERT_DIR',params['GLITE_CERT_DIR'])
