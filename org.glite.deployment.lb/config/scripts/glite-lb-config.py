@@ -246,6 +246,11 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
             file.close()
             os.system('/usr/bin/mysql < /tmp/mysql_ct')
             os.system('/bin/rm /tmp/mysql_ct')
+            
+            #Starting and stopping the database before the index creation
+            self.mysql.stop()
+            time.sleep(5)
+            self.mysql.start()
 
             #Creating the indexes
             print 'Creating the index configuration file %s/etc/glite-lb-index.conf            ' % os.environ['GLITE_LOCATION'],
