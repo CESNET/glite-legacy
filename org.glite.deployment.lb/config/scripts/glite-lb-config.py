@@ -70,8 +70,14 @@ class glite_lb:
         
 params = {}
 gLib.loadConfiguration("../glite-lb.cfg.xml",params) 
+gLib.getEnvironment(params)
 gLib.print_params(params)
 gLib.user_add(params['glite.user.name'],params['glite.group.name'])
+if not os.environ.has_key('GLITE_LOCATION'):
+    os.environ['GLITE_LOCATION']='/opt/glite'
+if os.environ['LD_LIBRARY_PATH'].find('${LD_LIBRARY_PATH}/lib') == -1:
+    os.environ['LD_LIBRARY_PATH']='${LD_LIBRARY_PATH}/lib:'+ os.environ['LD_LIBRARY_PATH']
+
 #lib.check_dir(os.environ['GLITE_LOCATION']+"/var",0777)
 #lib.getEnvironment(library)
 if params['glite.installer.checkcerts']:
