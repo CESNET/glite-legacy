@@ -138,6 +138,8 @@ install:
 	${INSTALL} -m 644 ${top_srcdir}/LICENSE ${PREFIX}/share/doc/${package}-${version}
 	cd ${top_srcdir}/interface && ${INSTALL} -m 644 renewal.h ${PREFIX}/include/glite/security/proxyrenewal
 
+	${INSTALL} -m 755 ${top_srcdir}/config/startup ${PREFIX}/etc/init.d/${DAEMON}
+
 
 clean:
 	$(RM) $(LIB) $(DAEMON) $(CLIENT) *.o core 
