@@ -20,6 +20,13 @@
 
     Revision history:
     $Log$
+    Revision 1.3  2005/03/08 12:51:23  dkouril
+    - Removed unused code
+    - enabled (and partly rewritten) support for renewal of VOMS attributes
+    - internal VOMS headers added - they are necessary to work with ASN.1 encoded
+      VOMS attribures (hopefully new version of the VOMS API will provide better
+      support)
+
     Revision 1.2  2004/07/12 16:18:37  dimeglio
     Modified to use myproxy from the repository if available
 
