@@ -68,6 +68,7 @@ class glite_lb:
 params = {}
 gLib.loadConfiguration("../glite-lb.cfg.xml",params) 
 gLib.print_params(params)
+os.environ['GLITE_LOCATION'] = params['glite.location']
 gLib.user_add(params['glite.user.name'],params['glite.group.name'])
 gLib.check_dir_perms(params['glite.location']+"/var",0777)
 if params['glite.installer.checkcerts']:
@@ -75,7 +76,7 @@ if params['glite.installer.checkcerts']:
 mysql = MySQL.Mysql()
 lb = glite_lb()
 lb.configure()
-os.environ['LD_LIBRARY_PATH'] = params['glite.location'] + "/lib:" + params['globus.location'] + "/lib:" + params['ld.library.path']
+os.environ['LD_LIBRARY_PATH'] = params['glite.location'] + "/lib:" + params['globus.location'] + "/lib:"
 os.environ['GLITE_HOST_CERT'] = params['host.certificate.file']
 os.environ['GLITE_HOST_KEY'] = params['host.key.file']
 lb.start()
