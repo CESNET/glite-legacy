@@ -39,10 +39,7 @@ extern char *lbproxy_ilog_socket_path;
 extern char *lbproxy_ilog_file_prefix;
 
 
-#define DEFAULTCS			"lbserver/@localhost:lbserver20"
-/*
 #define DEFAULTCS			"lbserver/@localhost:lbproxy"
-*/
 
 #define CON_QUEUE			20	/* accept() */
 #define SLAVE_OVERLOAD		10	/* queue items per slave */
@@ -111,6 +108,8 @@ static void usage(char *me)
 }
 
 static void wait_for_open(edg_wll_Context,const char *);
+static int decrement_timeout(struct timeval *, struct timeval, struct timeval);
+
 
 
 /*
@@ -122,10 +121,10 @@ int clnt_data_init(void **);
 	 *	Serve & Store handlers
 	 */
 int clnt_reject(int);
-int handle_conn(int, struct timeval, void *);
-int accept_serve(int, void *);
-int accept_store(int, void *);
-int clnt_disconnect(int, void *);
+int handle_conn(int, struct timeval *, void *);
+int accept_serve(int, struct timeval *, void *);
+int accept_store(int, struct timeval *, void *);
+int clnt_disconnect(int, struct timeval *, void *);
 
 #define SRV_SERVE		0
 #define SRV_STORE		1
@@ -296,13 +295,15 @@ int main(int argc, char *argv[])
 	} else { setpgid(0, getpid()); }
 
 
-	glite_srvbones_set_param(GLITE_SBPARAM_SLAVES_CT, slaves);
+	glite_srvbones_set_param(GLITE_SBPARAM_SLAVES_COUNT, slaves);
 	glite_srvbones_set_param(GLITE_SBPARAM_SLAVE_OVERLOAD, SLAVE_OVERLOAD);
 	glite_srvbones_set_param(GLITE_SBPARAM_SLAVE_CONNS_MAX, SLAVE_CONNS_MAX);
 	to = (struct timeval){CLNT_TIMEOUT, 0};
-	glite_srvbones_set_param(GLITE_SBPARAM_CLNT_TIMEOUT, &to);
+	glite_srvbones_set_param(GLITE_SBPARAM_CONNECT_TIMEOUT, &to);
+	to = (struct timeval){CLNT_TIMEOUT, 0};
+	glite_srvbones_set_param(GLITE_SBPARAM_REQUEST_TIMEOUT, &to);
 	to = (struct timeval){TOTAL_CLNT_TIMEOUT, 0};
-	glite_srvbones_set_param(GLITE_SBPARAM_TOTAL_CLNT_TIMEOUT, &to);
+	glite_srvbones_set_param(GLITE_SBPARAM_IDLE_TIMEOUT, &to);
 
 	glite_srvbones_run(clnt_data_init, service_table, sizofa(service_table), debug);
 
@@ -341,11 +342,12 @@ int clnt_data_init(void **data)
 }
 
 	
-int handle_conn(int conn, struct timeval client_start, void *data)
+int handle_conn(int conn, struct timeval *timeout, void *data)
 {
 	struct clnt_data_t *cdata = (struct clnt_data_t *)data;
 	edg_wll_Context		ctx;
-	struct timeval		total_to = { TOTAL_CLNT_TIMEOUT,0 };
+	struct timeval		total_to = { TOTAL_CLNT_TIMEOUT,0 },
+						conn_start, now;
 
 
 	if ( !(ctx = (edg_wll_Context) calloc(1, sizeof(*ctx))) ) {
@@ -382,6 +384,7 @@ int handle_conn(int conn, struct timeval client_start, void *data)
 		return -1;
 	}
 
+	gettimeofday(&conn_start, 0);
 	if ( edg_wll_plain_accept(conn, &ctx->connProxy->conn) ) {
 		perror("accept");
 		edg_wll_FreeContext(ctx);
@@ -389,20 +392,32 @@ int handle_conn(int conn, struct timeval client_start, void *data)
 		return -1;
 	} 
 
+	gettimeofday(&now, 0);
+	if ( decrement_timeout(timeout, conn_start, now) ) {
+		if (debug) fprintf(stderr, "edg_wll_plain_accept() timeout");
+		else syslog(LOG_ERR, "edg_wll_plain_accept(): timeout");
+
+		return -1;
+	}
+
 
 	return 0;
 }
 
 
-int accept_store(int conn, void *cdata)
+int accept_store(int conn, struct timeval *timeout, void *cdata)
 {
 	edg_wll_Context		ctx = ((struct clnt_data_t *) cdata)->ctx;
+	struct timeval		before, after;
 
+	memcpy(&ctx->p_tmp_timeout, timeout, sizeof(ctx->p_tmp_timeout));
+	gettimeofday(&before, NULL);
 	if ( edg_wll_StoreProtoProxy(ctx) ) { 
 		char    *errt, *errd;
+		int		err;
 
 		errt = errd = NULL;
-		switch ( edg_wll_Error(ctx, &errt, &errd) ) {
+		switch ( (err = edg_wll_Error(ctx, &errt, &errd)) ) {
 		case ETIMEDOUT:
 		case EPIPE:
 			dprintf(("[%d] %s (%s)\n", getpid(), errt, errd));
@@ -410,11 +425,8 @@ int accept_store(int conn, void *cdata)
 			/*	fallthrough
 			 */
 		case ENOTCONN:
-			edg_wll_FreeContext(ctx);
-			ctx = NULL;
 			free(errt); free(errd);
-			dprintf(("[%d] Connection closed\n", getpid()));
-			return 1;
+			return err;
 			break;
 
 		case ENOENT:
@@ -434,23 +446,34 @@ int accept_store(int conn, void *cdata)
 		} 
 		free(errt); free(errd);
 	}
+	gettimeofday(&after, NULL);
+	if ( decrement_timeout(timeout, before, after) ) {
+		if (debug) fprintf(stderr, "Serving store connection timed out");
+		else syslog(LOG_ERR, "Serving store connection timed out");
+		return ETIMEDOUT;
+	}
 
 	return 0;
 }
 
-int accept_serve(int conn, void *cdata)
+int accept_serve(int conn, struct timeval *timeout, void *cdata)
 {
 	edg_wll_Context		ctx = ((struct clnt_data_t *) cdata)->ctx;
+	struct timeval		before, after;
+
 
 	/*
 	 *	serve the request
 	 */
+	memcpy(&ctx->p_tmp_timeout, timeout, sizeof(ctx->p_tmp_timeout));
+	gettimeofday(&before, NULL);
 	if ( edg_wll_ServerHTTP(ctx) ) { 
 		char    *errt, *errd;
+		int		err;
 
 		
 		errt = errd = NULL;
-		switch ( edg_wll_Error(ctx, &errt, &errd) ) {
+		switch ( (err = edg_wll_Error(ctx, &errt, &errd)) ) {
 		case ETIMEDOUT:
 		case EPIPE:
 			dprintf(("[%d] %s (%s)\n", getpid(), errt, errd));
@@ -458,14 +481,8 @@ int accept_serve(int conn, void *cdata)
 			/*	fallthrough
 			 */
 		case ENOTCONN:
-			edg_wll_FreeContext(ctx);
-			ctx = NULL;
 			free(errt); free(errd);
-			dprintf(("[%d] Connection closed\n", getpid()));
-			/*
-			 *	"recoverable" error - return (>0)
-			 */
-			return 1;
+			return err;
 			break;
 
 		case ENOENT:
@@ -491,16 +508,28 @@ int accept_serve(int conn, void *cdata)
 		} 
 		free(errt); free(errd);
 	}
+	gettimeofday(&after, NULL);
+	if ( decrement_timeout(timeout, before, after) ) {
+		if (debug) fprintf(stderr, "Serving store connection timed out");
+		else syslog(LOG_ERR, "Serving store connection timed out");
+		return ETIMEDOUT;
+	}
 
 	return 0;
 }
 
 
-int clnt_disconnect(int conn, void *cdata)
+int clnt_disconnect(int conn, struct timeval *timeout, void *cdata)
 {
 	edg_wll_Context		ctx = ((struct clnt_data_t *) cdata)->ctx;
 
+	/* XXX: handle the timeout
+	 */
+    if ( ctx->connProxy && ctx->connProxy->conn.sock >= 0 )
+		edg_wll_plain_close(&ctx->connProxy->conn);
+
 	edg_wll_FreeContext(ctx);
+	ctx = NULL;
 
 	return 0;
 }
@@ -541,3 +570,16 @@ static void wait_for_open(edg_wll_Context ctx, const char *dbstring)
 		if (!debug) syslog(LOG_INFO,"DB connection established\n");
 	}
 }
+
+static int decrement_timeout(struct timeval *timeout, struct timeval before, struct timeval after)
+{
+	(*timeout).tv_sec = (*timeout).tv_sec - (after.tv_sec - before.tv_sec);
+	(*timeout).tv_usec = (*timeout).tv_usec - (after.tv_usec - before.tv_usec);
+	while ( (*timeout).tv_usec < 0) {
+		(*timeout).tv_sec--;
+		(*timeout).tv_usec += 1000000;
+	}
+	if ( ((*timeout).tv_sec < 0) || (((*timeout).tv_sec == 0) && ((*timeout).tv_usec == 0)) ) return(1);
+	else return(0);
+}
+
