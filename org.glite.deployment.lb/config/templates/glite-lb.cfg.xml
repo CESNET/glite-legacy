@@ -15,6 +15,14 @@
 			description="Enable check of host certificates"
 			value="true"/>
 
+		<GLITE_USER
+			description="The account used to run the LB daemons"
+			value="changeme"/>
+			
+		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
+		<!-- Optimization parameters - Change them if you know what you're doing -->
+		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
+
 		<!-- MySQL DB -->
 		<lb.database.name
 			description="The mySQL database name to create for storing LB data
@@ -26,17 +34,9 @@
 						Now it must be set to the default value"
 			value="lbserver"/>
 			
-		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
-		<!-- Optimization parameters - Change them if you know what you're doing -->
-		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
-
 		<GLOBUS_LOCATION
 			description="The location of the Globus Toolkit"
 			value="/opt/globus"/>
-			
-		<GLITE_USER
-			description="The account used to run the LB daemons"
-			value="gproduct"/>
 			
 		<GLITE_CERT_DIR
 			value='/etc/grid-security/certificates/'/>
