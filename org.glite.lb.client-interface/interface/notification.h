@@ -51,9 +51,10 @@ int edg_wll_NotifNew(
 /** Change the receiving local address.
  * Report the new address to the server.
  *
- * \param fd 
- * \param address_override 
- * \param valid all same as for \ref edg_wll_NotifNew
+ * \param id			notification ID you are binding to
+ * \param fd			same as for \ref edg_wll_NotifNew 
+ * \param address_override 	same as for \ref edg_wll_NotifNew
+ * \param valid 		same as for \ref edg_wll_NotifNew
  */
 
 int edg_wll_NotifBind(
@@ -65,9 +66,13 @@ int edg_wll_NotifBind(
 );
 
 typedef enum _edg_wll_NotifChangeOp {
+	/** No operation, equal to not defined */
 	EDG_WLL_NOTIF_NOOP = 0,
+	/** Replace notification registration with new one */
 	EDG_WLL_NOTIF_REPLACE,
+	/** Add new condition when to be notifed */
 	EDG_WLL_NOTIF_ADD,
+	/** Remove condition on notification */
 	EDG_WLL_NOTIF_REMOVE
 /*      if adding new attribute, add conversion string to common/xml_conversions.c too !! */
 } edg_wll_NotifChangeOp;
