@@ -5,7 +5,7 @@
 	For license conditions see the license file or http://eu-egee.org/license.html
 -->
 
-<node name="glite-ce-node">
+<node name="glite-lb-server-node">
 	<services>
 		<service name="glite-lb-server-service">
 			<components>
