@@ -19,6 +19,9 @@
 #
 #       Revision history:
 #       $Log$
+#       Revision 1.6  2004/08/17 10:41:47  eronchie
+#       Added optimize option
+#
 #       Revision 1.5  2004/07/23 08:02:09  eronchie
 #       Updated configure.ac
 #
@@ -40,7 +43,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.57)
-AC_INIT([GLite WMS Utils Exception], [0.0.0])
+AC_INIT([GLite WMS Utils Exception], [0.1.0]
 AC_CONFIG_AUX_DIR([./project])
 AM_INIT_AUTOMAKE([1.6.3 subdir-objects])
 AC_CONFIG_SRCDIR([src/Exception.cpp])
@@ -100,3 +103,4 @@ AC_CONFIG_FILES([src/Makefile])
 AC_CONFIG_FILES([interface/Makefile])
 
 AC_OUTPUT
+

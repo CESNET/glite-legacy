@@ -19,6 +19,9 @@
 #
 #       Revision history:
 #       $Log$
+#       Revision 1.11  2004/08/17 13:46:28  eronchie
+#       Added interface
+#
 #       Revision 1.10  2004/08/17 13:41:20  eronchie
 #       Moved out JobIdExceptions.h cjobid.h JobId.h
 #       Put in interface/glite/wmsutils/jobid
@@ -39,7 +42,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.57)
-AC_INIT([GLite WMS Utils Jobid], [0.0.0])
+AC_INIT([GLite WMS Utils Jobid], [0.1.0]
 AC_CONFIG_AUX_DIR([./project])
 AM_INIT_AUTOMAKE([1.6.3 subdir-objects])
 AC_CONFIG_SRCDIR([src/jobid/strmd5.h])
@@ -110,3 +113,4 @@ AC_CONFIG_FILES([src/Makefile])
 AC_CONFIG_FILES([src/jobid/Makefile])
 
 AC_OUTPUT
+
