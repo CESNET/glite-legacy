@@ -20,6 +20,9 @@
 
 	Revision history:
 	$Log$
+	Revision 1.2.2.3  2005/02/25 12:03:11  jpospi
+	Added PDF options to doxygen conf.
+	
 	Revision 1.2.2.2  2005/02/25 09:37:52  mmulac
 	generate doxygen doc for notification.h
 	
@@ -75,6 +78,7 @@ INPUT                 = ./events.h \
                         ../interface/context.h \
                         ../interface/notifid.h \
                         ../interface/notification.h \
+                        ../interface/notifid.h \
                         ../interface/consumer.h 
 SHOW_DIRECTORIES       = NO
 FULL_PATH_NAMES        = NO

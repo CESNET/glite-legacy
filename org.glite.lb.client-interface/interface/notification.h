@@ -22,7 +22,7 @@ extern "C" {
 /** Register for receiving notifications.
  * Connects to the server specified by EDG_WLL_NOTIF_SERVER context parameter
  * (temporary workaround, should be resolved by registry in future).
- * \param conditions: the same conditions as for \see edg_wll_QueryJobsExt.
+ * \param conditions: the same conditions as for \ref edg_wll_QueryJobsExt.
  * 		currently one or more JOBID's are required.
  * 		Only a single occurence of a specific attribute is allowed
  * 		among ANDed conditions (due to the ability to modify them
@@ -53,7 +53,7 @@ int edg_wll_NotifNew(
  *
  * \param fd 
  * \param address_override 
- * \param valid all same as for \see edg_wll_NotifNew
+ * \param valid all same as for \ref edg_wll_NotifNew
  */
 
 int edg_wll_NotifBind(
@@ -79,7 +79,7 @@ typedef enum _edg_wll_NotifChangeOp {
  * OR-ed row of conditions on the attributes infolved in the change.
  * 
  * \param op action to be taken on existing conditions,
- * 	\see edg_wll_NotifChangeOp
+ * 	\ref edg_wll_NotifChangeOp
  */
 int edg_wll_NotifChange(
 	edg_wll_Context		context,
@@ -130,7 +130,7 @@ int edg_wll_NotifReceive(
 
 /** Default socket descriptor where to select(2) for notifications.
  * Even if nothing is available for reading from the socket, 
- * there may be some data cached so calling \see edg_wll_NotifReceive
+ * there may be some data cached so calling \ref edg_wll_NotifReceive
  * may return notifications immediately.
  *
  * \retval >=0 socket descriptor
@@ -142,7 +142,7 @@ int edg_wll_NotifGetFd(
 );
 
 /** Close the default local listening socket.
- * Useful to force following \see edg_wll_NotifBind to open
+ * Useful to force following \ref edg_wll_NotifBind to open
  * a new one.
  */
 
