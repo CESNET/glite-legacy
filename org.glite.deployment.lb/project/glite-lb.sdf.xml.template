@@ -116,6 +116,11 @@
 					arch="i386"/>
 			</dependencies>
 		</service>
+
+		<!-- RGMA servicetool -->
+                <service name="glite-rgma-servicetool">
+                        <subservice name="glite-rgma-servicetool"/>
+                </service>
 	</services>
 	<dependencies>
 	  <!-- glite service tool -->

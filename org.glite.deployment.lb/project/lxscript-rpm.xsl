@@ -9,6 +9,7 @@
 		omit-xml-declaration="yes"/>
 
 	<!-- Definition of variables and parameters -->
+	<xsl:param name="installers"/>
 	<xsl:param name="repository"/>
 	<xsl:param name="ext-repository"/>
 
@@ -52,10 +53,24 @@ function parseRPMList()
         RPMLIST=$newRPMLIST
 }
 
+#Parse the SCRIPTLIST to execute all scripts
+function parseScriptList()
+{
+        for i in $SCRIPTLIST
+        do
+		if [ "$INSTALL" = "true" ]; then
+                        $i
+		else
+                        $i -u
+		fi
+        done
+}
 
 #Downloads and install the module RPMS
 function install()
 {
+
+	INSTALL=true
 	version
 	echo
 	echo xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -75,6 +90,14 @@ function install()
 	
 	<xsl:for-each select="node/services/service">
 
+	# Download <xsl:value-of select="@name"/> scripts from repository
+                <xsl:for-each select=".">
+                        <xsl:apply-templates select="subservice">
+                                <xsl:with-param name="install">true</xsl:with-param>
+                        </xsl:apply-templates>
+                </xsl:for-each>
+
+
 	# Download <xsl:value-of select="@name"/> dependencies RPMS from repository
 		<xsl:for-each select="dependencies">
 			<xsl:apply-templates>
@@ -90,6 +113,10 @@ function install()
 		</xsl:for-each>
 
 	</xsl:for-each>
+
+	# Download and install subservices
+        parseScriptList
+
 		
 	# Install all RPMS
 	echo
@@ -239,6 +266,28 @@ install
 
 exit 0
 	</xsl:template>
+
+	<xsl:template name="subservices" match="subservice">
+                <xsl:param name="install"/>
+                <xsl:variable name="package"><xsl:value-of select="@name"/>_installer.sh</xsl:variable>
+                <xsl:choose>
+                        <xsl:when test="$install = 'true'">
+wget -N --non-verbose <xsl:value-of select="$installers"/><xsl:value-of select="$package"/>
+if [ ! -f "<xsl:value-of select="$package"/>" ]
+then
+        echo
+        echo ERROR: <xsl:value-of select="$package"/> could not be downloaded!
+        exit 1
+fi
+chmod u+x <xsl:value-of select="$package"/>
+SCRIPTLIST="$SCRIPTLIST ./<xsl:value-of select="$package"/>"
+                        </xsl:when>
+                        <xsl:otherwise>
+SCRIPTLISTUn="$SCRIPTLISTUn ./<xsl:value-of select="$package"/> -u "
+                        </xsl:otherwise>
+                </xsl:choose>
+        </xsl:template>
+
 
 	<xsl:template name="dependencies" match="external">
 		<xsl:param name="install"/>
