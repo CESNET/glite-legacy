@@ -45,12 +45,6 @@
 					build="@org.glite.wms-utils.exception.build@"
 					arch="i386"/>
 	
-				<component name="glite-wms-utils-thirdparty-globus_ssl_utils"
-					version="@org.glite.wms-utils.thirdparty-globus_ssl_utils.version@"
-					age="@org.glite.wms-utils.thirdparty-globus_ssl_utils.age@"
-					build="@org.glite.wms-utils.thirdparty-globus_ssl_utils.build@"
-					arch="i386"/>
-	
 				<component name="glite-security-proxyrenewal"
 					version="@org.glite.security.proxyrenewal.version@"
 					age="@org.glite.security.proxyrenewal.age@"

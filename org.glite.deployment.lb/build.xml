@@ -13,6 +13,9 @@
 
 	Revision history:
 	$Log$
+	Revision 1.3  2004/10/14 11:50:22  dimeglio
+	Fixed some name and formatting issues
+	
 	Revision 1.2  2004/10/06 11:42:02  harakaly
 	first fill-up
 	
@@ -116,10 +119,6 @@
 				<filter token="org.glite.wms-utils.exception.version" value="${org.glite.wms-utils.exception.version}" />
 				<filter token="org.glite.wms-utils.exception.age" value="${org.glite.wms-utils.exception.age}" />
 				<filter token="org.glite.wms-utils.exception.build" value="${org.glite.wms-utils.exception.build}" />
-
-				<filter token="org.glite.wms-utils.thirdparty-globus_ssl_utils.version" value="${org.glite.wms-utils.thirdparty-globus_ssl_utils.version}" />
-				<filter token="org.glite.wms-utils.thirdparty-globus_ssl_utils.age" value="${org.glite.wms-utils.thirdparty-globus_ssl_utils.age}" />
-				<filter token="org.glite.wms-utils.thirdparty-globus_ssl_utils.build" value="${org.glite.wms-utils.thirdparty-globus_ssl_utils.build}" />
 
 				<filter token="org.glite.security.proxyrenewal.version" value="${org.glite.security.proxyrenewal.version}" />
 				<filter token="org.glite.security.proxyrenewal.age" value="${org.glite.security.proxyrenewal.age}" />
