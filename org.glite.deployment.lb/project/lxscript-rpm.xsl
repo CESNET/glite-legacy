@@ -15,50 +15,179 @@
 	<!-- global processing -->
 	<xsl:template match="/">
 #!/bin/sh
+
+# Copyright (c) Members of the EGEE Collaboration. 2004 
+# See http://eu-egee.org/partners/ for details on the copyright holders
+# For license conditions see the license file or http://eu-egee.org/license.html
+
+# glite-lb_installer v. <xsl:value-of select="/node/@version"/>
 #
-# glite-lb_installer
-# usage: glite-lb_installer [-u]
-#		 -u		uninstall
+# The glite-lb_installer installs the gLite <xsl:value-of select="/node/@name"/> Deployment Unit
 #
-# glite-wn_installer installs the gLite <xsl:value-of select="/node/@name"/> Worker Node Deployment Unit
-#
-<!-- Put here pre-install instructions -->
+# Usage: glite-lb_installer [-u|-v|--help]
+#        -u          uninstall
+#        -v          print version
+#        --help      print script usage info
+# Return codes: 0 - Ok
+#               1 - if a file could not be downloaded
 
 ###############################################################################
-# Download global dependencies	
-		<xsl:for-each select="node/dependencies">
-			<xsl:apply-templates/>
+function install()
+{
+	# Download global dependencies	
+	<xsl:for-each select="node/dependencies">
+		<xsl:apply-templates>
+				<xsl:with-param name="install">true</xsl:with-param>
+		</xsl:apply-templates>
+	</xsl:for-each>
+	
+	<xsl:for-each select="node/services/service">
+
+	# Download <xsl:value-of select="@name"/> dependencies RPMS from repository
+		<xsl:for-each select="dependencies">
+			<xsl:apply-templates>
+				<xsl:with-param name="install">true</xsl:with-param>
+			</xsl:apply-templates>
 		</xsl:for-each>
-###############################################################################
-		
-		<xsl:for-each select="node/services/service">
-###############################################################################
-# Download <xsl:value-of select="@name"/> dependencies RPMS from repository
-			<xsl:for-each select="dependencies">
-				<xsl:apply-templates/>
-			</xsl:for-each>
-###############################################################################
-# Download <xsl:value-of select="@name"/> RPMS from repository
-			<xsl:for-each select="components">
-				<xsl:apply-templates/>
-			</xsl:for-each>
-###############################################################################
+
+	# Download <xsl:value-of select="@name"/> RPMS from repository
+		<xsl:for-each select="components">
+			<xsl:apply-templates>
+				<xsl:with-param name="install">true</xsl:with-param>
+			</xsl:apply-templates>
 		</xsl:for-each>
+
+	</xsl:for-each>
 		
+	# Install all RPMS
+	rpm -Uvh $RPMLIST
+}
+
 ###############################################################################
-# Install all RPMS
-rpm -Uvh *.rpm
+function uninstall()
+{
+	# Global dependencies	
+	<xsl:for-each select="node/dependencies">
+		<xsl:apply-templates>
+			<xsl:with-param name="install">false</xsl:with-param>
+		</xsl:apply-templates>
+	</xsl:for-each>
+		
+	<xsl:for-each select="node/services/service">
+
+	# <xsl:value-of select="@name"/> dependencies RPMS from repository
+		<xsl:for-each select="dependencies">
+			<xsl:apply-templates>
+				<xsl:with-param name="install">false</xsl:with-param>
+			</xsl:apply-templates>
+		</xsl:for-each>
+
+	# <xsl:value-of select="@name"/> RPMS from repository
+		<xsl:for-each select="components">
+			<xsl:apply-templates>
+				<xsl:with-param name="install">false</xsl:with-param>
+			</xsl:apply-templates>
+		</xsl:for-each>
+
+	</xsl:for-each>
+		
+	# Uninstall all RPMS
+	rpm -e $RPMLIST
+}
+
 ###############################################################################
+function usage()
+{
+	echo 
+	echo Copyright \(c\) Members of the EGEE Collaboration. 2004 
+	echo See http://eu-egee.org/partners/ for details on the copyright holders
+	echo For license conditions see the license file or http://eu-egee.org/license.html
+	echo 
+	echo glite-lb_installer v. <xsl:value-of select="/node/@version"/>
+	echo 
+	echo The glite-lb_installer installs the gLite <xsl:value-of select="/node/@name"/> Deployment Unit
+	echo 
+	echo Usage: glite-lb_installer \[-u\|-v\|--help\]
+	echo -u          uninstall
+	echo -v          print version
+	echo --help      print script usage info
+	echo 
+	echo Return codes:
+	echo 0 - Ok
+	echo 1 - if a file could not be downloaded
+	echo 
+}
+
+###############################################################################
+function version
+{
+	echo 
+	echo Copyright \(c\) Members of the EGEE Collaboration. 2004 
+	echo See http://eu-egee.org/partners/ for details on the copyright holders
+	echo For license conditions see the license file or http://eu-egee.org/license.html
+	echo 
+	echo glite-lb_installer v. <xsl:value-of select="/node/@version"/>
+	echo 
+}
+
+
+RPMLIST=
+
+###############################################################################
+# Main
+
+while getopts uvh opt
+do
+	case $opt in
+		'u') uninstall
+		     exit 0	
+		     ;;
+		'v') version
+		     exit 0	
+		     ;;
+		'h') usage
+		     exit 0	
+		     ;;
+	esac
+done
+
+install
+
+exit 0
 	</xsl:template>
 
 	<xsl:template name="dependencies" match="external">
+		<xsl:param name="install"/>
 		<xsl:variable name="package"><xsl:value-of select="@name"/>-<xsl:value-of select="@version"/>-<xsl:value-of select="@age"/>.<xsl:value-of select="@arch"/>.rpm</xsl:variable>
-wget <xsl:value-of select="$ext-repository"/><xsl:value-of select="$package"/>
+		<xsl:choose>
+			<xsl:when test="$install = 'true'">
+wget -N --non-verbose <xsl:value-of select="$ext-repository"/><xsl:value-of select="$package"/>
+if [ ! -f "<xsl:value-of select="$package"/>" ]
+then
+	echo 
+	echo ERROR: <xsl:value-of select="$package"/> could not be downloaded!
+	exit 1
+fi
+			</xsl:when>
+		</xsl:choose>
+RPMLIST="$RPMLIST <xsl:value-of select="$package"/>"
 	</xsl:template>
 	
 	<xsl:template name="components" match="component">
+		<xsl:param name="install"/>
 		<xsl:variable name="package"><xsl:value-of select="@name"/>-<xsl:value-of select="@version"/>-<xsl:value-of select="@age"/>.<xsl:value-of select="@arch"/>.rpm</xsl:variable>
-wget <xsl:value-of select="$repository"/><xsl:value-of select="@arch"/>/RPMS/<xsl:value-of select="$package"/>
+		<xsl:choose>
+			<xsl:when test="$install='true'">
+wget -N --non-verbose <xsl:value-of select="$repository"/><xsl:value-of select="@arch"/>/RPMS/<xsl:value-of select="$package"/>
+if [ ! -f "<xsl:value-of select="$package"/>" ]
+then
+	echo 
+	echo ERROR: <xsl:value-of select="$package"/> could not be downloaded!
+	exit 1
+fi
+			</xsl:when>
+		</xsl:choose>
+RPMLIST="$RPMLIST <xsl:value-of select="$package"/>"
 	</xsl:template>
 
 </xsl:stylesheet>

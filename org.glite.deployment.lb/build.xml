@@ -13,6 +13,9 @@
 
 	Revision history:
 	$Log$
+	Revision 1.4  2004/10/14 16:07:53  dimeglio
+	Removed wms.thirdparty-globus-ssl-utils
+	
 	Revision 1.3  2004/10/14 11:50:22  dimeglio
 	Fixed some name and formatting issues
 	
@@ -92,41 +95,6 @@
 
 	<target name="localcompile"
 		description="Module specific compilation tasks">
-		<copy file="${module.project.dir}/${global.prefix}-${component.prefix}.sdf.xml.template"
-			tofile="${module.project.dir}/${global.prefix}-${component.prefix}.sdf.xml" overwrite="true">
-			<filterset>
-				<filter token="org.glite.lb.client-interface.version" value="${org.glite.lb.client-interface.version}" />
-				<filter token="org.glite.lb.client-interface.age" value="${org.glite.lb.client-interface.age}" />
-				<filter token="org.glite.lb.client-interface.build" value="${org.glite.lb.client-interface.build}" />
-
-				<filter token="org.glite.lb.common.version" value="${org.glite.lb.common.version}" />
-				<filter token="org.glite.lb.common.age" value="${org.glite.lb.common.age}" />
-				<filter token="org.glite.lb.common.build" value="${org.glite.lb.common.build}" />
-
-				<filter token="org.glite.lb.logger.version" value="${org.glite.lb.logger.version}" />
-				<filter token="org.glite.lb.logger.age" value="${org.glite.lb.logger.age}" />
-				<filter token="org.glite.lb.logger.build" value="${org.glite.lb.logger.build}" />
-
-				<filter token="org.glite.lb.server.version" value="${org.glite.lb.server.version}" />
-				<filter token="org.glite.lb.server.age" value="${org.glite.lb.server.age}" />
-				<filter token="org.glite.lb.server.build" value="${org.glite.lb.server.build}" />
-
-				<filter token="org.glite.wms-utils.jobid.version" value="${org.glite.wms-utils.jobid.version}" />
-				<filter token="org.glite.wms-utils.jobid.age" value="${org.glite.wms-utils.jobid.age}" />
-				<filter token="org.glite.wms-utils.jobid.build" value="${org.glite.wms-utils.jobid.build}" />
-
-
-				<filter token="org.glite.wms-utils.exception.version" value="${org.glite.wms-utils.exception.version}" />
-				<filter token="org.glite.wms-utils.exception.age" value="${org.glite.wms-utils.exception.age}" />
-				<filter token="org.glite.wms-utils.exception.build" value="${org.glite.wms-utils.exception.build}" />
-
-				<filter token="org.glite.security.proxyrenewal.version" value="${org.glite.security.proxyrenewal.version}" />
-				<filter token="org.glite.security.proxyrenewal.age" value="${org.glite.security.proxyrenewal.age}" />
-				<filter token="org.glite.security.proxyrenewal.build" value="${org.glite.security.proxyrenewalon.build}" />
-
-
-			</filterset>
-		</copy>
 	</target>
 
 	<target name="localclean"

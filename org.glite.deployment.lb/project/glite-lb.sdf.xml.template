@@ -5,7 +5,7 @@
 	For license conditions see the license file or http://eu-egee.org/license.html
 -->
 
-<node name="glite-lb-node">
+<node name="glite-lb-node" version="@module.version@">
 	<services>
 		<service name="glite-lb-service">
 			<components>
@@ -62,8 +62,8 @@
 					age="0"
 					arch="i386"/>				  
 	  			<external name="expat"
-					version="1.95.7"
-					age="EGEE"
+					version="1.95.5"
+					age="6"
 					arch="i386"/>				  
 	  			<external name="ares"
 					version="1.1.1"
