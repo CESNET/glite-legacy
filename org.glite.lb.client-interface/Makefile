@@ -58,12 +58,13 @@ doc: generate
 	doxygen C.dox
 	doxygen CPP.dox
 
-install:
+install: generate doc
 	-mkdir -p ${PREFIX}/${STAGETO}
 	-mkdir -p ${PREFIX}/share/doc/${package}-${version}
 	install -m 644 ${GEN_H} ${PREFIX}/${STAGETO}
 	install -m 644 ${top_srcdir}/LICENSE ${PREFIX}/share/doc/${package}-${version}
 	cd ${top_srcdir}/interface && install -m 644 ${STATIC_H} ${PREFIX}/${STAGETO}
+	cd ${top_srcdir}/doc && cp -r C CPP ${PREFIX}/share/doc/${package}-${version}
 
 clean:
 	rm -f *.h

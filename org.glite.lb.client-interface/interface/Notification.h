@@ -9,7 +9,7 @@
 #include "glite/lb/JobStatus.h"
 
 
-EWL_BEGIN_NAMESPACE; 
+EWL_BEGIN_NAMESPACE
 
 
 /** Manage LB notifications.
@@ -91,6 +91,6 @@ private:
 };
 
 
-EWL_END_NAMESPACE;
+EWL_END_NAMESPACE
 
 #endif

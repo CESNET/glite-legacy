@@ -101,16 +101,34 @@ int edg_wll_SetParam(
 	...
 );
 
-struct timeval;	/* gcc, shut up! */
+struct timeval;	/* XXX: gcc, shut up! */
 
-/** Set an int context parameter */
-int edg_wll_SetParamInt(edg_wll_Context,edg_wll_ContextParam,int);
+/** Set a context parameter of type int.
+ * \param ctx 		INOUT context to work with
+ * \param param 	IN parameter to set
+ * \param val 		IN value to set
+ * \retval 0 		success
+ * \retval EINVAL 	param is not a valid parameter, or invalid value
+ */
+int edg_wll_SetParamInt(edg_wll_Context ctx,edg_wll_ContextParam param,int val);
 
-/** Set a string context parameter */
-int edg_wll_SetParamString(edg_wll_Context,edg_wll_ContextParam,const char *);
+/** Set a context parameter of type string.
+ * \param ctx 		INOUT context to work with
+ * \param param 	IN parameter to set
+ * \param val 		In value to set (if NULL, default is used)
+ * \retval 0 		success
+ * \retval EINVAL 	param is not a valid parameter, or invalid value
+ */
+int edg_wll_SetParamString(edg_wll_Context ctx,edg_wll_ContextParam param,const char *val);
 
-/** Set a timeval context parameter */
-int edg_wll_SetParamTime(edg_wll_Context,edg_wll_ContextParam,const struct timeval *);
+/** Set a context parameter of type timeval.
+ * \param ctx		INOUT context to work with
+ * \param param		IN parameter to set
+ * \param val		IN value to set (if NULL, default is used)
+ * \retval 0 		success
+ * \retval EINVAL 	param is not a valid parameter, or invalid value
+ */
+int edg_wll_SetParamTime(edg_wll_Context ctx,edg_wll_ContextParam param,const struct timeval *val);
 
 /** Get current parameter value.
  * \param context INOUT context to work with

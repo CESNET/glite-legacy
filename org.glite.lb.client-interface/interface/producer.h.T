@@ -354,7 +354,6 @@ extern int edg_wll_RegisterJobSync(
  * \param context 	INOUT context to work with
  * \param job 		IN jobId
  * \param type 		IN EDG_WLL_JOB_SIMPLE,  EDG_WLL_JOB_DAG, or EDG_WLL_JOB_PARTITIONABLE
- * \param user 		IN user credentials
  * \param jdl 		IN user-specified JDL
  * \param ns 		IN network server contact
  * \param num_subjobs 	IN number of subjobs to create

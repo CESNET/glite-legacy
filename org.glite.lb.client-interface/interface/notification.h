@@ -129,7 +129,7 @@ int edg_wll_NotifReceive(
 
 
 /** Default socket descriptor where to select(2) for notifications.
- * Even if nothing is available for reading freom the socket, 
+ * Even if nothing is available for reading from the socket, 
  * there may be some data cached so calling \see edg_wll_NotifReceive
  * may return notifications immediately.
  *

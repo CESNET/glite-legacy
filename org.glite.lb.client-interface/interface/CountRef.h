@@ -1,10 +1,17 @@
 #ifndef __EDG_WORKLOAD_LOGGING_CLIENT_COUNTREF_HPP__
 #define __EDG_WORKLOAD_LOGGING_CLIENT_COUNTREF_HPP__
 
+/**
+ * Switching into glite.lb namespace (couple with EWL_END_NAMESPACE).
+ */
 #define EWL_BEGIN_NAMESPACE namespace glite { namespace lb {
+
+/**
+ * Leave the glite.lb namespace.
+ */
 #define EWL_END_NAMESPACE } }
 
-EWL_BEGIN_NAMESPACE;
+EWL_BEGIN_NAMESPACE
 
 template<typename T>
 class CountRef {
@@ -43,6 +50,6 @@ void CountRef<T>::use(void)
 	count++;
 }
 
-EWL_END_NAMESPACE;
+EWL_END_NAMESPACE
 
 #endif

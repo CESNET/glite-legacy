@@ -23,7 +23,7 @@
 #include "glite/lb/events.h"
 #include "glite/lb/notifid.h"
 
-EWL_BEGIN_NAMESPACE;
+EWL_BEGIN_NAMESPACE
 
 class Event {
 	friend class Job;
@@ -143,6 +143,6 @@ private:
 	CountRef<Event>	*flesh;
 };
 
-EWL_END_NAMESPACE;
+EWL_END_NAMESPACE
 
 #endif

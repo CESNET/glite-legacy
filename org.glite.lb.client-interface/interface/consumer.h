@@ -126,7 +126,7 @@ extern int set_server_name_and_port(
 
 /**
  * General query on events.
- * Return events satysfying all conditions 
+ * Return events satisfying all conditions 
  * query records represent conditions in the form 
  * \a attr \a op \a value eg. time > 87654321.
  * \see edg_wll_QueryRec
@@ -243,10 +243,15 @@ int edg_wll_JobStatus(
 
 /**
  * Query LBProxy and use plain communication
+ * \param context 	IN: context to operate on
+ * \param jobid 	IN: query this job
+ * \param flags 	IN: specifies optional status fields to retrieve,
+ *     \see EDG_WLL_STAT_CLASSADS, EDG_WLL_STAT_CHILDREN, EDG_WLL_STAT_CHILDSTAT
+ * \param status 	OUT: the status of the job
  */
 int edg_wll_JobStatusProxy(
 	edg_wll_Context		context,
-	const edg_wlc_JobId		jobid,
+	const edg_wlc_JobId	jobid,
 	int			flags,
 	edg_wll_JobStat		*status
 );
@@ -376,9 +381,13 @@ void edg_wll_QueryRecFree(edg_wll_QueryRec *);
 
 
 /**
- * default and maximal query timeout (in seconds)
+ * default query timeout (in seconds)
  */
 #define EDG_WLL_QUERY_TIMEOUT_DEFAULT   120
+
+/**
+ * maximal query timeout (in seconds)
+ */
 #define EDG_WLL_QUERY_TIMEOUT_MAX       1800
 
 #ifdef __cplusplus
