@@ -32,7 +32,7 @@ LB node installation package
  
 %pre
 %post
-echo "post install script"
+#echo "post install script"
 %preun
 %postun
 %files
