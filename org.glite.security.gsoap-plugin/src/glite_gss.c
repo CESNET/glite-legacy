@@ -15,7 +15,7 @@
 #include <ares.h>
 #include <errno.h>
 
-#include "lb_gss.h"
+#include "glite_gss.h"
 
 #define tv_sub(a,b) {\
 	(a).tv_usec -= (b).tv_usec;\

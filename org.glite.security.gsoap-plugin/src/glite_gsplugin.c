@@ -37,7 +37,7 @@ glite_gsplugin_init_context(glite_gsplugin_Context *ctx)
 	memset(out, 0, sizeof(*out));
 	out->cred = GSS_C_NO_CREDENTIAL;
 
-	/* XXX: some troubles with lb_gss and blocking calls!
+	/* XXX: some troubles with glite_gss and blocking calls!
 	 */
 	out->timeout.tv_sec = 10000;
 	*ctx = out;
