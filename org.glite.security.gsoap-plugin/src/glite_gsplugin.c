@@ -70,6 +70,26 @@ glite_gsplugin_get_context(struct soap *soap)
 	return ((int_plugin_data_t *)soap_lookup_plugin(soap, plugin_id))->ctx;
 }
 
+void *
+glite_gsplugin_get_udata(struct soap *soap)
+{
+	int_plugin_data_t *pdata;
+   
+	pdata = (int_plugin_data_t *)soap_lookup_plugin(soap, plugin_id);
+	assert(pdata);
+	return pdata->ctx->user_data;
+}
+
+void
+glite_gsplugin_set_udata(struct soap *soap, void *d)
+{
+	int_plugin_data_t *pdata;
+   
+	pdata = (int_plugin_data_t *)soap_lookup_plugin(soap, plugin_id);
+	assert(pdata);
+	pdata->ctx->user_data = d;
+}
+
 int
 glite_gsplugin(struct soap *soap, struct soap_plugin *p, void *arg)
 {
