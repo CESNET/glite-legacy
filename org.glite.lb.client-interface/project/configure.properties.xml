@@ -20,6 +20,9 @@
 
 	Revision history:
 	$Log$
+	Revision 1.2.2.2  2005/02/25 09:37:52  mmulac
+	generate doxygen doc for notification.h
+	
 	Revision 1.2.2.1  2005/02/18 14:00:16  jpospi
 	- Removed all L&B Proxy related things
 	- Documentation update
@@ -70,12 +73,15 @@ INPUT                 = ./events.h \
                         ./jobstat.h \
                         ./producer.h \
                         ../interface/context.h \
+                        ../interface/notifid.h \
                         ../interface/notification.h \
                         ../interface/consumer.h 
-SHOW_DIRECTORIES      = NO
-EXTRACT_ALL           = YES
-#HAVE_DOT              = YES
-#CALL_GRAPH            = YES
+SHOW_DIRECTORIES       = NO
+FULL_PATH_NAMES        = NO
+EXTRACT_ALL            = YES
+PDF_HYPERLINKS         = YES
+USE_PDFLATEX           = YES
+HAVE_DOT               = NO
 			</echo>
 			<echo file="${module.build.dir}/CPP.dox">
 PROJECT_NAME           = "Glite LB Client: CPP - Interface"
@@ -89,7 +95,10 @@ INPUT                  = ../build/Event.h \
                          ../interface/ServerConnection.h \
                          ../interface/Notification.h
 SHOW_DIRECTORIES       = NO
+FULL_PATH_NAMES        = NO
 EXTRACT_ALL            = YES
+PDF_HYPERLINKS         = YES
+USE_PDFLATEX           = YES
 #HAVE_DOT               = YES
 #CALL_GRAPH             = YES
 			</echo>
