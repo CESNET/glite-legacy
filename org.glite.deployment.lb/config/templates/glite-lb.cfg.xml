@@ -6,7 +6,15 @@
 		<!-- User-defined parameters - Please change them -->
 		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
 
-		<!-- gLite configuration -->
+		<GLITE_USER
+			description="The account used to run the LB daemons"
+			value="changeme"/>
+			
+		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
+		<!-- Advanced parameters - Change them if you know what you're doing -->
+		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
+
+		<!-- Installer configuration -->
 		<glite.installer.verbose
 			description="Enable verbose output"
 			value="true"/>
@@ -14,14 +22,6 @@
 		<glite.installer.checkcerts
 			description="Enable check of host certificates"
 			value="true"/>
-
-		<GLITE_USER
-			description="The account used to run the LB daemons"
-			value="changeme"/>
-			
-		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
-		<!-- Optimization parameters - Change them if you know what you're doing -->
-		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
 
 		<!-- MySQL DB -->
 		<lb.database.name
@@ -41,6 +41,10 @@
 		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
 		<!-- System parameters - You should leave these alone -->
 		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->		
-		<dirlist value='/opt/glite/var'/>
+
+		<dirlist
+			description="List of directory to be created"
+			value="/opt/glite/var"/>
+
 	</parameters>
 </config>
