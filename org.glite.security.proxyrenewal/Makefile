@@ -30,7 +30,7 @@ distdir=.
 globalprefix=glite
 lbprefix=lb
 package=glite-security-proxyrenewal
-version=0.0.0
+version=1.0.0
 PREFIX=/opt/glite
 
 glite_location=$PREFIX
