@@ -20,6 +20,9 @@
 
 	Revision history:
 	$Log$
+	Revision 1.2.2.5  2005/02/25 13:39:29  mmulac
+	remove duplicate notifid in configure.properties.xml
+	
 	Revision 1.2.2.4  2005/02/25 13:37:11  mmulac
 	add notifid to doxygen
 	see -> ref
@@ -88,6 +91,9 @@ FULL_PATH_NAMES        = NO
 EXTRACT_ALL            = YES
 PDF_HYPERLINKS         = YES
 USE_PDFLATEX           = YES
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = YES
+PREDEFINED             = _EDG_WLL_EVENT_COMMON 
 HAVE_DOT               = NO
 			</echo>
 			<echo file="${module.build.dir}/CPP.dox">
