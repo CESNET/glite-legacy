@@ -564,11 +564,8 @@ get_record_ext(FILE *fd, proxy_record *record, int *last_used_suffix)
       if (tmp_record.jobids.len == 0) {
 	 /* no jobs registered for this record, so use it initialized with the
 	  * parameters (currently myproxy location) provided by user */
-	 char *server = record->myproxy_server;
-
-	 memset(record, 0, sizeof(*record));
 	 record->suffix = tmp_record.suffix;
-	 record->myproxy_server = server;
+	 record->next_renewal = record->end_time = 0;
 	 free_record(&tmp_record);
 	 return 0;
       }
