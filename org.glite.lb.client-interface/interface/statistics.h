@@ -1,7 +1,7 @@
 #ifndef __EDG_WORKLOAD_LOGGING_CLIENT_STATISTICS_H__
 #define __EDG_WORKLOAD_LOGGING_CLIENT_STATISTICS_H__
 
-#include "edg/workload/logging/client/consumer.h"
+#include "glite/lb/consumer.h"
 
 #ifdef __cplusplus
 extern "C" {
