@@ -75,15 +75,15 @@
 					build="@org.glite.security.proxyrenewal.info.build@"
 					arch="i386"/>
 				<component name="glite-security-voms"
-                                        version="@org.glite.security.voms.info.version@"
-                                        age="@org.glite.security.voms.info.age@"
-                                        build="@org.glite.security.voms.info.build@"
-                                        arch="i386"/>
-                                <component name="gridsite-core"
-                                        version="@org.gridsite.core.info.version@"
-                                        age="@org.gridsite.core.info.age@"
+                    version="@org.glite.security.voms.info.version@"
+                    age="@org.glite.security.voms.info.age@"
+                    build="@org.glite.security.voms.info.build@"
+                    arch="i386"/>
+                <component name="gridsite"
+                    version="@org.gridsite.core.info.version@"
+                    age="@org.gridsite.core.info.age@"
 					build="@org.gridsite.core.info.build@"
-                                        arch="i386"/>
+                    arch="i386"/>
 			</components>
 			<dependencies>
 				<external name="MySQL-server"
