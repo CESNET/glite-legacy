@@ -109,6 +109,11 @@
 					version="1.01"
 					age="9"
 					arch="i386"/>
+				<external name="gridsite"
+                                        version="1.1.5"
+                                        age="3"
+                                        arch="i386"/>
+
 			</dependencies>
 		</service>
 	</services>
