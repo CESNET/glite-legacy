@@ -1,9 +1,7 @@
 #include "renewal_locl.h"
 #include "renewd_locl.h"
 
-#ifndef NOVOMS
-#include <voms_apic.h>
-#endif
+#include "glite/security/voms/voms_apic.h"
 
 #ident "$Header$"
 
@@ -877,7 +875,7 @@ find_voms_cert(char *file, int *present)
       return EDG_WLPR_ERROR_VOMS;
    }
 
-   ret = load_proxy(file, &cert, &privkey, &chain);
+   ret = load_proxy(file, &cert, &privkey, &chain, NULL);
    if (ret) {
       VOMS_Destroy(voms_info);
       return ret;

@@ -17,9 +17,6 @@ char *cert = NULL;
 char *key = NULL;
 
 char *vomsconf = "/opt/edg/etc/vomses";
-#ifndef NOVOMS
-struct vomses_records vomses;
-#endif
 
 static volatile int die = 0, child_died = 0;
 
@@ -145,7 +142,7 @@ proto(int sock)
 
    edg_wlpr_Log(LOG_INFO, "Received command code %d for proxy %s and jobid %s",
                 request.command,
-                request.proxy_filename ? request.proxy_filename : "(unspecified)",
+		request.proxy_filename ? request.proxy_filename : "(unspecified)",
 		request.jobid ? request.jobid : "(unspecified)");
 
    command->handler(&request, &response);
@@ -513,74 +510,6 @@ start_watchdog(pid_t *pid)
    exit(0);
 }
 
-#ifdef NOVOMS
-static int
-load_vomses()
-{
-	return ENOSYS;
-}
-
-#else
-static int
-load_vomses()
-{
-   FILE *fd = NULL;
-   char line[1024];
-   char *nick, *hostname;
-   int port;
-   vomses_record *rec;
-   vomses_record **tmp;
-   char *p;
-   
-   fd = fopen(vomsconf, "r");
-   if (fd == NULL) {
-      edg_wlpr_Log(LOG_ERR, "Cannot open vomses configuration file (%s)",
-	           strerror(errno));
-      return errno;
-   }
-   while (fgets(line, sizeof(line), fd) != NULL) {
-      p = line;
-      if (*p != '"') {
-	 edg_wlpr_Log(LOG_ERR, "Parsing error when reading vomses configuration file");
-	 return EINVAL;
-      }
-      nick = strdup(strtok(p+1, "\""));
-
-      p = strtok(NULL, "\"");
-      hostname = strdup(strtok(NULL, "\""));
-
-      p = strtok(NULL, "\"");
-      port = atoi(strdup(strtok(NULL, "\"")));
-
-      if (nick == NULL || hostname == NULL) {
-	 edg_wlpr_Log(LOG_ERR, "Parsing error when reading vomses configuration file");
-	 return EINVAL;
-      }
-
-      rec = calloc(1, sizeof(*rec));
-      if (rec == NULL) {
-	 edg_wlpr_Log(LOG_ERR, "Not enough memory");
-	 return ENOMEM;
-      }
-      rec->nick = nick;
-      rec->hostname = hostname;
-      rec->port = port;
-
-      tmp = realloc(vomses.val, vomses.len + 1);
-      if (tmp == NULL) {
-	 edg_wlpr_Log(LOG_ERR, "Not enough memory");
-	 return ENOMEM;
-      }
-      vomses.val = tmp;
-      vomses.len++;
-
-      vomses.val[vomses.len-1] = rec;
-   }
-   fclose(fd);
-   return 0;
-}
-#endif
-
 int main(int argc, char *argv[])
 {
    int   sock;
@@ -627,6 +556,7 @@ int main(int argc, char *argv[])
    }
 
    globus_module_activate(GLOBUS_GSI_CERT_UTILS_MODULE);
+   globus_module_activate(GLOBUS_GSI_PROXY_MODULE);
 
    if (!debug)
       for (fd = 3; fd < OPEN_MAX; fd++) close(fd);
@@ -648,20 +578,6 @@ int main(int argc, char *argv[])
 
    if (cadir)
       setenv("X509_CERT_DIR", cadir, 1);
-
-   if (voms_enabled) {
-      char *path;
-      char *new_path;
-      ret = load_vomses();
-      if (ret)
-	 return 1;
-      setenv("GLOBUS_VERSION", "22", 0);
-      if (VOMS_INSTALL_PATH != NULL && *VOMS_INSTALL_PATH != '\0') {
-	 path = getenv("PATH");
-	 asprintf(&new_path, "%s:%s/bin", path, VOMS_INSTALL_PATH);
-         setenv("PATH", new_path, 1);
-      }
-   }
 
    memset(&sa,0,sizeof(sa));
    sa.sa_handler = catchsig;
@@ -699,7 +615,7 @@ get_proxy_base_name(char *file, char **name)
    X509_NAME *subject = NULL;
    int ret;
 
-   ret = load_proxy(file, &cert, &key, &chain);
+   ret = load_proxy(file, &cert, &key, &chain, NULL);
    if (ret)
       return ret;
 
