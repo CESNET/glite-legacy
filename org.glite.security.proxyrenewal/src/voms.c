@@ -194,8 +194,12 @@ renew_voms_certs(const char *cur_file, const char *renewed_file, const char *new
    size_t buf_len = 0;
    X509_EXTENSION *extension = NULL;
    char *old_env_proxy = getenv("X509_USER_PROXY");
+   char *old_env_cert = getenv("X509_USER_CERT");
+   char *old_env_key = getenv("X509_USER_KEY");
 
    setenv("X509_USER_PROXY", cur_file, 1);
+   setenv("X509_USER_CERT", renewed_file, 1);
+   setenv("X509_USER_KEY", renewed_file, 1);
 
    ret = load_proxy(cur_file, &cert, NULL, &chain, &cur_proxy);
    if (ret)
@@ -261,6 +265,10 @@ renew_voms_certs(const char *cur_file, const char *renewed_file, const char *new
 end:
    (old_env_proxy) ? setenv("X509_USER_PROXY", old_env_proxy, 1) :
       		     unsetenv("X509_USER_PROXY");
+   (old_env_cert) ? setenv("X509_USER_CERT", old_env_cert, 1) :
+                    unsetenv("X509_USER_CERT");
+   (old_env_key) ? setenv("X509_USER_KEY", old_env_key, 1) :
+                   unsetenv("X509_USER_KEY");
 
    if (cert)
       X509_free(cert);
