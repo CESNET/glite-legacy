@@ -151,7 +151,8 @@ renew_voms_cert(struct vomsdata *vd, struct voms **voms_cert,
    struct contactdata **voms_contacts = NULL;
    char *command = NULL;
 
-   voms_contacts = VOMS_FindByVO(vd, (*voms_cert)->voname, "/etc/vomses", "/home/kouril/.globus/vomses", &voms_error);
+   voms_contacts = VOMS_FindByVO(vd, (*voms_cert)->voname, NULL, NULL, &voms_error);
+
    if (voms_contacts == NULL) {
       fprintf(stderr, "VOMS_FindByVO() failed\n");
       return 1;
