@@ -6,7 +6,7 @@
 # For license conditions see the license file or http://eu-egee.org/license.html
 #
 ################################################################################
-# glite-lb-config v. 0.2.0
+# glite-lb-config v. 0.3.0
 #
 # Post-installation script for configuring the gLite Logging and Bookkeping Server
 # Robert Harakaly < robert.harakaly@cern.ch >
@@ -40,7 +40,7 @@ class glite_lb:
     def __init__(self):
         self.mysql = MySQL.Mysql()
         self.verbose = 0
-        self.version = "0.2.0"
+        self.version = "0.3.1"
         self.name = "glite-lb"
         self.friendly_name = "gLite Logging and Bookkeeping"
         
@@ -202,13 +202,6 @@ def set_env():
 
 if __name__ == '__main__':
 
-    # Command line opts if any
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], 'chv', ['checkconf', 'help', 'version','stop','start'])
-    except getopt.GetoptError:
-        usage(msg = "Unknown options(s)")
-        sys.exit(1)
-
     # The script must be run as root
     if not os.geteuid()==0:
         print '"\nThis script must be run as root\n'
@@ -236,6 +229,13 @@ if __name__ == '__main__':
     service = glite_lb()
     service.verbose = verbose
     
+    # Command line opts if any
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], 'chv', ['checkconf', 'help', 'version','stop','start'])
+    except getopt.GetoptError:
+        service.usage(msg = "Unknown options(s)")
+        sys.exit(1)
+
     # Check cli options
     for o, a in opts:
         if o in ("-h", "--help"):
