@@ -9,6 +9,8 @@
 extern "C" {
 #endif
 
+#include "glite/lb/context.h"
+
 typedef int (edg_wll_Logging_cb_f)(edg_wll_Context context);
 
 int edg_wll_RegisterTestLogging(edg_wll_Logging_cb_f *cb);
