@@ -39,6 +39,7 @@
 			value="/opt/globus"/>
 			
 		<GLITE_CERT_DIR
+			description="The local of the CA certificates"
 			value='/etc/grid-security/certificates/'/>
 			
 		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
