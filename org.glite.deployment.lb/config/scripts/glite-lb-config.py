@@ -209,6 +209,18 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         
     def configure(self):
         
+        #--------------------------------------------------------
+        # Installs the Security Utilities
+        #--------------------------------------------------------
+        
+        if os.system("python %s/glite-security-utils-config.py --subservice" % glib.getScriptPath()):
+            print "\nInstalling gLite Security Utilities                   ",
+            glib.printFailedMessage()
+            return 1
+
+        print "\nInstalling gLite Security Utilities                   ",
+        glib.printOkMessage()
+        
         # Create the GLITE_USER if it doesn't exists
         print "\nCreating/Verifying the GLITE_USER account %s" % os.environ['GLITE_USER']
         (uid,gid) = glib.get_user_info(os.environ['GLITE_USER'])
