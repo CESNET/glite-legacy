@@ -19,10 +19,10 @@ ares_prefix=/opt/ares
 
 -include Makefile.inc
 
-VPATH=${top_srcdir}/src:${top_srcdir}/test
+VPATH=${top_srcdir}/src:${top_srcdir}/examples
 
 DEBUG:=-g -O0 -Wall
-CFLAGS:= ${DEBUG} -I${top_srcdir}/interface -I${top_srcdir}/src -I.
+CFLAGS:= ${DEBUG} -I${top_srcdir}/interface
 
 COMPILE:=libtool --mode=compile ${CC} ${CFLAGS}
 LINK:=libtool --mode=link ${CC} -rpath ${stagedir}/lib ${LDFLAGS} 
@@ -38,7 +38,7 @@ HDRS:=srvbones.h
 
 default all: compile
 
-compile: ${STATICLIB} ${LTLIB}
+compile: ${STATICLIB} ${LTLIB} example
 
 ${STATICLIB}: ${OBJS}
 	ar crv $@ ${OBJS}
@@ -53,13 +53,13 @@ stage: compile
 check: example_test
 	-echo "No unit tests so far."
 
-example_test: srv_example client_example
+example: srv_example cnt_example
 
 srv_example: srv_example.o
 	${LINK} -o $@ ${LTLIB} srv_example.o
 
-client_example: client.o
-	${LINK} -o $@ client.o
+cnt_example: cnt_example.o
+	${LINK} -o $@ cnt_example.o
 
 doc:
 
