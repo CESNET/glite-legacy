@@ -19,6 +19,9 @@
 #
 #       Revision history:
 #       $Log$
+#       Revision 1.2  2004/05/31 14:03:30  eronchie
+#       Merged with code in the infnforge repository
+#
 #       Revision 1.1.1.1  2004/05/26 18:45:05  eronchie
 #       Import of wms jobid
 #
@@ -31,7 +34,7 @@ AC_PREREQ(2.57)
 AC_INIT([GLite WMS jobid], [0.0.0])
 AC_CONFIG_AUX_DIR([./project])
 AM_INIT_AUTOMAKE([1.6.3 subdir-objects])
-AC_CONFIG_SRCDIR([src/jobid_namespace.h])
+AC_CONFIG_SRCDIR([src/jobid/cjobid.h])
 
 # Notices.
 AC_COPYRIGHT([Copyright (c) 2004 The EU EGEE Project
