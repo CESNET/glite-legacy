@@ -2,7 +2,7 @@
 
 GLITE_LOCATION=${GLITE_LOCATION:-/opt/glite}
 GLITE_USER=${GLITE_USER:-glite}
-GLITE_LOCATION_VAR=$(GLITE_LOCATION_VAR:-/opt/glite/var}
+GLITE_LOCATION_VAR=${GLITE_LOCATION_VAR:-/opt/glite/var}
 
 [ -f /etc/glite.conf ] && . /etc/glite.conf
 [ -f $GLITE_LOCATION/etc/glite-wms.conf ] && . $GLITE_LOCATION/etc/glite-wms.conf
