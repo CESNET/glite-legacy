@@ -14,6 +14,7 @@
 			    		age="1"
 			    		build="1"
 			    		arch="noarch"/>
+			    		
                 <component name="glite-lb-config"
                         version="@module.version@"
                         age="@module.age@"
@@ -24,6 +25,12 @@
 					version="@org.glite.lb.client-interface.version@"
 					age="@org.glite.lb.client-interface.age@"
 					build="@org.glite.lb.client-interface.build@"
+					arch="i386"/>
+
+				<component name="glite-lb-ws-interface"
+					version="@org.glite.lb.ws-interface.version@"
+					age="@org.glite.lb.ws-interface.age@"
+					build="@org.glite.lb.ws-interface.build@"
 					arch="i386"/>
 			
 				<component name="glite-lb-logger"
