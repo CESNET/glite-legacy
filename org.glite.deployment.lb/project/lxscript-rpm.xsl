@@ -98,12 +98,35 @@ function install()
 	echo xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 	echo
 	parseRPMList
-	rpm -Uvh $RPMLIST
+	if [ ! -z "$RPMLIST" ]; then
+		rpm -Uvh $RPMLIST
+		rpm_return=$?
+	else
+		echo All required RPMS are already installed
+		rpm_return=0
+	fi
+	if [ "$rpm_return" == "0" ]; then
+		echo
+		echo Done!
+		echo
+		echo Before using the gLite LB, please create or update the configuration
+		echo file /opt/glite/etc/config/glite-lb.cfg.xml
+		echo and run the configuration script
+		echo /opt/glite/etc/config/scripts/glite-lb-config.py.
+		echo A template is provided in
+		echo /opt/glite/etc/config/templates/glite-lb.cfg.xml
+	else
+		echo
+		echo An error occurred while installing the LB RPMS.
+		echo Most likely one or more of the RPMS to be installed require
+		echo additional dependencies or are older than already installed packages.
+		echo Please refer to the rpm error message above for more details.
+	fi
 	echo
-	echo Done!
-	echo
-	echo For more information refer to the gLite Installation and User Guides or to the gLite web site \(http:\/\/www.glite.org\)
-	echo Please report problems and comments to the gLite Team at project-eu-egee-middleware-integration-support@cern.ch
+	echo For more information refer to the gLite Installation and User Guides
+	echo or to the gLite web site \(http:\/\/www.glite.org\)
+	echo Please report problems and comments to the gLite Team at
+	echo project-eu-egee-middleware-integration-support@cern.ch
 
 	cd ..
 }
@@ -144,8 +167,16 @@ function uninstall()
 	echo xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 	echo
 	rpm -ev $RPMLIST
-	echo
-	echo Done!
+	if [ "$?" == "0" ]; then
+		echo
+		echo Done!
+	else
+		echo
+		echo An error occurred while removing the LB RPMS.
+		echo Most likely one or more of the RPMS to be removed have
+		echo dependent packages.
+		echo Please refer to the rpm error message above for more details.
+	fi
 }
 
 ###############################################################################
