@@ -182,6 +182,27 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
             
         if not os.path.exists('/tmp/mysql.sock'):
             os.symlink('/var/lib/mysql/mysql.sock', '/tmp/mysql.sock')
+
+	#Creating the indexes
+	print 'Creating the index configuration file /opt/glite/etc/glite-lb-index.conf'
+	path = "%s/etc/glite-lb-index.conf" % os.environ['GLITE_LOCATION']
+	pathBak = "%s/etc/glite-lb-index.conf.bak" % os.environ['GLITE_LOCATION']
+
+	if os.path.exists(pathBak):
+		os.remove(pathBak)
+	if os.path.exists(path):
+		os.rename(path,pathBak)
+	file = open(path, 'w')
+	file.write("[\n")
+	file.write("		JobIndices = {\n")
+	for index in params['lb.index.list']:
+		file.write("				[ type = \"system\"; name = \"%s\" ],\n" % index)
+	file.write("		}\n")
+	file.write("]\n")
+	file.close()
+	print "Running glite-lb-bkindex"	
+	os.system('/opt/glite/bin/glite-lb-bkindex -r /opt/glite/etc/glite-lb-index.conf')
+
         self.mysql.stop()
         
         print "\n[OK]"
@@ -311,6 +332,7 @@ if __name__ == '__main__':
     # Configure the service
     if service.configure() == 0:
         print "%s configuration successfully completed\n" % service.friendly_name
+	glib.registerService()
     else:
         print "An error occurred while configuring the %s" % service.friendly_name
         sys.exit(1)
