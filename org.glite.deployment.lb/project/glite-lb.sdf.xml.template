@@ -207,5 +207,37 @@
 				  version="0.23"
 				  age="1"
 				  arch="noarch"/>
+                <external name="edg-mkgridmap"
+                                  version="2.1.1"
+                                  age="1_sl3"
+                                  arch="i386"/>
+                <external name="edg-mkgridmap-conf"
+                                  version="2.1.1"
+                                  age="1_sl3"
+                                  arch="i386"/>
+                <external name="edg-fetch-crl"
+                                  version="1.0.0"
+                                  age="2_EGEE"
+                                  arch="noarch"/>
+                <external name="perl-IO-Socket-SSL"
+                                  version="0.94"
+                                  age="0.dag.rhel3"
+                                  arch="noarch"/>
+                <external name="perl-Net-LDAP"
+                                  version="0.2701"
+                                  age="1.dag.rhel3"
+                                  arch="noarch"/>
+                <external name="perl-Net-SSLeay"
+                                  version="1.23"
+                                  age="0.dag.rhel3"
+                                  arch="i386"/>
+                <external name="perl-Term-ReadKey"
+                                  version="2.21"
+                                  age="1"
+                                  arch="i386"/>
+                <external name="perl-Convert-ASN1"
+                                  version="0.18"
+                                  age="0.rhel3.dag"
+                                  arch="noarch"/>
 	</dependencies>
 </node>
