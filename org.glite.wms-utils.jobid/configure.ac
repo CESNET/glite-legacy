@@ -19,6 +19,10 @@
 #
 #       Revision history:
 #       $Log$
+#       Revision 1.10  2004/08/17 13:41:20  eronchie
+#       Moved out JobIdExceptions.h cjobid.h JobId.h
+#       Put in interface/glite/wmsutils/jobid
+#
 #       Revision 1.9  2004/08/17 10:40:34  eronchie
 #       Added optimize option
 #
@@ -38,7 +42,7 @@ AC_PREREQ(2.57)
 AC_INIT([GLite WMS Utils Jobid], [0.0.0])
 AC_CONFIG_AUX_DIR([./project])
 AM_INIT_AUTOMAKE([1.6.3 subdir-objects])
-AC_CONFIG_SRCDIR([src/jobid/cjobid.h])
+AC_CONFIG_SRCDIR([src/jobid/strmd5.h])
 
 # Notices.
 AC_COPYRIGHT([Copyright (c) 2004 The EU EGEE Project
