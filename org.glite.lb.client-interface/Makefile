@@ -2,15 +2,15 @@ include Makefile.inc
 
 SUFFIXES = .T
 
-VPATH=${interface}
-AT3=perl -I${lbconfig} ${lbproject}/at3
+VPATH=${top_srcdir}/interface
+AT3=perl -I${top_srcdir}/project ${top_srcdir}/project/at3
 
 STAGETO=${stageinc}/${globalprefix}/${lbprefix}
 STATIC_H=consumer.h context.h dump.h load.h notification.h notifid.h purge.h
 GEN_H=events.h jobstat.h producer.h
 
-all stage: stage-gen stage-static
-compile: generate
+stage: stage-gen stage-static
+all compile: generate
 
 stage-static:
 	-mkdir -p ${STAGETO}
