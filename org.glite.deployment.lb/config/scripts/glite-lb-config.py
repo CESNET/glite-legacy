@@ -38,6 +38,7 @@ global params                         # all config values from the XML file
 class glite_lb:
 
     def __init__(self):
+        self.mysql = MySQL.Mysql()
         self.verbose = 0
         self.version = "0.1.0"
         self.name = "glite-lb"
@@ -101,14 +102,14 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
     #-------------------------------------------------------------------------------
 
     def start(self):
-        mysql.start()
+        self.mysql.start()
         os.system('%s/etc/init.d/glite-lb-bkserverd start' % os.environ['GLITE_LOCATION'])
         
         return 0
         
     def stop(self):
         os.system('%s/etc/init.d/glite-lb-bkserverd stop' % os.environ['GLITE_LOCATION'])
-        mysql.stop()
+        self.mysql.stop()
         
         return 0
         
@@ -136,9 +137,9 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         f.close()
          
         # Create the MySQL database
-        mysql.stop()
+        self.mysql.stop()
         time.sleep(5)
-        mysql.start()
+        self.mysql.start()
         
         print '#-------------------------------------------------------------------'
         print ('Creating MySQL %s database.' % params['lb.database.name'])
@@ -156,9 +157,9 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         os.system('/usr/bin/mysql < /tmp/mysql_ct')
         os.system('/bin/rm /tmp/mysql_ct')
         
-        mysql.stop()
+        self.mysql.stop()
         time.sleep(5)
-        mysql.start()
+        self.mysql.start()
         
         return 0
         
@@ -200,7 +201,7 @@ if __name__ == '__main__':
 
     # Command line opts if any
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'chv', ['checkconf', 'help', 'version'])
+        opts, args = getopt.getopt(sys.argv[1:], 'chv', ['checkconf', 'help', 'version','stop','start'])
     except getopt.GetoptError:
         usage(msg = "Unknown options(s)")
         sys.exit(1)
@@ -229,7 +230,6 @@ if __name__ == '__main__':
     set_env()
           
     # Instantiate the service classes
-    mysql = MySQL.Mysql()
     service = glite_lb()
     service.verbose = verbose
     
@@ -245,6 +245,12 @@ if __name__ == '__main__':
             service.copyright()
             service.showVersion()
             glib.print_params(params)
+            sys.exit(0)
+        if o == "--stop":
+            service.stop()
+            sys.exit(0)
+        if o == "--start":
+            service.start()
             sys.exit(0)
 
     # Check certificates
