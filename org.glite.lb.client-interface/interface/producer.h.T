@@ -281,7 +281,7 @@ extern int edg_wll_SetLoggingJob(
  * \param context INOUT context to work with
  * \param job IN further logging calls are related to this job
  * \param code IN sequence code as obtained from previous component
- * \param user IN user ceredentials
+ * \param user IN user credentials
  * \param flags IN flags on code handling (\see API documentation)
  */
 extern int edg_wll_SetLoggingJobProxy(
@@ -302,13 +302,13 @@ extern int edg_wll_SetLoggingJobProxy(
  * Partitionable jobs should set num_subjobs=0 initially,
  * and re-register when number of subjobs becomes known.
  *
- * \param type EDG_WLL_JOB_SIMPLE,  EDG_WLL_JOB_DAG, or EDG_WLL_JOB_PARTITIONABLE
- * \param jdl user-specified JDL
- * \param ns network server contact
- * \param num_subjobs number of subjobs to create
- * \param seed seed used for subjob id's generator.
+ * \param type IN EDG_WLL_JOB_SIMPLE,  EDG_WLL_JOB_DAG, or EDG_WLL_JOB_PARTITIONABLE
+ * \param jdl IN user-specified JDL
+ * \param ns IN network server contact
+ * \param num_subjobs IN number of subjobs to create
+ * \param seed IN seed used for subjob id's generator.
  * 	Use non-NULL value to be able to regenerate the set of jobid's
- * \param subjobs returned subjob id's
+ * \param subjobs OUT returned subjob id's
  */
 
 /* backward compatibility */
@@ -341,12 +341,29 @@ extern int edg_wll_RegisterJobSync(
 );
 
 /**
- * Register alternative for L&B Proxy
+ * Register job with L&B Proxy service.
+ * Done via logging REGJOB event, may generate subjob id's and create
+ * the parent-children associations.
+ * Set the job as current for the context and initialize sequence code.
+ *
+ * Partitionable jobs should set num_subjobs=0 initially,
+ * and re-register when number of subjobs becomes known.
+ *
+ * \param type IN EDG_WLL_JOB_SIMPLE,  EDG_WLL_JOB_DAG, or EDG_WLL_JOB_PARTITIONABLE
+ * \param user IN user credentials
+ * \param jdl IN user-specified JDL
+ * \param ns IN network server contact
+ * \param num_subjobs IN number of subjobs to create
+ * \param seed IN seed used for subjob id's generator.
+ *      Use non-NULL value to be able to regenerate the set of jobid's
+ * \param subjobs OUT returned subjob id's
  */
+
 extern int edg_wll_RegisterJobProxy(
 	edg_wll_Context		context,
 	const edg_wlc_JobId	job,
 	enum edg_wll_RegJobJobtype	type,
+	const char *		user,
 	const char *		jdl,
 	const char *		ns,
 	int			num_subjobs,
