@@ -21,6 +21,9 @@
 	
 	Revision history:
 	$Log$
+	Revision 1.1.1.1  2004/05/26 18:45:05  eronchie
+	Import of wms jobid
+	
 	
 -->
 
@@ -28,7 +31,7 @@
 
 	<!-- Include build properties to allow overwriting 
 	     of properties for subsystem                    -->
-	<property file="build.properties" />	
+	<property file="project/build.properties" />	
 
 	<!-- ======================================================
           Define corresponding subsystem properties
