@@ -79,6 +79,11 @@
                                         age="@org.glite.security.voms.info.age@"
                                         build="@org.glite.security.voms.info.build@"
                                         arch="i386"/>
+                                <component name="gridsite-core"
+                                        version="@org.gridsite.core.info.version@"
+                                        age="@org.gridsite.core.info.age@"
+					build="@org.gridsite.core.info.build@"
+                                        arch="i386"/>
 			</components>
 			<dependencies>
 				<external name="MySQL-server"
@@ -109,11 +114,6 @@
 					version="1.01"
 					age="9"
 					arch="i386"/>
-				<external name="gridsite"
-                                        version="1.1.5"
-                                        age="3"
-                                        arch="i386"/>
-
 			</dependencies>
 		</service>
 	</services>
