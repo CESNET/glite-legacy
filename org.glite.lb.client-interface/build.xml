@@ -20,6 +20,9 @@
 
 	Revision history:
 	$Log$
+	Revision 1.2  2004/06/21 16:02:16  dimeglio
+	Modified to search support files in module project directory
+	
 -->
 
 <project name="client-interface" default="compile">
@@ -72,7 +75,7 @@
 		 Load common targets
 		 ========================================= -->
 	<import file="${global.targets-external-dependencies.file}"/>	
-	<import file="${global.targets-make.file}" />
+	<import file="${global.targets-simple_make.file}" />
 	<import file="${component.configure.options.file}"/>
 
 	<!-- =========================================
