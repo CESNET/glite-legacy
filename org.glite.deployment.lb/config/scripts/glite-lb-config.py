@@ -122,6 +122,19 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         (uid,gid) = glib.get_user_info(os.environ['GLITE_USER'])
         glib.check_dir(os.environ['GLITE_LOCATION_VAR'],0755, uid, gid)
         
+        # Create /etc/my.cnf file
+        f = open("/etc/my.cnf","w")
+        f.write("[mysqld]\n")
+        f.write("  datadir=/var/lib/mysql\n")
+        f.write("  socket=/tmp/mysql.sock\n")
+        f.write("[mysql.server]\n")
+        f.write("  user=mysql\n")
+        f.write("  basedir=/var/lib\n")
+        f.write("[safe_mysqld]\n")
+        f.write("  err-log=/var/log/mysqld.log\n")
+        f.write("  pid-file=/var/run/mysqld/mysqld.pid\n")
+        f.close()
+         
         # Create the MySQL database
         mysql.stop()
         time.sleep(5)
