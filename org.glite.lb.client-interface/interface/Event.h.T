@@ -32,7 +32,7 @@ EWL_BEGIN_NAMESPACE
  * by name()) there is a list of allowed attributes (returned by
  * getAttrs()). The Event class provides methods for reading these
  * attributes, but no means of changing the 
- * event are provided (except assigning new one).
+ * event are provided; this class is used as a result of L&B queries.
  */
 class Event {
 	friend class Job;
