@@ -23,7 +23,7 @@ import time
 
 sys.path.append(".")
 import mysql as MySQL
-import gLiteInstallerLib as gLib
+from gLiteInstallerLib import gLib as GLib
 
 
 global mysql
@@ -65,11 +65,16 @@ class glite_lb:
     def init(self):
         return 0
         
+
+# ---- Main program --
+# Get an instance of the library class
+gLib = GLib()
+
 params = {}
 gLib.loadConfiguration("../glite-lb.cfg.xml",params) 
 gLib.print_params(params)
 os.environ['GLITE_LOCATION'] = params['glite.location']
-gLib.user_add(params['glite.user.name'],params['glite.group.name'])
+gLib.add_user(params['glite.user.name'],params['glite.group.name'])
 gLib.check_dir_perms(params['glite.location']+"/var",0777)
 if params['glite.installer.checkcerts']:
    gLib.check_certs(params)
