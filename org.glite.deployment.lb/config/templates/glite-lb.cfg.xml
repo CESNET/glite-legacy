@@ -44,6 +44,14 @@
 		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
 		<!-- System parameters - You should leave these alone -->
 		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
+		<lb.certificate.file
+			description="The host certificate (public key) file location"
+			value="/home/gproduct/.certs/hostcert.pem"/>
+		
+		<lb.key.file
+			description="The host certificate (private key) file location"
+			value="/home/gproduct/.certs/hostkey.pem"/>
+		
 		<dirlist value='/opt/glite/var'/>
 	</parameters>
 </config>

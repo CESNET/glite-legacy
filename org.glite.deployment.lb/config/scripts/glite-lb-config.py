@@ -118,7 +118,8 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         if params.has_key('dirlist'):
            dirlist = string.split(params['dirlist'],',')
            for d in dirlist:
-              gLib.check_dir(d,0777)
+              glib.check_dir(d,0777)
+        glib.check_dir(params['GLITE_CERT_DIR'])
          
         # Create the GLITE_USER if it doesn't exists
         print "Creating/Verifying the GLITE_USER account %s" % params['GLITE_USER']
@@ -128,7 +129,9 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         
         # Copy certificates
         os.system("cp %s %s ~%s/.certs/" % (params['host.certificate.file'], params['host.key.file'], params['GLITE_USER']))
-                 
+        os.chown("/home/%s/.certs" % params['GLITE_USER'], params['GLITE_USER'])
+        os.chown("/home/%s/.certs/*" % params['GLITE_USER'], params['GLITE_USER'])
+                
         # Create the MySQL database
         self.mysql.stop()
         time.sleep(5)
