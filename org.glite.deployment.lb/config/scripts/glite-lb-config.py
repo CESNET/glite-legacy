@@ -126,8 +126,8 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
             print "The gLite LB Server service has been started               ",
             glib.printOkMessage()
         else:
-            print glib.printErrorMessage("Could not start the gLite LB Server service")
-            print glib.printErrorMessage("Please verify and re-run the script                        "),
+            glib.printErrorMessage("Could not start the gLite LB Server service")
+            glib.printErrorMessage("Please verify and re-run the script                        "),
             glib.printFailedMessage()
             return 1
         
@@ -153,8 +153,8 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
             print "The gLite R-GMA Servicetool service has been started               ",
             glib.printOkMessage()
         else:
-            print glib.printErrorMessage("Could not start the gLite R-GMA Servicetool service")
-            print glib.printErrorMessage("Please verify and re-run the script                        "),
+            glib.printErrorMessage("Could not start the gLite R-GMA Servicetool service")
+            glib.printErrorMessage("Please verify and re-run the script                        "),
             glib.printFailedMessage()
             return 1
         
@@ -317,9 +317,12 @@ def set_env():
     lb_cert_path = pwd.getpwnam(os.environ['GLITE_USER'])[5] + "/" + params['user.certificate.path']
     glib.export('GLITE_HOST_CERT',"%s/hostcert.pem" % lb_cert_path)
     glib.export('GLITE_HOST_KEY',"%s/hostkey.pem" % lb_cert_path)
-    glib.export('GLOBUS_LOCATION',params['GLOBUS_LOCATION'])
     glib.export('GLITE_CERT_DIR',params['ca.certificates.dir'])
+
+    glib.export('GLOBUS_LOCATION',params['GLOBUS_LOCATION'])
     
+    glib.export('JAVA_HOME')
+
     # bin and lib paths
     glib.addEnvPath("PATH","/usr/bin/:%s/bin:%s/bin:%s/externals/bin:%s/bin" \
         % (os.environ['JAVA_HOME'],os.environ['GLOBUS_LOCATION'],os.environ['GLITE_LOCATION'],os.environ['GLITE_LOCATION']))
