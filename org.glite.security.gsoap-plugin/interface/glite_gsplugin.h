@@ -8,10 +8,7 @@
 #define PLUGIN_ID		"GLITE_GSOAP_PLUGIN"
 
 struct _glite_gsplugin_ctx {
-	struct timeval			timeout; /**<	timeout for all netcalls
-									  *		if tv_sec ==0 and tv_usec == 0 then
-									  *		no timeout is used - every call will
-									  *		be considered as a nonblocking */
+	struct timeval			_timeout, *timeout;
 
 	char				   *error_msg;
 
@@ -31,6 +28,8 @@ extern int glite_gsplugin_free_context(glite_gsplugin_Context);
 extern glite_gsplugin_Context glite_gsplugin_get_context(struct soap *);
 extern void *glite_gsplugin_get_udata(struct soap *);
 extern void glite_gsplugin_set_udata(struct soap *, void *);
+
+extern void glite_gsplugin_set_timeout(glite_gsplugin_Context, struct timeval const *);
 
 extern int glite_gsplugin(struct soap *, struct soap_plugin *, void *);
 extern char *glite_gsplugin_errdesc(struct soap *);

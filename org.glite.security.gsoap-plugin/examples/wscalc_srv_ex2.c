@@ -93,7 +93,7 @@ main(int argc, char **argv)
 			perror("accept");
 			exit(1);
 		}
-		if ( edg_wll_gss_accept(ctx->cred,conn,&ctx->timeout,ctx->connection,&gss_code) ){
+		if ( edg_wll_gss_accept(ctx->cred,conn,ctx->timeout,ctx->connection,&gss_code) ){
 			edg_wll_gss_get_error(&gss_code, "Failed to read credential", &msg);
 			fprintf(stderr, "%s\n", msg);
 			free(msg);

@@ -15,7 +15,7 @@ nothrflavour=gcc32
 thrflavour=gcc32pthr
 gsoap_prefix=/opt/gsoap
 
-CC?=gcc
+CC=gcc
 
 -include Makefile.inc
 -include ../Makefile.inc

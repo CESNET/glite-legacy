@@ -38,8 +38,10 @@ glite_gsplugin_init_context(glite_gsplugin_Context *ctx)
 	out->cred = GSS_C_NO_CREDENTIAL;
 
 	/* XXX: some troubles with glite_gss and blocking calls!
-	 */
 	out->timeout.tv_sec = 10000;
+	 */
+
+	out->timeout = NULL;
 	*ctx = out;
 
 	return 0;
@@ -89,6 +91,16 @@ glite_gsplugin_set_udata(struct soap *soap, void *d)
 	assert(pdata);
 	pdata->ctx->user_data = d;
 }
+
+void glite_gsplugin_set_timeout(glite_gsplugin_Context ctx, struct timeval const *to)
+{
+	if (to) {
+		ctx->_timeout = *to;
+		ctx->timeout = &ctx->_timeout;
+	}
+	else ctx->timeout = NULL;
+}
+
 
 int
 glite_gsplugin(struct soap *soap, struct soap_plugin *p, void *arg)
@@ -216,7 +228,7 @@ glite_gsplugin_connect(
 	if ( !(ctx->connection = malloc(sizeof(*ctx->connection))) ) return errno;
 	ret = edg_wll_gss_connect(ctx->cred,
 				host, port,
-				(ctx->timeout.tv_usec || ctx->timeout.tv_sec)? &ctx->timeout: NULL,
+				ctx->timeout,
 				ctx->connection, &gss_stat);
 	if ( ret ) {
 		edg_wll_gss_get_error(&gss_stat, "edg_wll_gss_connect()", &ctx->error_msg);
@@ -252,8 +264,7 @@ glite_gsplugin_close(struct soap *soap)
 	if ( ctx->connection ) {
 		if ( ctx->connection->context != GSS_C_NO_CONTEXT) {
 			pdprintf(("GSLITE_GSPLUGIN: closing gss connection\n"));
-			ret = edg_wll_gss_close(ctx->connection,
-					(ctx->timeout.tv_usec || ctx->timeout.tv_sec)? &ctx->timeout: NULL);
+			ret = edg_wll_gss_close(ctx->connection, ctx->timeout);
 		}
 		ctx->connection->context = GSS_C_NO_CONTEXT;
 	}
@@ -275,7 +286,7 @@ glite_gsplugin_accept(struct soap *soap, int s, struct sockaddr *a, int *n)
 	if ( (conn = accept(s, (struct sockaddr *)&a, n)) < 0 ) return conn;
 	if (   !ctx->connection
 		&& !(ctx->connection = malloc(sizeof(*ctx->connection))) ) return -1;
-	if ( edg_wll_gss_accept(ctx->cred, conn, &ctx->timeout, ctx->connection, &gss_code)) {
+	if ( edg_wll_gss_accept(ctx->cred, conn, ctx->timeout, ctx->connection, &gss_code)) {
 		pdprintf(("GSLITE_GSPLUGIN: Client authentication failed, closing.\n"));
 		edg_wll_gss_get_error(&gss_code, "Client authentication failed", &ctx->error_msg);
 		return -1;
@@ -304,7 +315,7 @@ glite_gsplugin_recv(struct soap *soap, char *buf, size_t bufsz)
 	}
 	
 	len = edg_wll_gss_read(ctx->connection, buf, bufsz,
-					(ctx->timeout.tv_usec || ctx->timeout.tv_sec)? &ctx->timeout: NULL,
+					ctx->timeout,
 					&gss_code);
 
 	switch ( len ) {
@@ -363,7 +374,7 @@ glite_gsplugin_send(struct soap *soap, const char *buf, size_t bufsz)
 	sigaction(SIGPIPE, &sa, &osa);
 
 	ret = edg_wll_gss_write_full(ctx->connection,
-				(void*)buf, bufsz, &ctx->timeout, &total, &gss_code);
+				(void*)buf, bufsz, ctx->timeout, &total, &gss_code);
 
 	sigaction(SIGPIPE, &osa, NULL);
 
@@ -397,3 +408,4 @@ glite_gsplugin_send(struct soap *soap, const char *buf, size_t bufsz)
 
 	return SOAP_OK;
 }
+
