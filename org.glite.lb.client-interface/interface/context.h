@@ -139,7 +139,7 @@ typedef enum _edg_wll_ErrorCode {
 		See errDesc returned by edg_wll_ErrorCode(). */
 	EDG_WLL_ERROR_URL_FORMAT, /**< Malformed URL */
 	EDG_WLL_ERROR_MD5_CLASH, /**< MD5 hash same for different strings. Very unlikely :-). */
-	EDG_WLL_ERROR_SSL, /**< Generic SSL error. See errDesc returned by edg_wll_Error(). */
+	EDG_WLL_ERROR_GSS, /**< Generic GSSAPI error. See errDesc returned by edg_wll_Error(). */
 	EDG_WLL_ERROR_DNS, /**< DNS resolver error. See errDesc returned by edg_wll_Error(). */
 	EDG_WLL_ERROR_NOJOBID,	/**< Attmepted call requires calling edg_wll_SetLoggingJob() first. */
 	EDG_WLL_ERROR_NOINDEX,	/**< Query does not contain any conidion on indexed attribute. */
