@@ -25,6 +25,14 @@
 
 EWL_BEGIN_NAMESPACE
 
+/** Class representing one event in the LB database.
+ *
+ * This class represents a LB event, which is basically list of
+ * attribute -- value pairs. For each particular event type (returned
+ * by name()) there is a list of allowed attributes. The Event class
+ * provides methods for accessing these attributes both by
+ * their name and as an vector of pairs.
+ */
 class Event {
 	friend class Job;
 	friend class ServerConnection;
@@ -33,9 +41,8 @@ public:
 	/** Event type codes.
 	 * Identify which of the event fields are valid.
 	 */
-
 	enum Type {
-		UNDEF = 0,
+		UNDEF = 0, /**< Undefined event type. */
 @@@{
 	for my $e ($event->getTypesOrdered) {
 		my $u = uc $e;
@@ -43,10 +50,15 @@ public:
 		gen "\t\t$u,\t/**< $c */\n";
 	}
 @@@}
-		TYPE_MAX
+		TYPE_MAX /**< Limit for checking type validity. */
 	};
 
-	/** Event attribute symbolic identifier. */
+	/** Event attribute symbolic identifier. 
+	 * These symbols provide symbolic names for event
+	 * attributes. In braces are shown the event types for which the
+	 * attribute is defined, for each event type the attribute
+	 * meaning is described.
+	 */
 	enum Attr {
 @@@{
 	for (sort {$a cmp $b} getAllFields $event) {
@@ -59,14 +71,15 @@ public:
 			selectType $event $t;
 			my $cc = getFieldComment $event $_;
 			$t = 'common' if $t eq '_common_';
-			$c .= "\t * $t: $cc\n";
+			$c .= "\t * \\n\[$t\] $cc\n";
 		}
 		$c .= "\t */\n";
 
 		gen "$c\t\t$u,\n";
 	}
 @@@}
-		ATTR_MAX
+		ATTR_MAX /**< Limit for checking attribute code
+			    validity. */
 	};
 
 @@@{
@@ -75,10 +88,12 @@ public:
 			my $ff;
 			my $ut;
 			my $utf;
+			my $fc;
 			if ($t eq '_common_') {
 				$ff = $f;
 				$ut = '';
 				$utf = '';
+				$fc = '';
 			}
 			else {
 				selectType $event $t;
@@ -86,9 +101,11 @@ public:
 				$ff = getField $event;
 				$ut = uc $t . '_';
 				$utf = ucfirst $t;
+				$fc = $event->getFieldComment($f);
 			}
 			if ($ff->{codes}) {
 				gen qq{
+!       /** $fc */
 !	enum ${utf}Code \{
 };
 				for (@{$ff->{codes}}) {
