@@ -130,7 +130,7 @@ glite_gsplugin_copy(struct soap *soap, struct soap_plugin *dst, struct soap_plug
 	pdprintf(("GSLITE_GSPLUGIN: glite_gsplugin_copy()\n"));
 	/*	Should be the copy code here?
 	 */
-	return SOAP_OK;
+	return ENOSYS;
 }
 
 static void
