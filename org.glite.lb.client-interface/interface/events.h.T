@@ -2,7 +2,7 @@
 #define __EDG_WORKLOAD_LOGGING_CLIENT_EVENTS_H__
 
 /**
- * \file edg/workload/logging/client/events.h
+ * \file events.h
  * \brief contains definition of event type codes for use both by lbapi.h and dglog.h
  */
 
@@ -139,7 +139,7 @@ for ($event->getFieldsOrdered) {
 # enum
 		gen qq{
 /**
- * \\enum $enum
+ * \\$enum
  * $fn codes 
  */
 $enum \{
@@ -187,7 +187,7 @@ for my $t (sort { $event->{order}->{$a} <=> $event->{order}->{$b} }
 # enum
 			gen qq{
 /**
- * \\enum $enum
+ * \\$enum
  * $fn codes of the $t event
  */
 $enum \{
@@ -314,7 +314,7 @@ extern edg_wll_Event *edg_wll_InitEvent(edg_wll_EventCode eventcode);
 
 /**
  * Free the contents of event structure
- * \param IN event structure to be freed
+ * \param event 	IN structure to be freed
  * \warning As event structures are likely to be allocated in arrays,
  *      the structure itself is not freed.
  *      Its the responsibility of the caller to call free(event)

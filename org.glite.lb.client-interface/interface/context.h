@@ -2,7 +2,7 @@
 #define _EDG_WORKLOAD_LOGGING_CLIENT_CONTEXT_H
 
 /**
- * \file edg/workload/logging/client/context.h
+ * \file context.h
  * \brief L&B API common context (publicly visible) and related definitions
  */
 
@@ -99,8 +99,13 @@ int edg_wll_SetParam(
 
 struct timeval;	/* gcc, shut up! */
 
+/** Set an int context parameter */
 int edg_wll_SetParamInt(edg_wll_Context,edg_wll_ContextParam,int);
+
+/** Set a string context parameter */
 int edg_wll_SetParamString(edg_wll_Context,edg_wll_ContextParam,const char *);
+
+/** Set a timeval context parameter */
 int edg_wll_SetParamTime(edg_wll_Context,edg_wll_ContextParam,const struct timeval *);
 
 /** Get current parameter value.
@@ -165,7 +170,7 @@ typedef enum _edg_wll_ErrorCode {
 int edg_wll_Error(
 	edg_wll_Context context,
 	char		**errText,
-	char		**eddDesc
+	char		**errDesc
 );
 
 /** Convert source code to printable string 
@@ -195,7 +200,6 @@ edg_wll_QueryResults edg_wll_StringToQResult(const char *name);
 /**
  * initial sequence code for BigHelper
  */
-
 #define EDG_WLL_SEQ_BIGHELPER_INITIAL "UI=2:NS=0:WM=0:BH=1:JSS=0:LM=0:LRMS=0:APP=0"
 
 /** Retrieve current sequence code from the context */
