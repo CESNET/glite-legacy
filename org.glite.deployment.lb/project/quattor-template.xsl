@@ -12,7 +12,7 @@
 
 	<!-- global processing -->
 	<xsl:template match="/">
-template pro_software_glite_lb
+template pro_software_glite_lb;
 
 #
 # Copyright (c) Members of the EGEE Collaboration. 2004 
