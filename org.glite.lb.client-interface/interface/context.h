@@ -71,6 +71,10 @@ typedef enum _edg_wll_Source {
 	EDG_WLL_SOURCE__LAST		/* marker, for internal use only */
 } edg_wll_Source;
 
+/** Currently an alias. Will be replaced when migration NS -> WMProxy
+ * is finished. */
+#define EDG_WLL_SOURCE_WM_PROXY EDG_WLL_SOURCE_NETWORK_SERVER
+
 
 /** Allocate an initialize a new context object.
  * \param context OUT returned context
