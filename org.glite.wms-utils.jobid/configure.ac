@@ -19,6 +19,10 @@
 #
 #       Revision history:
 #       $Log$
+#       Revision 1.5  2004/06/16 11:02:05  eronchie
+#       Added configure options
+#       WARNING: Work in progress
+#
 #       Revision 1.4  2004/06/14 18:14:35  eronchie
 #       Added Configure options
 #       WARNING work in progress
@@ -54,9 +58,6 @@ AC_REVISION([$Revision$])
 WORKDIR=`pwd`
 AC_SUBST(WORKDIR)
 
-DISTBIN=$WORKDIR/../../dist
-AC_SUBST(DISTBIN)
-                                                                               
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_CPP
