@@ -268,6 +268,21 @@ int edg_wll_QueryListener(
 	uint16_t *	port
 );
 
+
+/**
+ * Ask LB Proxy server for sequence number
+ * \param context IN: context to work with
+ * \param jobId IN: job to query
+ * \param code OUT: sequence code
+ */
+
+
+int edg_wll_QuerySequenceCode(
+	edg_wll_Context	context,
+	edg_wlc_JobId	jobId,
+	char **		code
+);
+		
 /*@}*/
 
 /*
@@ -276,6 +291,8 @@ int edg_wll_QueryListener(
 
 /** Free edg_wll_QueryRec internals, not the structure itself */
 void edg_wll_QueryRecFree(edg_wll_QueryRec *);
+
+
 
 /**
  * default and maximal query timeout (in seconds)
