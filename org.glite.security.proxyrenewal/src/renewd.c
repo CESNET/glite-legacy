@@ -16,6 +16,8 @@ int voms_enabled = 0;
 
 char *vomsconf = "/opt/edg/etc/vomses";
 
+static volatile int die = 0, child_died = 0;
+
 static struct option opts[] = {
    { "help",       no_argument,       NULL,  'h' },
    { "version",    no_argument,       NULL,  'v' },
@@ -67,6 +69,26 @@ doit(int sock);
 
 static int
 decode_request(const char *msg, const size_t msg_len, edg_wlpr_Request *request);
+
+int
+start_watchdog(pid_t *pid);
+
+static void
+catchsig(int sig)
+{
+   switch (sig) {
+      case SIGINT:
+      case SIGTERM:
+      case SIGQUIT:
+	 die = sig;
+	 break;
+      case SIGCHLD:
+	 child_died = 1;
+	 break;
+      default:
+	 break;
+   }
+}
 
 static command_table *
 find_command(edg_wlpr_Command code)
@@ -155,44 +177,36 @@ doit(int sock)
    proxies[0] = NULL;
 #endif
 
-#if 0
-   sigemptyset(&sset);
-   sigaddset(&sset,SIGTERM);
-   sigaddset(&sset,SIGINT);
-   sigaddset(&sset, SIGKILL);
-   sigaddset(&sset, SIGUSR1);
-   sigaddset(&sset, SIGALRM);
-   sigprocmask(SIG_BLOCK,&sset,NULL);
-#endif
+   while (!die) {
 
-   while (1) {
-#if 0
-      sigprocmask(SIG_UNBLOCK,&sset,NULL);
-      newsock = accept(sock, (struct sockaddr *) &client_addr, &client_addr_len);
-      sigprocmask(SIG_BLOCK,&sset,NULL);
+      if (child_died) {
+	 int pid, newpid, ret;
 
-      if (newsock == -1) {
-         if (errno == EINTR) /* ERESTARTSYS */
-             proxy_renewal(received_signal);
-         else
-            log();
-         continue;
+	 while ((pid=waitpid(-1,NULL,WNOHANG))>0)
+	    ;
+	 ret = start_watchdog(&newpid);
+	 if (ret)
+	    return ret;
+	 edg_wlpr_Log(LOG_DEBUG, "Renewal slave process re-started");
+	 child_died = 0;
+	 continue;
       }
-#else
+
       newsock = accept(sock, (struct sockaddr *) &client_addr, &client_addr_len);
       if (newsock == -1) {
-         edg_wlpr_Log(LOG_ERR, "accept() failed");
+	 if (errno != EINTR)
+	    edg_wlpr_Log(LOG_ERR, "accept() failed");
          continue;
       }
       edg_wlpr_Log(LOG_DEBUG, "Got connection");
-
-#endif
 
       proto(newsock);
 
       edg_wlpr_Log(LOG_DEBUG, "Connection closed");
       close(newsock);
    }
+   edg_wlpr_Log(LOG_DEBUG, "Terminating on signal %d\n",die);
+   return 0;
 }
 
 static int
@@ -500,6 +514,7 @@ int main(int argc, char *argv[])
    char  sockname[PATH_MAX];
    int   ret;
    pid_t pid;
+   struct sigaction	sa;
 
    progname = strrchr(argv[0],'/');
    if (progname) progname++; 
@@ -548,6 +563,14 @@ int main(int argc, char *argv[])
       openlog(progname, LOG_PID, LOG_DAEMON);
    }
 
+   memset(&sa,0,sizeof(sa));
+   sa.sa_handler = catchsig;
+   sigaction(SIGINT,&sa,NULL);
+   sigaction(SIGQUIT,&sa,NULL);
+   sigaction(SIGTERM,&sa,NULL);
+   sigaction(SIGCHLD,&sa,NULL);
+   sigaction(SIGPIPE,&sa,NULL);
+
    ret = start_watchdog(&pid);
    if (ret)
       return 1;
@@ -560,22 +583,6 @@ int main(int argc, char *argv[])
    if (ret)
       return 1;
    edg_wlpr_Log(LOG_DEBUG, "Listening at %s", sockname);
-
-#if 0
-   /* XXX ??? */
-   install_handlers();
-#endif
-   
-
-#if 0
-   /* XXX this overrides setings done by install_handlers()? */
-   signal(SIGTERM, cleanup);
-   signal(SIGINT, cleanup);
-   signal(SIGKILL, cleanup);
-   signal(SIGPIPE, SIG_IGN);
-
-   atexit(cleanup);
-#endif
 
    ret = doit(sock);
 
