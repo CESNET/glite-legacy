@@ -22,7 +22,7 @@
 
 # glite-lb_installer v. <xsl:value-of select="/node/@version"/>
 #
-# The glite-lb_installer installs the gLite <xsl:value-of select="/node/@name"/> Deployment Unit
+# The glite-lb_installer installs the gLite Logging & Bookkeeping Server
 #
 # Usage: glite-lb_installer [-u|-v|--help]
 #        -u          uninstall
@@ -32,8 +32,40 @@
 #               1 - if a file could not be downloaded
 
 ###############################################################################
+
+#Parse the RPMLIST to strip out the RPMS that are already installed
+function parseRPMList()
+{
+        newRPMLIST=""
+        localRPMLIST=`rpm -qa`
+        for i in $RPMLIST
+        do
+                g=`echo $i | sed -e 's/\.i386\.rpm//g'`
+                g=`echo $g | sed -e 's/\.noarch\.rpm//g'`
+                if [ -z "`echo $localRPMLIST | grep $g`" ]; then
+                        newRPMLIST="${newRPMLIST} $i"
+                else
+                        echo "$i is already installed. It will be skipped."
+                fi
+        done
+                                                                                                                                                             
+        RPMLIST=$newRPMLIST
+}
+
+
+#Downloads and install the module RPMS
 function install()
 {
+	version
+	echo
+	echo xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+	echo x Please wait, downloading the gLite Logging & Bookkeeping Server... x
+	echo xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+	echo
+
+        mkdir -p glite-lb
+        cd glite-lb
+
 	# Download global dependencies	
 	<xsl:for-each select="node/dependencies">
 		<xsl:apply-templates>
@@ -60,12 +92,27 @@ function install()
 	</xsl:for-each>
 		
 	# Install all RPMS
+	echo
+	echo xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+	echo x Please wait, installing the gLite Logging & Bookkeeping Server... x
+	echo xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+	echo
+	parseRPMList
 	rpm -Uvh $RPMLIST
+	echo
+	echo Done!
+	echo
+	echo For more information refer to the gLite Installation and User Guides or to the gLite web site \(http:\/\/www.glite.org\)
+	echo Please report problems and comments to the gLite Team at project-eu-egee-middleware-integration-support@cern.ch
+
+	cd ..
 }
 
 ###############################################################################
 function uninstall()
 {
+	version
+
 	# Global dependencies	
 	<xsl:for-each select="node/dependencies">
 		<xsl:apply-templates>
@@ -92,7 +139,13 @@ function uninstall()
 	</xsl:for-each>
 		
 	# Uninstall all RPMS
-	rpm -e $RPMLIST
+	echo xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+	echo x  Please wait, uninstalling the gLite Logging & Bookkeeping Server... x
+	echo xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+	echo
+	rpm -ev $RPMLIST
+	echo
+	echo Done!
 }
 
 ###############################################################################
@@ -105,7 +158,7 @@ function usage()
 	echo 
 	echo glite-lb_installer v. <xsl:value-of select="/node/@version"/>
 	echo 
-	echo The glite-lb_installer installs the gLite <xsl:value-of select="/node/@name"/> Deployment Unit
+	echo The glite-lb_installer installs the gLite Logging & Bookkeeping Server
 	echo 
 	echo Usage: glite-lb_installer \[-u\|-v\|--help\]
 	echo -u          uninstall
@@ -172,14 +225,7 @@ fi
 RPMLIST="$RPMLIST <xsl:value-of select="$package"/>"
 			</xsl:when>
 			<xsl:otherwise>
-				<xsl:choose>
-					<xsl:when test="@package.name">
-RPMLIST="$RPMLIST <xsl:value-of select="@package.name"/>"
-					</xsl:when>
-					<xsl:otherwise>
 RPMLIST="$RPMLIST <xsl:value-of select="$package.name"/>"
-					</xsl:otherwise>
-				</xsl:choose>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
@@ -200,14 +246,7 @@ fi
 RPMLIST="$RPMLIST <xsl:value-of select="$package"/>"
 			</xsl:when>
 			<xsl:otherwise>
-				<xsl:choose>
-					<xsl:when test="@package.name">
-RPMLIST="$RPMLIST <xsl:value-of select="@package.name"/>"
-					</xsl:when>
-					<xsl:otherwise>
 RPMLIST="$RPMLIST <xsl:value-of select="$package.name"/>"
-					</xsl:otherwise>
-				</xsl:choose>
 			</xsl:otherwise>
 		</xsl:choose>
 	</xsl:template>
