@@ -180,10 +180,11 @@ renew_voms_cert(struct vomsdata *vd, struct voms **voms_cert,
    return 0;
 }
 
-int
-renew_voms_certs(const char *cur_file, const char *new_file)
+static int
+renew_voms_certs(const char *cur_file, const char *renewed_file, const char *new_file)
 {
    globus_gsi_cred_handle_t cur_proxy = NULL;
+   globus_gsi_cred_handle_t new_proxy = NULL;
    struct vomsdata *vd = NULL;
    struct voms **voms_cert = NULL;
    int voms_err, ret;
@@ -251,19 +252,36 @@ renew_voms_certs(const char *cur_file, const char *new_file)
    if (ret)
       goto end;
 
-   ret = generate_proxy(cur_proxy, extension, new_file);
+   ret = load_proxy(renewed_file, NULL, NULL, NULL, &new_proxy);
+   if (ret)
+      goto end;
+
+   ret = generate_proxy(new_proxy, extension, new_file);
 
 end:
-#if 0
-   if (ret)
-      unlink(new_file);
-#endif
    (old_env_proxy) ? setenv("X509_USER_PROXY", old_env_proxy, 1) :
       		     unsetenv("X509_USER_PROXY");
 
-   VOMS_Destroy(vd);
+   if (cert)
+      X509_free(cert);
+   if (chain)
+      sk_X509_pop_free(chain, X509_free);
+   if (vd)
+      VOMS_Destroy(vd);
+   if (cur_proxy)
+      globus_gsi_cred_handle_destroy(cur_proxy);
+   if (new_proxy)
+      globus_gsi_cred_handle_destroy(new_proxy);
+   if (buf)
+      free(buf);
 
    return ret;
+}
+
+int
+renew_voms_creds(const char *cur_file, const char *renewed_file, const char *new_file)
+{
+   return renew_voms_certs(cur_file, renewed_file, new_file);
 }
 
 #if 0
