@@ -22,7 +22,7 @@
 
 # glite-lb_installer v. <xsl:value-of select="/node/@version"/>
 #
-# The glite-lb_installer installs the gLite Logging & Bookkeeping Server
+# The glite-lb_installer installs the gLite Logging &amp; Bookkeeping Server
 #
 # Usage: glite-lb_installer [-u|-v|--help]
 #        -u          uninstall
@@ -59,7 +59,7 @@ function install()
 	version
 	echo
 	echo xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-	echo x Please wait, downloading the gLite Logging & Bookkeeping Server... x
+	echo x Please wait, downloading the gLite Logging &amp; Bookkeeping Server... x
 	echo xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 	echo
 
@@ -94,7 +94,7 @@ function install()
 	# Install all RPMS
 	echo
 	echo xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-	echo x Please wait, installing the gLite Logging & Bookkeeping Server... x
+	echo x Please wait, installing the gLite Logging &amp; Bookkeeping Server... x
 	echo xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 	echo
 	parseRPMList
@@ -140,7 +140,7 @@ function uninstall()
 		
 	# Uninstall all RPMS
 	echo xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-	echo x  Please wait, uninstalling the gLite Logging & Bookkeeping Server... x
+	echo x  Please wait, uninstalling the gLite Logging &amp; Bookkeeping Server... x
 	echo xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 	echo
 	rpm -ev $RPMLIST
@@ -158,7 +158,7 @@ function usage()
 	echo 
 	echo glite-lb_installer v. <xsl:value-of select="/node/@version"/>
 	echo 
-	echo The glite-lb_installer installs the gLite Logging & Bookkeeping Server
+	echo The glite-lb_installer installs the gLite Logging &amp; Bookkeeping Server
 	echo 
 	echo Usage: glite-lb_installer \[-u\|-v\|--help\]
 	echo -u          uninstall
