@@ -20,6 +20,9 @@
 
 	Revision history:
 	$Log$
+	Revision 1.2  2004/10/18 19:16:09  zsalvet
+	RPM descriptions
+	
 	Revision 1.1  2004/09/22 15:41:24  jskrabal
 	- sorry! Forgot to add
 	
@@ -84,6 +87,7 @@
 		 Load version file 
 	     ========================================= -->
 	<property file="${module.version.file}"/>
+		<property file="${module.build.file}"/>
 		
 	<!-- ==============================================
 		 Local private targets
