@@ -42,13 +42,6 @@ def usage(msg='glite-lb-bkserverd start/stop/status'):
 #-------------------------------------------------------------------------------
 
 def set_env():
-   os.environ['GLITE_LOCATION']  = config['glite_location']
-   os.environ['GLOBUS_LOCATION'] = config['globus_location']
-   os.environ['LD_LIBRARY_PATH'] = '%s/lib:/%s/lib:$LD_LIBRARY_PATH' % (config['glite_location'], config['globus_location'])
-   os.environ['GLITE_HOST_KEY']  = config['hostkey']
-   os.environ['GLITE_HOST_CERT'] = config['hostcert']
-   os.environ['GLITE_CERT_DIR']  = config['certs_path']
-
    print '#-------------------------------------------------------------------'
    print 'Setting ENV variables in /root/.bashrc and /root/.profile'
    print '#-------------------------------------------------------------------'
@@ -56,16 +49,16 @@ def set_env():
    file.write('\nexport GLITE_LOCATION=%s\n' % config['glite_location'])
    file.write('export GLOBUS_LOCATION=%s\n' % config['globus_location'])
    file.write('export LD_LIBRARY_PATH=$GLITE_LOCATION/lib:$GLOBUS_LOCATION/lib:$LD_LIBRARY_PATH]\n')
-   file.write('export GLITE_HOST_KEY=%s\n' % config['hostkey'])
-   file.write('export GLITE_HOST_CERT=%s\n' % config['hostcert'])
+   file.write('export GLITE_HOST_KEY=/home/%s/%s/%s\n' % (config['username'], config['user_cert_path'], config['hostkey']))
+   file.write('export GLITE_HOST_CERT=/home/%s/%s/%s\n' % (config['username'], config['user_cert_path'], config['hostcert']))
    file.write('export GLITE_CERT_DIR=%s\n\n' % config['certs_path'])
    file.close()
    file = open('/root/.profile', 'a')
    file.write('\nexport GLITE_LOCATION=%s\n' % config['glite_location'])
    file.write('export GLOBUS_LOCATION=%s\n' % config['globus_location'])
    file.write('export LD_LIBRARY_PATH=$GLITE_LOCATION/lib:$GLOBUS_LOCATION/lib:$LD_LIBRARY_PATH]\n')
-   file.write('export GLITE_HOST_KEY=%s\n' % config['hostkey'])
-   file.write('export GLITE_HOST_CERT=%s\n' % config['hostcert'])
+   file.write('export GLITE_HOST_KEY=/home/%s/%s/%s\n' % (config['username'], config['user_cert_path'], config['hostkey']))
+   file.write('export GLITE_HOST_CERT=/home/%s/%s/%s\n' % (config['username'], config['user_cert_path'], config['hostcert']))
    file.write('export GLITE_CERT_DIR=%s\n\n' % config['certs_path'])
    file.close()
    print 'OK!\n'
@@ -77,16 +70,16 @@ def set_env():
    file.write('\nexport GLITE_LOCATION=%s\n' % config['glite_location'])
    file.write('export GLOBUS_LOCATION=%s\n' % config['globus_location'])
    file.write('export LD_LIBRARY_PATH=$GLITE_LOCATION/lib:$GLOBUS_LOCATION/lib:$LD_LIBRARY_PATH\n')
-   file.write('export GLITE_HOST_KEY=%s\n' % config['hostkey'])
-   file.write('export GLITE_HOST_CERT=%s\n' % config['hostcert'])
+   file.write('export GLITE_HOST_KEY=/home/%s/%s/%s\n' % (config['username'], config['user_cert_path'], config['hostkey']))
+   file.write('export GLITE_HOST_CERT=/home/%s/%s/%s\n' % (config['username'], config['user_cert_path'], config['hostcert'])) 
    file.write('export GLITE_CERT_DIR=%s\n\n' % config['certs_path'])
    file.close()
    file = open('/home/%s/.profile' % config['username'], 'a')
    file.write('\nexport GLITE_LOCATION=%s\n' % config['glite_location'])
    file.write('export GLOBUS_LOCATION=%s\n' % config['globus_location'])
    file.write('export LD_LIBRARY_PATH=$GLITE_LOCATION/lib:$GLOBUS_LOCATION/lib:$LD_LIBRARY_PATH\n')
-   file.write('export GLITE_HOST_KEY=%s\n' % config['hostkey'])
-   file.write('export GLITE_HOST_CERT=%s\n' % config['hostcert'])
+   file.write('export GLITE_HOST_KEY=/home/%s/%s/%s\n' % (config['username'], config['user_cert_path'], config['hostkey']))
+   file.write('export GLITE_HOST_CERT=/home/%s/%s/%s\n' % (config['username'], config['user_cert_path'], config['hostcert']))
    file.write('export GLITE_CERT_DIR=%s\n\n' % config['certs_path'])
    file.close()
    os.system('/bin/chown %s:%s /home/%s/.bashrc' % (config['username'], config['group_name'], config['username']))
@@ -148,8 +141,8 @@ def check_certs():
    print 'Checking if the hostkey and hostcert are in the machine.'
    print '#-------------------------------------------------------------------'
 
-   hostcert = config['hostcert']
-   hostkey  = config['hostkey']
+   hostcert = '%s/%s' % (config['host_cert_path'], config['hostcert'])
+   hostkey  = '%s/%s' % (config['host_cert_path'], config['hostkey'])
    if not os.path.exists(hostcert):
       sys.exit("Error: Host certificate not found at %s" % hostcert)
    if not os.path.exists(hostkey) :
@@ -168,9 +161,10 @@ def configure():
    print '#-------------------------------------------------------------------'
    print ('Creating MySQL %s database.' % config['db_name'])
    print '#-------------------------------------------------------------------'
+   os.system('/usr/bin/mysqlaccess %s %s' % (config['db_user'], config['db_name']))
    file = open('/tmp/mysql_ct', 'w')
    file.write('CREATE DATABASE %s;\n' % config['db_name'])
-   file.write('GRANT ALL PRIVILEGES ON %s.* TO %s@localhost IDENTIFIED BY "";\n' % (config['db_name'], config['db_name']))
+   file.write('GRANT ALL PRIVILEGES ON %s.* TO %s@localhost IDENTIFIED BY "";\n' % (config['db_name'], config['db_user']))
    file.write('USE %s;\n' % config['db_name'])
    file.write('\. %s/etc/glite-lb-dbsetup.sql\n' % config['glite_location'])
    file.close()
@@ -200,11 +194,11 @@ def configure():
 
 
    # Copy the temporary glite-lb-bkserverd daemon in init.d
-   print '#-------------------------------------------------------------------'
-   print ('Updating %s/etc/init.d/glite-lb-bkserverd' % config['glite_location'])
-   print '#-------------------------------------------------------------------'
-   os.system('/bin/cp glite-lb-bkserverd-config %s/etc/init.d/glite-lb-bkserverd' % config['glite_location'])
-   print '\n'
+   # print '#-------------------------------------------------------------------'
+   # print ('Updating %s/etc/init.d/glite-lb-bkserverd' % config['glite_location'])
+   # print '#-------------------------------------------------------------------'
+   # os.system('/bin/cp glite-lb-bkserverd-config %s/etc/init.d/glite-lb-bkserverd' % config['glite_location'])
+   # print '\n'
 
 
    return 1
@@ -319,7 +313,7 @@ if __name__ == '__main__':
    
    # Set up the environment
    set_env()
-   check_env()
+   # check_env()
    print_env()
       
    # Print configuration parameters

@@ -4,13 +4,15 @@
 
    <!-- host certificate -->
    <parameter name='certs'           value='true'/>
-   <parameter name='certs_path'      value='/etc/grid-security/certificates/'/>
-   <parameter name='hostcert'        value='/etc/grid-security/hostcert.pem'/>
-   <parameter name='hostkey'         value='/etc/grid-security/hostkey.pem'/>
+   <parameter name='certs_path'      value='/etc/grid-security/certificates'/>
+   <parameter name='host_cert_path'  value='/etc/grid-security'/>
+   <parameter name='hostcert'        value='hostcert.pem'/>
+   <parameter name='hostkey'         value='hostkey.pem'/>
 
    <!-- user account -->
    <parameter name='username'        value='glite'/>
    <parameter name='group_name'      value='glite'/>
+   <parameter name='user_cert_path'  value='.cert'/>
 
    <!-- env variables -->
    <parameter name='glite_location'  value='/opt/glite'/>
@@ -18,4 +20,5 @@
 
    <!-- MySQL DB -->
    <parameter name='db_name'         value='lbserver20'/>
+   <parameter name='db_user'         value='lbserver'/>
 </config>
