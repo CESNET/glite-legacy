@@ -108,7 +108,9 @@ glite_gsplugin(struct soap *soap, struct soap_plugin *p, void *arg)
 
 	soap->fconnect		= glite_gsplugin_connect;
 	soap->fclose		= glite_gsplugin_close;
+#if GSOAP_VERSION >= 20700
 	soap->fclosesocket	= glite_gsplugin_close;
+#endif
 	soap->faccept		= glite_gsplugin_accept;
 	soap->fsend			= glite_gsplugin_send;
 	soap->frecv			= glite_gsplugin_recv;
@@ -169,6 +171,15 @@ glite_gsplugin_connect(
 
 
 	pdprintf(("GSLITE_GSPLUGIN: glite_gsplugin_connect()\n"));
+#if GSOAP_VERSION <= 20700
+	if (   GSOAP_VERSION < 20700
+		|| (GSOAP_VERSION == 20700
+			&& (strlen(GSOAP_MIN_VERSION) < 1 || GSOAP_MIN_VERSION[1] < 'e')) ) {
+		fprintf(stderr, "Client connect will work only with gSOAP v2.7.0e and later");
+		return ENOSYS;
+	}
+#endif
+
 	ctx = ((int_plugin_data_t *)soap_lookup_plugin(soap, plugin_id))->ctx;
 
 	if ( ctx->cred == GSS_C_NO_CREDENTIAL ) {
