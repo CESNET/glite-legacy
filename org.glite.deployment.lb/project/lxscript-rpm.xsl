@@ -16,8 +16,8 @@
 	<xsl:template match="/">
 #!/bin/sh
 #
-# glite-wn_installer
-# usage: glite-wn_installer [-u]
+# glite-lb_installer
+# usage: glite-lb_installer [-u]
 #		 -u		uninstall
 #
 # glite-wn_installer installs the gLite <xsl:value-of select="/node/@name"/> Worker Node Deployment Unit

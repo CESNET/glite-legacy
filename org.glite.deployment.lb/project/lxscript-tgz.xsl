@@ -16,11 +16,11 @@
 	<xsl:template match="/">
 #!/bin/sh
 #
-# glite-wn_tgz_installer
-# usage: glite-wn_tgz_installer [-u]
+# glite-lb_tgz_installer
+# usage: glite-lb_tgz_installer [-u]
 #		 -u		uninstall
 #
-# glite-wn_tgz_installer installs the gLite <xsl:value-of select="/node/@name"/> Deployment Unit from biniary tarballs
+# glite-lb_tgz_installer installs the gLite <xsl:value-of select="/node/@name"/> Deployment Unit from biniary tarballs
 #
 <!-- Put here pre-install instructions -->
 PREFIX=/opt/glite
