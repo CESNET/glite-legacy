@@ -19,6 +19,9 @@
 #
 #       Revision history:
 #       $Log$
+#       Revision 1.4  2004/07/21 18:49:26  eronchie
+#       Added AC_GLITE
+#
 #       Revision 1.3  2004/07/21 18:47:49  eronchie
 #       Removed obsolete things
 #
@@ -37,7 +40,7 @@ AC_PREREQ(2.57)
 AC_INIT([GLite WMS Utils Exception], [0.0.0])
 AC_CONFIG_AUX_DIR([./project])
 AM_INIT_AUTOMAKE([1.6.3 subdir-objects])
-AC_CONFIG_SRCDIR([src/utils.h])
+AC_CONFIG_SRCDIR([src/Exception.cpp])
 
 # Notices.
 AC_COPYRIGHT([Copyright (c) 2004 The EU EGEE Project
