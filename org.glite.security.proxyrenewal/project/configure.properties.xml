@@ -12,17 +12,22 @@
 	University of Bergen (UiB), Norway
 	Council for the Central Laboratory of the Research Councils (CCLRC), United Kingdom
 
-	Configuration options for the GLite LB Client module
+	Configuration options for the GLite Security Proxyrenewal module
 	
 	Authors: Ales Krenek <ljocha@ics.muni.cz>
+    Version info: $Id$
+    Release: $Name$
+
+    Revision history:
+    $Log$
 -->
 
 	<!-- ======================================================
          Define extra properties here ...
          ====================================================== -->
         
-	<project name="LB Client configuration options">                                                                        
-		<target name="lbmakefiles">
+	<project name="Security Proxyrenewal configuration options">                                                                        
+		<target name="secmakefiles">
 			<exec executable="ln" failonerror="true">
 				<arg line="-fs ${component.dir}/Makefile ${module.build.dir}/Makefile"/>
 			</exec>
@@ -39,6 +44,8 @@ glite_location=${with.glite.location}
 globus_prefix=${with.globus.prefix}
 thrflavour=${with.globus.thr.flavor}
 nothrflavour=${with.globus.nothr.flavor}
+myproxy_prefix=${with.myproxy.prefix}
+voms_prefix=${with.glite.location}
 			</echo>
 	    </target>
 	</project>

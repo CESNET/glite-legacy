@@ -1,3 +1,26 @@
+#
+# Copyright (c) 2004 on behalf of the EU EGEE Project:
+# The European Organization for Nuclear Research (CERN),
+# Istituto Nazionale di Fisica Nucleare (INFN), Italy
+# Datamat Spa, Italy
+# Centre National de la Recherche Scientifique (CNRS), France
+# CS Systeme d'Information (CSSI), France
+# Royal Institute of Technology, Center for Parallel Computers (KTH-PDC), Sweden
+# Universiteit van Amsterdam (UvA), Netherlands
+# University of Helsinki (UH.HIP), Finland
+# University of Bergen (UiB), Norway
+# Council for the Central Laboratory of the Research Councils (CCLRC), United Kingdom
+#
+# Top Makefile file for the GLite Security Proxyrenewal module
+#
+# Authors: Ales Krenek <ljocha@ics.muni.cz>
+# Version info: $Id$
+# Release: $Name$
+#
+# Revision history:
+# $Log
+#
+
 # defaults
 top_srcdir=.
 builddir=build
@@ -10,11 +33,12 @@ package=glite-security-proxyrenewal
 version=0.0.0
 PREFIX=/opt/glite
 
-glite_location=/opt/glite
+glite_location=$PREFIX
 globus_prefix=/opt/globus
+voms_prefix=/opt/glite
 nothrflavour=gcc32
 thrflavour=gcc32pthr
-myproxy_prefix=/software/myproxy-0.4
+myproxy_prefix=$globus_prefix
 
 -include Makefile.inc
 
@@ -26,6 +50,8 @@ GLOBUSINC:= -I${globus_prefix}/include/${nothrflavour} \
 GLOBUSTHRINC:= -I${globus_prefix}/include/${thrflavour} \
 	-I${globus_prefix}/include/${thrflavour}/openssl
 
+MYPROXYINC:= -I${myproxy_prefix}/include/${nothrflavour}
+MYPROXYTHRINC:= -I${myproxy_prefix}/include/${thrflavour}
 
 DEBUG:=-g -O0
 
@@ -33,18 +59,18 @@ DEBUG:=-g -O0
 CFLAGS:= -DNOVOMS \
 	${DEBUG} \
 	-DVOMS_INSTALL_PATH=\"${voms_prefix}\"\
-	-I${myproxy_prefix}/include \
+	${MYPROXYINC} \
 	-I${top_srcdir}/src -I${top_srcdir}/interface \
-	-I${stagedir}/include
+	-I${glite_location}/include
 
 GLOBUS_LIBS:=-L${globus_prefix}/lib \
 	-lglobus_common_${nothrflavour} \
 	-lssl_${nothrflavour}
 
-SSL_UTILS_LIB:=-L${stagedir}/lib -lglobus_ssl_utils
-MYPROXY_LIB:=-L${myproxy_prefix}/lib -lmyproxy
+SSL_UTILS_LIB:=-L${glite_location}/lib -lglobus_ssl_utils
+MYPROXY_LIB:=-L${myproxy_prefix}/lib -lmyproxy_${nothrflavour}
 
-JOBIDLIB:=-L${stagedir}/lib -lglite_wms_cjobid
+JOBIDLIB:=-L${glite_location}/lib -lglite_wms_cjobid
 
 COMPILE:=libtool --mode=compile ${CC} ${CFLAGS}
 LINK:=libtool --mode=link ${CC} ${LDFLAGS}

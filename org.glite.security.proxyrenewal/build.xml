@@ -20,6 +20,9 @@
 
 	Revision history:
 	$Log$
+	Revision 1.1.1.1  2004/07/09 10:16:25  akrenek
+	initial import
+	
 	Revision 1.2  2004/07/07 09:24:57  akrenek
 	thr/nonthr flavours used correctly
 	
@@ -90,7 +93,7 @@
 	
 	<target name="localinit"
 		description="Module specific initialization tasks">
-		<antcall target="lbmakefiles" />
+		<antcall target="secmakefiles" />
 	</target>
 		
 	<target name="localcompile"
