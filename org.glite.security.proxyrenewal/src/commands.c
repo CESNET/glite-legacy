@@ -577,7 +577,7 @@ get_record_ext(FILE *fd, proxy_record *record, int *last_used_suffix)
 	 continue;
 
       if (tmp_record.jobids.len > 0 && record->myproxy_server &&
-	  strcmp(record->myproxy_server, tmp_record.myproxy_server) != 0 &&
+	  strcmp(record->myproxy_server, tmp_record.myproxy_server) != 0)
 	 continue;
 
       if (tmp_record.jobids.len > 0 &&
