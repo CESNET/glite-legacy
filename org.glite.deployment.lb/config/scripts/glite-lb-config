@@ -82,8 +82,8 @@ def set_env():
    file.write('export GLITE_HOST_CERT=/home/%s/%s/%s\n' % (config['username'], config['user_cert_path'], config['hostcert']))
    file.write('export GLITE_CERT_DIR=%s\n\n' % config['certs_path'])
    file.close()
-   os.chown('/home/%s/.bashrc' % config['username'], config['username'], config['group_name'])
-   os.chown('/home/%s/.profile' % config['username'], config['username'], config['group_name'])
+   os.system('/bin/chown %s:%s /home/%s/.bashrc' % (config['username'], config['group_name'], config['username']))
+   os.system('/bin/chown %s:%s /home/%s/.profile' % (config['username'], config['group_name'], config['username']))
    print 'OK!\n'
 
 
@@ -136,6 +136,42 @@ def configure():
    print('OK!\n')
 
 
+   # Stop MySQL
+#   print '#-------------------------------------------------------------------'
+#   print 'Stopping MySQL...'
+#   print '#-------------------------------------------------------------------'
+#   os.system('/usr/share/mysql/mysql.server stop')
+#   print('\n')
+
+
+   # Create /etc/my.cnf file
+#   print '#-------------------------------------------------------------------'
+#   print 'Creating /etc/my.cnf file...'
+#   print '#-------------------------------------------------------------------'
+#   file = open('/etc/my.cnf', 'w')
+#   file.write('[mysqld]\n')
+#   file.write('datadir=/var/lib/mysql\n')
+#   file.write('socket=/tmp/mysql.sock\n')
+#   file.write('\n')
+#   file.write('[mysql.server]\n')
+#   file.write('user=mysql\n')
+#   file.write('basedir=/var/lib\n')
+#   file.write('\n')
+#   file.write('[safe_mysqld]\n')
+#   file.write('err-log=/var/log/mysqld.log\n')
+#   file.write('pid-file=/var/run/mysqld/mysqld.pid\n')
+#   file.close()
+#   print('\n')
+
+
+   # Start MySQL
+#   print '#-------------------------------------------------------------------'
+#   print 'Starting MySQL...'
+#   print '#-------------------------------------------------------------------'
+#   os.system('/usr/share/mysql/mysql.server start')
+#   print('\n')
+
+
    # Create the MySQL database
    print '#-------------------------------------------------------------------'
    print ('Creating MySQL %s database.' % config['db_name'])
@@ -148,6 +184,7 @@ def configure():
    file.write('\. %s/etc/glite-lb-dbsetup.sql\n' % config['glite_location'])
    file.close()
    os.system('/usr/bin/mysql < /tmp/mysql_ct')
+   os.system('/bin/rm /tmp/mysql_ct')
 
 
    # Restarting MySQL
@@ -160,16 +197,35 @@ def configure():
    print '\n'
 
 
-   # Create var directory
+   # Create var directory and give privileges for all
    print '#-------------------------------------------------------------------'
    print ('Creating %s/var directory.' % config['glite_location'])
    print '#-------------------------------------------------------------------'
-   os.makedirs('%s/var' % config['glite_location'])
-   os.chmod('%s/var' % config['glite_location'], 777)
+   os.system('/bin/mkdir %s/var' % config['glite_location'])
+   os.chmod('%s/var' % config['glite_location'], 0777)
    if os.path.exists('%s/var' % config['glite_location']):
       print('OK!\n')
    else:
       sys.exit('Could not create directory %s/var\n' % config['glite_location'])
+
+
+
+   # Copy the host certificate to the user account
+   print '#-------------------------------------------------------------------'
+   print 'Copying the host certificate to the user account.'
+   print '#-------------------------------------------------------------------'
+   os.system('/bin/mkdir /home/%s/.cert' % config['username'])
+   os.system('/bin/cp %s/%s /home/%s/.cert/hostcert.pem' % (config['host_cert_path'], config['hostcert'], config['username']))
+   os.system('/bin/cp %s/%s /home/%s/.cert/hostkey.pem' % (config['host_cert_path'], config['hostkey'], config['username']))
+   os.system('/bin/chown -R %s:%s /home/%s/.cert/' % (config['username'], config['group_name'], config['username']))
+   os.system('/bin/chmod 0644 /home/%s/.cert/hostcert.pem' % config['username'])
+   os.system('/bin/chmod 0400 /home/%s/.cert/hostkey.pem' % config['username'])
+   if (os.path.exists('/home/%s/.cert/hostkey.pem' % config['username'])) and \
+      (os.path.exists('/home/%s/.cert/hostcert.pem' % config['username'])) :
+      print('OK!\n')
+   else:
+      sys.exit('Could not copy the host certificate to /home/%s/.cert directory!!\n\n' % config['username'])
+
 
    return 1
 
