@@ -98,8 +98,8 @@
 					age="1"
 					arch="i386"/>						 
 				<external name="myproxy"
-					version="VDT1.2.2rh9"
-					age="1"
+					version="1.14"
+					age="EGEE"
 					arch="i386"/>
 				<external name="perl-Expect.pm"
 					version="1.01"
