@@ -1,0 +1,109 @@
+#!/bin/sh
+
+GLITE_LOCATION=${GLITE_LOCATION:-/opt/glite}
+GLITE_LOCATION_VAR=${GLITE_LOCATION_VAR:-${GLITE_LOCATION}/var}
+
+[ -f /etc/glite.conf ] && . /etc/glite.conf
+[ -f $GLITE_LOCATION/etc/glite-wms.conf ] && . $GLITE_LOCATION/etc/glite-wms.conf
+
+[ -f $GLITE_LOCATION/etc/lb.conf ] && . $GLITE_LOCATION/etc/lb.conf
+[ -f $GLITE_LOCATION_VAR/etc/lb.conf ] && . $GLITE_LOCATION_VAR/etc/lb.conf
+
+[ -f $HOME/.glite.conf ] && . $HOME/.glite.conf
+
+[ -n "$GLITE_LB_PROXY_PIDFILE" ] && pidfile=$GLITE_LB_PROXY_PIDFILE ||
+	pidfile=$GLITE_LOCATION_VAR/glite-lb-proxy.pid
+
+unset creds
+
+start()
+{
+	if test -z "$GLITE_USER" ;then
+		echo 'Error: GLITE_USER is not set'
+		echo FAILED
+		return 1
+	fi
+
+	[ -n "$GLITE_HOST_CERT" -a -n "$GLITE_HOST_KEY" ] &&
+		creds="-c $GLITE_HOST_CERT -k $GLITE_HOST_KEY"
+
+	if test -z "$creds"; then
+		if su - $GLITE_USER -c "test -r /etc/grid-security/hostkey.pem -a -r /etc/grid-security/hostcert.pem"; then
+			echo "$0: WARNING: /etc/grid-security/hostkey.pem readable by $GLITE_USER"
+			creds="-c /etc/grid-security/hostcert.pem -k /etc/grid-security/hostkey.pem"
+		fi
+	fi
+
+
+	[ -z "$creds" ] && echo $0: WARNING: No credentials specified. Using default lookup which is dangerous. >&2
+
+	#
+	# XXX: Starting proxy only with default socket paths
+	#
+	echo -n Starting glite-lb-proxy ...
+	su - $GLITE_USER -c "$GLITE_LOCATION/bin/glite-lb-lbproxy \
+        --proxy-il-sock=/tmp/glite-lbproxy-ilog.sock \
+		--proxy-il-fprefix=/tmp/glite-lbproxy-ilog_events \
+		-i $pidfile " && echo " done" || echo " FAILED"
+
+	echo -n Starting glite-lb-interlogd ...
+	su - $GLITE_USER -c "$GLITE_LOCATION/bin/glite-lb-interlogd \
+		-f /tmp/glite-lbproxy-ilog_events -s /tmp/glite-lbproxy-ilog.sock
+		$creds" && echo " done" || echo " FAILED"
+}
+
+stop()
+{
+	echo -n Stopping glite-lb-interlogd ...
+	killall glite-lb-interlogd
+	echo done
+	if [ -f $pidfile ]; then
+		pid=`cat $pidfile`
+		kill $pid
+		echo -n Stopping glite-lb-proxy \($pid\) ...
+		try=0
+		while ps p $pid >/dev/null 2>&1; do 
+			sleep 1;
+			try=`expr $try + 1`
+			if [ $try = 20 ]; then
+				echo " giving up after $try retries"
+				return 1
+			fi
+	 	done
+		echo " done"
+		rm -f $pidfile
+	else
+		echo $pidfile does not exist - glite-lb-proxy not running? >&2
+		return 1
+	fi
+}
+
+status()
+{
+	if netstat -an --unix | grep "^unix .* LISTEN.* /tmp/glite-lbproxy-ilog.sock$" >/dev/null 2>&1 ;then
+		echo glite-lb-interlogd running
+	else
+		echo glite-lb-interlogd not running
+		return 1
+	fi
+
+	if [ -f $pidfile ]; then
+		pid=`cat $pidfile`
+		if ps p $pid >/dev/null 2>&1; then
+			echo glite-lb-proxy running as $pid 
+			return 0
+		fi
+	fi
+
+	echo glite-lb-proxy not running
+	return 1
+}
+
+case x$1 in
+	xstart)	start;;
+	xstop)	stop;;
+	xrestart) stop; start;;
+	xstatus) status;;
+	x*)	echo usage: $0 start,stop,restart,status >&2
+		exit 1;;
+esac
