@@ -136,7 +136,7 @@ install:
 	-mkdir -p ${PREFIX}/bin ${PREFIX}/lib ${PREFIX}/include/glite/security
 	${INSTALL} -m 644 ${LIB} ${THRLIB} ${PREFIX}/lib
 	${INSTALL} -m 755 ${DAEMON} ${CLIENT} ${PREFIX}/bin
-	cd ${top_srcdir}/interface && ${INSTALL} -m 644 renewal.h ${PREFIX}/include/glite/security
+	cd ${top_srcdir}/interface && ${INSTALL} -m 644 renewal.h ${PREFIX}/include/glite/security/proxyrenewal
 
 
 clean:
