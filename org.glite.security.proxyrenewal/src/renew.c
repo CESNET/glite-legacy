@@ -914,7 +914,8 @@ renew_proxy(proxy_record *record, char *basename, char **new_proxy)
 	                        server_response, tmp_proxy);
    if (ret == 1) {
       ret = EDG_WLPR_ERROR_MYPROXY;
-      edg_wlpr_Log(LOG_ERR, "Cannot get renewed proxy from Myproxy server");
+      edg_wlpr_Log(LOG_ERR, "Error contacting MyProxy server for proxy %s",
+	           repository_file);
       goto end;
    }
 

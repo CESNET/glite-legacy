@@ -1217,8 +1217,7 @@ update_db(edg_wlpr_Request *request, edg_wlpr_Response *response)
 	       free_record(&record);
 	       record.suffix = suffix;
 	       record.myproxy_server = server;
-	       edg_wlpr_Log(LOG_WARNING, "Removed expired proxy (suffix %d)",
-			    suffix);
+	       edg_wlpr_Log(LOG_WARNING, "Removed expired proxy %s", cur_proxy);
 	    } else
 	       get_times(cur_proxy, &record);
 	 } else {

@@ -9,6 +9,8 @@ GLITE_LOCATION_VAR=${GLITE_LOCATION_VAR:-/opt/glite/var}
 
 PROXY_REPOSITORY="$GLITE_LOCATION_VAR/spool/glite-renewd"
 
+unset creds
+
 start()
 {
 	if test -z "$GLITE_USER" ;then
@@ -17,14 +19,18 @@ start()
 		return 1
 	fi
 
-	if [ -n "$GLITE_HOST_CERT" ]; then 
-		X509_USER_CERT="$GLITE_HOST_CERT"
-		export X509_USER_CERT
+	[ -n "$GLITE_HOST_CERT" -a -n "$GLITE_HOST_KEY" ] &&
+		creds="-t $GLITE_HOST_CERT -k $GLITE_HOST_KEY"
+
+	if test -z "$creds"; then
+		if su - $GLITE_USER -c "test -r /etc/grid-security/hostkey.pem -a -r /etc/grid-security/hostcert.pem"; then
+			echo "$0: WARNING: /etc/grid-security/hostkey.pem readable by $GLITE_USER"
+			creds="-t /etc/grid-security/hostcert.pem -k /etc/grid-security/hostkey.pem"
+		fi
 	fi
-	if [ -n "$GLITE_HOST_KEY" ]; then
-		X509_USER_KEY="$GLITE_HOST_KEY"
-		export X509_USER_KEY
-	fi
+
+	[ -z "$creds" ] &&
+		echo $0: WARNING: No credentials specified. Using default lookup which is dangerous. >&2
 
 	echo -n Starting ProxyRenewal Daemon: glite-proxy-renewd ...
 
@@ -35,7 +41,7 @@ start()
 	fi
 	
 	su - $GLITE_USER -c "$GLITE_LOCATION/bin/glite-proxy-renewd \
-		-r $PROXY_REPOSITORY" && echo " done"
+		-r $PROXY_REPOSITORY $creds" && echo " done"
 }
 
 stop()

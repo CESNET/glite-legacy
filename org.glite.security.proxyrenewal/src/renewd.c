@@ -13,6 +13,8 @@ time_t condor_limit = CONDOR_MINIMUM_PROXY_TIME;
 char *cadir = NULL;
 char *vomsdir = NULL;
 int voms_enabled = 0;
+char *cert = NULL;
+char *key = NULL;
 
 char *vomsconf = "/opt/edg/etc/vomses";
 #ifndef NOVOMS
@@ -31,6 +33,8 @@ static struct option opts[] = {
    { "VOMSdir",    required_argument, NULL,  'V' },
    { "enable-voms", no_argument,     NULL,  'A' },
    { "voms-config", required_argument, NULL, 'G' },
+   { "cert",        required_argument, NULL, 't' },
+   { "key",         required_argument, NULL, 'k' },
    { NULL, 0, NULL, 0 }
 };
 
@@ -595,7 +599,7 @@ int main(int argc, char *argv[])
    repository = EDG_WLPR_REPOSITORY_ROOT;
    debug = 0;
 
-   while ((opt = getopt_long(argc, argv, "hvdr:c:C:V:AG:", opts, NULL)) != EOF)
+   while ((opt = getopt_long(argc, argv, "hvdr:c:C:V:AG:t:k:", opts, NULL)) != EOF)
       switch (opt) {
 	 case 'h': usage(progname); exit(0);
 	 case 'v': fprintf(stdout, "%s:\t%s\n", progname, rcsid); exit(0);
@@ -606,6 +610,8 @@ int main(int argc, char *argv[])
 	 case 'V': vomsdir = optarg; break;
 	 case 'A': voms_enabled = 1; break;
 	 case 'G': vomsconf = optarg; break;
+	 case 't': cert = optarg; break;
+	 case 'k': key = optarg; break;
 	 case '?': usage(progname); return 1;
       }
 
@@ -633,6 +639,15 @@ int main(int argc, char *argv[])
       }
       openlog(progname, LOG_PID, LOG_DAEMON);
    }
+
+   if (cert)
+      setenv("X509_USER_CERT", cert, 1);
+
+   if (key)
+      setenv("X509_USER_KEY", key, 1);
+
+   if (cadir)
+      setenv("X509_CERT_DIR", cadir, 1);
 
    if (voms_enabled) {
       char *path;
