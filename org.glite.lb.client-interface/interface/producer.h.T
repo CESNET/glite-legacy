@@ -120,7 +120,8 @@ for my $t (sort { $event->{order}->{$a} <=> $event->{order}->{$b} }
  * \\brief simple wrapper around edg_wll_LogEvent for event $t} . $doc . qq{ * \\see edg_wll_LogEvent\(\)
  */
 };
-	gen "\nextern int edg_wll_Log$t$a;\n\n";
+	gen "\nextern int edg_wll_Log${t}$a;\n";
+	gen "\nextern int edg_wll_Log${t}Proxy$a;\n";
 #	gen qq{
 #int edg_wll_Log$t$a
 #\{
@@ -156,7 +157,8 @@ for my $t (sort { $event->{order}->{$a} <=> $event->{order}->{$b} }
  * \\brief simple wrapper around edg_wll_LogEvent for event $t, $fn $code} . $e . qq{ * \\see edg_wll_LogEvent\(\)
  */
 };
-				gen "\nextern int edg_wll_Log$t$code$c;\n\n";
+				gen "\nextern int edg_wll_Log$t${code}$c;\n";
+				gen "\nextern int edg_wll_Log$t${code}Proxy$c;\n";
 #				gen qq{
 #int edg_wll_Log$t$code$c
 #\{
@@ -190,7 +192,6 @@ extern int edg_wll_LogEvent(
 	edg_wll_EventCode event,
 	char *fmt, ...);
 
-
 /**
  * Formats a logging message and sends it synchronously to local-logger
  * \brief generic synchronous logging function
@@ -213,6 +214,25 @@ extern int edg_wll_LogEventSync(
 	edg_wll_EventCode event,
 	char *fmt, ...);
 
+/**
+ * Formats a logging message and sends it synchronously to L&B Proxy
+ * \brief generic synchronous logging function
+ * \param context       INOUT context to work with,
+ * \param event         IN type of the event,
+ * \param fmt           IN printf()-like format string,
+ * \param ...           IN event specific values/data according to fmt,
+ * \retval 0            successful completition,
+ * \retval EINVAL       bad jobId, unknown event code, or the format string together with the remaining arguments does not form a valid event,             
+ * \retval ENOSPC       L&B infrastructure failed to accept the event due to lack of disk space etc.,
+ * \retval ENOMEM       failed to allocate memory,
+ * \retval ECONNREFUSED cannot connect to the specified L&B Proxy
+ * \retval EAGAIN       non blocking return from the call, the event may or may not get logged,
+ * \retval EDG_WLL_ERROR_NOJOBID logging call attempted without assigning jobId to the context.
+ */             
+extern int edg_wll_LogEventProxy(
+        edg_wll_Context context, 
+        edg_wll_EventCode event,
+        char *fmt, ...);        
 
 /**
  * Instructs interlogger to to deliver all pending events related to current job
@@ -252,6 +272,23 @@ extern int edg_wll_SetLoggingJob(
 	edg_wll_Context	context,
 	const edg_wlc_JobId	job,
 	const char *		code,
+	int			flags
+);
+
+/**
+ * Set a current job for given context.
+ * \note Should be called before any logging call.
+ * \param context INOUT context to work with
+ * \param job IN further logging calls are related to this job
+ * \param code IN sequence code as obtained from previous component
+ * \param user IN user ceredentials
+ * \param flags IN flags on code handling (\see API documentation)
+ */
+extern int edg_wll_SetLoggingJobProxy(
+	edg_wll_Context	context,
+	const edg_wlc_JobId	job,
+	const char *		code,
+	const char *		user,
 	int			flags
 );
 
@@ -302,6 +339,21 @@ extern int edg_wll_RegisterJobSync(
 	const char *		seed,
 	edg_wlc_JobId **	subjobs
 );
+
+/**
+ * Register alternative for L&B Proxy
+ */
+extern int edg_wll_RegisterJobProxy(
+	edg_wll_Context		context,
+	const edg_wlc_JobId	job,
+	enum edg_wll_RegJobJobtype	type,
+	const char *		jdl,
+	const char *		ns,
+	int			num_subjobs,
+	const char *		seed,
+	edg_wlc_JobId **	subjobs
+);
+
 
 /**
  * Register subjobs in a batch.
