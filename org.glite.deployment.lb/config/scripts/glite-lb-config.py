@@ -25,6 +25,7 @@ sys.path.append(".")
 import mysql as MySQL
 import gLiteInstallerLib as gLib
 
+
 global mysql
 global params
 
@@ -53,10 +54,6 @@ class glite_lb:
                    '\. %s/etc/glite-lb-dbsetup.sql\n' % os.environ['GLITE_LOCATION']]
 
         file.writelines(text)
-#        file.write('CREATE DATABASE %s;\n' % config['lb.database.name'])
-#        file.write('GRANT ALL PRIVILEGES ON %s.* TO %s@localhost IDENTIFIED BY "";\n' % (config['lb.database.name'], config['lb.database.username']))
-#        file.write('USE %s;\n' % config['lb.database.name'])
-#        file.write('\. %s/etc/glite-lb-dbsetup.sql\n' % os.environ['GLITE_LOCATION'])
         file.close()
         os.system('/usr/bin/mysql < /tmp/mysql_ct')
         os.system('/bin/rm /tmp/mysql_ct')
@@ -70,19 +67,14 @@ class glite_lb:
         
 params = {}
 gLib.loadConfiguration("../glite-lb.cfg.xml",params) 
-gLib.getEnvironment(params)
 gLib.print_params(params)
 gLib.user_add(params['glite.user.name'],params['glite.group.name'])
-if not os.environ.has_key('GLITE_LOCATION'):
-    os.environ['GLITE_LOCATION']='/opt/glite'
-if os.environ['LD_LIBRARY_PATH'].find('${LD_LIBRARY_PATH}/lib') == -1:
-    os.environ['LD_LIBRARY_PATH']='${LD_LIBRARY_PATH}/lib:'+ os.environ['LD_LIBRARY_PATH']
-
-#lib.check_dir(os.environ['GLITE_LOCATION']+"/var",0777)
-#lib.getEnvironment(library)
+gLib.check_dir_perms(params['glite.location']+"/var",0777)
 if params['glite.installer.checkcerts']:
    gLib.check_certs(params)
 mysql = MySQL.Mysql()
 lb = glite_lb()
 lb.configure()
+os.environ['GLITE_HOST_CERT'] = params['host.certificate.file']
+os.environ['GLITE_HOST_KEY'] = params['host.key.file']
 lb.start()
