@@ -20,8 +20,8 @@
 */
 @@@LANG: C++
 
-#include "edg/workload/logging/client/events.h"
-#include "edg/workload/logging/common/notifid.h"
+#include "glite/lb/events.h"
+#include "glite/lb/notifid.h"
 
 EWL_BEGIN_NAMESPACE;
 
@@ -130,7 +130,7 @@ public:
         struct timeval	getValTime(Attr) const;
 		
         /** Retrieve jobid attribute */
-        const edg::workload::common::jobid::JobId getValJobId(Attr) const;
+        const glite::wms::jobid::JobId getValJobId(Attr) const;
 
 	/** Attribute name */
 	const std::string & getAttrName(Attr) const;

@@ -107,7 +107,7 @@ public:
 	struct timeval	getValTime(Attr) const;
   
 	/** Retrieve jobid attribute */
-	const edg::workload::common::jobid::JobId  getValJobId(Attr) const;
+	const glite::wms::jobid::JobId  getValJobId(Attr) const;
 
 	/** Retrieve bool attribute */
 	bool getValBool(Attr) const;

@@ -36,16 +36,16 @@ public:
 	 * Local operation only, Register() has to be called
 	 * to propagate changes to server 
 	 */
-	void addJob(const edg::workload::common::jobid::JobId &); 
+	void addJob(const glite::wms::jobid::JobId &); 
 
 	/** Remove job from the list, local op again. */
-	void removeJob(const edg::workload::common::jobid::JobId &);
+	void removeJob(const glite::wms::jobid::JobId &);
 
 	/** Get jobs on the list */
 	std::string getJobs();
 
 	/** Receive notifications on these states */
-	void setStates(const std::vector<edg::workload::logging::client::JobStatus::Code> &);
+	void setStates(const std::vector<glite::lb::JobStatus::Code> &);
 
 	/** Get states */
 	std::string getStates();
@@ -60,11 +60,11 @@ public:
 	 * \retval 0 OK
 	 * \retval 1 timeout 
 	 */
-	int receive(edg::workload::logging::client::JobStatus &,timeval &);
+	int receive(glite::lb::JobStatus &,timeval &);
 
 private:
-	std::vector<edg::workload::common::jobid::JobId>	jobs;
-	std::vector<edg::workload::logging::client::JobStatus::Code>	states;
+	std::vector<glite::wms::jobid::JobId>	jobs;
+	std::vector<glite::lb::JobStatus::Code>	states;
 
 	edg_wll_Context	ctx;
 	edg_wll_NotifId	notifId;

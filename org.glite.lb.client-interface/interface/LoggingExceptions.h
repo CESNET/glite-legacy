@@ -13,7 +13,7 @@
 
 EWL_BEGIN_NAMESPACE;
 
-class Exception: public edg::workload::common::utilities::Exception {
+class Exception: public glite::wms::common::utilities::Exception {
 public:
 	
 	/* constructor for mandatory fields */
@@ -22,11 +22,11 @@ public:
 		  const std::string& method,
 		  int   code,
 		  const std::string& exception) 
-		: edg::workload::common::utilities::Exception(source, 
+		: glite::wms::common::utilities::Exception(source, 
 							      line_number, 
 							      method, 
 							      code, 
-							      "edg::workload::logging::Exception")
+							      "glite::lb::Exception")
 		{ error_message = exception; };
 	
 	/* constructor for mandatory fields AND exception chain */
@@ -35,12 +35,12 @@ public:
 		  const std::string& method,
 		  int   code,
 		  const std::string& exception,
-		  const edg::workload::common::utilities::Exception &exc)
-		: edg::workload::common::utilities::Exception(source, 
+		  const glite::wms::common::utilities::Exception &exc)
+		: glite::wms::common::utilities::Exception(source, 
 							      line_number, 
 							      method, 
 							      code, 
-							      "edg::workload::logging::Exception")
+							      "glite::lb::Exception")
 		{ error_message = exception + ": " + exc.what(); };
 };
 
@@ -63,7 +63,7 @@ public:
 			 const std::string& method,
 			 int   code,
 			 const std::string& exception, 
-			 const edg::workload::common::utilities::Exception &exc)
+			 const glite::wms::common::utilities::Exception &exc)
 		: Exception(source, line_number, method, code, exception)
 		{};
 };
@@ -91,7 +91,7 @@ public:
 		    const std::string& method,
 		    int   code,
 		    const std::string& exception,
-		    const edg::workload::common::utilities::Exception &exc)
+		    const glite::wms::common::utilities::Exception &exc)
 		: Exception(source, 
 			    line_number, 
 			    method, 
