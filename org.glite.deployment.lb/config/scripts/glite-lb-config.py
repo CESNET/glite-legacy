@@ -199,7 +199,6 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         error_level = 0
 
         retval = os.system('%s/etc/init.d/glite-lb-bkserverd status' % os.environ['GLITE_LOCATION'])
-        print retval
         if retval != 0:
             error_level = 1
 
