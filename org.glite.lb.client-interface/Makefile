@@ -18,8 +18,10 @@ VPATH=${top_srcdir}/interface
 AT3=perl -I${top_srcdir}/project ${top_srcdir}/project/at3
 
 STAGETO=include/${globalprefix}/${lbprefix}
-STATIC_H=consumer.h context.h dump.h load.h notification.h notifid.h purge.h
-GEN_H=events.h jobstat.h producer.h
+STATIC_H=consumer.h context.h dump.h load.h notification.h notifid.h purge.h \
+	Notification.h CountRef.h Job.h LoggingExceptions.h ServerConnection.h
+GEN_H=events.h jobstat.h producer.h Event.h JobStatus.h
+
 
 generate: ${GEN_H}
 
@@ -33,7 +35,7 @@ check:
 	${AT3} $< >$@ || rm -f $@
 	chmod -w $@ >/dev/null
 
-stage:
+stage: generate
 	$(MAKE) install PREFIX=${top_srcdir}/${stagedir}
 
 dist: distsrc distbin
