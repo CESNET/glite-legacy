@@ -65,6 +65,10 @@ typedef enum {
 
 #define MAX_PROXIES 4 /* max. number of jobids sharing one proxy */
 
+#define RENEWAL_CLOCK_SKEW (5 * 60)
+
+#define DGPR_RETRIEVE_DEFAULT_HOURS 10
+
 typedef struct {
   char *version;
   edg_wlpr_Command command;
