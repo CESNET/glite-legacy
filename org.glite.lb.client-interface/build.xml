@@ -20,6 +20,9 @@
 
 	Revision history:
 	$Log$
+	Revision 1.5  2004/08/05 15:22:34  dimeglio
+	Changed default target from compile to dist
+	
 	Revision 1.4  2004/07/06 17:47:31  flammer
 	Update of classpath definitions, targets & configure file.
 	
@@ -120,4 +123,12 @@
 		</delete>	
 	</target>
 	
+	<!-- =========================================
+	     RPM settings
+	     ========================================= -->
+
+	<property name="build.package.summary" value="L&amp;B client library header files" />
+	<property name="build.package.description" value="
+Logging &amp; Bookkeeping (L&amp;B) client library C/C++ header files." />
+
 </project>		

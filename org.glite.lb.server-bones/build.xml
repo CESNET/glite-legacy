@@ -20,6 +20,9 @@
 
 	Revision history:
 	$Log$
+	Revision 1.1  2004/09/22 15:41:24  jskrabal
+	- sorry! Forgot to add
+	
 	Revision 1.0  2004/09/07 00:00:01  nykolas
 	First shot
 	
@@ -99,4 +102,12 @@
 		description="Module specific cleaning tasks">
 	</target>
 	
+	<!-- =========================================
+	     RPM settings
+	     ========================================= -->
+
+	<property name="build.package.summary" value="L&amp;B server bones" />
+	<property name="build.package.description" value="
+Library of common routines used by Logging &amp; Bookkeeping (L&amp;B) servers." />
+
 </project>		
