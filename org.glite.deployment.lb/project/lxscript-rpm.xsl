@@ -24,7 +24,7 @@
 #
 		<xsl:apply-templates/>
 # Install dependencies and gLite RPMS
-rpm -Uvh *
+rpm -Uvh *.rpm
 	</xsl:template>
 
 	<xsl:template match="dependencies">
@@ -40,13 +40,11 @@ rpm -Uvh *
 	<xsl:template name="components" match="components/component">
 		<xsl:variable name="package"><xsl:value-of select="@name"/>-<xsl:value-of select="@version"/>-<xsl:value-of select="@age"/>.<xsl:value-of select="@arch"/>.rpm</xsl:variable>
 wget <xsl:value-of select="$repository"/><xsl:value-of select="@arch"/>/RPMS/<xsl:value-of select="$package"/>
-<!-- rpm -Uvh <xsl:value-of select="$package"/> -->
 	</xsl:template>
 
 	<xsl:template name="dependencies" match="external">
 		<xsl:variable name="package"><xsl:value-of select="@name"/>-<xsl:value-of select="@version"/>-<xsl:value-of select="@age"/>.<xsl:value-of select="@arch"/>.rpm</xsl:variable>
 wget <xsl:value-of select="$ext-repository"/><xsl:value-of select="$package"/>
-<!-- rpm -Uvh <xsl:value-of select="$package"/> -->
 	</xsl:template>
 </xsl:stylesheet>
    
