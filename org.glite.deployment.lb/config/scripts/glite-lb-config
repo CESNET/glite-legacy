@@ -76,7 +76,7 @@ def set_env():
    file = open('/home/%s/.bashrc' % config['username'], 'a')
    file.write('\nexport GLITE_LOCATION=%s\n' % config['glite_location'])
    file.write('export GLOBUS_LOCATION=%s\n' % config['globus_location'])
-   file.write('export LD_LIBRARY_PATH=$GLITE_LOCATION/lib:$GLOBUS_LOCATION/lib:$LD_LIBRARY_PATH]\n')
+   file.write('export LD_LIBRARY_PATH=$GLITE_LOCATION/lib:$GLOBUS_LOCATION/lib:$LD_LIBRARY_PATH\n')
    file.write('export GLITE_HOST_KEY=%s\n' % config['hostkey'])
    file.write('export GLITE_HOST_CERT=%s\n' % config['hostcert'])
    file.write('export GLITE_CERT_DIR=%s\n\n' % config['certs_path'])
@@ -84,7 +84,7 @@ def set_env():
    file = open('/home/%s/.profile' % config['username'], 'a')
    file.write('\nexport GLITE_LOCATION=%s\n' % config['glite_location'])
    file.write('export GLOBUS_LOCATION=%s\n' % config['globus_location'])
-   file.write('export LD_LIBRARY_PATH=$GLITE_LOCATION/lib:$GLOBUS_LOCATION/lib:$LD_LIBRARY_PATH]\n')
+   file.write('export LD_LIBRARY_PATH=$GLITE_LOCATION/lib:$GLOBUS_LOCATION/lib:$LD_LIBRARY_PATH\n')
    file.write('export GLITE_HOST_KEY=%s\n' % config['hostkey'])
    file.write('export GLITE_HOST_CERT=%s\n' % config['hostcert'])
    file.write('export GLITE_CERT_DIR=%s\n\n' % config['certs_path'])
@@ -235,7 +235,7 @@ def create_account():
    print '#-------------------------------------------------------------------'
    print ('Adding user "%s" to group "%s"' % (config['username'], config['group_name']))
    print '#-------------------------------------------------------------------'
-   os.system('/usr/sbin/useradd -s /bin/bash -g %s %s' % (config['group_name'], config['username']))
+   os.system('/usr/sbin/useradd -s /bin/sh -g %s %s' % (config['group_name'], config['username']))
    file = open('/etc/passwd', 'r')
    user = config['username']
    found_user = 0;
