@@ -13,14 +13,17 @@
 
 	Revision history:
 	$Log$
+	Revision 1.1  2004/10/06 09:19:24  dimeglio
+	First version of this file
+	
 -->
 
 <project name="deployment-lb-server" default="dist">
-	
+
 	<!-- =========================================
 		 Builds the gLite LB Server Deployment Unit
 		 ========================================= -->
-	
+
 	<!-- =========================================
 	     Import properties (order is important)
 		 ========================================= -->
@@ -32,7 +35,7 @@
 		        component properties &
 		        component common properties -->
 	<import file="./project/properties.xml"/>
-	
+
 	<!-- import subsystem build properties,
 		        subsystem properties &
 		        subsystem common properties -->
@@ -41,7 +44,7 @@
 	<!-- import global build properties &
 		        global properties -->
 	<import file="${global.properties.file}" />
-		
+
 	<!-- =========================================
 		 Load dependency property files (order is important)
 		 ========================================= -->
@@ -49,14 +52,14 @@
 	<property file="${component.dependencies.file}" />
 	<property file="${subsystem.dependencies.file}" />
 	<property file="${global.dependencies.file}"/>
-	
-	
+
+
 	<!-- =========================================
 		 Import task definitions (order is important)
 		 ========================================= -->
 	<import file="${subsystem.taskdefs.file}" />
 	<import file="${global.taskdefs.file}" />
-			
+
 	<!-- =========================================
 		 Load configure options
 		 ========================================= -->
@@ -65,34 +68,67 @@
 	<!-- =========================================
 		 Load common targets
 		 ========================================= -->
-	<import file="${global.targets-external-dependencies.file}"/>	
+	<import file="${global.targets-external-dependencies.file}"/>
 	<import file="${global.targets-deploy.file}" />
 
 	<!-- =========================================
 		 Load version file 
 		 ========================================= -->
 	<property file="${module.version.file}"/>
-		
+
 	<!-- ==============================================
 		 Local private targets
 		 ============================================== -->
-	
+
 	<target name="localinit"
 		description="Module specific initialization tasks">
 	</target>
-		
+
 	<target name="localcompile"
 		description="Module specific compilation tasks">
 		<copy file="${module.project.dir}/${global.prefix}-${component.prefix}.sdf.xml.template"
 			tofile="${module.project.dir}/${global.prefix}-${component.prefix}.sdf.xml" overwrite="true">
 			<filterset>
+				<filter token="org.glite.lb.client-interface.version" value="${org.glite.lb.client-interface.version}" />
+				<filter token="org.glite.lb.client-interface.age" value="${org.glite.lb.client-interface.age}" />
+				<filter token="org.glite.lb.client-interface.build" value="${org.glite.lb.client-interface.build}" />
 
-		</filterset>
+				<filter token="org.glite.lb.common.version" value="${org.glite.lb.common.version}" />
+				<filter token="org.glite.lb.common.age" value="${org.glite.lb.common.age}" />
+				<filter token="org.glite.lb.common.build" value="${org.glite.lb.common.build}" />
+
+				<filter token="org.glite.lb.logger.version" value="${org.glite.lb.logger.version}" />
+				<filter token="org.glite.lb.logger.age" value="${org.glite.lb.logger.age}" />
+				<filter token="org.glite.lb.logger.build" value="${org.glite.lb.logger.build}" />
+
+				<filter token="org.glite.lb.server.version" value="${org.glite.lb.server.version}" />
+				<filter token="org.glite.lb.server.age" value="${org.glite.lb.server.age}" />
+				<filter token="org.glite.lb.server.build" value="${org.glite.lb.server.build}" />
+
+				<filter token="org.glite.wms-utils.jobid.version" value="${org.glite.wms-utils.jobid.version}" />
+				<filter token="org.glite.wms-utils.jobid.age" value="${org.glite.wms-utils.jobid.age}" />
+				<filter token="org.glite.wms-utils.jobid.build" value="${org.glite.wms-utils.jobid.build}" />
+
+
+				<filter token="org.glite.wms-utils.exception.version" value="${org.glite.wms-utils.exception.version}" />
+				<filter token="org.glite.wms-utils.exception.age" value="${org.glite.wms-utils.exception.age}" />
+				<filter token="org.glite.wms-utils.exception.build" value="${org.glite.wms-utils.exception.build}" />
+
+				<filter token="org.glite.wms-utils.thirdparty-globus_ssl_utils.version" value="${org.glite.wms-utils.thirdparty-globus_ssl_utils.version}" />
+				<filter token="org.glite.wms-utils.thirdparty-globus_ssl_utils.age" value="${org.glite.wms-utils.thirdparty-globus_ssl_utils.age}" />
+				<filter token="org.glite.wms-utils.thirdparty-globus_ssl_utils.build" value="${org.glite.wms-utils.thirdparty-globus_ssl_utils.build}" />
+
+				<filter token="org.glite.security.proxyrenewal.version" value="${org.glite.security.proxyrenewal.version}" />
+				<filter token="org.glite.security.proxyrenewal.age" value="${org.glite.security.proxyrenewal.age}" />
+				<filter token="org.glite.security.proxyrenewal.build" value="${org.glite.security.proxyrenewalon.build}" />
+
+
+			</filterset>
 		</copy>
 	</target>
-		
+
 	<target name="localclean"
 		description="Module specific cleaning tasks">
 	</target>
-	
-</project>		
+
+</project>
