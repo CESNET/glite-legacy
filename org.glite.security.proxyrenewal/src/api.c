@@ -13,11 +13,10 @@ static int
 decode_response(const char *msg, const size_t msg_len, edg_wlpr_Response *response);
 
 static int
-do_connect(char *socket_name, int *sock);
+do_connect(char *socket_name, struct timeval *timeout, int *sock);
 
 static int
-send_request(int sock, edg_wlpr_Request *request, edg_wlpr_Response *response);
-
+send_request(int sock, struct timeval *timeout, edg_wlpr_Request *request, edg_wlpr_Response *response);
 
 static int 
 encode_request(edg_wlpr_Request *request, char **msg)
@@ -206,11 +205,14 @@ err:
 }
 
 static int
-do_connect(char *socket_name, int *sock)
+do_connect(char *socket_name, struct timeval *timeout, int *sock)
 {
    struct sockaddr_un my_addr;
    int s;
    int ret;
+   struct timeval before,after,to;
+   int sock_err;
+   socklen_t err_len;
 
    assert(sock != NULL);
    memset(&my_addr, 0, sizeof(my_addr));
@@ -220,13 +222,50 @@ do_connect(char *socket_name, int *sock)
       return errno;
    }
 
+   if (timeout) {
+      int flags = fcntl(s, F_GETFL, 0);
+      if (fcntl(s, F_SETFL, flags | O_NONBLOCK) < 0)
+	 return errno;
+   }
+
    my_addr.sun_family = AF_UNIX;
    strncpy(my_addr.sun_path, socket_name, sizeof(my_addr.sun_path));
 
    ret = connect(s, (struct sockaddr *) &my_addr, sizeof(my_addr));
    if (ret == -1) {
-      close(s);
-      return errno;
+      if (errno == EINPROGRESS) {
+	 fd_set fds;
+
+	 FD_ZERO(&fds);
+	 FD_SET(s, &fds);
+	 memcpy(&to, timeout, sizeof(to));
+	 gettimeofday(&before,NULL);
+	 switch (select(s+1, NULL, &fds, NULL, &to)) {
+	    case -1: close(s);
+		     return errno;
+	    case 0: close(s);
+		    return EDG_WLPR_ERROR_TIMEOUT;
+	 }
+	 gettimeofday(&after,NULL);
+	 if (edg_wlpr_DecrementTimeout(timeout, before, after)) {
+	    close (s);
+	    return EDG_WLPR_ERROR_TIMEOUT;
+	 }
+
+	 err_len = sizeof sock_err;
+	 if (getsockopt(s,SOL_SOCKET,SO_ERROR,&sock_err,&err_len)) {
+	    close(s);
+	    return errno;
+	 }
+	 if (sock_err) {
+	    close(s);
+	    errno = sock_err;
+	    return errno;
+	 }
+      } else {
+	 close(s);
+   	 return errno;
+      }
    }
 
    *sock = s;
@@ -234,7 +273,7 @@ do_connect(char *socket_name, int *sock)
 }
 
 static int
-send_request(int sock, edg_wlpr_Request *request, edg_wlpr_Response *response)
+send_request(int sock, struct timeval *timeout, edg_wlpr_Request *request, edg_wlpr_Response *response)
 {
    int ret;
    char *buf = NULL;
@@ -246,12 +285,12 @@ send_request(int sock, edg_wlpr_Request *request, edg_wlpr_Response *response)
    if (ret)
       return ret;
 
-   ret = edg_wlpr_Write(sock, buf, strlen(buf) + 1);
+   ret = edg_wlpr_Write(sock, timeout, buf, strlen(buf) + 1);
    free(buf);
    if (ret)
       return ret;
 
-   ret = edg_wlpr_Read(sock, &buf, &buf_len);
+   ret = edg_wlpr_Read(sock, timeout, &buf, &buf_len);
    if (ret)
       return ret;
 
@@ -269,14 +308,22 @@ edg_wlpr_RequestSend(edg_wlpr_Request *request, edg_wlpr_Response *response)
    char sockname[1024];
    int ret;
    int sock;
+   struct timeval timeout;
+   const char *s = NULL;
+   double d;
+
+   s = getenv("GLITE_PR_TIMEOUT");
+   d = s ? atof(s) : GLITE_PR_TIMEOUT_DEFAULT;
+   timeout.tv_sec = (long) d;
+   timeout.tv_usec = (long) ((d-timeout.tv_sec) * 1e6);
 
    snprintf(sockname, sizeof(sockname), "%s%d",
 	    DGPR_REG_SOCKET_NAME_ROOT, getuid());
-   ret = do_connect(sockname, &sock);
+   ret = do_connect(sockname, &timeout, &sock);
    if (ret)
       return ret;
 
-   ret = send_request(sock, request, response);
+   ret = send_request(sock, &timeout, request, response);
 
    close(sock);
    return ret;
@@ -393,6 +440,8 @@ static const char* const errTexts[] = {
    "Proxy not registered",
    "Proxy expired",
    "VOMS error",
+   "Operation timed out",
+   "System error"
 };
 
 const char *

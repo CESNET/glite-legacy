@@ -40,6 +40,8 @@ typedef enum _edg_wlpr_ErrorCode {
     EDG_WLPR_PROXY_NOT_REGISTERED,
     EDG_WLPR_PROXY_EXPIRED,
     EDG_WLPR_ERROR_VOMS,
+    EDG_WLPR_ERROR_TIMEOUT,
+    EDG_WLPR_ERROR_ERRNO,
 } edg_wlpr_ErrorCode;
 
 /**
