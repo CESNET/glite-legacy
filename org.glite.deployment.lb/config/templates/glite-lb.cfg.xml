@@ -38,6 +38,9 @@
 			description="The account used to run the LB daemons"
 			value="gproduct"/>
 			
+		<GLITE_CERT_DIR
+			value='/etc/grid-security/certificates/'/>
+			
 		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
 		<!-- System parameters - You should leave these alone -->
 		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
