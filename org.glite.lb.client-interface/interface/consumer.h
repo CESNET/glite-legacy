@@ -150,6 +150,24 @@ int edg_wll_QueryEventsExt(
 	edg_wll_Event **		events
 );
 
+
+/**
+ * Query LBProxy and use plain communication
+ */
+int edg_wll_QueryEventsProxy(
+	edg_wll_Context			context,
+	const edg_wll_QueryRec *	job_conditions,
+	const edg_wll_QueryRec *	event_conditions,
+	edg_wll_Event **		events
+);
+
+int edg_wll_QueryEventsExtProxy(
+	edg_wll_Context			context,
+	const edg_wll_QueryRec **	job_conditions,
+	const edg_wll_QueryRec **	event_conditions,
+	edg_wll_Event **		events
+);
+
 /** 
  * General query on jobs.
  * Return jobs (and possibly their states) for which an event satisfying the conditions
@@ -177,6 +195,27 @@ int edg_wll_QueryJobsExt(
 	edg_wll_JobStat **		states
 );
 
+
+/**
+ * Query LBProxy and use plain communication
+ */
+int edg_wll_QueryJobsProxy(
+	edg_wll_Context			context,
+	const edg_wll_QueryRec *	conditions,
+	int				flags,
+	edg_wlc_JobId **		jobs,
+	edg_wll_JobStat **		states
+);
+
+int edg_wll_QueryJobsExtProxy(
+	edg_wll_Context			context,
+	const edg_wll_QueryRec **	conditions,
+	int				flags,
+	edg_wlc_JobId **		jobs,
+	edg_wll_JobStat **		states
+);
+
+
 /**
  * Bitmasks for edg_wll_JobStatus() flags argument.
  * Settings these flags causes the status calls to retrieve additional
@@ -202,6 +241,16 @@ int edg_wll_JobStatus(
 );
 
 /**
+ * Query LBProxy and use plain communication
+ */
+int edg_wll_JobStatusProxy(
+	edg_wll_Context		context,
+	const edg_wlc_JobId		jobid,
+	int			flags,
+	edg_wll_JobStat		*status
+);
+
+/**
  * Return all events related to a single job.
  * Convenience wrapper around edg_wll_Query()
  * \param context IN: context to work with
@@ -215,6 +264,16 @@ int edg_wll_JobLog(
 	edg_wll_Event **	events
 );
 
+
+/**
+ * Query LBProxy and use plain communication
+ */
+int edg_wll_JobLogProxy(
+	edg_wll_Context		context,
+	const edg_wlc_JobId	jobId,
+	edg_wll_Event **	events
+);
+
 /**
  * All current user's jobs.
  * \param context IN: context to work with
@@ -222,6 +281,16 @@ int edg_wll_JobLog(
  * \param states OUT: list of the jobs' states
  */
 int edg_wll_UserJobs(
+	edg_wll_Context		context,
+	edg_wlc_JobId **	jobs,
+	edg_wll_JobStat	**	states
+);
+
+
+/**
+ * Query LBProxy and use plain communication
+ */
+int edg_wll_UserJobsProxy(
 	edg_wll_Context		context,
 	edg_wlc_JobId **	jobs,
 	edg_wll_JobStat	**	states
@@ -268,6 +337,17 @@ int edg_wll_QueryListener(
 	uint16_t *	port
 );
 
+
+/**
+ * Query LBProxy and use plain communication
+ */
+int edg_wll_QueryListener(
+	edg_wll_Context	context,
+	edg_wlc_JobId		jobId,
+	const char *	name,
+	char **		host,
+	uint16_t *	port
+);
 
 /**
  * Ask LB Proxy server for sequence number
