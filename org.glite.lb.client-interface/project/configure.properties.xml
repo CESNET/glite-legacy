@@ -20,6 +20,10 @@
 
 	Revision history:
 	$Log$
+	Revision 1.2.2.4  2005/02/25 13:37:11  mmulac
+	add notifid to doxygen
+	see -> ref
+	
 	Revision 1.2.2.3  2005/02/25 12:03:11  jpospi
 	Added PDF options to doxygen conf.
 	
@@ -78,7 +82,6 @@ INPUT                 = ./events.h \
                         ../interface/context.h \
                         ../interface/notifid.h \
                         ../interface/notification.h \
-                        ../interface/notifid.h \
                         ../interface/consumer.h 
 SHOW_DIRECTORIES       = NO
 FULL_PATH_NAMES        = NO
