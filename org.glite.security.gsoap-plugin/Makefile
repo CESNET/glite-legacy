@@ -38,6 +38,7 @@ CFLAGS:= ${DEBUG} \
 	-I${top_srcdir}/src -I${top_srcdir}/interface -I. \
 	-I${stagedir}/include \
 	-I${gsoap_prefix}/include \
+	-I${ares_prefix}/include \
 	-I${globus_prefix}/include/${nothrflavour} \
 	-I${globus_prefix}/include/${nothrflavour}/openssl \
 	${COVERAGE_FLAGS} -D_GNU_SOURCE -DDATAGRID_EXTENSION

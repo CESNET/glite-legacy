@@ -26,6 +26,7 @@ typedef struct _glite_gsplugin_ctx *glite_gsplugin_Context;
 
 extern int glite_gsplugin_init_context(glite_gsplugin_Context *);
 extern int glite_gsplugin_free_context(glite_gsplugin_Context);
+extern glite_gsplugin_Context glite_gsplugin_get_context(struct soap *);
 
 extern int glite_gsplugin(struct soap *, struct soap_plugin *, void *);
 extern char *glite_gsplugin_errdesc(struct soap *);
