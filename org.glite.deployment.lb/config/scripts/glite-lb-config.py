@@ -30,10 +30,12 @@ import sys, posix, getopt,time
 
 sys.path.append(".")
 from gLiteInstallerLib import gLib 
+from gliteRgmaServicetool import gliteRgmaServicetool
 import mysql as MySQL
 
 # Set global variables here 
 global params                         # all config values from the XML file
+global rgmaServicetool
 
 class glite_lb:
 
@@ -110,12 +112,51 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
             os.symlink('/var/lib/mysql/mysql.sock', '/tmp/mysql.sock')
             
         os.system('%s/etc/init.d/glite-lb-bkserverd start' % os.environ['GLITE_LOCATION'])
+
+	#-------------------------------------------------------------------
+        # Start Servicetool
+        #-------------------------------------------------------------------
+  	 
+        pid = glib.getPID('rgma-servicetool')
+        if (pid != 0):
+		print 'The gLite R-GMA Servicetool service is already running. Restarting...'
+		rgmaServicetool.stop()
+	else:
+		print "Starting the gLite R-GMA Servicetool service"
+	rgmaServicetool.start()
+
+  	 
+        # Check that the daemon is running
+	
+  	pid = glib.getPID('rgma-servicetool')
+
+        if (pid != 0):
+		print "The gLite R-GMA Servicetool service has been started               ", glib.printOkMessage()
+        else:
+		print "ERROR ==> Could not start the gLite R-GMA Servicetool service"
+		print "ERROR ==> Please verify and re-run the script"
+  	        return 1
         
         return 0
         
     def stop(self):
         os.system('%s/etc/init.d/glite-lb-bkserverd stop' % os.environ['GLITE_LOCATION'])
         self.mysql.stop()
+
+	#-------------------------------------------------------------------
+        # Stop the servicetool
+        #-------------------------------------------------------------------
+
+        pid = glib.getPID('rgma-servicetool')
+	if (pid != 0):
+		rgmaServicetool.stop()
+		pid = glib.getPID('rgma-servicetool')
+		if (pid != 0):
+			print 'Failed to stop rgma-servicetool'
+		else:
+			print "[OK]"
+	else:
+		print "[OK] rgmaServicetool was already stopped"
         
         return 0
         
@@ -204,6 +245,16 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
 	os.system('/opt/glite/bin/glite-lb-bkindex -r /opt/glite/etc/glite-lb-index.conf')
 
         self.mysql.stop()
+
+	#-------------------------------------------------------------------
+        # RGMA servicetool: configure servicetool
+        #-------------------------------------------------------------------
+        print"Configuring the servicetool"
+  	if rgmaServicetool.configure(glib):
+  	# error in configuring services
+  	   print "FAILED configuring the service tool"
+  	   return 1
+  	print "OK Configuring the Service Tool"
         
         print "\n[OK]"
          
@@ -282,6 +333,9 @@ if __name__ == '__main__':
     # Instantiate the service classes
     service = glite_lb()
     service.verbose = verbose
+    # Instantiate the rgma servicetool class
+    rgmaServicetool = gliteRgmaServicetool()
+    rgmaServicetool.verbose = verbose	
     
     # Command line opts if any
     try:
