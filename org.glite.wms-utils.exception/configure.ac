@@ -19,6 +19,9 @@
 #
 #       Revision history:
 #       $Log$
+#       Revision 1.2  2004/07/21 18:44:22  eronchie
+#       Updated header file
+#
 #       Revision 1.1.1.1  2004/07/21 18:16:57  eronchie
 #       Moved out exception from org.glite.wms.common/src/utilitiesY
 #
@@ -75,18 +78,6 @@ AC_FUNC_STAT
 AC_FUNC_STRFTIME
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([bzero endpwent ftruncate getmntent memset mkdir pow strerror strtol])
-
-have_globus=no
-                                                                                
-AC_GLOBUS([], have_globus=yes, have_globus=no)
-AC_MSG_RESULT(["GLOBUS found $have_globus"])
-
-#have_glite_wmsutils_exception=no
-                                                                                
-AC_GLITE
-                                                                                
-#AC_GLITE_WMSUTILS_EXCEPTION([], have_glite_wmsutils_exception=yes, have_glite_wmsutils_exception=no)
-#AC_MSG_RESULT(["GLITE_WMSUTILS_EXCEPTION found $have_glite_wmsutils_exception"])
 
 # Configuration items
 AC_PREFIX_DEFAULT([/opt/glite])
