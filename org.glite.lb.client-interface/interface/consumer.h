@@ -19,7 +19,12 @@ extern "C" {
 
 /**
  * \defgroup querying Server querying
- * \brief Query server record description and handling.
+ * \brief The core part of the LB querying API.
+ * 
+ * The functions in this part of the API are responsible for
+ * transforming the user query to the LB protocol, contacting the server,
+ * receiving back the response and transforming back the results to the
+ * API data structures. 
  *
  * General rules:
  * - functions return 0 on success, nonzero on error, errror details can 
@@ -128,6 +133,14 @@ int edg_wll_QueryEvents(
 	edg_wll_Event **		events
 );
 
+/**
+ * Extended event query interface.
+ * Similar to \ref edg_wll_QueryEvents but the conditions are nested lists.
+ * Elements of the inner lists have to refer to the same attribute and they
+ * are logically ORed. 
+ * The inner lists themselves are logically ANDed then.
+ */
+
 int edg_wll_QueryEventsExt(
 	edg_wll_Context			context,
 	const edg_wll_QueryRec **	job_conditions,
@@ -138,6 +151,7 @@ int edg_wll_QueryEventsExt(
 
 /**
  * Query LBProxy and use plain communication
+ * \warning edg_wll_*Proxy() functions are not implemented in release 1.
  */
 int edg_wll_QueryEventsProxy(
 	edg_wll_Context			context,
@@ -145,6 +159,10 @@ int edg_wll_QueryEventsProxy(
 	const edg_wll_QueryRec *	event_conditions,
 	edg_wll_Event **		events
 );
+
+/**
+ * \warning edg_wll_*Proxy() functions are not implemented in release 1.
+ */
 
 int edg_wll_QueryEventsExtProxy(
 	edg_wll_Context			context,
@@ -172,6 +190,15 @@ int edg_wll_QueryJobs(
 	edg_wll_JobStat **		states
 );
 
+/**
+ * Extended job query interface.
+ * Similar to \ref edg_wll_QueryJobs but the conditions are nested lists.
+ * Elements of the inner lists have to refer to the same attribute and they
+ * are logically ORed. 
+ * The inner lists themselves are logically ANDed then.
+ */
+
+
 int edg_wll_QueryJobsExt(
 	edg_wll_Context			context,
 	const edg_wll_QueryRec **	conditions,
@@ -183,6 +210,7 @@ int edg_wll_QueryJobsExt(
 
 /**
  * Query LBProxy and use plain communication
+ * \warning edg_wll_*Proxy() functions are not implemented in release 1.
  */
 int edg_wll_QueryJobsProxy(
 	edg_wll_Context			context,
@@ -191,6 +219,10 @@ int edg_wll_QueryJobsProxy(
 	edg_wlc_JobId **		jobs,
 	edg_wll_JobStat **		states
 );
+
+/**
+ * \warning edg_wll_*Proxy() functions are not implemented in release 1.
+ */
 
 int edg_wll_QueryJobsExtProxy(
 	edg_wll_Context			context,
@@ -233,6 +265,8 @@ int edg_wll_JobStatus(
  * \param[in] flags 		specifies optional status fields to retrieve,
  *     \see EDG_WLL_STAT_CLASSADS, EDG_WLL_STAT_CHILDREN, EDG_WLL_STAT_CHILDSTAT
  * \param[out] status 		the status of the job
+
+ * \warning edg_wll_*Proxy() functions are not implemented in release 1.
  */
 int edg_wll_JobStatusProxy(
 	edg_wll_Context		context,
@@ -258,6 +292,8 @@ int edg_wll_JobLog(
 
 /**
  * Query LBProxy and use plain communication
+ * \warning edg_wll_*Proxy() functions are not implemented in release 1.
+
  */
 int edg_wll_JobLogProxy(
 	edg_wll_Context		context,
@@ -280,6 +316,8 @@ int edg_wll_UserJobs(
 
 /**
  * Query LBProxy and use plain communication
+ * \warning edg_wll_*Proxy() functions are not implemented in release 1.
+
  */
 int edg_wll_UserJobsProxy(
 	edg_wll_Context		context,
@@ -302,7 +340,7 @@ int edg_wll_GetIndexedAttrs(
 
 /**
  * Retrieve limit on query result size (no. of events or jobs).
- * FIXME: not implemented.
+ * \warning not implemented.
  * \see DataGrid-01-TEN-0125
  * \param[in] context 		context to work with
  * \param[out] limit 		server imposed limit
@@ -313,7 +351,7 @@ int edg_wll_GetServerLimit(
 );
 
 /**
- * UI port for the job
+ * UI port for intactive jobs. Used internally by WMS.
  * \param[in] context 		context to work with
  * \param[in] jobId 		job to query
  * \param[in] name 		name of the UI-port
@@ -331,6 +369,8 @@ int edg_wll_QueryListener(
 
 /**
  * Query LBProxy and use plain communication
+ * \warning edg_wll_*Proxy() functions are not implemented in release 1.
+
  */
 int edg_wll_QueryListenerProxy(
 	edg_wll_Context	context,
@@ -345,6 +385,8 @@ int edg_wll_QueryListenerProxy(
  * \param[in] context 		context to work with
  * \param[in] jobId 		job to query
  * \param[out] code 		sequence code
+ * \warning edg_wll_*Proxy() functions are not implemented in release 1.
+
  */
 
 
