@@ -21,8 +21,12 @@ import _xmlplus.xpath as xpath
 import xml.dom.minidom
 import time
 
-import mysql
-import gLiteInstallerLib as lib
+sys.path.append(".")
+import mysql as MySQL
+import gLiteInstallerLib as gLib
+
+global mysql
+global params
 
 class glite_lb:
     def start(self):
@@ -38,14 +42,14 @@ class glite_lb:
         
         # Create the MySQL database
         print '#-------------------------------------------------------------------'
-        print ('Creating MySQL %s database.' % config['db_name'])
+        print ('Creating MySQL %s database.' % params['lb.database.name'])
         print '#-------------------------------------------------------------------'
         
-        os.system('/usr/bin/mysqlaccess %s %s' % (config['lb.database.username'], config['lb.database.name']))
+        os.system('/usr/bin/mysqlaccess %s %s' % (params['lb.database.username'], params['lb.database.name']))
         file = open('/tmp/mysql_ct', 'w')
-        text = ['CREATE DATABASE %s;\n' % config['lb.database.name'], 
-                   'GRANT ALL PRIVILEGES ON %s.* TO %s@localhost IDENTIFIED BY "";\n' % (config['lb.database.name'], config['lb.database.username']),
-                   'USE %s;\n' % config['lb.database.name'],
+        text = ['CREATE DATABASE %s;\n' % params['lb.database.name'], 
+                   'GRANT ALL PRIVILEGES ON %s.* TO %s@localhost IDENTIFIED BY "";\n' % (params['lb.database.name'],params['lb.database.username']),
+                   'USE %s;\n' % params['lb.database.name'],
                    '\. %s/etc/glite-lb-dbsetup.sql\n' % os.environ['GLITE_LOCATION']]
 
         file.writelines(text)
@@ -57,12 +61,22 @@ class glite_lb:
         os.system('/usr/bin/mysql < /tmp/mysql_ct')
         os.system('/bin/rm /tmp/mysql_ct')
         
-        mysql.restart()
+        mysql.stop()
+        time.sleep(5)
+        mysql.start()
         
     def init(self):
         return 0
         
-    lib.loadConfiguration("glite-lb.cfg.xml")
-    lib.getEnvironment()
-    configure()
-    start()
+params = {}
+gLib.loadConfiguration("../glite-lb.cfg.xml",params) 
+gLib.print_params(params)
+gLib.user_add(params['glite.user.name'],params['glite.group.name'])
+#lib.check_dir(os.environ['GLITE_LOCATION']+"/var",0777)
+#lib.getEnvironment(library)
+if params['glite.installer.checkcerts']:
+   gLib.check_certs(params)
+mysql = MySQL.Mysql()
+lb = glite_lb()
+lb.configure()
+lb.start()
