@@ -16,40 +16,41 @@
 
 #include "srvbones.h"
 
-#define SLAVES_CT			5		/* default number of slaves */
+/* defaults for GLITE_SBPARAM_* */
+
+#define SLAVES_COUNT		5		/* default number of slaves */
 #define SLAVE_OVERLOAD		10		/* queue items per slave */
 #define SLAVE_CONNS_MAX		500		/* commit suicide after that many connections */
-#define SLAVE_CHECK_SIGNALS	2		/* how often to check signals while waiting for recv_mesg */
-#define CLNT_TIMEOUT		10		/* keep idle connection that many seconds */
-#define TOTAL_CLNT_TIMEOUT	60		/* one client may ask one slave multiple times */
-									/* but only limited time to avoid DoS attacks */
+#define IDLE_TIMEOUT		30		/* keep idle connection that many seconds */
+#define CONNECT_TIMEOUT		5		/* timeout for establishing a connection */
+#define REQUEST_TIMEOUT		10		/* timeout for a single request */ 
 
 #ifndef dprintf
 #define dprintf(x)			{ if (debug) printf x; }
 #endif
 
 
-static int					running = 0;
-static int					debug = 0;
-static volatile int			die = 0,
-							child_died = 0;
-static unsigned long		clnt_dispatched = 0,
-							clnt_accepted = 0;
+static int		running = 0;
+static int		debug = 0;
+static volatile int	die = 0,
+			child_died = 0;
+static unsigned long	clnt_dispatched = 0,
+			clnt_accepted = 0;
 
-static struct glite_srvbones_service  *services;
-static int					services_ct;
+static struct glite_srvbones_service	*services;
+static int				services_ct;
 
-static int					set_slaves_ct = SLAVES_CT;
-static int					set_slave_overload = SLAVE_OVERLOAD;
-static int					set_slave_conns_max = SLAVE_CONNS_MAX;
-static struct timeval		set_clnt_to = {CLNT_TIMEOUT, 0};
-static struct timeval		set_total_clnt_to = {TOTAL_CLNT_TIMEOUT, 0};
-
+static int		set_slaves_ct = SLAVES_COUNT;
+static int		set_slave_overload = SLAVE_OVERLOAD;
+static int		set_slave_conns_max = SLAVE_CONNS_MAX;
+static struct timeval	set_idle_to = {IDLE_TIMEOUT, 0};
+static struct timeval	set_connect_to = {CONNECT_TIMEOUT, 0};
+static struct timeval	set_request_to = {REQUEST_TIMEOUT, 0};
 
 static int dispatchit(int, int, int);
 static int do_sendmsg(int, int, unsigned long, int);
 static int do_recvmsg(int, int *, unsigned long *, int *);
-static int check_timeout(struct timeval *, struct timeval, struct timeval);
+static int check_timeout(struct timeval, struct timeval, struct timeval);
 static void catchsig(int);
 static void catch_chld(int sig);
 static int slave(int (*)(void **), int);
@@ -57,9 +58,7 @@ static int slave(int (*)(void **), int);
 static void glite_srvbones_set_slaves_ct(int);
 static void glite_srvbones_set_slave_overload(int);
 static void glite_srvbones_set_slave_conns_max(int);
-static void glite_srvbones_set_clnt_to(struct timeval *);
-static void glite_srvbones_set_total_clnt_to(struct timeval *);
-
+static void set_timeout(struct timeval *,struct timeval *);
 
 int glite_srvbones_set_param(glite_srvbones_param_t param, ...)
 {
@@ -72,16 +71,18 @@ int glite_srvbones_set_param(glite_srvbones_param_t param, ...)
 
 	va_start(ap, param);
 	switch ( param ) {
-	case GLITE_SBPARAM_SLAVES_CT:
+	case GLITE_SBPARAM_SLAVES_COUNT:
 		glite_srvbones_set_slaves_ct(va_arg(ap,int)); break;
 	case GLITE_SBPARAM_SLAVE_OVERLOAD:
 		glite_srvbones_set_slave_overload(va_arg(ap,int)); break;
 	case GLITE_SBPARAM_SLAVE_CONNS_MAX:
 		glite_srvbones_set_slave_conns_max(va_arg(ap,int)); break;
-	case GLITE_SBPARAM_CLNT_TIMEOUT:
-		glite_srvbones_set_clnt_to(va_arg(ap,struct timeval *)); break;
-	case GLITE_SBPARAM_TOTAL_CLNT_TIMEOUT:
-		glite_srvbones_set_total_clnt_to(va_arg(ap,struct timeval *)); break;
+	case GLITE_SBPARAM_IDLE_TIMEOUT:
+		set_timeout(&set_idle_to,va_arg(ap,struct timeval *)); break;
+	case GLITE_SBPARAM_CONNECT_TIMEOUT:
+		set_timeout(&set_connect_to,va_arg(ap,struct timeval *)); break;
+	case GLITE_SBPARAM_REQUEST_TIMEOUT:
+		set_timeout(&set_request_to,va_arg(ap,struct timeval *)); break;
 	}
 	va_end(ap);
 
@@ -270,17 +271,19 @@ static int dispatchit(int sock_slave, int sock, int sidx)
 
 static int slave(slave_data_init_hnd data_init_hnd, int sock)
 {
-	sigset_t			sset;
+	sigset_t		sset;
 	struct sigaction	sa;
 	struct timeval		client_done,
-						client_start;
-	void			   *clnt_data = NULL;
-	int					conn = -1,
-						srv = -1,
-						conn_cnt = 0,
-						sockflags,
-						h_errno,
-						pid, i;
+				client_start;
+
+	void	*clnt_data = NULL;
+	int	conn = -1,
+		srv = -1,
+		conn_cnt = 0,
+		sockflags,
+		h_errno,
+		pid, i,
+		first_request = 0;
 
 
 
@@ -312,6 +315,8 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 		/*
 		 *	XXX: what if the error remains and master will start new slave
 		 *	again and again?
+		 *
+		 *	Then we are in a deep shit.
 		 */
 		exit(1);
 
@@ -323,11 +328,14 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 							newconn = -1,
 							newsrv = -1,
 							kick_client = 0;
+		static char * kicks[] = {
+			"don't kick",
+			"idle client",
+			"high load",
+			"no request handler"
+		};
 		unsigned long		seq;
-		struct timeval		check_to = { SLAVE_CHECK_SIGNALS, 0},
-							total_to = set_total_clnt_to,
-							client_to = set_clnt_to,
-							now;
+		struct timeval		now,to;
 
 
 		FD_ZERO(&fds);
@@ -335,8 +343,9 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 		if ( conn >= 0 ) FD_SET(conn, &fds);
 		if ( conn > sock ) max = conn;
 	
+		to = set_idle_to;
 		sigprocmask(SIG_UNBLOCK, &sset, NULL);
-		switch ( select(max+1, &fds, NULL, NULL, &check_to) )
+		switch (select(max+1, &fds, NULL, NULL, to.tv_sec >= 0 ? &to : NULL))
 		{
 		case -1:
 			if ( errno != EINTR )
@@ -356,10 +365,7 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 		sigprocmask(SIG_BLOCK, &sset, NULL);
 
 		gettimeofday(&now,NULL);
-		if (   conn >= 0
-			&& (   check_timeout(&client_to, client_done, now)
-				|| check_timeout(&total_to, client_start, now)) )
-			kick_client = 1;
+		if (conn >= 0 && check_timeout(set_idle_to, client_done, now)) kick_client = 1;
 
 		if ( conn >= 0 && !kick_client && FD_ISSET(conn, &fds) )
 		{
@@ -369,32 +375,52 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 			int		rv;
 
 			dprintf(("[%d] incoming request\n", getpid()));
-			if ( !services[srv].on_accept_hnd )
+			if ( !services[srv].on_request_hnd )
 			{
-				dprintf(("[%d] request handler for '%s' service not set\n", getpid(), services[srv].id));
-				kick_client = 1;
-				continue;
+				kick_client = 3;
+				goto kick;
 			}
 
-			if ( (rv = services[srv].on_accept_hnd(conn, clnt_data)) > 0 )
-			{
-				/*	expected FATAL error -> close connection and contiue
+			to = set_request_to;
+			if ((rv = services[srv].on_request_hnd(conn,to.tv_sec>=0 ? &to : NULL,clnt_data)) == ENOTCONN) {
+				if (services[srv].on_disconnect_hnd
+						&& (rv = services[srv].on_disconnect_hnd(conn,NULL,clnt_data)))
+				{
+					dprintf(("[%d] disconnect handler: %s, terminating\n",getpid(),strerror(rv)));
+					exit(1);
+				}
+				close(conn);
+				conn = -1;
+				srv = -1;
+				dprintf(("[%d] Connection closed\n", getpid()));
+			}
+			else if (rv > 0) {
+				/*	non-fatal error -> close connection and contiue
+				 * XXX: likely to leak resources but can we call on_disconnect_hnd() on error? 
 				 */
 				close(conn);
 				conn = -1;
+				srv = -1;
+				dprintf(("[%d] %s, connection closed\n",getpid(),strerror(rv)));
 				continue;
 			}
-			else if ( rv < 0 )
+			else if ( rv < 0 ) {
 				/*	unknown error -> clasified as FATAL -> kill slave
 				 */
+				dprintf(("[%d] %s, terminating\n",getpid(),strerror(-rv)));
 				exit(1);
+			}
+			else {
+				dprintf(("[%d] request done\n", getpid()));
+				gettimeofday(&client_done, NULL);
+			}
 
-			dprintf(("[%d] request done\n", getpid()));
-			gettimeofday(&client_done, NULL);
+			first_request = 0;
 			continue;
+		kick:
 		}
 
-		if ( FD_ISSET(sock, &fds) && conn_cnt < set_slave_conns_max )
+		if ( !first_request && FD_ISSET(sock, &fds) && conn_cnt < set_slave_conns_max )
 		{
 			if ( conn >= 0 ) usleep(100000 + 1000 * (random() % 200));
 			if ( do_recvmsg(sock, &newconn, &seq, &newsrv) ) switch ( errno )
@@ -406,17 +432,17 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 				if (!debug) syslog(LOG_CRIT,"recvmsg(): %m\n");
 				exit(1);
 			}
-			kick_client = 1;
+			kick_client = 2;
 		}
 
 		if ( kick_client && conn >= 0 )
 		{
 			if ( services[srv].on_disconnect_hnd )
-				services[srv].on_disconnect_hnd(conn, clnt_data);
+				services[srv].on_disconnect_hnd(conn, NULL, clnt_data);
 			close(conn);
 			conn = -1;
 			srv = -1;
-			dprintf(("[%d] Idle connection closed\n", getpid()));
+			dprintf(("[%d] Connection closed, %s\n", getpid(), kicks[kick_client]));
 		}
 
 		if ( newconn >= 0 )
@@ -455,8 +481,9 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 				continue;
 			}
 
+			to = set_connect_to;
 			if (   services[srv].on_new_conn_hnd
-				&& services[srv].on_new_conn_hnd(conn, client_start, clnt_data) )
+				&& services[srv].on_new_conn_hnd(conn, to.tv_sec >= 0 ? &to : NULL, clnt_data) )
 			{
 				dprintf(("[%d] Connection not estabilished.\n", getpid()));
 				if ( !debug ) syslog(LOG_ERR, "Connection not estabilished.\n");
@@ -464,6 +491,7 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 				conn = srv = -1;
 				continue;
 			}
+			first_request = 1;
 		}
 	}
 
@@ -489,11 +517,11 @@ static void catch_chld(int sig)
 	child_died = 1;
 }
 
-static int check_timeout(struct timeval *timeout, struct timeval before, struct timeval after)
+static int check_timeout(struct timeval timeout, struct timeval before, struct timeval after)
 {
-	return (timeout->tv_usec <= after.tv_usec - before.tv_usec) ? 
-			(timeout->tv_sec <= after.tv_sec - before.tv_sec) :
-			(timeout->tv_sec < after.tv_sec - before.tv_sec);
+	return (timeout.tv_usec <= after.tv_usec - before.tv_usec) ? 
+			(timeout.tv_sec <= after.tv_sec - before.tv_sec) :
+			(timeout.tv_sec < after.tv_sec - before.tv_sec);
 }
 
 #define MSG_BUFSIZ	30
@@ -578,7 +606,7 @@ static int do_recvmsg(int from_sock, int *sock, unsigned long *clnt_accepted,int
 
 static void glite_srvbones_set_slaves_ct(int n)
 {
-	set_slaves_ct = (n == -1)? SLAVES_CT: n;
+	set_slaves_ct = (n == -1)? SLAVES_COUNT: n;
 }
 
 static void glite_srvbones_set_slave_overload(int n)
@@ -591,12 +619,12 @@ static void glite_srvbones_set_slave_conns_max(int n)
 	set_slave_conns_max = (n == -1)? SLAVE_CONNS_MAX: n;
 }
 
-static void glite_srvbones_set_clnt_to(struct timeval *t)
+static void set_timeout(struct timeval *to, struct timeval *val)
 {
-	set_clnt_to = t? (struct timeval){CLNT_TIMEOUT, 0}: *t;
-}
-
-static void glite_srvbones_set_total_clnt_to(struct timeval *t)
-{
-	set_total_clnt_to = t? (struct timeval){TOTAL_CLNT_TIMEOUT, 0}: *t;
+	if (val) {
+	/* XXX: why not, negative timeouts don't make any sense, IMHO */
+		assert(val->tv_sec >= 0);
+		*to = *val;
+	}
+	else to->tv_sec = -1;
 }
