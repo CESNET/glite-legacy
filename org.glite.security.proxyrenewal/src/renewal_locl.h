@@ -21,6 +21,7 @@
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/file.h>
+#include <sys/wait.h>
 #include <openssl/md5.h>
 #include <openssl/x509.h>
 #include <openssl/pem.h>

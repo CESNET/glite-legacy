@@ -7,6 +7,8 @@
 
 #ident "$Header$"
 
+#define RENEWAL_COUNTS_MAX	1000	/* the slave daemon exits after that many attemtps */
+
 extern char *repository;
 extern char *cadir;
 extern char *vomsdir;
@@ -14,10 +16,10 @@ extern int voms_enabled;
 extern char *vomsconf;
 extern struct vomses_records vomses;
 
-static int received_signal = -1;
+static int received_signal = -1, die = 0;
 
 static void
-check_renewal(char *datafile, int force_renew);
+check_renewal(char *datafile, int force_renew, int *num_renewed);
 
 static int
 renew_proxy(proxy_record *record, char *basename, char **new_proxy);
@@ -835,6 +837,15 @@ static void
 register_signal(int signal)
 {
       received_signal = signal;
+      switch ((received_signal = signal)) {
+	 case SIGINT:
+	 case SIGTERM:
+	 case SIGQUIT:
+	    die = signal;
+	    break;
+	 default:
+	    break;
+      }
 }
 
 static int
@@ -950,7 +961,7 @@ end:
 }
 
 static void
-check_renewal(char *datafile, int force_renew)
+check_renewal(char *datafile, int force_renew, int *num_renewed)
 {
    char line[1024];
    proxy_record record;
@@ -967,6 +978,8 @@ check_renewal(char *datafile, int force_renew)
    int num = 0;
 
    assert(datafile != NULL);
+
+   *num_renewed = 0;
 
    memset(&record, 0, sizeof(record));
    memset(basename, 0, sizeof(basename));
@@ -1054,16 +1067,21 @@ check_renewal(char *datafile, int force_renew)
    edg_wlpr_CleanResponse(&response);
    edg_wlpr_CleanRequest(&request);
 
+   *num_renewed = num;
+
    return;
 }
 
-int renewal(int force_renew)
+int renewal(int force_renew, int *num_renewed)
 {
    DIR *dir = NULL;
    struct dirent *file;
    FILE *fd;
+   int num = 0;
 
    edg_wlpr_Log(LOG_DEBUG, "Starting renewal process");
+
+   *num_renewed = 0;
 
    if (chdir(repository)) {
       edg_wlpr_Log(LOG_ERR, "Cannot access repository directory %s (%s)",
@@ -1090,7 +1108,8 @@ int renewal(int force_renew)
 	              file->d_name, strerror(errno));
 	 continue;
       }
-      check_renewal(file->d_name, force_renew);
+      check_renewal(file->d_name, force_renew, &num);
+      *num_renewed += num;
       fclose(fd);
    }
    closedir(dir);
@@ -1103,18 +1122,28 @@ watchdog_start(void)
 {
    struct sigaction sa;
    int force_renewal;
+   int count = 0, num;
    
    memset(&sa,0,sizeof(sa));
    sa.sa_handler = register_signal;
    sigaction(SIGUSR1, &sa, NULL);
+   sigaction(SIGINT,&sa,NULL);
+   sigaction(SIGQUIT,&sa,NULL);
+   sigaction(SIGTERM,&sa,NULL);
+   sigaction(SIGPIPE,&sa,NULL);
 
    /* load_vomses(); */
 
-   while (1) {
+   while (count < RENEWAL_COUNTS_MAX && !die) {
        received_signal = -1;
        sleep(60 * 5);
        force_renewal = (received_signal == SIGUSR1) ? 1 : 0;
+       if (die)
+	  break;
        /* XXX uninstall signal handler ? */
-       renewal(force_renewal);
+       renewal(force_renewal, &num);
+       count += num;
    }
+   edg_wlpr_Log(LOG_DEBUG, "Terminating after %d renewal attempts", count);
+   exit(0);
 }
