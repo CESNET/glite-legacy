@@ -26,8 +26,10 @@
 ################################################################################
 
 import os,string
-import sys, posix
+import sys, posix, getopt,time
 
+sys.path.append(".")
+from gLiteInstallerLib import gLib 
 import mysql as MySQL
 
 # Set global variables here 
@@ -40,7 +42,7 @@ class glite_lb:
         
         self.version = "0.1.0"
         self.name = "glite-lb"
-        self.friendly.name = "gLite Logging and Bookkeeping Server"
+        self.friendly_name = "gLite Logging and Bookkeeping Server"
         
     #-------------------------------------------------------------------------------
     # Banner 
@@ -49,7 +51,7 @@ class glite_lb:
     def banner(self):
 
         print "\nxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-        print "Configuring the %s" % self.friendly.name
+        print "Configuring the %s" % self.friendly_name
         print "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n"
     
     #-------------------------------------------------------------------------------
@@ -150,7 +152,7 @@ def set_env():
     glib.export('GLOBUS_LOCATION',params['GLOBUS_LOCATION'])
 
     # bin and lib paths
-    glib.addEnvPath("PATH","/usr/bin/:$s/bin:%s/externals/bin:%s/bin" % (os.environ['GLOBUS_LOCATION'],os.environ['GLITE_LOCATION'],os.environ['GLITE_LOCATION']))
+    glib.addEnvPath("PATH","/usr/bin/:%s/bin:%s/externals/bin:%s/bin" % (os.environ['GLOBUS_LOCATION'],os.environ['GLITE_LOCATION'],os.environ['GLITE_LOCATION']))
     glib.addEnvPath("LD_LIBRARY_PATH","/usr/lib:%s/lib:%s/externals/lib:%s/lib" % (os.environ['GLOBUS_LOCATION'], os.environ['GLITE_LOCATION'],os.environ['GLITE_LOCATION']))
 
     # Set environment
@@ -223,18 +225,18 @@ if __name__ == '__main__':
         glib.print_params(params)
 
     service.copyright()
-    service.version()
+    #service.version()
     service.banner()
         
     # Configure the service
     if service.configure() == 0:
-        print "%s configuration successfully completed\n" % service.friendly.name
+        print "%s configuration successfully completed\n" % service.friendly_name
     else:
-        print "An error occurred while configuring the %s" % service.friendly.name
+        print "An error occurred while configuring the %s" % service.friendly_name
         sys.exit(1)
         
     # Start the service
     if service.start() != 0:
-        print "An error occurred while strating the %s" % service.friendly.name
+        print "An error occurred while starting the %s" % service.friendly_name
         sys.exit(1)
 
