@@ -26,6 +26,7 @@ typedef enum _edg_wll_ContextParam {
 	EDG_WLL_PARAM_LEVEL,		/**< logging level */
 	EDG_WLL_PARAM_DESTINATION,	/**< logging destination host */
 	EDG_WLL_PARAM_DESTINATION_PORT, /**< logging destination port */
+	EDG_WLL_PARAM_USER_LBPROXY,	/**< user credentials when logging to L&B Proxy */
 	EDG_WLL_PARAM_LOG_TIMEOUT,	/**< logging timeout (asynchronous) */
 	EDG_WLL_PARAM_LOG_SYNC_TIMEOUT,	/**< logging timeout (synchronous) */
 	EDG_WLL_PARAM_QUERY_SERVER,	/**< default server name to query */
