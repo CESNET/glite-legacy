@@ -132,7 +132,7 @@ distbin:
 	rm -rf tmpbuilddir
 
 install:
-	-mkdir -p ${PREFIX}/bin ${PREFIX}/lib ${PREFIX}/include/glite/security/proxyrenewal ${PREFIX}/share/doc/${package}-${version}
+	-mkdir -p ${PREFIX}/bin ${PREFIX}/lib ${PREFIX}/include/glite/security/proxyrenewal ${PREFIX}/share/doc/${package}-${version} ${PREFIX}/etc/init.d
 	${INSTALL} -m 644 ${LIB} ${THRLIB} ${PREFIX}/lib
 	${INSTALL} -m 755 ${DAEMON} ${CLIENT} ${PREFIX}/bin
 	${INSTALL} -m 644 ${top_srcdir}/LICENSE ${PREFIX}/share/doc/${package}-${version}
