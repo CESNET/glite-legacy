@@ -28,6 +28,13 @@
 			description="The mySQL database name to create for storing LB data
 			In this version it must be set to the given value"
 			value="lbserver20"/>
+
+		<lb.index.list
+                        description="Definitions of indices on all the currently supported indexed system attributes">
+                        <value>owner</value>
+                        <value>location</value>
+                        <value>destination</value>
+                </lb.index.list>
 			
 		<lb.database.username
 			description="The username to be used to access the local mySQL server
