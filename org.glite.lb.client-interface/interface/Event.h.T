@@ -29,17 +29,18 @@ EWL_BEGIN_NAMESPACE
  *
  * This class represents a LB event, which is basically list of
  * attribute -- value pairs. For each particular event type (returned
- * by name()) there is a list of allowed attributes. The Event class
- * provides methods for accessing these attributes both by
- * their name and as an vector of pairs.
+ * by name()) there is a list of allowed attributes (returned by
+ * getAttrs()). The Event class provides methods for reading these
+ * attributes, but no means of changing the 
+ * event are provided (except assigning new one).
  */
 class Event {
 	friend class Job;
 	friend class ServerConnection;
 	friend class CountRef<Event>;
 public:
-	/** Event type codes.
-	 * Identify which of the event fields are valid.
+	/** Event type codes
+	 * identify which of the event fields are valid.
 	 */
 	enum Type {
 		UNDEF = 0, /**< Undefined event type. */
@@ -121,38 +122,117 @@ public:
 	}
 @@@}
 
-	enum AttrType { INT_T, STRING_T, TIMEVAL_T, PORT_T, LOGSRC_T, JOBID_T, NOTIFID_T };
+	/** Symbolic names for types of attribute values. */
+	enum AttrType { INT_T,           /**< Integer value. */
+			STRING_T,        /**< String value.  */
+			TIMEVAL_T,       /**< Time value (ie. struct
+					    timeval). */
+			PORT_T,          /**< Service port  (integer). */
+			LOGSRC_T,        /**< Source of the event
+					    (integer). */
+			JOBID_T,         /**< JobId value. */
+			NOTIFID_T        /**< NotifId value. */
+	};
 
-	Type 	type;
+	Type 	type; /**< Type of the event as defined by Type. */
 
+	/** Default constructor.
+	 *
+	 * Initializes an empty event.
+	 */
 	Event(void);
+
+	/** Constructor from corresponding C type.
+	 *
+	 * Initializes the object from the corresponding C struct, in
+	 * fact holding the pointer to it.
+	 */
         Event(edg_wll_Event *);
+
+	/** Copy constructor.
+	 *
+	 * Creates a copy of the object by sharing the C struct
+	 * with the original.
+	 */
 	Event(const Event &);
+
+	/** Destructor.
+	 *
+	 * Releases the C struct (possibly deallocating it).
+	 */
 	~Event(void);
 
 
-	/** Assign new Event to an existing instance. */
+	/** Assign new Event to an existing instance. 
+	 *
+	 * The original data are released and new ones are made
+	 * accessible.
+	 * \returns Reference to this object.
+	 */
 	Event & operator= (const Event &);
 
-	/** String representation of the event type */
+	/** String representation of the event type.
+	 * 
+	 * Returns string representing the event type.
+	 * \returns Name of the event.
+	 * \throw Exception Invalid event type.
+	 */
 	const std::string & name(void) const;
 
-	/** Retrieve integer attribute */
+	/** Retrieve integer attribute.
+	 * 
+	 * Retrieves value for attributes of integer type.
+	 * \param[in] name Name of the attribute to retrieve.
+	 * \returns Integer value of the attribute.
+	 * \throw Exception Invalid event type or attribute not
+	 * defined for this event.
+	 */
 	int	getValInt(Attr) const;
 
-	/** Retrieve string attribute */
+	/** Retrieve string attribute.
+	 *
+	 * Retrieves value for attributes of string type.
+	 * \param[in] name Name of the attribute to retrieve.
+	 * \returns String value of the attribute.
+	 * \throw Exception Invalid event type or attribute not
+	 * defined for this event.
+	 */
 	std::string getValString(Attr) const;
 
-        /** Retrieve time attribute */
+        /** Retrieve time attribute.
+	 *
+	 * Retrieves value for attributes of timeval type.
+	 * \param[in] name Name of the attribute to retrieve.
+	 * \returns struct timeval  value of the attribute.
+	 */
         struct timeval	getValTime(Attr) const;
 		
-        /** Retrieve jobid attribute */
+        /** Retrieve jobid attribute 
+	 *
+	 * Retrieves value for attributes of JobId type.
+	 * \param[in] name Name of the attribute to retrieve.
+	 * \returns JobId value of the attribute.
+	 * \throw Exception Invalid event type or attribute not
+	 * defined for this event.
+	 */
         const glite::wmsutils::jobid::JobId getValJobId(Attr) const;
 
-	/** Attribute name */
+	/** Attribute name.
+	 *
+	 * Retrieves string representation of the attribute name.
+	 * \param[in] name Symbolic name of the attribute.
+	 * \returns String name of the attribute.
+	 * \throw Exception Invalid event type or attribute not
+	 * defined for this event.
+	 */
 	const std::string & getAttrName(Attr) const;
 
-	/** List of attributes and types valid for this instance */
+	/** List of attributes and types valid for this instance.
+	 *
+	 * Retrieves description of all attributes defined for this event.
+	 * \returns Vector of Attr -- AttrType pairs.
+	 * \throw Exception Invalid event type.
+	 */
 	const std::vector<std::pair<Attr,AttrType> >  &	getAttrs(void) const;
 
 private:
