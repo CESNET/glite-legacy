@@ -237,6 +237,14 @@ if __name__ == '__main__':
     
     # Load parameters
     params = {}
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], '', ['siteconfig='])
+        for o, a in opts:
+            if o == "--siteconfig":
+                params['site.config.url'] = a
+                break
+    except getopt.GetoptError:
+        pass
     if glib.loadConfiguration("%s/../glite-lb.cfg.xml" % glib.getScriptPath(),params):
         print "An error occurred while configuring the service"
         sys.exit(1)
@@ -256,7 +264,7 @@ if __name__ == '__main__':
     
     # Command line opts if any
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'chv', ['checkconf', 'help', 'version','stop','start'])
+        opts, args = getopt.getopt(sys.argv[1:], 'chv', ['checkconf', 'help', 'version','stop','start', 'siteconfig='])
     except getopt.GetoptError:
         service.usage(msg = "Unknown options(s)")
         sys.exit(1)
@@ -280,6 +288,9 @@ if __name__ == '__main__':
         if o == "--start":
             service.start()
             sys.exit(0)
+        if o == "--status":
+            print "Not yet implemented"
+            sys.exit(1)
 
     # Check certificates
     if params.has_key('glite.installer.checkcerts'):
