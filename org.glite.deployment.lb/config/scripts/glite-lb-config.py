@@ -125,6 +125,9 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         glib.add_user(params['GLITE_USER'],params['GLITE_USER'])
         (uid,gid) = glib.get_user_info(params['GLITE_USER'])
         glib.check_dir(os.environ['GLITE_LOCATION_VAR'],0755, uid, gid)
+        
+        # Copy certificates
+        os.system("cp %s %s ~%s/.certs/" % (params['host.certificate.file'], params['host.key.file'], params['GLITE_USER']))
                  
         # Create the MySQL database
         self.mysql.stop()
