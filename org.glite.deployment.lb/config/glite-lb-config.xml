@@ -1,0 +1,21 @@
+<!--  Parameters for  configuring the org.glite.data.io-daemon service -->
+<config>
+   <parameter name='verbose'         value='true'/>
+
+   <!-- host certificate -->
+   <parameter name='certs'           value='true'/>
+   <parameter name='certs_path'      value='/etc/grid-security/certificates/'/>
+   <parameter name='hostcert'        value='/etc/grid-security/hostcert.pem'/>
+   <parameter name='hostkey'         value='/etc/grid-security/hostkey.pem'/>
+
+   <!-- user account -->
+   <parameter name='username'        value='glite'/>
+   <parameter name='group_name'      value='glite'/>
+
+   <!-- env variables -->
+   <parameter name='glite_location'  value='/opt/glite'/>
+   <parameter name='globus_location' value='/opt/globus'/>
+
+   <!-- MySQL DB -->
+   <parameter name='db_name'         value='lbserver20'/>
+</config>
