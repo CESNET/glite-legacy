@@ -357,7 +357,7 @@ int edg_wll_QueryListener(
  */
 
 
-int edg_wll_QuerySequenceCode(
+int edg_wll_QuerySequenceCodeProxy(
 	edg_wll_Context	context,
 	edg_wlc_JobId	jobId,
 	char **		code
