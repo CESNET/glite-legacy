@@ -570,8 +570,14 @@ get_record_ext(FILE *fd, proxy_record *record, int *last_used_suffix)
 	 return 0;
       }
 
+      /* Proxies with VOMS attributes require a separate record, which is not
+       * shared with another proxies. The same applies it the unique flag was
+       * set by the caller */
+      if (record->voms_exts || record->unique)
+	 continue;
+
       if (tmp_record.jobids.len > 0 && record->myproxy_server &&
-	  strcmp(record->myproxy_server, tmp_record.myproxy_server) != 0)
+	  strcmp(record->myproxy_server, tmp_record.myproxy_server) != 0 &&
 	 continue;
 
       if (tmp_record.jobids.len > 0 &&
