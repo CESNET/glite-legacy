@@ -2,6 +2,7 @@
 #define __EDG_WORKLOAD_LOGGING_CLIENT_PRODUCER_H__
 
 /**
+ * \file producer.h
  * \brief client API for storing data into L&B service
  */
 
@@ -120,7 +121,7 @@ for my $t (sort { $event->{order}->{$a} <=> $event->{order}->{$b} }
  */
 };
 	gen "\nextern int edg_wll_Log${t}$a;\n";
-	gen "\nextern int edg_wll_Log${t}Proxy$a;\n";
+#	gen "\nextern int edg_wll_Log${t}Proxy$a;\n";
 #	gen qq{
 #int edg_wll_Log$t$a
 #\{
@@ -157,7 +158,7 @@ for my $t (sort { $event->{order}->{$a} <=> $event->{order}->{$b} }
  */
 };
 				gen "\nextern int edg_wll_Log$t${code}$c;\n";
-				gen "\nextern int edg_wll_Log$t${code}Proxy$c;\n";
+#				gen "\nextern int edg_wll_Log$t${code}Proxy$c;\n";
 #				gen qq{
 #int edg_wll_Log$t$code$c
 #\{
@@ -214,26 +215,6 @@ extern int edg_wll_LogEventSync(
 	char *fmt, ...);
 
 /**
- * Formats a logging message and sends it synchronously to L&B Proxy
- * \brief generic synchronous logging function
- * \param context       INOUT context to work with,
- * \param event         IN type of the event,
- * \param fmt           IN printf()-like format string,
- * \param ...           IN event specific values/data according to fmt,
- * \retval 0            successful completition,
- * \retval EINVAL       bad jobId, unknown event code, or the format string together with the remaining arguments does not form a valid event,             
- * \retval ENOSPC       L&B infrastructure failed to accept the event due to lack of disk space etc.,
- * \retval ENOMEM       failed to allocate memory,
- * \retval ECONNREFUSED cannot connect to the specified L&B Proxy
- * \retval EAGAIN       non blocking return from the call, the event may or may not get logged,
- * \retval EDG_WLL_ERROR_NOJOBID logging call attempted without assigning jobId to the context.
- */             
-extern int edg_wll_LogEventProxy(
-        edg_wll_Context context, 
-        edg_wll_EventCode event,
-        char *fmt, ...);        
-
-/**
  * Instructs interlogger to to deliver all pending events related to current job
  * \brief flush events from interlogger
  * \note sort of status query more than a command
@@ -262,10 +243,10 @@ extern int edg_wll_LogFlushAll(
 /**
  * Set a current job for given context.
  * \note Should be called before any logging call.
- * \param context INOUT context to work with
- * \param job IN further logging calls are related to this job
- * \param code IN sequence code as obtained from previous component
- * \param flags IN flags on code handling (\see API documentation)
+ * \param context 	INOUT context to work with
+ * \param job 		IN further logging calls are related to this job
+ * \param code 		IN sequence code as obtained from previous component
+ * \param flags 	IN flags on code handling (\see API documentation)
  */
 extern int edg_wll_SetLoggingJob(
 	edg_wll_Context	context,
@@ -273,24 +254,6 @@ extern int edg_wll_SetLoggingJob(
 	const char *		code,
 	int			flags
 );
-
-/**
- * Set a current job for given context.
- * \note Should be called before any logging call.
- * \param context INOUT context to work with
- * \param job IN further logging calls are related to this job
- * \param code IN sequence code as obtained from previous component
- * \param user IN user credentials
- * \param flags IN flags on code handling (\see API documentation)
- */
-extern int edg_wll_SetLoggingJobProxy(
-	edg_wll_Context	context,
-	const edg_wlc_JobId	job,
-	const char *		code,
-	const char *		user,
-	int			flags
-);
-
 
 /**
  * Register job with L&B service.
@@ -301,13 +264,15 @@ extern int edg_wll_SetLoggingJobProxy(
  * Partitionable jobs should set num_subjobs=0 initially,
  * and re-register when number of subjobs becomes known.
  *
- * \param type IN EDG_WLL_JOB_SIMPLE,  EDG_WLL_JOB_DAG, or EDG_WLL_JOB_PARTITIONABLE
- * \param jdl IN user-specified JDL
- * \param ns IN network server contact
- * \param num_subjobs IN number of subjobs to create
- * \param seed IN seed used for subjob id's generator.
+ * \param context 	INOUT context to work with
+ * \param job 		IN jobId
+ * \param type 		IN EDG_WLL_JOB_SIMPLE,  EDG_WLL_JOB_DAG, or EDG_WLL_JOB_PARTITIONABLE
+ * \param jdl 		IN user-specified JDL
+ * \param ns 		IN network server contact
+ * \param num_subjobs 	IN number of subjobs to create
+ * \param seed 		IN seed used for subjob id's generator.
  * 	Use non-NULL value to be able to regenerate the set of jobid's
- * \param subjobs OUT returned subjob id's
+ * \param subjobs 	OUT returned subjob id's
  */
 
 /* backward compatibility */
@@ -340,45 +305,14 @@ extern int edg_wll_RegisterJobSync(
 );
 
 /**
- * Register job with L&B Proxy service.
- * Done via logging REGJOB event, may generate subjob id's and create
- * the parent-children associations.
- * Set the job as current for the context and initialize sequence code.
- *
- * Partitionable jobs should set num_subjobs=0 initially,
- * and re-register when number of subjobs becomes known.
- *
- * \param context INOUT context to work with
- * \param job IN registered job
- * \param type IN EDG_WLL_JOB_SIMPLE,  EDG_WLL_JOB_DAG, or EDG_WLL_JOB_PARTITIONABLE
- * \param user IN user credentials
- * \param jdl IN user-specified JDL
- * \param ns IN network server contact
- * \param num_subjobs IN number of subjobs to create
- * \param seed IN seed used for subjob id's generator.
- *      Use non-NULL value to be able to regenerate the set of jobid's
- * \param subjobs OUT returned subjob id's
- */
-
-extern int edg_wll_RegisterJobProxy(
-	edg_wll_Context		context,
-	const edg_wlc_JobId	job,
-	enum edg_wll_RegJobJobtype	type,
-	const char *		user,
-	const char *		jdl,
-	const char *		ns,
-	int			num_subjobs,
-	const char *		seed,
-	edg_wlc_JobId **	subjobs
-);
-
-
-/**
  * Register subjobs in a batch.
  * Mainly used to provide JDL's of individual subjobs in a more efficient
  * way than logging them one by one.
- * \param jdls	array of JDL's
- * \param subjobs 	array of jobid's in the same order
+ * \param context 	INOUT context to work with
+ * \param parent 	IN parent's jobId
+ * \param jdls		IN array of JDL's
+ * \param ns 		IN network server contact
+ * \param subjobs 	OUT array of jobid's in the same order
  */
 
 extern int edg_wll_RegisterSubjobs(
@@ -428,14 +362,15 @@ enum edg_wll_UserIdType {
 
 /**
  * Change ACL for given job.
- * \param context INOUT context to workt with
- * \param user_id IN: specification of user's credential
- * \param user_id_type IN type of user_id,
+ * \param context 	INOUT context to work with
+ * \param job 		IN jobId
+ * \param user_id 	IN specification of user's credential
+ * \param user_id_type 	IN type of user_id,
  *    for EDG_WLL_USER_SUBJECT the user_id parameter is expected to be user's subject name
  *    for EDG_WLL_USER_VOMS_GROUP the user_id is expected to be of the form VO:group specifying required group membersip as managed by VOMS
- * \param permission IN ACL permission to change
- * \param permission_type IN type of given permission (allow or deny operation) 
- * \param operation IN operation to perform with ACL (add or remove record)
+ * \param permission 	ACL permission to change
+ * \param permission_type type of given permission (allow or deny operation) 
+ * \param operation 	operation to perform with ACL (add or remove record)
  */
  
 extern int edg_wll_ChangeACL(

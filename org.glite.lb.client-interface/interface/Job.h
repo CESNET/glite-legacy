@@ -51,7 +51,7 @@ public:
   const std::vector<Event> log(void) const;
   
   /** Return last known address of a listener associated to the job.
-   * \param name name of the listener
+   * \param name 	IN name of the listener
    * \return hostname and port number
    */
   const std::pair<std::string,uint16_t> queryListener(const std::string & name) const;
@@ -61,8 +61,8 @@ public:
    *
    * The same as for edg_wll_Context in C 
    *
-   * \param ctx INOUT context to work with
-   * \param val IN value
+   * \param ctx 	INOUT context to work with
+   * \param val 	IN value
    */
   void setParam(edg_wll_ContextParam ctx, int val); 
   /** 
@@ -70,8 +70,8 @@ public:
    *
    * The same as for edg_wll_Context in C 
    *
-   * \param ctx INOUT context to work with
-   * \param val IN value
+   * \param ctx 	INOUT context to work with
+   * \param val 	IN value
    */
   void setParam(edg_wll_ContextParam ctx, const std::string val); 
   /** 
@@ -79,8 +79,8 @@ public:
    *
    * The same as for edg_wll_Context in C 
    *
-   * \param ctx INOUT context to work with
-   * \param val IN value
+   * \param ctx 	INOUT context to work with
+   * \param val 	IN value
    */
   void setParam(edg_wll_ContextParam ctx, const struct timeval &val); 
 
@@ -89,7 +89,7 @@ public:
    *
    * The same as for edg_wll_Context in C 
    *
-   * \param ctx INOUT context to work with
+   * \param ctx 	INOUT context to work with
    * \return integer value of the parameter
    */
   int getParamInt(edg_wll_ContextParam ctx) const;
@@ -98,19 +98,19 @@ public:
    *
    * The same as for edg_wll_Context in C 
    *
-   * \param ctx INOUT context to work with
+   * \param ctx 	INOUT context to work with
    * \return string value of the parameter
    */
-  std::string getParamString(edg_wll_ContextParam) const;
+  std::string getParamString(edg_wll_ContextParam ctx) const;
   /** 
    * Get LB parameters. 
    *
    * The same as for edg_wll_Context in C 
    *
-   * \param ctx INOUT context to work with
+   * \param ctx		INOUT context to work with
    * \return timeval value of the parameter
    */
-  struct timeval getParamTime(edg_wll_ContextParam) const;
+  struct timeval getParamTime(edg_wll_ContextParam ctx) const;
   
 private:
   ServerConnection	server;

@@ -6,6 +6,7 @@
 */
 
 /*!
+ * \file jobstat.h  
  * \brief edg_wll_JobStat definition and related stuff
  */
 
