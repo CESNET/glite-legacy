@@ -21,6 +21,9 @@
 	
 	Revision history:
 	$Log$
+	Revision 1.2  2004/07/23 15:37:26  eronchie
+	Commit
+	
 	Revision 1.1.1.1  2004/07/21 18:16:57  eronchie
 	Moved out exception from org.glite.wms.common/src/utilitiesY
 	
@@ -66,5 +69,6 @@
 		 Define extra properties here ...
 		 ====================================================== -->
 		 
-		 						
+	<property name="m4files.list" value="glite.m4">
+
 </project>
