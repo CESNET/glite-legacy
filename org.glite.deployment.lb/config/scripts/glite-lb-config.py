@@ -117,9 +117,7 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         
         # Create the GLITE_USER if it doesn't exists
         print "Creating/Verifying the GLITE_USER account %s" % os.environ['GLITE_USER']
-        (uid,gid) = glib.get_user_info(os.environ['GLITE_USER'])
-        if uid == -1:
-            glib.add_user(os.environ['GLITE_USER'],os.environ['GLITE_USER'])
+        glib.add_user(os.environ['GLITE_USER'],os.environ['GLITE_USER'])
         (uid,gid) = glib.get_user_info(os.environ['GLITE_USER'])
         glib.check_dir(os.environ['GLITE_LOCATION_VAR'],0755, uid, gid)
                  
@@ -143,7 +141,8 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         file.close()
         os.system('/usr/bin/mysql < /tmp/mysql_ct')
         os.system('/bin/rm /tmp/mysql_ct')
-        os.link('/var/lib/mysql/mysql.sock', '/tmp/mysql.sock')
+        if not os.path.exist('/tmp/mysql.sock'):
+            os.link('/var/lib/mysql/mysql.sock', '/tmp/mysql.sock')
         self.mysql.stop()
          
         return 0
