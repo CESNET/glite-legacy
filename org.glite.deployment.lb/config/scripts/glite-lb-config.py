@@ -219,7 +219,7 @@ if __name__ == '__main__':
     # Load parameters
     params = {}
     if glib.loadConfiguration("%s/../glite-lb.cfg.xml" % glib.getScriptPath(),params):
-        print "An error occurred while configuring the service"
+        print "Configuration files not found.\nPlease verify if the configuration files are copied from the templates directory\n"
         sys.exit(1)
     
     verbose = 0
@@ -259,8 +259,7 @@ if __name__ == '__main__':
     if params.has_key('glite.installer.checkcerts'):
         if params['glite.installer.checkcerts'] == "true":
             if glib.check_certs(params) != 0:
-                print "An error occurred while configuring the %s service" \
-                    % service.friendly_name
+                print "Certificate files are not found\n" 
                 sys.exit(1)
     
     # Print configuration parameters
