@@ -21,6 +21,9 @@
 
 	Revision history:
 	$Log$
+	Revision 1.1.1.1  2004/05/26 18:45:05  eronchie
+	Import of wms jobid
+	
 
 -->
 
@@ -65,12 +68,18 @@
 		 ========================================= -->
 	<import file="${subsystem.taskdefs.file}" />
 	<import file="${global.taskdefs.file}" />
-			
+	
 	<!-- =========================================
-		 Load common targets
-		 ========================================= -->
-	<import file="${global.targets-external-dependencies.file}"/>	
-	<import file="${global.targets-make.file}" />
+                 Load configure options
+                 ========================================= -->
+        <property file="${global.configure.options.file}"/>
+                                                                               
+        <!-- =========================================
+                 Load common targets
+                 ========================================= -->
+        <import file="${global.targets-external-dependencies.file}"/>
+        <import file="${global.targets-make.file}" />
+        <import file="${component.configure.options.file}"/>		
 		
 	<!-- =========================================
 		 Load version file 
