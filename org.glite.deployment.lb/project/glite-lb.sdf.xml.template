@@ -56,7 +56,7 @@
 				<external name="MySQL-server"
 					version="4.0.20"
 					age="0"
-					build="i386"/>
+					arch="i386"/>
 	  			<external name="MySQL-client"
 					version="4.0.20"
 					age="0"
