@@ -50,10 +50,10 @@
 			In this version it must be set to the given value"
 			value="lbserver"/>
 			
-		<GLOBUS_LOCATION
-			description="The location of the Globus Toolkit"
-			value="/opt/globus"/>
-			
+		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
+		<!-- System parameters - You should leave these alone -->
+		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->		
+	
 	</parameters>
 
 	<!--RGMA service publishing: log server -->
@@ -68,7 +68,7 @@
 				
 			<rgma.servicetool.name
 				description="RGMA servicetool variable: Name of the service. This should be globally unique.
-				Example: your.host.name_lb
+				Example: your.host.name_Logging_Bookkeeping_Server
 				[Type: 'String']"
 
 				value="changeme"/>
@@ -76,7 +76,7 @@
 			<rgma.servicetool.url_endpoint
 				description="RGMA servicetool variable: URL to contact the service at. 
 				This should be unique for each service. Use example and adapt host. 
-				Example: http://your.host.name:0/LB/lbServer
+				Example: http://your.host.name:0/LB/LBServer
 				[Type: 'string']"
 
 				value="changeme"/>
@@ -141,8 +141,4 @@
 		</parameters>
 	</instance>
 						
-	<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
-	<!-- System parameters - You should leave these alone -->
-	<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->		
-
 </config>
