@@ -24,9 +24,6 @@ renew_proxy(proxy_record *record, char *basename, char **new_proxy);
 static void
 register_signal(int signal);
 
-#define DGPR_RETRIEVE_DEFAULT_HOURS 10
-#define RENEWAL_CLOCK_SKEW 5 * 60
-
 int
 load_proxy(const char *cur_file, X509 **cert, EVP_PKEY **priv_key,
            STACK_OF(X509) **chain, globus_gsi_cred_handle_t *cur_proxy)
@@ -264,15 +261,14 @@ check_renewal(char *datafile, int force_renew, int *num_renewed)
 	 continue; /* XXX exit? */
       if (record.jobids.len == 0) /* no jobid registered for this proxy */
 	 continue;
-      if (record.end_time - current_time < RENEWAL_CLOCK_SKEW ||
-	  abs(record.next_renewal - current_time) < RENEWAL_CLOCK_SKEW ||
-	  record.next_renewal < current_time ||
-	  record.end_time < current_time ||
+      if (current_time + RENEWAL_CLOCK_SKEW >= record.end_time ||
+	  record.next_renewal <= current_time ||
 	  force_renew) {
 	 ret = EDG_WLPR_PROXY_EXPIRED;
-	 if (record.end_time >= current_time)
+	 if ( record.end_time + RENEWAL_CLOCK_SKEW >= current_time) {
 	    /* only try renewal if the proxy hasn't already expired */
 	    ret = renew_proxy(&record, basename, &new_proxy);
+         }
 
 	 /* if the proxy wasn't renewed have the daemon planned another renewal */
 	 asprintf(&entry, "%d:%s", record.suffix, (ret == 0) ? new_proxy : "");
