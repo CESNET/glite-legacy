@@ -30,4 +30,4 @@ check:
 	${AT3} $< >$@ || rm -f $@
 	chmod -w $@ >/dev/null
 
-
+clean:
