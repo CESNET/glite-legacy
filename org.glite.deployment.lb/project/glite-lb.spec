@@ -1,21 +1,21 @@
-Summary:LB node installation package
-Name:glite-lb
+Summary:gLite LB node installation package
+Name:glite-lb-config
 Version:@MODULE.VERSION@
 Release:@MODULE.BUILD@
 Copyright:Open Source EGEE License
 Vendor:EU EGEE project
 Group:System/Application
 Prefix:/opt/glite
-BuildArch:i386
+BuildArch:noarch
 BuildRoot:%{_builddir}/%{name}-%{version}
-Requires: glite-lb-common, glite-lb-logger, glite-lb-server, glite-security-proxyrenewal, glite-lb-client-interface, MySQL-server, MySQL-client, expat, ares,vdt_globus_essentials, glite-wms-utils-jobid, glite-wms-utils-exception, glite-wms-utils-thirdparty-globus_ssl_utils, myproxy, perl-Expect.pm 
+Requires: glite-lb-common, glite-lb-logger, glite-lb-server, glite-security-proxyrenewal, glite-lb-client-interface, MySQL-server, MySQL-client, expat, ares,vdt_globus_essentials, glite-wms-utils-jobid, glite-wms-utils-exception, myproxy, perl-Expect.pm 
 
 AutoReqProv:no
 Source:glite-lb.tar.gz
 %define debug_package %{nil}
 
 %description
-LB node installation package
+gLite Logging and Bookkeeping node installation package
 
 %prep
  
@@ -36,8 +36,8 @@ LB node installation package
 %preun
 %postun
 %files
-%attr(755,root,root) %{prefix}/etc/config/scripts
-%attr(644,root,root) %{prefix}/etc/config/
+%attr(755,root,root) %{prefix}/etc/config/glite-lb/scripts/glite-lb-config
+%attr(644,root,root) %{prefix}/etc/config/glite-lb/glite-lb.cfg.xml
 
 %changelog
 
