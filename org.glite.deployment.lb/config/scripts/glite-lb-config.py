@@ -103,6 +103,8 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
 
     def start(self):
         self.mysql.start()
+        if not os.path.exists('/tmp/mysql.sock'):
+            os.symlink('/var/lib/mysql/mysql.sock', '/tmp/mysql.sock')
         os.system('%s/etc/init.d/glite-lb-bkserverd start' % os.environ['GLITE_LOCATION'])
         
         return 0
