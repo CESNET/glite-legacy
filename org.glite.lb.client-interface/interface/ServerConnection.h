@@ -178,7 +178,7 @@ public:
 	 */
 	void queryEvents(const std::vector<QueryRecord>& job_cond,
 			 const std::vector<QueryRecord>& event_cond,
-			 std::vector<Event>&) const;
+			 std::vector<Event>& events) const;
   
 	const std::vector<Event> queryEvents(const std::vector<QueryRecord>& job_cond,
 					     const std::vector<QueryRecord>& event_cond) const;
@@ -200,14 +200,14 @@ public:
   
 
 	/** Retrieve all events satisfying the query records
-	 * @param job_cond, event_cond - vectors of vectors of job or event conditions, 
+	 * @param job_cond, event_cond 	IN vectors of vectors of job or event conditions, 
 	 * respectively. The inner vectors are logically ANDed, the outer are ORed
 	 * (cond1 AND cond2 AND ...) OR (condN AND ...)
-	 * @param events vector of returned events
+	 * @param eventList 	OUT vector of returned events
 	 */
 	void queryEvents(const std::vector<std::vector<QueryRecord> >& job_cond,
 			 const std::vector<std::vector<QueryRecord> >& event_cond,
-			 std::vector<Event>&) const;
+			 std::vector<Event>& eventList) const;
   
 	const std::vector<Event> 
 	queryEvents(const std::vector<std::vector<QueryRecord> >& job_cond,
@@ -215,38 +215,32 @@ public:
 
 	
 	/** Retrieve jobs satisfying the query records, including their states
-	 * @param query vector of Query records that are anded to form the
-	 * 	query
-	 * @param ids vector of returned job id's
-	 * @param states vector of returned job states
+	 * @param query 	IN vector of Query records that are ANDed to form the query
+	 * @param jobList	OUT vector of returned job id's
 	 */
   
 	void queryJobs(const std::vector<QueryRecord>& query,
-		       std::vector<glite::wmsutils::jobid::JobId>& ids) const;
+		       std::vector<glite::wmsutils::jobid::JobId>& jobList) const;
   
 	const std::vector<glite::wmsutils::jobid::JobId>
 	queryJobs(const std::vector<QueryRecord>& query) const;
   
 	
 	/** Retrieve jobs satisfying the query records, including their states
-	 * @param query vector of Query record vectors that are ORed and ANDed to form the
-	 * 	query
-	 * @param ids vector of returned job id's
-	 * @param states vector of returned job states
+	 * @param query 	IN vector of Query record vectors that are ORed and ANDed to form the query
+	 * @param jobList	OUT vector of returned job id's
 	 */
    
 	void queryJobs(const std::vector<std::vector<QueryRecord> >& query,
-		       std::vector<glite::wmsutils::jobid::JobId>& ids) const;
+		       std::vector<glite::wmsutils::jobid::JobId>& jobList) const;
   
 	const std::vector<glite::wmsutils::jobid::JobId>
 	queryJobs(const std::vector<std::vector<QueryRecord> >& query) const;
 
-	/** Retrieve jobs satisfying the query records, including status
-	 * information
-	 * @param query vector of Query records that are anded to form the
-	 * 	query
-	 * @param ids vector of returned job id's
-	 * @param states vector of returned job states
+	/** Retrieve jobs satisfying the query records, including status information
+	 * @param query 	IN vector of Query records that are ANDed to form the query
+	 * @param flags		IN flags
+	 * @param states 	OUT vector of returned job states
 	 */
 	void queryJobStates(const std::vector<QueryRecord>& query, 
 			    int flags,
@@ -257,12 +251,10 @@ public:
 	const std::list<JobStatus>  queryJobStatesList(const std::vector<QueryRecord>& query,
 						     int flags) const;
   
-	/** Retrieve jobs satisfying the query records, including status
-	 * information
-	 * @param query vector of Query records that are anded to form the
-	 * 	query
-	 * @param ids vector of returned job id's
-	 * @param states vector of returned job states
+	/** Retrieve jobs satisfying the query records, including status information
+	 * @param query 	IN vector of Query records that are anded to form the query
+	 * @param flags		IN flags
+	 * @param states 	OUT vector of returned job states
 	 */
 	void queryJobStates(const std::vector<std::vector<QueryRecord> >& query, 
 			    int flags,
