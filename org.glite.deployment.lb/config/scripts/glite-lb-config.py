@@ -75,6 +75,7 @@ if params['glite.installer.checkcerts']:
 mysql = MySQL.Mysql()
 lb = glite_lb()
 lb.configure()
+os.environ['LD_LIBRARY_PATH'] = params['glite.location'] + "/lib:" + params['globus.location'] + "/lib:" + params['ld.library.path']
 os.environ['GLITE_HOST_CERT'] = params['host.certificate.file']
 os.environ['GLITE_HOST_KEY'] = params['host.key.file']
 lb.start()
