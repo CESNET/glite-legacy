@@ -519,19 +519,23 @@ get_record_ext(FILE *fd, proxy_record *record, int *last_used_suffix)
    char *p;
    proxy_record tmp_record;
    time_t current_time;
+   int line_num = 0;
 
    assert(record != NULL);
    memset(&tmp_record, 0, sizeof(tmp_record));
 
    current_time = time(NULL);
    while (fgets(line, sizeof(line), fd) != NULL) {
+      line_num++;
       free_record(&tmp_record);
       p = strchr(line, '\n');
       if (p)
 	 *p = '\0';
       ret = decode_record(line, &tmp_record);
-      if (ret)
-	 return ret; /* XXX continue */
+      if (ret) {
+	 edg_wlpr_Log(LOG_ERR, "Skipping invalid entry at line %d", line_num);
+	 continue;
+      }
       if (record->suffix >= 0) {
 	 if (record->suffix == tmp_record.suffix) {
 	    record->suffix = tmp_record.suffix;
@@ -562,10 +566,8 @@ get_record_ext(FILE *fd, proxy_record *record, int *last_used_suffix)
 	  * parameters (currently myproxy location) provided by user */
 	 char *server = record->myproxy_server;
 
-	 memset(record, sizeof(*record), 0);
+	 memset(record, 0, sizeof(*record));
 	 record->suffix = tmp_record.suffix;
-	 if (record->myproxy_server)
-	    free(record->myproxy_server);
 	 record->myproxy_server = server;
 	 free_record(&tmp_record);
 	 return 0;
@@ -630,6 +632,7 @@ store_record(char *basename, proxy_record *record)
    proxy_record tmp_record;
    char tmp_file[FILENAME_MAX];
    char meta_file[FILENAME_MAX];
+   int line_num = 0;
 
    assert (record != NULL);
 
@@ -648,13 +651,16 @@ store_record(char *basename, proxy_record *record)
       goto end;
    }
    while (fgets(line, sizeof(line), fd) != NULL) {
+      line_num++;
       free_record(&tmp_record);
       p = strchr(line, '\n');
       if (p)
 	 *p = '\0';
       ret = decode_record(line, &tmp_record);
-      if (ret)
-	 goto end;
+      if (ret) {
+	 edg_wlpr_Log(LOG_ERR, "Removing invalid entry at line %d in %s", line_num, basename);
+	 continue;
+      }
       if (record->suffix == tmp_record.suffix &&
 	  record->unique == tmp_record.unique) {
 	 tmp_record.next_renewal = record->next_renewal;
@@ -1209,8 +1215,7 @@ update_db(edg_wlpr_Request *request, edg_wlpr_Response *response)
 	       free_record(&record);
 	       record.suffix = suffix;
 	       record.myproxy_server = server;
-	       edg_wlpr_Log(LOG_WARNING, "Removed expired proxy (suffix %d)",
-			    suffix);
+	       edg_wlpr_Log(LOG_WARNING, "Removed expired proxy %s", cur_proxy);
 	    } else
 	       get_times(cur_proxy, &record);
 	 } else {
