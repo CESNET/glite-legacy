@@ -20,6 +20,9 @@
 
 	Revision history:
 	$Log$
+	Revision 1.2  2004/06/22 15:49:56  dimeglio
+	Added configuration options
+	
 	Revision 1.1  2004/06/21 16:00:23  dimeglio
 	First version of this file
 	
@@ -40,6 +43,8 @@ builddir=build
 stagedir=${stage.dir}
 distdir=${dist.dir}
 package=${module.package.name}
+globalprefix=${global.prefix}
+lbprefix=${subsystem.prefix}
 PREFIX=${install.dir}
 version=${module.version}
 			</echo>
