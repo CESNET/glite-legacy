@@ -139,9 +139,10 @@ proto(int sock)
       goto end;
    }
 
-   edg_wlpr_Log(LOG_INFO, "Received command code %d for proxy %s",
+   edg_wlpr_Log(LOG_INFO, "Received command code %d for proxy %s and jobid %s",
                 request.command,
-                request.proxy_filename ? request.proxy_filename : "(unspecified)");
+                request.proxy_filename ? request.proxy_filename : "(unspecified)",
+		request.jobid ? request.jobid : "(unspecified)");
 
    command->handler(&request, &response);
 
