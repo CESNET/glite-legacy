@@ -198,15 +198,12 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
 
         error_level = 0
 
-        retval = self.mysql.stop()
-        if retval != 0:
-            error_level = retval
-
         retval = os.system('%s/etc/init.d/glite-lb-bkserverd status' % os.environ['GLITE_LOCATION'])
+        print retval
         if retval != 0:
-            error_level = retval
+            error_level = 1
 
-        return 0
+        return error_level
         
     def configure(self):
         
@@ -403,7 +400,7 @@ if __name__ == '__main__':
     
     # Command line opts if any
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'chv', ['checkconf', 'help', 'version','stop','start', 'siteconfig='])
+        opts, args = getopt.getopt(sys.argv[1:], 'chv', ['checkconf', 'help', 'version','stop','start','status','siteconfig='])
     except getopt.GetoptError:
         service.usage(msg = "Unknown options(s)")
         sys.exit(1)
@@ -428,7 +425,7 @@ if __name__ == '__main__':
             service.start()
             sys.exit(0)
         if o == "--status":
-            sys.exit(service.start())
+            sys.exit(service.status())
                 
 
     # Check certificates
@@ -449,20 +446,20 @@ if __name__ == '__main__':
         
     # Configure the service
     if service.configure() == 0:
-        print "%s configuration successfully completed                " % service.friendly_name,
+        print "\n%s configuration successfully completed                " % service.friendly_name,
         glib.printOkMessage()
         glib.registerService()
     else:
-        print "An error occurred while configuring the %s            " % service.friendly_name,
+        print "\nAn error occurred while configuring the %s            " % service.friendly_name,
         glib.printFailedMessage()
         sys.exit(1)
         
     # Start the service
     if service.start() == 0:
-        print "The %s was successfully started           " % service.friendly_name,
+        print "\nThe %s was successfully started           " % service.friendly_name,
         glib.printOkMessage()
     else:
-        print "An error occurred while starting the %s            " % service.friendly_name,
+        print "\nAn error occurred while starting the %s            " % service.friendly_name,
         glib.printFailedMessage()
         sys.exit(1)
 
