@@ -20,7 +20,7 @@
 # usage: glite-wn_installer [-u]
 #		 -u		uninstall
 #
-# glite-wn_installer installs the gLite Worker Node Deployment Unit
+# glite-wn_installer installs the gLite <xsl:value-of select="/node/@name"/> Worker Node Deployment Unit
 #
 <!-- Put here pre-install instructions -->
 
