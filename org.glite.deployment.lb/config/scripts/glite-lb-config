@@ -48,7 +48,7 @@ def set_env():
    file = open('/root/.bashrc', 'a')
    file.write('\nexport GLITE_LOCATION=%s\n' % config['glite_location'])
    file.write('export GLOBUS_LOCATION=%s\n' % config['globus_location'])
-   file.write('export LD_LIBRARY_PATH=$GLITE_LOCATION/lib:$GLOBUS_LOCATION/lib:$LD_LIBRARY_PATH]\n')
+   file.write('export LD_LIBRARY_PATH=$GLITE_LOCATION/lib:$GLOBUS_LOCATION/lib:$LD_LIBRARY_PATH\n')
    file.write('export GLITE_HOST_KEY=/home/%s/%s/%s\n' % (config['username'], config['user_cert_path'], config['hostkey']))
    file.write('export GLITE_HOST_CERT=/home/%s/%s/%s\n' % (config['username'], config['user_cert_path'], config['hostcert']))
    file.write('export GLITE_CERT_DIR=%s\n\n' % config['certs_path'])
@@ -56,7 +56,7 @@ def set_env():
    file = open('/root/.profile', 'a')
    file.write('\nexport GLITE_LOCATION=%s\n' % config['glite_location'])
    file.write('export GLOBUS_LOCATION=%s\n' % config['globus_location'])
-   file.write('export LD_LIBRARY_PATH=$GLITE_LOCATION/lib:$GLOBUS_LOCATION/lib:$LD_LIBRARY_PATH]\n')
+   file.write('export LD_LIBRARY_PATH=$GLITE_LOCATION/lib:$GLOBUS_LOCATION/lib:$LD_LIBRARY_PATH\n')
    file.write('export GLITE_HOST_KEY=/home/%s/%s/%s\n' % (config['username'], config['user_cert_path'], config['hostkey']))
    file.write('export GLITE_HOST_CERT=/home/%s/%s/%s\n' % (config['username'], config['user_cert_path'], config['hostcert']))
    file.write('export GLITE_CERT_DIR=%s\n\n' % config['certs_path'])
@@ -82,19 +82,9 @@ def set_env():
    file.write('export GLITE_HOST_CERT=/home/%s/%s/%s\n' % (config['username'], config['user_cert_path'], config['hostcert']))
    file.write('export GLITE_CERT_DIR=%s\n\n' % config['certs_path'])
    file.close()
-   os.system('/bin/chown %s:%s /home/%s/.bashrc' % (config['username'], config['group_name'], config['username']))
-   os.system('/bin/chown %s:%s /home/%s/.profile' % (config['username'], config['group_name'], config['username']))
+   os.chown('/home/%s/.bashrc' % config['username'], config['username'], config['group_name'])
+   os.chown('/home/%s/.profile' % config['username'], config['username'], config['group_name'])
    print 'OK!\n'
-
-#-------------------------------------------------------------------------------
-# Check the environment is correctly set 
-#-------------------------------------------------------------------------------
-
-def check_env():
-    if (os.environ['GLITE_LOCATION'] == '/opt/glite'):
-       return 1
-    else:
-       sys.exit('GLITE_LOCATION env variable not set!')
 
 
 #-------------------------------------------------------------------------------
@@ -111,25 +101,6 @@ def print_config(config):
     
     print "\n"
     
-
-#-------------------------------------------------------------------------------
-# Display the environment varaibles 
-#-------------------------------------------------------------------------------
-
-def print_env():
-
-    print '#-------------------------------------------------------------------'
-    print 'Environment variables:'
-    print '#-------------------------------------------------------------------'
-    print "GLITE_LOCATION  = %s " % os.environ['GLITE_LOCATION']
-    print "LD_LIBRARY_PATH = %s " % os.environ['LD_LIBRARY_PATH']
-    print "PATH            = %s " % os.environ['PATH']
-    print "GLITE_HOST_KEY  = %s " % os.environ['GLITE_HOST_KEY']
-    print "GLITE_HOST_CERT = %s " % os.environ['GLITE_HOST_CERT']
-    print "GLITE_CERT_DIR  = %s " % os.environ['GLITE_CERT_DIR']
-
-    print "\n"
-
 
 #-------------------------------------------------------------------------------
 # Check to see if host certs exist and that the permissions are correct
@@ -157,6 +128,14 @@ def check_certs():
 #-------------------------------------------------------------------------------
 
 def configure():
+   # Load environment variables
+   print '#-------------------------------------------------------------------'
+   print 'Loading environment variables.'
+   print '#-------------------------------------------------------------------'
+   os.system('source /root/.bashrc')
+   print('OK!\n')
+
+
    # Create the MySQL database
    print '#-------------------------------------------------------------------'
    print ('Creating MySQL %s database.' % config['db_name'])
@@ -185,21 +164,12 @@ def configure():
    print '#-------------------------------------------------------------------'
    print ('Creating %s/var directory.' % config['glite_location'])
    print '#-------------------------------------------------------------------'
-   os.system('/bin/mkdir %s/var' % config['glite_location'])
-   os.system('/bin/chmod 777 %s/var' % config['glite_location'])
+   os.makedirs('%s/var' % config['glite_location'])
+   os.chmod('%s/var' % config['glite_location'], 777)
    if os.path.exists('%s/var' % config['glite_location']):
       print('OK!\n')
    else:
       sys.exit('Could not create directory %s/var\n' % config['glite_location'])
-
-
-   # Copy the temporary glite-lb-bkserverd daemon in init.d
-   # print '#-------------------------------------------------------------------'
-   # print ('Updating %s/etc/init.d/glite-lb-bkserverd' % config['glite_location'])
-   # print '#-------------------------------------------------------------------'
-   # os.system('/bin/cp glite-lb-bkserverd-config %s/etc/init.d/glite-lb-bkserverd' % config['glite_location'])
-   # print '\n'
-
 
    return 1
 
@@ -313,8 +283,6 @@ if __name__ == '__main__':
    
    # Set up the environment
    set_env()
-   # check_env()
-   print_env()
       
    # Print configuration parameters
    if verbose:
@@ -331,7 +299,6 @@ if __name__ == '__main__':
    print '#-------------------------------------------------------------------'
    print ('Starting the gLite LB daemon using: %s/etc/init.d/glite-lb-bkserverd start' % config['glite_location'])
    print '#-------------------------------------------------------------------'
-   # os.system('/bin/su -l %s -c "%s/etc/init.d/glite-lb-bkserverd start"' % (config['username'], config['glite_location']))
    os.system('%s/etc/init.d/glite-lb-bkserverd start' % config['glite_location'])
    print '\n'
 
