@@ -18,7 +18,7 @@
 #
 # glite-wn_installer
 # usage: glite-wn_installer [-u]
-		 -u		uninstall
+#		 -u		uninstall
 #
 # glite-wn_installer installs the gLite Worker Node Deployment Unit
 #
@@ -38,13 +38,13 @@ rpm -Uvh *
 	</xsl:template>
 
 	<xsl:template name="components" match="components/component">
-		<xsl:variable name="package"><xsl:value-of select="@name"/>-<xsl:value-of select="@version"/>-<xsl:value-of select="@age"/>.1386.rpm</xsl:variable>
-wget <xsl:value-of select="$repository"/><xsl:value-of select="$package"/>
+		<xsl:variable name="package"><xsl:value-of select="@name"/>-<xsl:value-of select="@version"/>-<xsl:value-of select="@age"/>.<xsl:value-of select="@arch"/>.rpm</xsl:variable>
+wget <xsl:value-of select="$repository"/><xsl:value-of select="@arch"/>/RPMS/<xsl:value-of select="$package"/>
 <!-- rpm -Uvh <xsl:value-of select="$package"/> -->
 	</xsl:template>
 
 	<xsl:template name="dependencies" match="external">
-		<xsl:variable name="package"><xsl:value-of select="@name"/>-<xsl:value-of select="@version"/>-<xsl:value-of select="@age"/>.1386.rpm</xsl:variable>
+		<xsl:variable name="package"><xsl:value-of select="@name"/>-<xsl:value-of select="@version"/>-<xsl:value-of select="@age"/>.<xsl:value-of select="@arch"/>.rpm</xsl:variable>
 wget <xsl:value-of select="$ext-repository"/><xsl:value-of select="$package"/>
 <!-- rpm -Uvh <xsl:value-of select="$package"/> -->
 	</xsl:template>
