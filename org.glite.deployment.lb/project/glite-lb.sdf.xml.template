@@ -12,7 +12,7 @@
 			    <component name="glite-config"
 			    		version="@org.glite.deployment.config.info.version@"
 			    		age="@org.glite.deployment.config.info.age@"
-			    		build="1"
+			    		build="@org.glite.deployment.config.info.build@"
 			    		arch="noarch"/>
 			    		
                 <component name="glite-lb-config"
