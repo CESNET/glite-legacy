@@ -20,6 +20,9 @@
 
 	Revision history:
 	$Log$
+	Revision 1.2  2004/07/12 16:18:37  dimeglio
+	Modified to use myproxy from the repository if available
+	
 	Revision 1.1.1.1  2004/07/09 10:16:25  akrenek
 	initial import
 	
@@ -34,7 +37,7 @@
 	
 -->
 
-<project name="proxyrenewal" default="compile">
+<project name="proxyrenewal" default="dist">
 	
 	<!-- =========================================
 	     Import properties (order is important)
