@@ -4,18 +4,15 @@ GLITE_LOCATION=/opt/glite
 GLITE_USER=glite
 GLITE_LOCATION_VAR=/opt/glite/var
 
-PROXY_REPOSITORY="$GLITE_LOCATION_VAR/spool/glite-renewd"
-
 [ -f /etc/glite.conf ] && . /etc/glite.conf
 [ -f $HOME/.glite.conf ] && . $HOME/.glite.conf
 
-#[ -f $GLITE_LOCATION/etc/lb.conf ] && . $GLITE_LOCATION/etc/lb.conf
-#[ -f $GLITE_LOCATION_VAR/etc/lb.conf ] && . $GLITE_LOCATION_VAR/etc/lb.conf
+PROXY_REPOSITORY="$GLITE_LOCATION_VAR/spool/glite-renewd"
 
 start()
 {
-	[ -n "$GLITE_HOST_CERT"] X509_USER_CERT="$GLITE_HOST_CERT"
-	[ -n "$GLITE_HOST_KEY" ] X509_USER_KEY="$GLITE_HOST_KEY"
+	[ -n "$GLITE_HOST_CERT" ] && X509_USER_CERT="$GLITE_HOST_CERT"
+	[ -n "$GLITE_HOST_KEY" ] && X509_USER_KEY="$GLITE_HOST_KEY"
 
 	echo -n Starting ProxyRenewal Daemon: glite-proxy-renewd ...
 
@@ -25,8 +22,8 @@ start()
 		chmod 0700 $PROXY_REPOSITORY
 	fi
 	
-	su $GLITE_USER -c "$GLITE_LOCATION/bin/glite-proxy-renewd" \
-		-r $PROXY_REPOSITORY && echo " done"
+	su $GLITE_USER -c "$GLITE_LOCATION/bin/glite-proxy-renewd \
+		-r $PROXY_REPOSITORY" && echo " done"
 }
 
 stop()
