@@ -11,6 +11,8 @@
 char * Decode(const char *, int, int *);
 char **listadd(char **, char *, int);
 
+extern char *vomsconf;
+
 static int
 generate_proxy(globus_gsi_cred_handle_t cur_proxy,
                X509_EXTENSION *voms_extension, const char *new_file)
@@ -151,7 +153,7 @@ renew_voms_cert(struct vomsdata *vd, struct voms **voms_cert,
    struct contactdata **voms_contacts = NULL;
    char *command = NULL;
 
-   voms_contacts = VOMS_FindByVO(vd, (*voms_cert)->voname, NULL, NULL, &voms_error);
+   voms_contacts = VOMS_FindByVO(vd, (*voms_cert)->voname, vomsconf, NULL, &voms_error);
 
    if (voms_contacts == NULL) {
       fprintf(stderr, "VOMS_FindByVO() failed\n");
