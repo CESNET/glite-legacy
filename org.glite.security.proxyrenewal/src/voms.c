@@ -190,7 +190,7 @@ renew_voms_certs(const char *cur_file, const char *new_file)
    X509 *cert = NULL;
    STACK_OF(X509) *chain = NULL;
    char *buf = NULL;
-   size_t buf_len;
+   size_t buf_len = 0;
    X509_EXTENSION *extension = NULL;
    char *old_env_proxy = getenv("X509_USER_PROXY");
 
