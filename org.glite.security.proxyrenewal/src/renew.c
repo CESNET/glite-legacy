@@ -157,12 +157,14 @@ renew_proxy(proxy_record *record, char *basename, char **new_proxy)
    } else
       socket_attrs->psport = MYPROXY_SERVER_PORT;
 
+   verror_clear();
    ret = myproxy_get_delegation(socket_attrs, client_request,
 	                        server_response, tmp_proxy);
    if (ret == 1) {
       ret = EDG_WLPR_ERROR_MYPROXY;
       edg_wlpr_Log(LOG_ERR, "Error contacting MyProxy server for proxy %s: %s",
 	           repository_file, verror_get_string());
+      verror_clear();
       goto end;
    }
 
