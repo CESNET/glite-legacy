@@ -8,7 +8,7 @@ Group:System/Application
 Prefix:/opt/glite
 BuildArch:noarch
 BuildRoot:%{_builddir}/%{name}-%{version}
-Requires: glite-lb-common, glite-lb-logger, glite-lb-server, glite-security-proxyrenewal, glite-lb-client-interface, MySQL-server, MySQL-client, expat, ares,vdt_globus_essentials, glite-wms-utils-jobid, glite-wms-utils-exception, myproxy, perl-Expect.pm 
+Requires: glite-config, glite-rgma-servicetool-config, glite-lb-client-interface, glite-lb-ws-interface, glite-lb-logger, glite-lb-common, glite-lb-server, glite-lb-server-bones, glite-wms-utils-jobid, glite-wms-utils-exception, glite-security-proxyrenewal, glite-security-voms, gridsite, MySQL-server, MySQL-client, ares, vdt_globus_essentials, gpt, myproxy, perl-Expect.pm
 
 AutoReqProv:no
 Source:glite-lb.tar.gz
