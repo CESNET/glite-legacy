@@ -14,6 +14,12 @@
 extern "C" {
 #endif
 
+/**
+ * \defgroup context Context
+ *
+ *@{
+ */
+
 /** Opaque context type */
 typedef struct _edg_wll_Context *edg_wll_Context;
 
@@ -232,6 +238,10 @@ int edg_wll_GetLoggingJob(
 	const edg_wll_Context	context,
 	edg_wlc_JobId	*jobid_out
 );
+
+/*
+ *@} end of group
+ */
 
 #ifdef __cplusplus
 }

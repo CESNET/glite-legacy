@@ -1,10 +1,6 @@
 #ifndef __EDG_WORKLOAD_LOGGING_CLIENT_EVENTS_H__
 #define __EDG_WORKLOAD_LOGGING_CLIENT_EVENTS_H__
 
-/**
- * \brief contains definition of event type codes for use both by lbapi.h and dglog.h
- */
-
 #ident "$Header$"
 /*
 @@@AUTO
@@ -22,6 +18,12 @@
 extern "C" {
 #endif
 
+/**
+ * \defgroup events Events
+ * \brief All L&B event types.
+ *
+ *@{
+ */
 
 /**
  * Predefined type for ULM string 
@@ -327,6 +329,9 @@ void edg_wll_FreeEvent(
 	edg_wll_Event * event
 );
 
+/*
+ *@} end of group
+ */
 
 #ifdef __cplusplus
 }

@@ -187,7 +187,7 @@ public:
 	 * \throw Exception Invalid event type or attribute not
 	 * defined for this event.
 	 */
-	int	getValInt(Attr) const;
+	int	getValInt(Attr name) const;
 
 	/** Retrieve string attribute.
 	 *
@@ -197,7 +197,7 @@ public:
 	 * \throw Exception Invalid event type or attribute not
 	 * defined for this event.
 	 */
-	std::string getValString(Attr) const;
+	std::string getValString(Attr name) const;
 
         /** Retrieve time attribute.
 	 *
@@ -205,7 +205,7 @@ public:
 	 * \param[in] name Name of the attribute to retrieve.
 	 * \returns struct timeval  value of the attribute.
 	 */
-        struct timeval	getValTime(Attr) const;
+        struct timeval	getValTime(Attr name) const;
 		
         /** Retrieve jobid attribute 
 	 *
@@ -215,7 +215,7 @@ public:
 	 * \throw Exception Invalid event type or attribute not
 	 * defined for this event.
 	 */
-        const glite::wmsutils::jobid::JobId getValJobId(Attr) const;
+        const glite::wmsutils::jobid::JobId getValJobId(Attr name) const;
 
 	/** Attribute name.
 	 *
@@ -225,7 +225,7 @@ public:
 	 * \throw Exception Invalid event type or attribute not
 	 * defined for this event.
 	 */
-	const std::string & getAttrName(Attr) const;
+	const std::string & getAttrName(Attr name) const;
 
 	/** List of attributes and types valid for this instance.
 	 *

@@ -4,15 +4,6 @@
 /*!
  * \file consumer.h
  * \brief L&B consumer API
- *
- * General rules:
- * - functions return 0 on success, nonzero on error, errror details can 
- *   be found via edg_wll_ErrorCode()
- * - OUT are ** types, functions malloc()-ate objects and fill in the pointer 
- *   pointed to by the OUT argument
- * - returned lists of pointers are NULL-terminated malloc()-ed arrays
- * - edg_wll_Query + wrapper terminate arrays with EDG_WLL_EVENT_UNDEF event
- * - OUT is NULL if the list is empty
  */
 
 #ident "$Header$"
@@ -26,7 +17,22 @@
 extern "C" {
 #endif
 
-/*!
+/**
+ * \defgroup querying Server querying
+ * \brief Query server record description and handling.
+ *
+ * General rules:
+ * - functions return 0 on success, nonzero on error, errror details can 
+ *   be found via edg_wll_ErrorCode()
+ * - OUT are ** types, functions malloc()-ate objects and fill in the pointer 
+ *   pointed to by the OUT argument
+ * - returned lists of pointers are NULL-terminated malloc()-ed arrays
+ * - edg_wll_Query + wrapper terminate arrays with EDG_WLL_EVENT_UNDEF event
+ * - OUT is NULL if the list is empty
+ *@{
+ */
+
+/**
  * Predefined types for query attributes
  */
 typedef enum _edg_wll_QueryAttr{
@@ -53,7 +59,7 @@ typedef enum _edg_wll_QueryAttr{
 } edg_wll_QueryAttr;
 
 
-/*!
+/**
  * Predefined types for query operands
  */
 typedef enum _edg_wll_QueryOp{
@@ -65,7 +71,7 @@ typedef enum _edg_wll_QueryOp{
 } edg_wll_QueryOp;
 
 
-/*!
+/**
  * Single query condition for edg_wll_Query().
  * Those records are composed to form an SQL \a where clause
  * when processed at the L&B server
@@ -93,36 +99,15 @@ typedef struct _edg_wll_QueryRec {
 	} value, value2;
 } edg_wll_QueryRec;
 
-/************************************************
- * API FUNCTION DECLARATIONS			*
+/**
+ * default query timeout (in seconds)
  */
-
-
-#ifdef CLIENT_SBIN_PROG
-extern int edg_wll_http_send_recv(
-	edg_wll_Context,
-	char *, const char * const *, char *,
-	char **,char ***,char **
-);
-
-extern int http_check_status(
-	edg_wll_Context,
-	char *,
-	char **
-);
-
-extern int set_server_name_and_port(
-	edg_wll_Context,
-	const edg_wll_QueryRec **
-);
-
-#endif
+#define EDG_WLL_QUERY_TIMEOUT_DEFAULT   120
 
 /**
- * \name Server querying
- *
- *@{
+ * maximal query timeout (in seconds)
  */
+#define EDG_WLL_QUERY_TIMEOUT_MAX       1800
 
 /**
  * General query on events.
@@ -369,8 +354,6 @@ int edg_wll_QuerySequenceCodeProxy(
 	char **		code
 );
 		
-/*@}*/
-
 /*
  * edg_wll_QueryRec manipulation
  */
@@ -378,17 +361,29 @@ int edg_wll_QuerySequenceCodeProxy(
 /** Free edg_wll_QueryRec internals, not the structure itself */
 void edg_wll_QueryRecFree(edg_wll_QueryRec *);
 
-
-
-/**
- * default query timeout (in seconds)
+/*
+ *@} end of group
  */
-#define EDG_WLL_QUERY_TIMEOUT_DEFAULT   120
 
-/**
- * maximal query timeout (in seconds)
- */
-#define EDG_WLL_QUERY_TIMEOUT_MAX       1800
+#ifdef CLIENT_SBIN_PROG
+extern int edg_wll_http_send_recv(
+	edg_wll_Context,
+	char *, const char * const *, char *,
+	char **,char ***,char **
+);
+
+extern int http_check_status(
+	edg_wll_Context,
+	char *,
+	char **
+);
+
+extern int set_server_name_and_port(
+	edg_wll_Context,
+	const edg_wll_QueryRec **
+);
+
+#endif
 
 #ifdef __cplusplus
 }
