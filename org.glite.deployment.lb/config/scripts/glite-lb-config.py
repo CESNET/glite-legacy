@@ -38,11 +38,10 @@ global params                         # all config values from the XML file
 class glite_lb:
 
     def __init__(self):
-        self.verbose = 'false'
-        
+        self.verbose = 0
         self.version = "0.1.0"
         self.name = "glite-lb"
-        self.friendly_name = "gLite Logging and Bookkeeping Server"
+        self.friendly_name = "gLite Logging and Bookkeeping"
         
     #-------------------------------------------------------------------------------
     # Banner 
@@ -68,7 +67,7 @@ class glite_lb:
     # Version
     #-------------------------------------------------------------------------------
 
-    def version(self):
+    def showVersion(self):
 
         print '\n%s-config  v. %s\n' % (self.name,self.version)
     
@@ -82,7 +81,7 @@ class glite_lb:
             print "\n%s" % (msg)
         
         self.copyright()
-        self.version()
+        self.showVersion()
     
         print """Usage: \n
 Edit the configuration file %s.cfg.xml in
@@ -90,12 +89,16 @@ Edit the configuration file %s.cfg.xml in
 save it as %s/etc/config/%s.cfg.xml
 and run the script as follows\n 
 python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
-        os.environ['GLITE_LOCATION'], self.name)
+        os.environ['GLITE_LOCATION'], self.name, self.name)
 
         print '    -c, --checkconf     print the service configuration'
         print '    -v, --version       print the version of the configuration script'
         print '    -h, --help          print this usage information'
         print '\n'
+
+    #-------------------------------------------------------------------------------
+    # All the configuration code goes here
+    #-------------------------------------------------------------------------------
 
     def start(self):
         mysql.start()
@@ -189,9 +192,14 @@ if __name__ == '__main__':
         usage(msg = "Unknown options(s)")
         sys.exit(1)
 
+    # The script must be run as root
+    if not os.geteuid()==0:
+        print '"\nThis script must be run as root\n'
+        sys.exit(1)
+        
     # Get an instance of the library class
     glib = gLib()
-
+    
     # Load parameters
     params = {}
     if glib.loadConfiguration("%s/../glite-lb.cfg.xml" % glib.getScriptPath(),params):
@@ -206,27 +214,23 @@ if __name__ == '__main__':
     
     # Set up the environment
     set_env()
-      
+          
     # Instantiate the service classes
     mysql = MySQL.Mysql()
     service = glite_lb()
     service.verbose = verbose
     
-    # Print configuration parameters
-    if verbose:
-        glib.print_params(params)
-
     # Check cli options
     for o, a in opts:
         if o in ("-h", "--help"):
             service.usage()
             sys.exit(0)
         if o in ("-v", "--version"):
-            service.version()
+            service.showVersion()
             sys.exit(0)
         if o in ("-c", "--checkconf"):
             service.copyright()
-            service.version()
+            service.showVersion()
             glib.print_params(params)
             sys.exit(0)
 
@@ -243,7 +247,7 @@ if __name__ == '__main__':
         glib.print_params(params)
 
     service.copyright()
-    #service.version()
+    service.showVersion()
     service.banner()
         
     # Configure the service
