@@ -85,7 +85,7 @@ typedef struct _edg_wll_QueryRec {
  * Query operand.
  * The appropriate type is uniquely defined by the attr member
  */
-	union {
+	union edg_wll_QueryVal {
 		int	i;	/**< integer query attribute value */
 		char	*c;	/**< character query attribute value */
 		struct timeval	t;	/**< time query attribute value */
