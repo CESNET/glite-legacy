@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="Proxy renewal">
+
+	<property file="build.properties" />	
+	<property name="subsystem.name" value="${security.subsystem.name}"/>
+	<property name="subsystem.prefix" value="${security.subsystem.prefix}"/>
+	<property name="component.prefix" value="proxyrenewal" />
+
+	<import file="${component.general.properties.file}" />
+
+</project>
