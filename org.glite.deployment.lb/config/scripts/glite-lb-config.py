@@ -303,10 +303,10 @@ if __name__ == '__main__':
             service.showVersion()
             glib.print_params(params)
             sys.exit(0)
-        if o == "--stop":
+   	if o in ("stop", "--stop"): 
             service.stop()
             sys.exit(0)
-        if o == "--start":
+	if o in ("start", "--start"):
             service.start()
             sys.exit(0)
         if o == "--status":
