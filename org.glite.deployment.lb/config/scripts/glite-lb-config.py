@@ -198,11 +198,10 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         
         # Create the GLITE_USER if it doesn't exists
         print "\nCreating/Verifying the GLITE_USER account %s" % os.environ['GLITE_USER']
-        glib.add_user(os.environ['GLITE_USER'],os.environ['GLITE_USER'])
         (uid,gid) = glib.get_user_info(os.environ['GLITE_USER'])
         glib.check_dir(os.environ['GLITE_LOCATION_VAR'],0755, uid, gid)
-        glib.check_dir("/home/%s/.certs" % os.environ['GLITE_USER'],0755, uid, gid)
         lb_cert_path = pwd.getpwnam(os.environ['GLITE_USER'])[5] + "/" + params['user.certificate.path']
+        glib.check_dir(lb_cert_path ,0755, uid, gid)
         glib.printOkMessage()
 
         # Create all directories needed
@@ -212,7 +211,6 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
          
         # Copy certificates
         print "\nCopy host certificates to GLITE_USER home directory as service certificates",
-        glib.check_dir( lb_cert_path, 0755, uid, gid)
         os.system("cp %s %s %s/" % (params['host.certificate.file'], params['host.key.file'], lb_cert_path))
         os.chown("%s/hostcert.pem" % lb_cert_path, uid,gid)
         os.chmod("%s/hostcert.pem" % lb_cert_path, 0644)
@@ -226,13 +224,16 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         time.sleep(5)
         self.mysql.start()
         
+        if not os.path.exists('/tmp/mysql.sock'):
+            os.symlink('/var/lib/mysql/mysql.sock', '/tmp/mysql.sock')
+
         # Check if database exists
         if self.mysql.existsDB(params['lb.database.name']) != 0:
             # Create database
             print ('\n==> Creating MySQL %s database\n' % params['lb.database.name'])
     
             if os.path.exists('/bin/rm /tmp/mysql_ct'):
-                os.system('/bin/rm /tmp/mysql_ct')
+                os.remove('/tmp/mysql_ct')
             
             file = open('/tmp/mysql_ct', 'w')
             text = ['CREATE DATABASE %s;\n' % params['lb.database.name'], 
@@ -245,35 +246,36 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
             file.close()
             os.system('/usr/bin/mysql < /tmp/mysql_ct')
             os.system('/bin/rm /tmp/mysql_ct')
+
+            #Creating the indexes
+            print 'Creating the index configuration file %s/etc/glite-lb-index.conf            ' % os.environ['GLITE_LOCATION'],
+            path = "%s/etc/glite-lb-index.conf" % os.environ['GLITE_LOCATION']
+            pathBak = "%s/etc/glite-lb-index.conf.bak" % os.environ['GLITE_LOCATION']
+        
+            if os.path.exists(pathBak):
+                os.remove(pathBak)
+            if os.path.exists(path):
+                os.rename(path,pathBak)
+            file = open(path, 'w')
+            file.write("[\n")
+            file.write("        JobIndices = {\n")
+            for index in params['lb.index.list']:
+                file.write("                [ type = \"system\"; name = \"%s\" ],\n" % index)
+            file.write("        }\n")
+            file.write("]\n")
+            file.close()
+            glib.printOkMessage()
+            
+            print "Running glite-lb-bkindex                    ",    
+            if os.system('%s/bin/glite-lb-bkindex -r %s/etc/glite-lb-index.conf' % (os.environ['GLITE_LOCATION'],os.environ['GLITE_LOCATION'])):
+                glib.printFailedMessage()
+                return 1
+            else:
+                glib.printOkMessage()
+        
         else:
             print "\n==> MySQL database %s already exist\n" % params['lb.database.name']
             
-        if not os.path.exists('/tmp/mysql.sock'):
-            os.symlink('/var/lib/mysql/mysql.sock', '/tmp/mysql.sock')
-
-    	#Creating the indexes
-    	print 'Creating the index configuration file %s/etc/glite-lb-index.conf            ' % os.environ['GLITE_LOCATION'],
-    	path = "%s/etc/glite-lb-index.conf" % os.environ['GLITE_LOCATION']
-    	pathBak = "%s/etc/glite-lb-index.conf.bak" % os.environ['GLITE_LOCATION']
-    
-    	if os.path.exists(pathBak):
-    		os.remove(pathBak)
-    	if os.path.exists(path):
-    		os.rename(path,pathBak)
-    	file = open(path, 'w')
-    	file.write("[\n")
-    	file.write("		JobIndices = {\n")
-    	for index in params['lb.index.list']:
-    		file.write("				[ type = \"system\"; name = \"%s\" ],\n" % index)
-    	file.write("		}\n")
-    	file.write("]\n")
-    	file.close()
-        glib.printOkMessage()
-    	
-        print "Running glite-lb-bkindex                    ",	
-        os.system('%s/bin/glite-lb-bkindex -r %s/etc/glite-lb-index.conf' % (os.environ['GLITE_LOCATION'],os.environ['GLITE_LOCATION']))
-        glib.printOkMessage()
-    
         self.mysql.stop()
     
         #-------------------------------------------------------------------
