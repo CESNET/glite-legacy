@@ -26,12 +26,12 @@
 		<!-- MySQL DB -->
 		<lb.database.name
 			description="The mySQL database name to create for storing LB data
-						Now it must be set to the default value"
+			In this version it must be set to the given value"
 			value="lbserver20"/>
 			
 		<lb.database.username
 			description="The username to be used to access the local mySQL server
-						Now it must be set to the default value"
+			In this version it must be set to the given value"
 			value="lbserver"/>
 			
 		<GLOBUS_LOCATION
@@ -41,10 +41,6 @@
 		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
 		<!-- System parameters - You should leave these alone -->
 		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->		
-
-		<dirlist
-			description="List of directory to be created"
-			value="/opt/glite/var"/>
 
 	</parameters>
 </config>

@@ -102,9 +102,13 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
     #-------------------------------------------------------------------------------
 
     def start(self):
+        self.stop()
+
         self.mysql.start()
+        time.sleep(5)
         if not os.path.exists('/tmp/mysql.sock'):
             os.symlink('/var/lib/mysql/mysql.sock', '/tmp/mysql.sock')
+            
         os.system('%s/etc/init.d/glite-lb-bkserverd start' % os.environ['GLITE_LOCATION'])
         
         return 0
@@ -116,52 +120,91 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         return 0
         
     def configure(self):
-        # Create all directories needed
-        if params.has_key('dirlist'):
-           dirlist = string.split(params['dirlist'],',')
-           for d in dirlist:
-              glib.check_dir(d,0777)
-        glib.check_dir(os.environ['GLITE_CERT_DIR'])
-         
+        
         # Create the GLITE_USER if it doesn't exists
-        print "Creating/Verifying the GLITE_USER account %s" % params['GLITE_USER']
+        print "\n1 - Creating/Verifying the GLITE_USER account %s" % params['GLITE_USER']
         glib.add_user(params['GLITE_USER'],params['GLITE_USER'])
         (uid,gid) = glib.get_user_info(params['GLITE_USER'])
         glib.check_dir(os.environ['GLITE_LOCATION_VAR'],0755, uid, gid)
         glib.check_dir("/home/%s/.certs" % params['GLITE_USER'],0755, uid, gid)
         lb_cert_path = pwd.getpwnam(params['GLITE_USER'])[5] + "/" + params['user.certificate.path']
+        print "\n[OK]"
 
+        # Create all directories needed
+        print "\n2 - Verify CA certificates directory"
+        glib.check_dir(os.environ['GLITE_CERT_DIR'])
+        print "\n[OK]"
+         
         # Copy certificates
+        print "\n3 - Copy host certificates to GLITE_USER home directory as service certificates"
         glib.check_dir( lb_cert_path, 0755, uid, gid)
         os.system("cp %s %s %s/" % (params['host.certificate.file'], params['host.key.file'], lb_cert_path))
         os.chown("%s/hostcert.pem" % lb_cert_path, uid,gid)
         os.chown("%s/hostkey.pem" % lb_cert_path, uid,gid)
-        glib.export('GLITE_HOST_CERT',"%s/hostcert.pem" % lb_cert_path)
-        glib.export('GLITE_HOST_KEY',"%s/hostkey.pem" % lb_cert_path)
+        print "\n[OK]"
                 
+        # MySQL configuration file
+        print "\n4 - Create/Verify the configuration file for MySQL Server"
+        file = open("/etc/my.cnf", 'w')
+        file.write("[mysqld]\n")
+        file.write("datadir=/var/lib/mysql\n")
+        file.write("socket=/tmp/mysql.sock\n")
+        file.write("\n")
+        file.write("[mysql.server]\n")
+        file.write("user=mysql\n")
+        file.write("basedir=/var/lib\n")
+        file.write("\n")
+        file.write("[safe_mysqld]\n")
+        file.write("err-log=/var/log/mysqld.log\n")
+        file.write("pid-file=/var/run/mysqld/mysqld.pid\n")
+        file.write("\n")
+        file.write("[client]\n")
+        file.write("socket=/tmp/mysql.sock\n")
+        file.close()
+        print "\n[OK]"
+
         # Create the MySQL database
+        print "\n5 - Create/Verify the %s database" % params['lb.database.name']
         self.mysql.stop()
         time.sleep(5)
         self.mysql.start()
         
-        print '#-------------------------------------------------------------------'
-        print ('Creating MySQL %s database.' % params['lb.database.name'])
-        print '#-------------------------------------------------------------------'
+        # Check if database exists
         
-        os.system('/usr/bin/mysqlaccess %s %s' % (params['lb.database.username'], params['lb.database.name']))
+        os.system('/usr/bin/mysqlaccess %s %s' % (params['lb.database.username'],params['lb.database.name']))
+        
         file = open('/tmp/mysql_ct', 'w')
-        text = ['CREATE DATABASE %s;\n' % params['lb.database.name'], 
-                   'GRANT ALL PRIVILEGES ON %s.* TO %s@localhost IDENTIFIED BY "";\n' % (params['lb.database.name'],params['lb.database.username']),
-                   'USE %s;\n' % params['lb.database.name'],
-                   '\. %s/etc/glite-lb-dbsetup.sql\n' % os.environ['GLITE_LOCATION']]
-
-        file.writelines(text)
+        file.write("USE %s;\n" % params['lb.database.name'])
         file.close()
-        os.system('/usr/bin/mysql < /tmp/mysql_ct')
-        os.system('/bin/rm /tmp/mysql_ct')
+        channels = os.popen3('/usr/bin/mysql < /tmp/mysql_ct')
+        
+        for line in channels[2].xreadlines():
+            print line
+            if line.find("Unknown database") != -1:
+                # Create database
+                print ('\n==> Creating MySQL %s database\n' % params['lb.database.name'])
+        
+                os.system('/bin/rm /tmp/mysql_ct')
+                
+                file = open('/tmp/mysql_ct', 'w')
+                text = ['CREATE DATABASE %s;\n' % params['lb.database.name'], 
+                           'GRANT ALL PRIVILEGES ON %s.* TO %s@localhost IDENTIFIED BY "";\n' % (params['lb.database.name'],params['lb.database.username']),
+                           'USE %s;\n' % params['lb.database.name'],
+                           '\. %s/etc/glite-lb-dbsetup.sql\n' % os.environ['GLITE_LOCATION']]
+        
+                file.writelines(text)
+                file.close()
+                os.system('/usr/bin/mysql < /tmp/mysql_ct')
+                os.system('/bin/rm /tmp/mysql_ct')
+                break
+        else:
+            print "\n==> MySQL database %s already exist\n" % params['lb.database.name']
+            
         if not os.path.exists('/tmp/mysql.sock'):
             os.symlink('/var/lib/mysql/mysql.sock', '/tmp/mysql.sock')
         self.mysql.stop()
+        
+        print "\n[OK]"
          
         return 0
         
