@@ -36,8 +36,8 @@ gLite Logging and Bookkeeping node installation package
 %preun
 %postun
 %files
-%attr(755,root,root) %{prefix}/etc/config/glite-lb/scripts/glite-lb-config
-%attr(644,root,root) %{prefix}/etc/config/glite-lb/glite-lb.cfg.xml
+%attr(755,root,root) %{prefix}/etc/config/scripts/glite-lb-config
+%attr(644,root,root) %{prefix}/etc/config/templates/glite-lb.cfg.xml
 
 %changelog
 
