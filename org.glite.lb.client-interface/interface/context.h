@@ -130,7 +130,8 @@ typedef enum _edg_wll_ErrorCode {
 	EDG_WLL_ERROR_PARSE_MSG_INCOMPLETE, /**< Incomplete message (missing fields) */
 	EDG_WLL_ERROR_PARSE_KEY_DUPLICITY, /**< Duplicate entry in message */
 	EDG_WLL_ERROR_PARSE_KEY_MISUSE, /**< Entry not allowed for this message type */
-	EDG_WLL_ERROR_PARSE_OK_WITH_EXTRA_FIELDS, /**< Additional, not understood fields found in message.
+	EDG_WLL_ERROR_PARSE_OK_WITH_EXTRA_FIELDS, /**< Additional, not understood fields found in message */
+	EDG_WLL_ERROR_COMPARE_EVENTS, /**< Two compared events differ.
 		The rest is OK therefore this is not a true error. */
         EDG_WLL_ERROR_XML_PARSE, /**< Error in parsing XML protocol. */
         EDG_WLL_ERROR_SERVER_RESPONSE, /**< Generic failure on server. See syslog on the server machine for details. */
