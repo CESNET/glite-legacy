@@ -186,9 +186,11 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
 
         pid = glib.getPID('rgma-servicetool')
         if (pid != 0):
-            print 'Could not stop the R-GMA Servicetool service            ', glib.printFailedMessage()
+            print 'Could not stop the R-GMA Servicetool service            ',
+            glib.printFailedMessage()
         else:
-            print 'The R-GMA Servicetool service has been stopped            ', glib.printOkMessage()
+            print 'The R-GMA Servicetool service has been stopped            ',
+            glib.printOkMessage()
         
         return 0
         
@@ -233,7 +235,8 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
             
             file = open('/tmp/mysql_ct', 'w')
             text = ['CREATE DATABASE %s;\n' % params['lb.database.name'], 
-                       'GRANT ALL PRIVILEGES ON %s.* TO %s@localhost IDENTIFIED BY "";\n' % (params['lb.database.name'],params['lb.database.username']),
+                       'GRANT ALL PRIVILEGES ON %s.* TO %s@localhost IDENTIFIED BY "";\n' \
+                       % (params['lb.database.name'],params['lb.database.username']),
                        'USE %s;\n' % params['lb.database.name'],
                        '\. %s/etc/glite-lb-dbsetup.sql\n' % os.environ['GLITE_LOCATION']]
     
