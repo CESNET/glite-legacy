@@ -1,6 +1,8 @@
 #ifndef __EDG_WORKLOAD_LOGGING_COMMON_LB_GSS_H__
 #define __EDG_WORKLOAD_LOGGING_COMMON_LB_GSS_H__
 
+#ident "$Header$"
+
 #include <gssapi.h>
 
 #ifdef __cplusplus
@@ -19,7 +21,7 @@ enum {
 typedef struct _edg_wll_GssConnection {
   gss_ctx_id_t context;
   int sock;
-  char buffer[BUFSIZ];
+  char *buffer;
   size_t bufsize;
 } edg_wll_GssConnection;
 
@@ -28,6 +30,8 @@ typedef struct _edg_wll_GssStatus {
   OM_uint32 minor_status;
 } edg_wll_GssStatus;
 
+/* XXX Support anonymous connections. Are we able/required to support
+ * anonymous servers as well. */
 
 int
 edg_wll_gss_acquire_cred_gsi(char *cert_file,
@@ -99,10 +103,15 @@ edg_wll_gss_reject(int sock);
 
 int
 edg_wll_gss_oid_equal(const gss_OID a,
-			const gss_OID b);
+		      const gss_OID b);
+
+/*
+int
+edg_wll_gss_get_name(gss_cred_id_t cred, char **name);
+*/
 
 #ifdef __cplusplus
 } 
 #endif
 	
-#endif
+#endif /* __EDG_WORKLOAD_LOGGING_COMMON_LB_GSS_H__ */

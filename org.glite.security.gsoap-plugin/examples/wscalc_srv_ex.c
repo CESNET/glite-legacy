@@ -10,7 +10,6 @@
 static struct option long_options[] = {
 	{ "cert",    required_argument,      NULL,   'c' },
 	{ "key",     required_argument,      NULL,   'k' },
-	{ "CAdir",   required_argument,      NULL,   'd' },
 	{ NULL, 0, NULL, 0 }
 };
 
@@ -20,69 +19,54 @@ usage(const char *me)
 	fprintf(stderr,
 			"usage: %s [option]\n"
 			"\t-c, --cred\t certificate file\n"
-			"\t-k, --key\t private key file\n"
-			"\t-d, --CAdir\t trusted certificates directory\n",	me);
+			"\t-k, --key\t private key file\n", me);
 }
 
 
 int
 main(int argc, char **argv)
 {
-	struct soap			soap;
-	edg_wll_GssStatus	gss_code;
-	gss_cred_id_t		cred = GSS_C_NO_CREDENTIAL;
-	char			   *name, *msg;
-	char			   *cert, *key, *cadir;
-	int					m, s; /* master and slave sockets */
-	int					opt;
+	struct soap				soap;
+	glite_gsplugin_Context	ctx = NULL;
+	char				   *name;
+	char				   *cert, *key;
+	int						opt;
 
 
-	cert = key = cadir = NULL;
+	cert = key = NULL;
 	name = strrchr(argv[0],'/');
 	if ( name ) name++; else name = argv[0];
 
-	while ((opt = getopt_long(argc, argv, "c:k:d:", long_options, NULL)) != EOF) {
+	while ((opt = getopt_long(argc, argv, "c:k:", long_options, NULL)) != EOF) {
 		switch (opt) {
 		case 'c': cert = optarg; break;
 		case 'k': key = optarg; break;
-		case 'd': cadir = optarg; break;
 		case '?':
 		default : usage(name); exit(1);
 		}
 	}
 
 	if ( cert || key ) {
-		char *subject = NULL;
-
-		if ( edg_wll_gss_acquire_cred_gsi(cert, key,
-							&cred, &subject, &gss_code) ) {
-			edg_wll_gss_get_error(&gss_code, "Failed to read credential", &msg);
-			fprintf(stderr, "%s\n", msg);
-			free(msg);
-			exit(1);
-		}
-		if (subject) {
-			printf("server running with certificate: %s\n", subject);
-			free(subject);
-		}
+		if ( glite_gsplugin_init_context(&ctx) ) { perror("init context"); exit(1); }
+		ctx->cert_filename = strdup(cert? : key);
+		ctx->key_filename = strdup(key? : cert);
 	}
 
 	soap_init(&soap);
 
-	if ( soap_register_plugin(&soap, glite_gsplugin) ) {
+	if ( soap_register_plugin_arg(&soap, glite_gsplugin, ctx? : NULL) ) {
 		fprintf(stderr, "Can't register plugin\n");
 		exit(1);
 	}
 
-	if ( (m = soap_bind(&soap, NULL, 9999, 100)) < 0 ) {
+	if ( soap_bind(&soap, NULL, 9999, 100) < 0 ) {
 		soap_print_fault(&soap, stderr);
 		exit(1);
 	}
 
 	while ( 1 ) {
 		printf("accepting connection\n");
-		s = soap_accept(&soap);
-		if ( s < 0 ) {
+		if ( soap_accept(&soap) < 0 ) {
 			fprintf(stderr, "soap_accept() failed!!!\n");
 			soap_print_fault(&soap, stderr);
 			fprintf(stderr, "plugin err: %s", glite_gsplugin_errdesc(&soap));
@@ -95,14 +79,12 @@ main(int argc, char **argv)
 			fprintf(stderr, "plugin err: %s", glite_gsplugin_errdesc(&soap));
 		}
 
-		/* clean up class instances
-		 */
-		soap_destroy(&soap);
-		/* clean up everything and close socket
-		 */
-		soap_end(&soap); 
+		soap_destroy(&soap); /* clean up class instances */
+		soap_end(&soap); /* clean up everything and close socket */
 	}
-	soap_done(&soap); // close master socket
+	soap_done(&soap); /* close master socket */
+
+	if ( ctx ) glite_gsplugin_free_context(ctx);
 
 	return 0;
 } 

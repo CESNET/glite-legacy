@@ -100,11 +100,12 @@ glite_gsplugin(struct soap *soap, struct soap_plugin *p, void *arg)
 	p->fdelete		= glite_gsplugin_delete;
 	p->fcopy		= glite_gsplugin_copy;
 
-	soap->fconnect	= glite_gsplugin_connect;
-	soap->fclose	= glite_gsplugin_close;
-	soap->faccept	= glite_gsplugin_accept;
-	soap->fsend		= glite_gsplugin_send;
-	soap->frecv		= glite_gsplugin_recv;
+	soap->fconnect		= glite_gsplugin_connect;
+	soap->fclose		= glite_gsplugin_close;
+	soap->fclosesocket	= glite_gsplugin_close;
+	soap->faccept		= glite_gsplugin_accept;
+	soap->fsend			= glite_gsplugin_send;
+	soap->frecv			= glite_gsplugin_recv;
 
 
 	return SOAP_OK;
@@ -185,12 +186,6 @@ glite_gsplugin_connect(
 		goto err;
 	}
 
-	/* XXX: co s tim???
-	 *
-	soap->socket = 2;
-	 */
-
-	return SOAP_OK;
 
 err:
 	pdprintf(("GSLITE_GSPLUGIN: glite_gsplugin_connect() error!\n"));
@@ -223,8 +218,7 @@ glite_gsplugin_close(struct soap *soap)
 			ret = edg_wll_gss_close(ctx->connection,
 					(ctx->timeout.tv_usec || ctx->timeout.tv_sec)? &ctx->timeout: NULL);
 		}
-		free(ctx->connection);
-		ctx->connection = NULL;
+		ctx->connection->context = GSS_C_NO_CONTEXT;
 	}
 
 	return ret;
@@ -261,12 +255,14 @@ glite_gsplugin_recv(struct soap *soap, char *buf, size_t bufsz)
 	int						len;
 
 
+	pdprintf(("GSLITE_GSPLUGIN: glite_gsplugin_recv()\n"));
 	ctx = ((int_plugin_data_t *)soap_lookup_plugin(soap, plugin_id))->ctx;
 	if ( ctx->error_msg ) { free(ctx->error_msg); ctx->error_msg = NULL; }
 
 	if ( ctx->connection->context == GSS_C_NO_CONTEXT ) {
 		soap->errnum = ENOTCONN;
-		/* XXX glite_gsplugin_send() returns SOAP_EOF on errors */
+		/* XXX: glite_gsplugin_send() returns SOAP_EOF on errors
+		 */
 		return 0;
 	}
 	
@@ -300,7 +296,6 @@ glite_gsplugin_recv(struct soap *soap, char *buf, size_t bufsz)
 		/* default: fallthrough */
 	}
 
-	pdprintf(("\nWS received:\n%s\n\n", buf));
 	return len;
 }
 
@@ -314,7 +309,7 @@ glite_gsplugin_send(struct soap *soap, const char *buf, size_t bufsz)
 	int						ret;
 
 
-	pdprintf(("GSLITE_GSPLUGIN: glite_gsplugin_send():\n%s\n\n", buf));
+	pdprintf(("GSLITE_GSPLUGIN: glite_gsplugin_send()\n"));
 	ctx = ((int_plugin_data_t *)soap_lookup_plugin(soap, plugin_id))->ctx;
 	/* XXX: check whether ctx is initialized
 	 *      i.e. ctx->connection != NULL
@@ -337,7 +332,6 @@ glite_gsplugin_send(struct soap *soap, const char *buf, size_t bufsz)
 
 	switch ( ret ) {
 	case EDG_WLL_GSS_OK:
-		pdprintf(("\nWS sent:\n%s\n\n", buf));
 		break;
 
 	case EDG_WLL_GSS_ERROR_TIMEOUT:

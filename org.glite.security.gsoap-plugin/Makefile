@@ -19,7 +19,7 @@ gsoap_prefix=/opt/gsoap
 -include Makefile.inc
 -include ../Makefile.inc
 
-GSPLUGIN_DEBUG:= yes
+GSPLUGIN_DEBUG:=
 
 version_info=-version-info `echo ${version} | cut -d. -f1,2 | tr . :`
 
@@ -129,7 +129,7 @@ test_coverage:
 	cd coverage && for i in ${OBJS}; do gcov -o .libs/ $$i ; done
 
 
-examples: soap_gen wscalc_clt_ex wscalc_srv_ex
+examples: soap_gen wscalc_clt_ex wscalc_srv_ex wscalc_srv_ex2
 
 GSOAP_FPREFIX:= GSOAP_
 
@@ -138,9 +138,12 @@ ifeq ($(GSPLUGIN_DEBUG),yes)
 					  stdsoap2.o
 	WSCALC_SRV_OBJS = wscalc_srv_ex.o ${GSOAP_FPREFIX}C.o ${GSOAP_FPREFIX}Server.o \
 					  stdsoap2.o
+	WSCALC_SRV2_OBJS = wscalc_srv_ex2.o ${GSOAP_FPREFIX}C.o ${GSOAP_FPREFIX}Server.o \
+					  stdsoap2.o
 else
 	WSCALC_CLT_OBJS = wscalc_clt_ex.o ${GSOAP_FPREFIX}C.o ${GSOAP_FPREFIX}Client.o
 	WSCALC_SRV_OBJS = wscalc_srv_ex.o ${GSOAP_FPREFIX}C.o ${GSOAP_FPREFIX}Server.o
+	WSCALC_SRV2_OBJS = wscalc_srv_ex2.o ${GSOAP_FPREFIX}C.o ${GSOAP_FPREFIX}Server.o
 endif
 
 
@@ -149,6 +152,9 @@ wscalc_clt_ex: ${WSCALC_CLT_OBJS} ${STATICLIB}
 
 wscalc_srv_ex: ${WSCALC_SRV_OBJS} ${STATICLIB}
 	${LINK} -o $@ ${STATICLIB} ${GSOAP_LIBS} ${EX_LIBS} ${WSCALC_SRV_OBJS}
+
+wscalc_srv_ex2: ${WSCALC_SRV2_OBJS} ${STATICLIB}
+	${LINK} -o $@ ${STATICLIB} ${GSOAP_LIBS} ${EX_LIBS} ${WSCALC_SRV2_OBJS}
 
 ${GSOAP_FPREFIX}H.h ${GSOAP_FPREFIX}C.c ${GSOAP_FPREFIX}Server.c ${GSOAP_FPREFIX}Client.c ${GSOAP_FPREFIX}ServerLib.c ${GSOAP_FPREFIX}ClientLib.c soap_gen:  calc.h.S
 	${gsoap_prefix}/bin/soapcpp2 -c -p ${GSOAP_FPREFIX} ${top_srcdir}/examples/calc.h.S
