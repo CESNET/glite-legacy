@@ -25,7 +25,7 @@
 #
 ################################################################################
 
-import os,string
+import os,string,pwd
 import sys, posix, getopt,time
 
 sys.path.append(".")
