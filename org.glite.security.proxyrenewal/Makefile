@@ -70,7 +70,7 @@ GLOBUS_LIBS:=-L${globus_prefix}/lib \
 SSL_UTILS_LIB:=-L${glite_location}/lib -lglobus_ssl_utils
 MYPROXY_LIB:=-L${myproxy_prefix}/lib -lmyproxy_${nothrflavour}
 
-JOBIDLIB:=-L${glite_location}/lib -lglite_wms_cjobid
+JOBIDLIB:=-L${glite_location}/lib -lglite_wmsutils_cjobid
 
 COMPILE:=libtool --mode=compile ${CC} ${CFLAGS}
 LINK:=libtool --mode=link ${CC} ${LDFLAGS}

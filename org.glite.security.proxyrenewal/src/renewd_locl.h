@@ -6,7 +6,7 @@
 #include <myproxy.h>
 #include <myproxy_delegation.h>
 
-#include "glite/wms/thirdparty/globus_ssl_utils/sslutils.h"
+#include "glite/wmsutils/thirdparty/globus_ssl_utils/sslutils.h"
 #include "renewal.h"
 
 #ifdef HAVE_DMALLOC_H

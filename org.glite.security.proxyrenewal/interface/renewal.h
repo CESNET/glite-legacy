@@ -15,7 +15,7 @@
 
 #ident "$Header$"
 
-#include "glite/wms/jobid/cjobid.h"
+#include "glite/wmsutils/jobid/cjobid.h"
 
 #ifdef __cplusplus
 extern "C" {
