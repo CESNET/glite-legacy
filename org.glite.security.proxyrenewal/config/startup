@@ -32,11 +32,11 @@ start()
 	[ -z "$creds" ] &&
 		echo $0: WARNING: No credentials specified. Using default lookup which is dangerous. >&2
 
-	# workaround for VOMS_FindByVO that seems to always require user's own VOMS config file
+	# workaround for VOMS_FindByVO that seems to always require user's own VOMS config file (bug #7511)
 	user_voms_config=$HOME/.glite/vomses
 	if [ ! -f "$user_voms_config" ]; then
 		rm -f /tmp/renewal_vomses
-		su - $GLITE_USER -c "touch /tmp/renewal_vomses"
+		su - $GLITE_USER -c "touch /tmp/renewal_vomses && chmod 644 /tmp/renewal_vomses"
 		user_voms_config=/tmp/renewal_vomses
 	fi
 
