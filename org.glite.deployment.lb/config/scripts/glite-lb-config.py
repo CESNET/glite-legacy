@@ -6,7 +6,7 @@
 # For license conditions see the license file or http://eu-egee.org/license.html
 #
 ################################################################################
-# glite-lb-config v. 0.3.0
+# glite-lb-config v. 1.0.1
 #
 # Post-installation script for configuring the gLite Logging and Bookkeping Server
 # Robert Harakaly < robert.harakaly@cern.ch >
@@ -40,7 +40,7 @@ class glite_lb:
     def __init__(self):
         self.mysql = MySQL.Mysql()
         self.verbose = 0
-        self.version = "0.3.1"
+        self.version = "1.0.1"
         self.name = "glite-lb"
         self.friendly_name = "gLite Logging and Bookkeeping"
         
