@@ -56,25 +56,18 @@ start()
 stop()
 {
 	echo -n "Stopping ProxyRenewal Daemon: glite-proxy-renewd ..."
-	PIDS=`ps -C glite-proxy-renewd -o pid --no-heading`
-	if [ -z "$PIDS" ]; then
-		echo " no process glite-proxy-renewd running"
-		exit 1
-	else
-		kill $PIDS && echo " done"
-	fi
+	killall glite-proxy-renewd
+	echo " done"
 }
 
 status()
 {
-	PIDS=`ps -C glite-proxy-renewd -o pid --no-heading`
-	if ps p $PIDS >/dev/null 2>&1; then
-		echo glite-proxy-renewd running \($PIDS\)
-		return 0
+	if netstat -an --unix | grep "^unix .* LISTEN.* /tmp/dgpr_renew_" >/dev/null 2>&1 ;then
+		echo glite-proxy-renewd running
+	else
+		echo glite-proxy-renewd not running
+		return 1
 	fi
-	
-	echo glite-proxy-renewd not running
-	return 1
 }
 
 case x$1 in
