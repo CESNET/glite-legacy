@@ -17,6 +17,8 @@ thrflavour=gcc32pthr
 expat_prefix=/opt/expat
 ares_prefix=/opt/ares
 
+CC=gcc
+
 -include Makefile.inc
 
 VPATH=${top_srcdir}/src:${top_srcdir}/examples
