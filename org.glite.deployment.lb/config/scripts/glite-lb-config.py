@@ -143,28 +143,8 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         os.chown("%s/hostkey.pem" % lb_cert_path, uid,gid)
         print "\n[OK]"
                 
-        # MySQL configuration file
-        print "\n4 - Create/Verify the configuration file for MySQL Server"
-        file = open("/etc/my.cnf", 'w')
-        file.write("[mysqld]\n")
-        file.write("datadir=/var/lib/mysql\n")
-        file.write("socket=/tmp/mysql.sock\n")
-        file.write("\n")
-        file.write("[mysql.server]\n")
-        file.write("user=mysql\n")
-        file.write("basedir=/var/lib\n")
-        file.write("\n")
-        file.write("[safe_mysqld]\n")
-        file.write("err-log=/var/log/mysqld.log\n")
-        file.write("pid-file=/var/run/mysqld/mysqld.pid\n")
-        file.write("\n")
-        file.write("[client]\n")
-        file.write("socket=/tmp/mysql.sock\n")
-        file.close()
-        print "\n[OK]"
-
         # Create the MySQL database
-        print "\n5 - Create/Verify the %s database" % params['lb.database.name']
+        print "\n4 - Create/Verify the %s database" % params['lb.database.name']
         self.mysql.stop()
         time.sleep(5)
         self.mysql.start()
