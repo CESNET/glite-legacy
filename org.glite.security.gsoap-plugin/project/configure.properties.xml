@@ -39,6 +39,7 @@ package=${module.package.name}
 PREFIX=${install.dir}
 version=${module.version}
 glite_location=${with.glite.location}
+ares_prefix=${with.ares.prefix}
 globus_prefix=${with.globus.prefix}
 thrflavour=${with.globus.thr.flavor}
 nothrflavour=${with.globus.nothr.flavor}
