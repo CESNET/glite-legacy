@@ -42,11 +42,11 @@ public:
 	/** Constructor from job id.
 	 *
 	 * Initializes the job to obtain information for the given job id.
-	 * \param[in] jobid The job id of the job this object will
+	 * \param[in] jobid 		The job id of the job this object will
 	 * represent.
 	 * \throws Exception Could not copy the job id.
 	 */
-	Job(const glite::wmsutils::jobid::JobId &);
+	Job(const glite::wmsutils::jobid::JobId &jobid);
 
 
 	/** Destructor.
@@ -60,11 +60,11 @@ public:
 	 * Redirect this instance to obtain information about
 	 * different job; connection to the server is preserved, if
 	 * possible. 
-	 * \param[in] jobid New job id.
+	 * \param[in] jobid 		New job id.
 	 * \returns Reference to this object.
 	 * \throws Exception Could not copy the job id.
 	 */
-	Job & operator= (const glite::wmsutils::jobid::JobId &);
+	Job & operator= (const glite::wmsutils::jobid::JobId &jobid);
 
 	/*
 	 * Status retrieval bitmasks. Used ORed as Job::status() argument,
@@ -84,22 +84,22 @@ public:
 	 *
 	 * Obtain the job status (as JobStatus) from the bookkeeping
 	 * server.
-	 * \param[in] flags Specify details of the query.
+	 * \param[in] flags 		Specify details of the query.
 	 * \returns Status of the job.
 	 * \throws Exception Could not query the server.
 	 * \see STAT_CLASSADS, STAT_CHILDREN, STAT_CHILDSTAT
 	 */
-	JobStatus status(int) const;
+	JobStatus status(int flags) const;
   
 	/** Return all events corresponding to this job 
 	 * 
 	 * Obtain all events corresponding to the job that are stored
 	 * in the bookkeeping server database. The maximum number of
 	 * returned events can be set by calling setParam().
-	 * \param[out] events Vector of events (of type Event).
+	 * \param[out] events 		Vector of events (of type Event).
 	 * \throws Exception Could not query the server.
 	 */
-	void log(std::vector<Event> &) const;
+	void log(std::vector<Event> &events) const;
 
 	/** Return all events corresponding to this job 
 	 * 
@@ -115,20 +115,20 @@ public:
 	 *
 	 * Obtains the information about last listener that has been
 	 * registered for this job in the bookkeeping server database.
-	 * \param[in] name Name of the listener.
+	 * \param[in] name 		Name of the listener.
 	 * \returns Hostname and port number of the registered
 	 * listener.
 	 * \throws Exception Could not query the server.
 	 */
-	const std::pair<std::string,uint16_t> queryListener(const std::string & name) const;
+	const std::pair<std::string,uint16_t> queryListener(const std::string &name) const;
   
 	/** 
 	 * Manipulate LB parameters. 
 	 *
 	 * This method sets integer typed parameters for the server connection.
 	 *
-	 * \param[in] ctx  Symbolic name of the parameter to change.
-	 * \param[in] val  New value of the parameter.
+	 * \param[in] ctx  		Symbolic name of the parameter to change.
+	 * \param[in] val  		New value of the parameter.
 	 */
 	void setParam(edg_wll_ContextParam ctx, int val); 
 
@@ -137,8 +137,8 @@ public:
 	 *
 	 * This method sets string typed parameters for the server connection.
 	 *
-	 * \param[in] ctx  Symbolic name of the parameter to change.
-	 * \param[in] val  New value of the parameter.
+	 * \param[in] ctx  		Symbolic name of the parameter to change.
+	 * \param[in] val  		New value of the parameter.
 	 */
 	void setParam(edg_wll_ContextParam ctx, const std::string val); 
 
@@ -147,8 +147,8 @@ public:
 	 *
 	 * This method sets timeval typed parameters for the server connection.
 	 *
-	 * \param[in] ctx  Symbolic name of the parameter to change.
-	 * \param[in] val  New value of the parameter.
+	 * \param[in] ctx  		Symbolic name of the parameter to change.
+	 * \param[in] val  		New value of the parameter.
 	 */
 	void setParam(edg_wll_ContextParam ctx, const struct timeval &val); 
 
@@ -157,7 +157,7 @@ public:
 	 *
 	 * Obtain value of the named integer parameter.
 	 *
-	 * \param[in] ctx Symbolic name of the paramater to obtain.
+	 * \param[in] ctx 		Symbolic name of the paramater to obtain.
 	 * \return Value of the parameter.
 	 */
 	int getParamInt(edg_wll_ContextParam ctx) const;
@@ -167,7 +167,7 @@ public:
 	 *
 	 * Obtain value of the named string parameter.
 	 *
-	 * \param[in] ctx Symbolic name of the paramater to obtain.
+	 * \param[in] ctx 		Symbolic name of the paramater to obtain.
 	 * \return Value of the parameter.
 	 */
 	std::string getParamString(edg_wll_ContextParam ctx) const;
@@ -177,7 +177,7 @@ public:
 	 *
 	 * Obtain value of the named timeval parameter.
 	 *
-	 * \param[in] ctx Symbolic name of the paramater to obtain.
+	 * \param[in] ctx 		Symbolic name of the paramater to obtain.
 	 * \return Value of the parameter.
 	 */
 	struct timeval getParamTime(edg_wll_ContextParam ctx) const;

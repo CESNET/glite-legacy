@@ -23,7 +23,7 @@ EWL_BEGIN_NAMESPACE
  *
  * This class is used to construct queries to the L&B database. Each
  * query is composed of multiple atomic conditions in the form of
- * <attribute> <predicate> <value>. QueryRecord represents such an
+ * 'attribute' 'predicate' 'value'. QueryRecord represents such an
  * atomic condition. 
  */
 class QueryRecord {
@@ -84,148 +84,148 @@ public:
 	/** Copy constructor
 	 * 
 	 * Initializes an exact copy of the object.
-	 * \param[in] src Original object.
+	 * \param[in] src 		Original object.
 	 */
-	QueryRecord(const QueryRecord &);
+	QueryRecord(const QueryRecord &src);
 
 	/** Assignment operator.
 	 *
 	 * Initializes an exact copy of the object.
-	 * \param[in] src Original object.
+	 * \param[in] src 		Original object.
 	 * \returns Reference to this object.
 	 */
-	QueryRecord& operator=(const QueryRecord &);
+	QueryRecord& operator=(const QueryRecord &src);
 
 	/** Constructor for condition on string typed value.
 	 *
 	 * Initializes the object to hold condition on string typed
 	 * attribute value.
-	 * \param[in] name Name of the attribute.
-	 * \param[in] op Symbolic name of the predicate.
-	 * \param[in] value Actual value.
+	 * \param[in] name 		Name of the attribute.
+	 * \param[in] op 		Symbolic name of the predicate.
+	 * \param[in] value 		Actual value.
 	 * \throw Exception Invalid value type for given attribute.
 	 */
-	QueryRecord(const Attr, const Op, const std::string &);
+	QueryRecord(const Attr name, const Op op, const std::string &value);
 
 	/** Constructor for condition on integer typed value.
 	 *
 	 * Initializes the object to hold condition on integer typed
 	 * attribute value.
-	 * \param[in] name Name of the attribute.
-	 * \param[in] op Symbolic name of the predicate.
-	 * \param[in] value Actual value.
+	 * \param[in] name 		Name of the attribute.
+	 * \param[in] op 		Symbolic name of the predicate.
+	 * \param[in] value 		Actual value.
 	 * \throw Exception Invalid value type for given attribute.
 	 */
-	QueryRecord(const Attr, const Op, const int);
+	QueryRecord(const Attr name, const Op op, const int value);
 
 	/** Constructor for condition on timeval typed value.
 	 *
 	 * Initializes the object to hold condition on timeval typed
 	 * attribute value.
-	 * \param[in] name Name of the attribute.
-	 * \param[in] op Symbolic name of the predicate.
-	 * \param[in] value Actual value.
+	 * \param[in] name 		Name of the attribute.
+	 * \param[in] op 		Symbolic name of the predicate.
+	 * \param[in] value 		Actual value.
 	 * \throw Exception Invalid value type for given attribute.
 	 */
-	QueryRecord(const Attr, const Op, const struct timeval &);
+	QueryRecord(const Attr name, const Op op, const struct timeval &value);
 
 	/** Constructor for condition on JobId typed value.
 	 *
 	 * Initializes the object to hold condition on JobId typed
 	 * attribute value.
-	 * \param[in] name Name of the attribute.
-	 * \param[in] op Symbolic name of the predicate.
-	 * \param[in] value Actual value.
+	 * \param[in] name 		Name of the attribute.
+	 * \param[in] op 		Symbolic name of the predicate.
+	 * \param[in] value 		Actual value.
 	 * \throw Exception Invalid value type for given attribute.
 	 */
-	QueryRecord(const Attr, const Op, const glite::wmsutils::jobid::JobId&);
+	QueryRecord(const Attr name, const Op op, const glite::wmsutils::jobid::JobId &value);
 
 	/* this one is for attr==TIME and particular state */
 	/** Constructor for condition on timeval typed value.
 	 *
 	 * Initializes the object to hold condition on the time the job 
 	 * stays in given state.
-	 * \param[in] name Name of the attribute.
-	 * \param[in] state State of thet job.
-	 * \param[in] op Symbolic name of the predicate.
-	 * \param[in] value Actual value.
+	 * \param[in] name 		Name of the attribute.
+	 * \param[in] op 		Symbolic name of the predicate.
+	 * \param[in] state 		State of thet job.
+	 * \param[in] value 		Actual value.
 	 * \throw Exception Invalid value type for given attribute.
 	 */
-	QueryRecord(const Attr, const Op, const int, const struct timeval &);
+	QueryRecord(const Attr name, const Op op, const int state, const struct timeval &value);
 	
 	/* constructors for WITHIN operator */
 	/** Constructor for condition on string typed interval.
 	 *
 	 * Initializes the object to hold condition on string typed
 	 * attribute interval.
-	 * \param[in] name Name of the attribute.
-	 * \param[in] op Symbolic name of the predicate.
-	 * \param[in] value_min Low interval boundary.
-	 * \param[in] value_max High interval boundary.
+	 * \param[in] name 		Name of the attribute.
+	 * \param[in] op 		Symbolic name of the predicate.
+	 * \param[in] value_min 	Low interval boundary.
+	 * \param[in] value_max 	High interval boundary.
 	 * \throw Exception Invalid value type for given attribute.
 	 */
-	QueryRecord(const Attr, const Op, const std::string &, const std::string &);
+	QueryRecord(const Attr name, const Op op, const std::string &value_min, const std::string &value_max);
 
 	/** Constructor for condition on integer typed interval.
 	 *
 	 * Initializes the object to hold condition on integer typed
 	 * attribute interval.
-	 * \param[in] name Name of the attribute.
-	 * \param[in] op Symbolic name of the predicate.
-	 * \param[in] value_min Low interval boundary.
-	 * \param[in] value_max High interval boundary.
+	 * \param[in] name 		Name of the attribute.
+	 * \param[in] op 		Symbolic name of the predicate.
+	 * \param[in] value_min 	Low interval boundary.
+	 * \param[in] value_max 	High interval boundary.
 	 * \throw Exception Invalid value type for given attribute.
 	 */
-	QueryRecord(const Attr, const Op, const int, const int);
+	QueryRecord(const Attr name, const Op op, const int value_min, const int value_max);
 
 	/** Constructor for condition on timeval typed interval.
 	 *
 	 * Initializes the object to hold condition on timeval typed
 	 * attribute interval.
-	 * \param[in] name Name of the attribute.
-	 * \param[in] op Symbolic name of the predicate.
-	 * \param[in] value_min Low interval boundary.
-	 * \param[in] value_max High interval boundary.
+	 * \param[in] name 		Name of the attribute.
+	 * \param[in] op 		Symbolic name of the predicate.
+	 * \param[in] value_min 	Low interval boundary.
+	 * \param[in] value_max 	High interval boundary.
 	 * \throw Exception Invalid value type for given attribute.
 	 */
-	QueryRecord(const Attr, const Op, const struct timeval &, const struct timeval &);
+	QueryRecord(const Attr name, const Op op, const struct timeval &value_min, const struct timeval &value_max);
 
 	/** Constructor for condition on timeval typed interval for
 	 * given state.
 	 *
 	 * Initializes the object to hold condition on the time job
 	 * stayed in given state.
-	 * \param[in] name Name of the attribute.
-	 * \param[in] op Symbolic name of the predicate.
-	 * \param[in] value_min Low interval boundary.
-	 * \param[in] value_max High interval boundary.
-	 * \param[in] state State of thet job.
+	 * \param[in] name 		Name of the attribute.
+	 * \param[in] op 		Symbolic name of the predicate.
+	 * \param[in] state 		State of thet job.
+	 * \param[in] value_min 	Low interval boundary.
+	 * \param[in] value_max 	High interval boundary.
 	 * \throw Exception Invalid value type for given attribute.
 	 */
-	QueryRecord(const Attr, const Op, const int, const struct timeval &, const struct timeval &);
+	QueryRecord(const Attr name, const Op op, const int state, const struct timeval &value_min, const struct timeval &value_max);
 
 	/* convenience for user tags */
 	/** Convenience constructor for condition on user tags.
 	 *
 	 * Initializes the object to hold condition on the value of
 	 * user tag.
-	 * \param[in] tag Name of the tag.
-	 * \param[in] op Symbolic namen of the predicate.
-	 * \param[in] value Value of the tag.
+	 * \param[in] tag 		Name of the tag.
+	 * \param[in] op 		Symbolic name of the predicate.
+	 * \param[in] value 		Value of the tag.
 	 */
-	QueryRecord(const std::string &, const Op, const std::string &);
+	QueryRecord(const std::string &tag, const Op op, const std::string &value);
 
 	/** Convenience constructor for condition on user tags.
 	 *
 	 * Initializes the object to hold condition on the value of
 	 * user tag.
-	 * \param[in] tag Name of the tag.
-	 * \param[in] op Symbolic namen of the predicate.
-	 * \param[in] value_min Minimal value of the tag.
-	 * \param[in] value_max Maximal value of the tag.
+	 * \param[in] tag 		Name of the tag.
+	 * \param[in] op 		Symbolic namen of the predicate.
+	 * \param[in] value_min 	Minimal value of the tag.
+	 * \param[in] value_max 	Maximal value of the tag.
 	 * \throws Exception Predicate is not WITHIN.
 	 */
-	QueryRecord(const std::string &, const Op, const std::string &, const std::string &);
+	QueryRecord(const std::string &tag, const Op op, const std::string &value_min, const std::string &value_max);
 	
 	/** Destructor.
 	 *
@@ -235,10 +235,10 @@ public:
   
 	/** Return the string representation of symbolic attribute
 	 * name.
-	 * \param[in] attr Symbolic attribute name.
+	 * \param[in] attr 		Symbolic attribute name.
 	 * \returns Printable attribute name.
 	 */
-	static const std::string AttrName(const Attr) ;
+	static const std::string AttrName(const Attr attr) ;
   
 protected:
 
@@ -329,7 +329,7 @@ public:
 	void setQueryEventsLimit(int);
   
 	/** Retrieve all events satisfying the query records
-	 * @param job_cond, event_cond - vectors of conditions to be satisfied 
+	 * \param[in] job_cond, event_cond	vectors of conditions to be satisfied 
 	 *  by jobs as a whole or particular events, conditions are ANDed
 	 * @param events vector of returned events
 	 */
@@ -345,10 +345,10 @@ public:
 
 
 	/** The same as queryEvents but return only an aggregate.
-	 * @param job_cond, event_cond - vectors of conditions to be satisfied 
+	 * \param[in] job_cond, event_cond	vectors of conditions to be satisfied 
 	 *  by jobs as a whole or particular events, conditions are ANDed
-	 * @param op aggregate operator to apply
-	 * @param attr attribute to apply the operation to
+	 * \param[in] op 			aggregate operator to apply
+	 * \param[in] attr 			attribute to apply the operation to
 	 */
 	std::string queryEventsAggregate(const std::vector<QueryRecord>& job_cond,
 					 const std::vector<QueryRecord>& event_cond,
@@ -357,10 +357,10 @@ public:
   
 
 	/** Retrieve all events satisfying the query records
-	 * @param job_cond, event_cond 	IN vectors of vectors of job or event conditions, 
+	 * \param[in] job_cond, event_cond 	vectors of vectors of job or event conditions, 
 	 * respectively. The inner vectors are logically ANDed, the outer are ORed
 	 * (cond1 AND cond2 AND ...) OR (condN AND ...)
-	 * @param eventList 	OUT vector of returned events
+	 * \param[out] eventList 		vector of returned events
 	 */
 	void queryEvents(const std::vector<std::vector<QueryRecord> >& job_cond,
 			 const std::vector<std::vector<QueryRecord> >& event_cond,
@@ -372,8 +372,8 @@ public:
 
 	
 	/** Retrieve jobs satisfying the query records, including their states
-	 * @param query 	IN vector of Query records that are ANDed to form the query
-	 * @param jobList	OUT vector of returned job id's
+	 * \param[in] query 			vector of Query records that are ANDed to form the query
+	 * \param[out] jobList			vector of returned job id's
 	 */
   
 	void queryJobs(const std::vector<QueryRecord>& query,
@@ -384,8 +384,8 @@ public:
   
 	
 	/** Retrieve jobs satisfying the query records, including their states
-	 * @param query 	IN vector of Query record vectors that are ORed and ANDed to form the query
-	 * @param jobList	OUT vector of returned job id's
+	 * \param[in] query 			vector of Query record vectors that are ORed and ANDed to form the query
+	 * \param[out] jobList			vector of returned job id's
 	 */
    
 	void queryJobs(const std::vector<std::vector<QueryRecord> >& query,
@@ -395,9 +395,9 @@ public:
 	queryJobs(const std::vector<std::vector<QueryRecord> >& query) const;
 
 	/** Retrieve jobs satisfying the query records, including status information
-	 * @param query 	IN vector of Query records that are ANDed to form the query
-	 * @param flags		IN flags
-	 * @param states 	OUT vector of returned job states
+	 * \param[in] query 			vector of Query records that are ANDed to form the query
+	 * \param[in] flags			flags
+	 * \param[out] states 			vector of returned job states
 	 */
 	void queryJobStates(const std::vector<QueryRecord>& query, 
 			    int flags,
@@ -409,9 +409,9 @@ public:
 						     int flags) const;
   
 	/** Retrieve jobs satisfying the query records, including status information
-	 * @param query 	IN vector of Query records that are anded to form the query
-	 * @param flags		IN flags
-	 * @param states 	OUT vector of returned job states
+	 * \param[in] query 			vector of Query records that are anded to form the query
+	 * \param[in] flags			flags
+	 * \param[out] states 			vector of returned job states
 	 */
 	void queryJobStates(const std::vector<std::vector<QueryRecord> >& query, 
 			    int flags,

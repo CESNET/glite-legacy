@@ -29,13 +29,11 @@ public:
 	/** Constructor for mandatory fields.
 	 *
 	 * Updates all the mandatory fields and names the exception.
-	 * \param [in] source Source filename where the exception was
-	 * raised.
-	 * \param [in] line_number Line in the source that caused the
-	 * exception.
-	 * \param [in] method Name of the method that raised the exception.
-	 * \param [in] code Error code giving the reason for exception.
-	 * \param [in] exception Error message describing the exception.
+	 * \param[in] source 		Source filename where the exception was raised.
+	 * \param[in] line_number 	Line in the source that caused the exception.
+	 * \param[in] method 		Name of the method that raised the exception.
+	 * \param[in] code 		Error code giving the reason for exception.
+	 * \param[in] exception 	Error message describing the exception.
 	 */
 	Exception(const std::string& source,
 		  int line_number,
@@ -54,14 +52,12 @@ public:
 	 * Updates all the mandatory fields, names the exception and
 	 * adds the original exception's error message to the current
 	 * one.
-	 * \param [in] source Source filename where the exception was
-	 * raised.
-	 * \param [in] line_number Line in the source that caused the
-	 * exception.
-	 * \param [in] method Name of the method that raised the exception.
-	 * \param [in] code Error code giving the reason for exception.
-	 * \param [in] exception Error message describing the exception.
-	 * \param [in] exc Originally raised exception.
+	 * \param[in] source 		Source filename where the exception was raised.
+	 * \param[in] line_number 	Line in the source that caused the exception.
+	 * \param[in] method 		Name of the method that raised the exception.
+	 * \param[in] code 		Error code giving the reason for exception.
+	 * \param[in] exception 	Error message describing the exception.
+	 * \param[in] exc 		Originally raised exception.
 	 */
 	Exception(const std::string& source,
 		  int line_number,
@@ -91,13 +87,11 @@ public:
 	/** Constructor for mandatory fields.
 	 *
 	 * Updates all the mandatory fields and names the exception.
-	 * \param [in] source Source filename where the exception was
-	 * raised.
-	 * \param [in] line_number Line in the source that caused the
-	 * exception.
-	 * \param [in] method Name of the method that raised the exception.
-	 * \param [in] code Error code giving the reason for exception.
-	 * \param [in] exception Error message describing the exception.
+	 * \param[in] source 		Source filename where the exception was raised.
+	 * \param[in] line_number 	Line in the source that caused the exception.
+	 * \param[in] method 		Name of the method that raised the exception.
+	 * \param[in] code 		Error code giving the reason for exception.
+	 * \param[in] exception 	Error message describing the exception.
 	 */
 	LoggingException(const std::string& source,
 			 int line_number,
@@ -112,14 +106,12 @@ public:
 	 * Updates all the mandatory fields, names the exception and
 	 * adds the original exception's error message to the current
 	 * one.
-	 * \param [in] source Source filename where the exception was
-	 * raised.
-	 * \param [in] line_number Line in the source that caused the
-	 * exception.
-	 * \param [in] method Name of the method that raised the exception.
-	 * \param [in] code Error code giving the reason for exception.
-	 * \param [in] exception Error message describing the exception.
-	 * \param [in] exc Originally raised exception.
+	 * \param[in] source 		Source filename where the exception was raised.
+	 * \param[in] line_number 	Line in the source that caused the exception.
+	 * \param[in] method 		Name of the method that raised the exception.
+	 * \param[in] code 		Error code giving the reason for exception.
+	 * \param[in] exception 	Error message describing the exception.
+	 * \param[in] exc 		Originally raised exception.
 	 */
 	LoggingException(const std::string& source,
 			 int line_number,
@@ -144,13 +136,11 @@ public:
 	/** Constructor for mandatory fields.
 	 *
 	 * Updates all the mandatory fields and names the exception.
-	 * \param [in] source Source filename where the exception was
-	 * raised.
-	 * \param [in] line_number Line in the source that caused the
-	 * exception.
-	 * \param [in] method Name of the method that raised the exception.
-	 * \param [in] code Error code giving the reason for exception.
-	 * \param [in] exception Error message describing the exception.
+	 * \param[in] source 		Source filename where the exception was raised.
+	 * \param[in] line_number 	Line in the source that caused the exception.
+	 * \param[in] method 		Name of the method that raised the exception.
+	 * \param[in] code 		Error code giving the reason for exception.
+	 * \param[in] exception 	Error message describing the exception.
 	 */
 	OSException(const std::string& source,
 		    int line_number,
@@ -169,14 +159,12 @@ public:
 	 * Updates all the mandatory fields, names the exception and
 	 * adds the original exception's error message to the current
 	 * one.
-	 * \param [in] source Source filename where the exception was
-	 * raised.
-	 * \param [in] line_number Line in the source that caused the
-	 * exception.
-	 * \param [in] method Name of the method that raised the exception.
-	 * \param [in] code Error code giving the reason for exception.
-	 * \param [in] exception Error message describing the exception.
-	 * \param [in] exc Originally raised exception.
+	 * \param[in] source 		Source filename where the exception was raised.
+	 * \param[in] line_number 	Line in the source that caused the exception.
+	 * \param[in] method 		Name of the method that raised the exception.
+	 * \param[in] code 		Error code giving the reason for exception.
+	 * \param[in] exception 	Error message describing the exception.
+	 * \param[in] exc 		Originally raised exception.
 	 */
 	OSException(const std::string& source,
 		    int line_number,

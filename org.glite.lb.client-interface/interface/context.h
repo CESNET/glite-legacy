@@ -78,21 +78,21 @@ typedef enum _edg_wll_Source {
 
 
 /** Allocate an initialize a new context object.
- * \param context OUT returned context
+ * \param[out] context 		returned context
  * \return 0 on success, ENOMEM if malloc() fails
  */
 int edg_wll_InitContext(edg_wll_Context *context);
 
 /** Destroy and free context object.
  * Also performs necessary cleanup (closing connections etc.)
- * \param context IN context to free
+ * \param[in] context 		context to free
  */
 void edg_wll_FreeContext(edg_wll_Context context);
 
 /** Set a context parameter.
- * \param context INOUT context to work with
- * \param param IN parameter to set
- * \param ... IN value to set (if NULL or 0, default is used)
+ * \param[in,out] context 	context to work with
+ * \param[in] param 		parameter to set
+ * \param[in] ... 		value to set (if NULL or 0, default is used)
  * \retval 0 success
  * \retval EINVAL param is not a valid parameter, or invalid value
  */
@@ -105,36 +105,36 @@ int edg_wll_SetParam(
 struct timeval; /* XXX: gcc, shut up! */
 
 /** Set a context parameter of type int.
- * \param ctx           INOUT context to work with
- * \param param         IN parameter to set
- * \param val           IN value to set
- * \retval 0            success
- * \retval EINVAL       param is not a valid parameter, or invalid value
+ * \param[in,out] ctx           context to work with
+ * \param[in] param		parameter to set
+ * \param[in] val		value to set
+ * \retval 0 success
+ * \retval EINVAL param is not a valid parameter, or invalid value
  */
 int edg_wll_SetParamInt(edg_wll_Context ctx,edg_wll_ContextParam param,int val);
 
 /** Set a context parameter of type string.
- * \param ctx           INOUT context to work with
- * \param param         IN parameter to set
- * \param val           In value to set (if NULL, default is used)
- * \retval 0            success
- * \retval EINVAL       param is not a valid parameter, or invalid value
+ * \param[in,out] ctx		context to work with
+ * \param[in] param		parameter to set
+ * \param[in] val		value to set (if NULL, default is used)
+ * \retval 0 success
+ * \retval EINVAL param is not a valid parameter, or invalid value
  */
 int edg_wll_SetParamString(edg_wll_Context ctx,edg_wll_ContextParam param,const char *val);
 
 /** Set a context parameter of type timeval.
- * \param ctx           INOUT context to work with
- * \param param         IN parameter to set
- * \param val           IN value to set (if NULL, default is used)
- * \retval 0            success
- * \retval EINVAL       param is not a valid parameter, or invalid value
+ * \param[in,out] ctx		context to work with
+ * \param[in] param		parameter to set
+ * \param[in] val		value to set (if NULL, default is used)
+ * \retval 0 success
+ * \retval EINVAL param is not a valid parameter, or invalid value
  */
 int edg_wll_SetParamTime(edg_wll_Context ctx,edg_wll_ContextParam param,const struct timeval *val);
 
 /** Get current parameter value.
- * \param context INOUT context to work with
- * \param param IN parameter to retrieve
- * \param ... OUT pointer to output variable
+ * \param[in,out] context 	context to work with
+ * \param[in] param 		parameter to retrieve
+ * \param[out] ... 		pointer to output variable
  * \retval 0 success
  * \retval EINVAL param is not a valid parameter
  */
@@ -182,10 +182,10 @@ typedef enum _edg_wll_ErrorCode {
 
 /**
  * Retrieve error details on recent API call
- * \param context IN: context to work with
- * \param errText OUT: standard error text
+ * \param[in] context 		context to work with
+ * \param[out] errText		standard error text
  *      (may be NULL - no text returned)
- * \param errDesc OUT: additional error description
+ * \param[out] errDesc		additional error description
  *      (may be NULL - no text returned)
  * \return Error code of the recent error
  */

@@ -116,10 +116,10 @@ typedef struct _edg_wll_QueryRec {
  * \a attr \a op \a value eg. time > 87654321.
  * \see edg_wll_QueryRec
  *
- * \param context 		IN: context to work with
- * \param job_conditions 	IN: query conditions (ANDed) on current job status, null (i.e. ATTR_UNDEF) terminated list. NULL means empty list, i.e. always TRUE
- * \param event_conditions: 	IN: conditions on events, null terminated list, NULL means empty list, i.e. always TRUE
- * \param events 		OUT: list of matching events
+ * \param[in] context 		context to work with
+ * \param[in] job_conditions 	query conditions (ANDed) on current job status, null (i.e. ATTR_UNDEF) terminated list. NULL means empty list, i.e. always TRUE
+ * \param[in] event_conditions 	conditions on events, null terminated list, NULL means empty list, i.e. always TRUE
+ * \param[out] events 		list of matching events
  */
 int edg_wll_QueryEvents(
 	edg_wll_Context			context,
@@ -158,11 +158,11 @@ int edg_wll_QueryEventsExtProxy(
  * Return jobs (and possibly their states) for which an event satisfying the conditions
  * exists.
  * \see edg_wll_QueryEvents
- * \param context 	IN: context to work with
- * \param conditions 	IN: query records (ANDed), null (i.e. EDG_WLL_ATTR_UNDEF) terminated list
- * \param flags 	IN: additional status fields to retrieve (\see edg_wll_JobStatus)
- * \param jobs 		OUT: list of job ids. May be NULL.
- * \param states 	OUT: list of corresponding states (returned only if not NULL)
+ * \param[in] context 		context to work with
+ * \param[in] conditions 	query records (ANDed), null (i.e. EDG_WLL_ATTR_UNDEF) terminated list
+ * \param[in] flags 		additional status fields to retrieve (\see edg_wll_JobStatus)
+ * \param[out] jobs 		list of job ids. May be NULL.
+ * \param[out] states 		list of corresponding states (returned only if not NULL)
  */
 int edg_wll_QueryJobs(
 	edg_wll_Context			context,
@@ -212,11 +212,11 @@ int edg_wll_QueryJobsExtProxy(
 /* starting from bit 10 private flags begins - do not add 1024 and more! */
 
 /** Return status of a single job.
- * \param context 	IN: context to operate on
- * \param jobid 	IN: query this job
- * \param flags 	IN: specifies optional status fields to retrieve,
+ * \param[in] context 		context to operate on
+ * \param[in] jobid 		query this job
+ * \param[in] flags 		specifies optional status fields to retrieve,
  * 	\see EDG_WLL_STAT_CLASSADS, EDG_WLL_STAT_CHILDREN, EDG_WLL_STAT_CHILDSTAT
- * \param status	OUT: status
+ * \param[out] status		status
  */
 
 int edg_wll_JobStatus(
@@ -228,11 +228,11 @@ int edg_wll_JobStatus(
 
 /**
  * Query LBProxy and use plain communication
- * \param context 	IN: context to operate on
- * \param jobid 	IN: query this job
- * \param flags 	IN: specifies optional status fields to retrieve,
+ * \param[in] context 		context to operate on
+ * \param[in] jobid 		query this job
+ * \param[in] flags 		specifies optional status fields to retrieve,
  *     \see EDG_WLL_STAT_CLASSADS, EDG_WLL_STAT_CHILDREN, EDG_WLL_STAT_CHILDSTAT
- * \param status 	OUT: the status of the job
+ * \param[out] status 		the status of the job
  */
 int edg_wll_JobStatusProxy(
 	edg_wll_Context		context,
@@ -244,9 +244,9 @@ int edg_wll_JobStatusProxy(
 /**
  * Return all events related to a single job.
  * Convenience wrapper around edg_wll_Query()
- * \param context 	IN: context to work with
- * \param jobId 	IN: job to query
- * \param events 	OUT: list of events 
+ * \param[in] context 		context to work with
+ * \param[in] jobId 		job to query
+ * \param[out] events 		list of events 
  */
 
 int edg_wll_JobLog(
@@ -267,9 +267,9 @@ int edg_wll_JobLogProxy(
 
 /**
  * All current user's jobs.
- * \param context 	IN: context to work with
- * \param jobs 		OUT: list of the user's jobs
- * \param states 	OUT: list of the jobs' states
+ * \param[in] context 		context to work with
+ * \param[out] jobs 		list of the user's jobs
+ * \param[out] states 		list of the jobs' states
  */
 int edg_wll_UserJobs(
 	edg_wll_Context		context,
@@ -290,8 +290,8 @@ int edg_wll_UserJobsProxy(
 /**
  * Server supported indexed attributes
  * \see DataGrid-01-TEN-0125
- * \param context 	IN: context to work with
- * \param attrs 	OUT: configured indices (each index is an UNDEF-terminated
+ * \param[in] context 		context to work with
+ * \param[out] attrs 		configured indices (each index is an UNDEF-terminated
  * 		array of QueryRec's from which only attr (and attr_id 
  * 		eventually) are meaningful
  */
@@ -304,8 +304,8 @@ int edg_wll_GetIndexedAttrs(
  * Retrieve limit on query result size (no. of events or jobs).
  * FIXME: not implemented.
  * \see DataGrid-01-TEN-0125
- * \param context 	IN: context to work with
- * \param limit 	OUT: server imposed limit
+ * \param[in] context 		context to work with
+ * \param[out] limit 		server imposed limit
  */
 int edg_wll_GetServerLimit(
 	edg_wll_Context	context,
@@ -314,11 +314,11 @@ int edg_wll_GetServerLimit(
 
 /**
  * UI port for the job
- * \param context 	IN: context to work with
- * \param jobId 	IN: job to query
- * \param name 		IN: name of the UI-port
- * \param host 		OUT: hostname of port
- * \param port 		OUT: port number
+ * \param[in] context 		context to work with
+ * \param[in] jobId 		job to query
+ * \param[in] name 		name of the UI-port
+ * \param[out] host 		hostname of port
+ * \param[out] port 		port number
  */
 int edg_wll_QueryListener(
 	edg_wll_Context	context,
@@ -342,9 +342,9 @@ int edg_wll_QueryListenerProxy(
 
 /**
  * Ask LB Proxy server for sequence number
- * \param context 	IN: context to work with
- * \param jobId 	IN: job to query
- * \param code 		OUT: sequence code
+ * \param[in] context 		context to work with
+ * \param[in] jobId 		job to query
+ * \param[out] code 		sequence code
  */
 
 
