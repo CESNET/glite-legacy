@@ -120,7 +120,7 @@ renew_proxy(proxy_record *record, char *basename, char **new_proxy)
    edg_wlpr_Log(LOG_DEBUG, "Trying to renew proxy in %s.%d",
 	        basename, record->suffix);
 
-   snprintf(tmp_proxy, sizeof(tmp_proxy), "%s.%d.renew.XXXXXX", 
+   snprintf(tmp_proxy, sizeof(tmp_proxy), "%s.%d.myproxy.XXXXXX", 
 	    basename, record->suffix);
    tmp_fd = mkstemp(tmp_proxy);
    if (tmp_fd == -1) {
@@ -157,22 +157,24 @@ renew_proxy(proxy_record *record, char *basename, char **new_proxy)
    } else
       socket_attrs->psport = MYPROXY_SERVER_PORT;
 
+   verror_clear();
    ret = myproxy_get_delegation(socket_attrs, client_request,
 	                        server_response, tmp_proxy);
    if (ret == 1) {
       ret = EDG_WLPR_ERROR_MYPROXY;
-      edg_wlpr_Log(LOG_ERR, "Error contacting MyProxy server for proxy %s",
-	           repository_file);
+      edg_wlpr_Log(LOG_ERR, "Error contacting MyProxy server for proxy %s: %s",
+	           repository_file, verror_get_string());
+      verror_clear();
       goto end;
    }
 
    renewed_proxy = tmp_proxy;
 
-   if (voms_enabled) {
+   if (voms_enabled && record->voms_exts) {
       char tmp_voms_proxy[FILENAME_MAX];
       int tmp_voms_fd;
       
-      snprintf(tmp_voms_proxy, sizeof(tmp_voms_proxy), "%s.%d.renew.XXXXXX",
+      snprintf(tmp_voms_proxy, sizeof(tmp_voms_proxy), "%s.%d.voms.XXXXXX",
 	       basename, record->suffix);
       tmp_voms_fd = mkstemp(tmp_voms_proxy);
       if (tmp_voms_fd == -1) {
@@ -182,11 +184,15 @@ renew_proxy(proxy_record *record, char *basename, char **new_proxy)
 	 goto end;
       }
 
-      ret = renew_voms_certs(repository_file, tmp_voms_proxy);
-      if (ret)
+      ret = renew_voms_creds(repository_file, renewed_proxy, tmp_voms_proxy);
+      close(tmp_voms_fd);
+      if (ret) {
+	 unlink(tmp_voms_proxy);
 	 goto end;
+      }
 
       renewed_proxy = tmp_voms_proxy;
+      unlink(tmp_proxy);
    }
 
    if (new_proxy)

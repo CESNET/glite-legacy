@@ -75,6 +75,6 @@ int
 get_proxy_base_name(char *file, char **subject);
 
 int
-renew_voms_certs(const char *cur_file, const char *new_file);
+renew_voms_creds(const char *cur_file, const char *renewed_file, const char *new_file);
 
 #endif /* RENEWALD_LOCL_H */

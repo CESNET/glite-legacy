@@ -32,6 +32,14 @@ start()
 	[ -z "$creds" ] &&
 		echo $0: WARNING: No credentials specified. Using default lookup which is dangerous. >&2
 
+	# workaround for VOMS_FindByVO that seems to always require user's own VOMS config file (bug #7511)
+	user_voms_config=$HOME/.glite/vomses
+	if [ ! -f "$user_voms_config" ]; then
+		rm -f /tmp/renewal_vomses
+		su - $GLITE_USER -c "touch /tmp/renewal_vomses && chmod 644 /tmp/renewal_vomses"
+		user_voms_config=/tmp/renewal_vomses
+	fi
+
 	echo -n Starting ProxyRenewal Daemon: glite-proxy-renewd ...
 
 	if [ ! -d "$PROXY_REPOSITORY" ]; then
@@ -40,32 +48,26 @@ start()
 		chmod 0700 $PROXY_REPOSITORY
 	fi
 	
-	su - $GLITE_USER -c "$GLITE_LOCATION/bin/glite-proxy-renewd \
-		-r $PROXY_REPOSITORY $creds" && echo " done"
+	su - $GLITE_USER -c "VOMS_USERCONF=$user_voms_config \
+		$GLITE_LOCATION/bin/glite-proxy-renewd \
+		-r $PROXY_REPOSITORY $creds -A" && echo " done"
 }
 
 stop()
 {
 	echo -n "Stopping ProxyRenewal Daemon: glite-proxy-renewd ..."
-	PIDS=`ps -C glite-proxy-renewd -o pid --no-heading`
-	if [ -z "$PIDS" ]; then
-		echo " no process glite-proxy-renewd running"
-		exit 1
-	else
-		kill $PIDS && echo " done"
-	fi
+	killall glite-proxy-renewd
+	echo " done"
 }
 
 status()
 {
-	PIDS=`ps -C glite-proxy-renewd -o pid --no-heading`
-	if ps p $PIDS >/dev/null 2>&1; then
-		echo glite-proxy-renewd running \($PIDS\)
-		return 0
+	if netstat -an --unix | grep "^unix .* LISTEN.* /tmp/dgpr_renew_" >/dev/null 2>&1 ;then
+		echo glite-proxy-renewd running
+	else
+		echo glite-proxy-renewd not running
+		return 1
 	fi
-	
-	echo glite-proxy-renewd not running
-	return 1
 }
 
 case x$1 in
