@@ -159,6 +159,7 @@ exit 0
 	<xsl:template name="dependencies" match="external">
 		<xsl:param name="install"/>
 		<xsl:variable name="package"><xsl:value-of select="@name"/>-<xsl:value-of select="@version"/>-<xsl:value-of select="@age"/>.<xsl:value-of select="@arch"/>.rpm</xsl:variable>
+		<xsl:variable name="package.name"><xsl:value-of select="@name"/>-<xsl:value-of select="@version"/>-<xsl:value-of select="@age"/></xsl:variable>
 		<xsl:choose>
 			<xsl:when test="$install = 'true'">
 wget -N --non-verbose <xsl:value-of select="$ext-repository"/><xsl:value-of select="$package"/>
@@ -168,14 +169,25 @@ then
 	echo ERROR: <xsl:value-of select="$package"/> could not be downloaded!
 	exit 1
 fi
-			</xsl:when>
-		</xsl:choose>
 RPMLIST="$RPMLIST <xsl:value-of select="$package"/>"
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:choose>
+					<xsl:when test="@package.name">
+RPMLIST="$RPMLIST <xsl:value-of select="@package.name"/>"
+					</xsl:when>
+					<xsl:otherwise>
+RPMLIST="$RPMLIST <xsl:value-of select="$package.name"/>"
+					</xsl:otherwise>
+				</xsl:choose>
+			</xsl:otherwise>
+		</xsl:choose>
 	</xsl:template>
 	
 	<xsl:template name="components" match="component">
 		<xsl:param name="install"/>
 		<xsl:variable name="package"><xsl:value-of select="@name"/>-<xsl:value-of select="@version"/>-<xsl:value-of select="@age"/>.<xsl:value-of select="@arch"/>.rpm</xsl:variable>
+		<xsl:variable name="package.name"><xsl:value-of select="@name"/>-<xsl:value-of select="@version"/>-<xsl:value-of select="@age"/></xsl:variable>
 		<xsl:choose>
 			<xsl:when test="$install='true'">
 wget -N --non-verbose <xsl:value-of select="$repository"/><xsl:value-of select="@arch"/>/RPMS/<xsl:value-of select="$package"/>
@@ -185,9 +197,19 @@ then
 	echo ERROR: <xsl:value-of select="$package"/> could not be downloaded!
 	exit 1
 fi
-			</xsl:when>
-		</xsl:choose>
 RPMLIST="$RPMLIST <xsl:value-of select="$package"/>"
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:choose>
+					<xsl:when test="@package.name">
+RPMLIST="$RPMLIST <xsl:value-of select="@package.name"/>"
+					</xsl:when>
+					<xsl:otherwise>
+RPMLIST="$RPMLIST <xsl:value-of select="$package.name"/>"
+					</xsl:otherwise>
+				</xsl:choose>
+			</xsl:otherwise>
+		</xsl:choose>
 	</xsl:template>
 
 </xsl:stylesheet>
