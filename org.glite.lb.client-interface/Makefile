@@ -54,7 +54,7 @@ distbin:
 	cd ${top_srcdir}/tmpbuilddir && tar -czf ${top_srcdir}/${distdir}/${package}-${version}_bin.tar.gz *
 	rm -rf ${top_srcdir}/tmpbuilddir
 	
-doc:
+doc: generate
 	doxygen C.dox
 	doxygen CPP.dox
 
