@@ -126,7 +126,6 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         # Create the MySQL database
         self.mysql.stop()
         time.sleep(5)
-        os.link('/var/lib/mysql/mysql.sock', '/tmp/mysql.sock')
         self.mysql.start()
         
         print '#-------------------------------------------------------------------'
@@ -144,25 +143,9 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         file.close()
         os.system('/usr/bin/mysql < /tmp/mysql_ct')
         os.system('/bin/rm /tmp/mysql_ct')
-        
+        os.link('/var/lib/mysql/mysql.sock', '/tmp/mysql.sock')
         self.mysql.stop()
-        
-        # Create /etc/my.cnf file
-        #f = open("/etc/my.cnf","w")
-        #f.write("[mysqld]\n")
-        #f.write("  datadir=/var/lib/mysql\n")
-        #f.write("  socket=/tmp/mysql.sock\n")
-        #f.write("[mysql.server]\n")
-        #f.write("  user=mysql\n")
-        #f.write("  basedir=/var/lib\n")
-        #f.write("[safe_mysqld]\n")
-        #f.write("  err-log=/var/log/mysqld.log\n")
-        #f.write("  pid-file=/var/run/mysqld/mysqld.pid\n")
-        #f.close()
-        
-        time.sleep(5)
-        self.mysql.start()
-        
+         
         return 0
         
 #-------------------------------------------------------------------------------
