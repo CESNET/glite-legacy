@@ -6,8 +6,8 @@
  * \brief L&B API common context (publicly visible) and related definitions
  */
 
-#include "glite/wms/common/utilities/exception_codes.h"
-#include "glite/wms/jobid/cjobid.h"
+#include "glite/wmsutils/exception/exception_codes.h"
+#include "glite/wmsutils/jobid/cjobid.h"
 
 #ident "$Header$"
 

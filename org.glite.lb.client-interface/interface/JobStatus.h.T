@@ -12,7 +12,7 @@
 #include <utility>
 #include <vector>
 
-#include "glite/wms/jobid/JobId.h"
+#include "glite/wmsutils/jobid/JobId.h"
 
 #include "glite/lb/jobstat.h"
 #include "glite/lb/CountRef.h"
@@ -107,7 +107,7 @@ public:
 	struct timeval	getValTime(Attr) const;
   
 	/** Retrieve jobid attribute */
-	const glite::wms::jobid::JobId  getValJobId(Attr) const;
+	const glite::wmsutils::jobid::JobId  getValJobId(Attr) const;
 
 	/** Retrieve bool attribute */
 	bool getValBool(Attr) const;

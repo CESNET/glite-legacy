@@ -1,19 +1,19 @@
 #ifndef __EDG_WORKLOAD_LOGGING_CLIENT_LOGGING_EXCEPTIONS_HPP__
 #define __EDG_WORKLOAD_LOGGING_CLIENT_LOGGING_EXCEPTIONS_HPP__
 
-#include "glite/wms/common/utilities/Exceptions.h"
-
-#include <pthread.h>
-
 #ident "$Header$"
 
 /** @file LoggingExceptions.h
  *  @version $Revision$
  */
 
+#include "glite/wmsutils/exception/Exceptions.h"
+
+#include <pthread.h>
+
 EWL_BEGIN_NAMESPACE;
 
-class Exception: public glite::wms::common::utilities::Exception {
+class Exception: public glite::wmsutils::exception::Exception {
 public:
 	
 	/* constructor for mandatory fields */
@@ -22,7 +22,7 @@ public:
 		  const std::string& method,
 		  int   code,
 		  const std::string& exception) 
-		: glite::wms::common::utilities::Exception(source, 
+		: glite::wmsutils::exception::Exception(source, 
 							      line_number, 
 							      method, 
 							      code, 
@@ -35,8 +35,8 @@ public:
 		  const std::string& method,
 		  int   code,
 		  const std::string& exception,
-		  const glite::wms::common::utilities::Exception &exc)
-		: glite::wms::common::utilities::Exception(source, 
+		  const glite::wmsutils::exception::Exception &exc)
+		: glite::wmsutils::exception::Exception(source, 
 							      line_number, 
 							      method, 
 							      code, 
@@ -63,7 +63,7 @@ public:
 			 const std::string& method,
 			 int   code,
 			 const std::string& exception, 
-			 const glite::wms::common::utilities::Exception &exc)
+			 const glite::wmsutils::exception::Exception &exc)
 		: Exception(source, line_number, method, code, exception)
 		{};
 };
@@ -91,7 +91,7 @@ public:
 		    const std::string& method,
 		    int   code,
 		    const std::string& exception,
-		    const glite::wms::common::utilities::Exception &exc)
+		    const glite::wmsutils::exception::Exception &exc)
 		: Exception(source, 
 			    line_number, 
 			    method, 

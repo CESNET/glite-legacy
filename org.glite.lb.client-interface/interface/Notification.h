@@ -2,7 +2,7 @@
 #define __EDG_WORKLOAD_LOGGING_CLIENT_NOTIFICATION_HPP__
 
 
-#include "glite/wms/jobid/JobId.h"
+#include "glite/wmsutils/jobid/JobId.h"
 
 #include "glite/lb/consumer.h"
 #include "glite/lb/notification.h"
@@ -36,10 +36,10 @@ public:
 	 * Local operation only, Register() has to be called
 	 * to propagate changes to server 
 	 */
-	void addJob(const glite::wms::jobid::JobId &); 
+	void addJob(const glite::wmsutils::jobid::JobId &); 
 
 	/** Remove job from the list, local op again. */
-	void removeJob(const glite::wms::jobid::JobId &);
+	void removeJob(const glite::wmsutils::jobid::JobId &);
 
 	/** Get jobs on the list */
 	std::string getJobs();
@@ -63,7 +63,7 @@ public:
 	int receive(glite::lb::JobStatus &,timeval &);
 
 private:
-	std::vector<glite::wms::jobid::JobId>	jobs;
+	std::vector<glite::wmsutils::jobid::JobId>	jobs;
 	std::vector<glite::lb::JobStatus::Code>	states;
 
 	edg_wll_Context	ctx;

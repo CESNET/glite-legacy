@@ -6,7 +6,7 @@
 #include <vector>
 #include <string>
 
-#include "glite/wms/jobid/JobId.h"
+#include "glite/wmsutils/jobid/JobId.h"
 #include "glite/lb/CountRef.h"
 
 #ident "$Header$"
@@ -130,7 +130,7 @@ public:
         struct timeval	getValTime(Attr) const;
 		
         /** Retrieve jobid attribute */
-        const glite::wms::jobid::JobId getValJobId(Attr) const;
+        const glite::wmsutils::jobid::JobId getValJobId(Attr) const;
 
 	/** Attribute name */
 	const std::string & getAttrName(Attr) const;

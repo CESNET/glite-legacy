@@ -3,7 +3,7 @@
 
 #ident "$Header$"
 
-#include "glite/wms/jobid/JobId.h"
+#include "glite/wmsutils/jobid/JobId.h"
 
 #include "glite/lb/Event.h"
 #include "glite/lb/JobStatus.h"
@@ -25,14 +25,14 @@ EWL_BEGIN_NAMESPACE;
 class Job {
 public:
   Job(void);
-  Job(const glite::wms::jobid::JobId &);
+  Job(const glite::wmsutils::jobid::JobId &);
   ~Job();
   
   /** Assign new JobId to an existing instance.
    * Connection to server is preserved if possible.
    */
   
-  Job & operator= (const glite::wms::jobid::JobId &);
+  Job & operator= (const glite::wmsutils::jobid::JobId &);
 
 /**
  * Status retrieval bitmasks. Used ORed as Job::status() argument,
@@ -66,7 +66,7 @@ public:
   
 private:
   ServerConnection	server;
-  glite::wms::jobid::JobId			jobId;
+  glite::wmsutils::jobid::JobId			jobId;
 };
 
 EWL_END_NAMESPACE;

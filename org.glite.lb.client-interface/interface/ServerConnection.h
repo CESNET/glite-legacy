@@ -11,7 +11,7 @@
 #include <string.h>
 #include <list>
 
-#include "glite/wms/jobid/JobId.h"
+#include "glite/wmsutils/jobid/JobId.h"
 
 #include "glite/lb/Event.h"
 #include "glite/lb/JobStatus.h"
@@ -65,7 +65,7 @@ public:
 	QueryRecord(const Attr, const Op, const std::string &);
 	QueryRecord(const Attr, const Op, const int);
 	QueryRecord(const Attr, const Op, const struct timeval &);
-	QueryRecord(const Attr, const Op, const glite::wms::jobid::JobId&);
+	QueryRecord(const Attr, const Op, const glite::wmsutils::jobid::JobId&);
 	/* this one is for attr==TIME and particular state */
 	QueryRecord(const Attr, const Op, const int, const struct timeval &);
 	
@@ -94,7 +94,7 @@ private:
 	std::string tag_name;
 	int state;
 	std::string string_value;
-	glite::wms::jobid::JobId jobid_value;
+	glite::wmsutils::jobid::JobId jobid_value;
         int     int_value;
         struct timeval timeval_value;
 	std::string string_value2;
@@ -222,9 +222,9 @@ public:
 	 */
   
 	void queryJobs(const std::vector<QueryRecord>& query,
-		       std::vector<glite::wms::jobid::JobId>& ids) const;
+		       std::vector<glite::wmsutils::jobid::JobId>& ids) const;
   
-	const std::vector<glite::wms::jobid::JobId>
+	const std::vector<glite::wmsutils::jobid::JobId>
 	queryJobs(const std::vector<QueryRecord>& query) const;
   
 	
@@ -236,9 +236,9 @@ public:
 	 */
    
 	void queryJobs(const std::vector<std::vector<QueryRecord> >& query,
-		       std::vector<glite::wms::jobid::JobId>& ids) const;
+		       std::vector<glite::wmsutils::jobid::JobId>& ids) const;
   
-	const std::vector<glite::wms::jobid::JobId>
+	const std::vector<glite::wmsutils::jobid::JobId>
 	queryJobs(const std::vector<std::vector<QueryRecord> >& query) const;
 
 	/** Retrieve jobs satisfying the query records, including status
@@ -281,8 +281,8 @@ public:
 	/** JobId's of all user's jobs.
 	 * Convenience wrapper around queryJobs.
 	 */
-	void userJobs(std::vector<glite::wms::jobid::JobId> &) const;
-	const std::vector<glite::wms::jobid::JobId> userJobs() const;
+	void userJobs(std::vector<glite::wmsutils::jobid::JobId> &) const;
+	const std::vector<glite::wmsutils::jobid::JobId> userJobs() const;
 
 	/** Manipulate LB parameters, the same as for edg_wll_Context in C */
 	void setParam(edg_wll_ContextParam, int); 
