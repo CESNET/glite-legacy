@@ -7,7 +7,7 @@
  *  @version $Revision$
  */
 
-#include "glite/wmsutils/exception/Exceptions.h"
+#include "glite/wmsutils/exception/Exception.h"
 
 #include <pthread.h>
 
