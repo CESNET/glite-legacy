@@ -210,6 +210,18 @@ if __name__ == '__main__':
             glib.print_params(params)
             sys.exit(0)
 
+    # Check certificates
+    if params.has_key('glite.installer.checkcerts'):
+        if params['glite.installer.checkcerts'] == "true":
+            if glib.check_certs(params) != 0:
+                print "An error occurred while configuring the %s service" \
+                    % service.friendly_name
+                sys.exit(1)
+    
+    # Print configuration parameters
+    if verbose:
+        glib.print_params(params)
+
     service.copyright()
     service.version()
     service.banner()
@@ -225,5 +237,4 @@ if __name__ == '__main__':
     if service.start() != 0:
         print "An error occurred while strating the %s" % service.friendly.name
         sys.exit(1)
-        
-        
+
