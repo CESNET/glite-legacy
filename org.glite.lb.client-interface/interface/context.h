@@ -146,6 +146,7 @@ typedef enum _edg_wll_ErrorCode {
 	EDG_WLL_IL_PROTO,	/**< Interlogger to lbserver communication protocol error. */
 	EDG_WLL_IL_SYS,         /**< Interlogger internal error. */
 	EDG_WLL_IL_EVENTS_WAITING, /**< Interlogger still has events pending delivery. */
+	EDG_WLL_ERROR_DNS, /**< DNS resolver error. See errDesc returned by edg_wll_Error(). */
 } edg_wll_ErrorCode;
 
 /**

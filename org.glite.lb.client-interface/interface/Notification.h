@@ -18,19 +18,29 @@ EWL_BEGIN_NAMESPACE;
 
 class Notification {
 public:
+	/** Create an empty object
+	 * to be used for new notifications, i.e. with Register()
+	 */
 	Notification();
 
-	/** Create from NotifId */
-	Notification(const std::string);
-
-	/** Create from server,port pair */
+	/** Create from server,port pair
+	 * to be used for new notifications, i.e. with Register()
+	 * \param host
+	 * \param port
+	 */
 	Notification(const std::string,const u_int16_t);
+
+	/** Create from NotifId
+	 * to be used for existing notifications, i.e. with Bind()
+	 * \param notifId
+	 */
+	Notification(const std::string);
 
 	~Notification();
 
 	std::string getNotifId() const;	/**< retrieve NotifId */
-	time_t getValid() const;	/**< until when it is valid */
-	int getFd() const;		/**< local listener filedescriptor */
+	time_t getValid() const;        /**< retrieve time until when it is valid */
+	int getFd() const;              /**< retrieve local listener filedescriptor */
 
 	/** Add this job to the list.
 	 * Local operation only, Register() has to be called
@@ -54,6 +64,12 @@ public:
 	 * with the server
 	 */
 	void Register();
+
+	/** Bind to the existing notification at the server
+	 * i.e. change the receiving local address
+	 * \param address_override
+	 */
+	void Bind(const std::string);
 
 	/** Receive notification.
 	 * Blocks at most the specified timeout (maybe 0 for local polling).
