@@ -20,6 +20,9 @@
 
     Revision history:
     $Log$
+    Revision 1.2  2004/07/12 16:18:37  dimeglio
+    Modified to use myproxy from the repository if available
+
 -->
 
 	<!-- ======================================================
@@ -45,7 +48,6 @@ globus_prefix=${with.globus.prefix}
 thrflavour=${with.globus.thr.flavor}
 nothrflavour=${with.globus.nothr.flavor}
 myproxy_prefix=${with.myproxy.prefix}
-voms_prefix=${with.glite.location}
 			</echo>
 	    </target>
 	</project>
