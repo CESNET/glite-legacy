@@ -1,7 +1,7 @@
 Summary:LB node installation package
 Name:glite-lb
-Version:0.1.0
-Release:0
+Version:@MODULE.VERSION@
+Release:@MODULE.BUILD@
 Copyright:Open Source EGEE License
 Vendor:EU EGEE project
 Group:System/Application
@@ -15,7 +15,7 @@ Source:glite-lb.tar.gz
 %define debug_package %{nil}
 
 %description
-WMS node installation package
+LB node installation package
 
 %prep
  
@@ -36,6 +36,8 @@ echo "post install script"
 %preun
 %postun
 %files
+%attr(755,root,root) %{prefix}/etc/config/scripts
+%attr(644,root,root) %{prefix}/etc/config/
 
 %changelog
 
