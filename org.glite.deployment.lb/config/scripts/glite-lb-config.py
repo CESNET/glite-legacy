@@ -197,12 +197,12 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
     def configure(self):
         
         # Create the GLITE_USER if it doesn't exists
-        print "\nCreating/Verifying the GLITE_USER account %s" % params['GLITE_USER']
-        glib.add_user(params['GLITE_USER'],params['GLITE_USER'])
-        (uid,gid) = glib.get_user_info(params['GLITE_USER'])
+        print "\nCreating/Verifying the GLITE_USER account %s" % os.environ['GLITE_USER']
+        glib.add_user(os.environ['GLITE_USER'],os.environ['GLITE_USER'])
+        (uid,gid) = glib.get_user_info(os.environ['GLITE_USER'])
         glib.check_dir(os.environ['GLITE_LOCATION_VAR'],0755, uid, gid)
-        glib.check_dir("/home/%s/.certs" % params['GLITE_USER'],0755, uid, gid)
-        lb_cert_path = pwd.getpwnam(params['GLITE_USER'])[5] + "/" + params['user.certificate.path']
+        glib.check_dir("/home/%s/.certs" % os.environ['GLITE_USER'],0755, uid, gid)
+        lb_cert_path = pwd.getpwnam(os.environ['GLITE_USER'])[5] + "/" + params['user.certificate.path']
         glib.printOkMessage()
 
         # Create all directories needed
@@ -227,11 +227,12 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         self.mysql.start()
         
         # Check if database exists
-        if self.mysql.existsDB(params['lb.database.name']) == 0:
+        if self.mysql.existsDB(params['lb.database.name']) != 0:
             # Create database
             print ('\n==> Creating MySQL %s database\n' % params['lb.database.name'])
     
-            os.system('/bin/rm /tmp/mysql_ct')
+            if os.path.exists['/bin/rm /tmp/mysql_ct']:
+                os.system('/bin/rm /tmp/mysql_ct')
             
             file = open('/tmp/mysql_ct', 'w')
             text = ['CREATE DATABASE %s;\n' % params['lb.database.name'], 
