@@ -168,7 +168,7 @@ renew_proxy(proxy_record *record, char *basename, char **new_proxy)
 
    renewed_proxy = tmp_proxy;
 
-   if (voms_enabled && record.voms_exts) {
+   if (voms_enabled && record->voms_exts) {
       char tmp_voms_proxy[FILENAME_MAX];
       int tmp_voms_fd;
       

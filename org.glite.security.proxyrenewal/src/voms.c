@@ -27,39 +27,39 @@ generate_proxy(globus_gsi_cred_handle_t cur_proxy,
 
    result = globus_gsi_proxy_handle_init(&proxy_handle, NULL);
    if (result) {
-      edg_wlpr_Log(LOG_ERROR, "globus_gsi_proxy_handle_init() failed\n");
+      edg_wlpr_Log(LOG_ERR, "globus_gsi_proxy_handle_init() failed\n");
       goto end;
    }
 
    result = globus_gsi_cred_get_key(cur_proxy, &cur_proxy_priv_key);
    if (result) {
-      edg_wlpr_Log(LOG_ERROR, "globus_gsi_cred_get_key() failed\n");
+      edg_wlpr_Log(LOG_ERR, "globus_gsi_cred_get_key() failed\n");
       goto end;
    }
 
    /* Create and sign a new proxy */
    result = globus_gsi_cred_get_cert_type(cur_proxy, &proxy_type);
    if (result) {
-      edg_wlpr_Log(LOG_ERROR, "globus_gsi_cred_get_cert_type() failed\n");
+      edg_wlpr_Log(LOG_ERR, "globus_gsi_cred_get_cert_type() failed\n");
       goto end;
    }
 
    result = globus_gsi_proxy_handle_set_type(proxy_handle, proxy_type);
    if (result) {
-      edg_wlpr_Log(LOG_ERROR, "globus_gsi_proxy_handle_set_type() failed\n");
+      edg_wlpr_Log(LOG_ERR, "globus_gsi_proxy_handle_set_type() failed\n");
       goto end;
    }
 
    result = globus_gsi_proxy_create_signed(proxy_handle, cur_proxy, &proxy);
    if (result) {
-      edg_wlpr_Log(LOG_ERROR, "globus_gsi_proxy_handle_init() failed\n");
+      edg_wlpr_Log(LOG_ERR, "globus_gsi_proxy_handle_init() failed\n");
       goto end;
    }
 
    /* Get the new proxy */
    result = globus_gsi_cred_get_cert(proxy, &new_cert);
    if (result) {
-      edg_wlpr_Log(LOG_ERROR, "globus_gsi_cred_get_cert() failed\n");
+      edg_wlpr_Log(LOG_ERR, "globus_gsi_cred_get_cert() failed\n");
       goto end;
    }
 
@@ -79,7 +79,7 @@ generate_proxy(globus_gsi_cred_handle_t cur_proxy,
    /* And put the cert back, older one is unallocated by the function */
    result = globus_gsi_cred_set_cert(proxy, voms_cert);
    if (result) {
-      edg_wlpr_Log(LOG_ERROR, "globus_gsi_cred_set_cert() failed\n");
+      edg_wlpr_Log(LOG_ERR, "globus_gsi_cred_set_cert() failed\n");
       goto end;
    }
 
@@ -100,7 +100,7 @@ my_VOMS_Export(void *buf, int buf_len, X509_EXTENSION **extension)
    p = pp = buf;
    ac = d2i_AC(NULL, &p, buf_len+1);
    if (ac == NULL) {
-      edg_wlpr_Log(LOG_ERROR, "d2i_AC() failed\n");
+      edg_wlpr_Log(LOG_ERR, "d2i_AC() failed\n");
       return 1;
    }
 
@@ -122,14 +122,14 @@ create_voms_command(struct vomsdata *vd, struct voms **voms_cert, char **command
    for (i = 2; i < argc; i++) {
       ret = VOMS_Ordering(argv[i], vd, &voms_error);
       if (ret == 0) {
-	 edg_wlpr_Log(LOG_ERROR, "VOMS_Ordering() failed\n"); 
+	 edg_wlpr_Log(LOG_ERR, "VOMS_Ordering() failed\n"); 
 	 return 1;
       }
    }
 #endif
 
    if (voms_cert == NULL || *voms_cert == NULL || (*voms_cert)->std == NULL) {
-      edg_wlpr_Log(LOG_ERROR, "Invalid VOMS certificate\n");
+      edg_wlpr_Log(LOG_ERR, "Invalid VOMS certificate\n");
       return 1;
    }
 
@@ -156,7 +156,7 @@ renew_voms_cert(struct vomsdata *vd, struct voms **voms_cert,
    voms_contacts = VOMS_FindByVO(vd, (*voms_cert)->voname, vomsconf, NULL, &voms_error);
 
    if (voms_contacts == NULL) {
-      edg_wlpr_Log(LOG_ERROR, "VOMS_FindByVO() failed\n");
+      edg_wlpr_Log(LOG_ERR, "VOMS_FindByVO() failed\n");
       return 1;
    }
 
@@ -168,7 +168,7 @@ renew_voms_cert(struct vomsdata *vd, struct voms **voms_cert,
 			 (void**) buf, buf_len, &voms_version,
 			 vd, &voms_error);
    if (ret == 0) {
-      edg_wlpr_Log(LOG_ERROR, "VOMS_Contact() failed\n");
+      edg_wlpr_Log(LOG_ERR, "VOMS_Contact() failed\n");
       return 1;
    }
 
@@ -202,7 +202,7 @@ renew_voms_certs(const char *cur_file, const char *new_file)
 
    vd = VOMS_Init(NULL, NULL);
    if (vd == NULL) {
-      edg_wlpr_Log(LOG_ERROR, "VOMS_Init() failed\n");
+      edg_wlpr_Log(LOG_ERR, "VOMS_Init() failed\n");
       return 1;
    }
 
@@ -212,11 +212,11 @@ renew_voms_certs(const char *cur_file, const char *new_file)
 	 /* no VOMS cred, no problem; continue */
 	 /* XXX this part shouldn't be reachable, this call is only called
 	  * if the proxy does contain VOMS attributes */
-	 edg_wlpr_Log(LOG_ERROR, "No VOMS attributes found in proxy %s\n", cur_file);
+	 edg_wlpr_Log(LOG_ERR, "No VOMS attributes found in proxy %s\n", cur_file);
 	 ret = 0;
 	 goto end;
       } else {
-	 edg_wlpr_Log(LOG_ERROR, "Cannot get VOMS certificate(s) from proxy");
+	 edg_wlpr_Log(LOG_ERR, "Cannot get VOMS certificate(s) from proxy");
 	 ret = 1;
 	 goto end;
       }
@@ -281,7 +281,7 @@ main(int argc, char *argv[])
 
    if (globus_module_activate(GLOBUS_GSI_PROXY_MODULE) != GLOBUS_SUCCESS ||
        globus_module_activate(GLOBUS_GSI_CERT_UTILS_MODULE) != GLOBUS_SUCCESS) {
-       edg_wlpr_Log(LOG_ERROR, "[%d]: Unable to initialize Globus modules\n", getpid());
+       edg_wlpr_Log(LOG_ERR, "[%d]: Unable to initialize Globus modules\n", getpid());
        return 1;
    }
 
