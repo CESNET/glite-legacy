@@ -74,7 +74,11 @@
 					age="@org.glite.security.proxyrenewal.info.age@"
 					build="@org.glite.security.proxyrenewal.info.build@"
 					arch="i386"/>
-	
+				<component name="glite-security-voms"
+                                        version="@org.glite.security.voms.info.version@"
+                                        age="@org.glite.security.voms.info.age@"
+                                        build="@org.glite.security.voms.info.build@"
+                                        arch="i386"/>
 			</components>
 			<dependencies>
 				<external name="MySQL-server"
