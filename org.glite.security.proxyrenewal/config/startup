@@ -5,6 +5,7 @@ GLITE_USER=${GLITE_USER:-glite}
 GLITE_LOCATION_VAR=$(GLITE_LOCATION_VAR:-/opt/glite/var}
 
 [ -f /etc/glite.conf ] && . /etc/glite.conf
+[ -f $GLITE_LOCATION/etc/glite-wms.conf ] && . $GLITE_LOCATION/etc/glite-wms.conf
 [ -f $HOME/.glite.conf ] && . $HOME/.glite.conf
 
 PROXY_REPOSITORY="$GLITE_LOCATION_VAR/spool/glite-renewd"
