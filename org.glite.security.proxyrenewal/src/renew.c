@@ -843,11 +843,8 @@ renew_proxy(proxy_record *record, char *basename, char **new_proxy)
    char tmp_proxy[FILENAME_MAX];
    int tmp_fd;
    char repository_file[FILENAME_MAX];
-   FILE *fd = NULL;
    int ret = -1;
    char *p;
-   X509 *cert = NULL;
-   X509_NAME *subject = NULL;
    char *server = NULL;
    myproxy_socket_attrs_t *socket_attrs;
    myproxy_request_t      *client_request;
@@ -863,6 +860,8 @@ renew_proxy(proxy_record *record, char *basename, char **new_proxy)
    server_response = malloc(sizeof(*server_response));
    memset(server_response, 0, sizeof(*server_response));
 
+   myproxy_set_delegation_defaults(socket_attrs, client_request);
+
    edg_wlpr_Log(LOG_DEBUG, "Trying to renew proxy in %s.%d",
 	        basename, record->suffix);
 
@@ -875,39 +874,13 @@ renew_proxy(proxy_record *record, char *basename, char **new_proxy)
       return errno;
    }
 
-   myproxy_set_delegation_defaults(socket_attrs, client_request);
-
    snprintf(repository_file, sizeof(repository_file),"%s.%d",
 	    basename, record->suffix);
-   fd = fopen(repository_file, "r");
-   if (fd == NULL) {
-      edg_wlpr_Log(LOG_ERR, "Cannot open proxy %s for renewal (%s)",
-	           repository_file, strerror(errno));
-      ret = errno;
-      goto end; /* XXX */
-   }
 
-   cert = PEM_read_X509(fd, NULL, NULL, NULL);
-   fclose(fd);
-   if (cert == NULL) {
-      edg_wlpr_Log(LOG_ERR, "SSL routines failed to read proxy %s for renewal",
-	           repository_file);
-      ret = EDG_WLPR_ERROR_SSL;
+   ret = get_proxy_base_name(repository_file, &client_request->username);
+   if (ret)
       goto end;
-   }
 
-   subject = X509_NAME_dup(X509_get_subject_name(cert));
-   proxy_get_base_name(subject);
-   client_request->username = X509_NAME_oneline(subject, NULL, 0);
-   X509_NAME_free(subject);
-   X509_free(cert);
-   if (client_request->username == NULL) {
-      edg_wlpr_Log(LOG_ERR, "Cannot read subject name from %s", repository_file);
-      ret = EINVAL;
-      goto end;
-   }
-
-   /* XXX support VERY_SHORT_LIFETIME ? */
    client_request->proxy_lifetime = 60 * 60 * DGPR_RETRIEVE_DEFAULT_HOURS;
    client_request->authzcreds = repository_file;
 

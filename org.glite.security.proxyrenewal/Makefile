@@ -67,7 +67,6 @@ GLOBUS_LIBS:=-L${globus_prefix}/lib \
 	-lglobus_common_${nothrflavour} \
 	-lssl_${nothrflavour}
 
-SSL_UTILS_LIB:=-L${glite_location}/lib -lglobus_ssl_utils
 MYPROXY_LIB:=-L${myproxy_prefix}/lib -lmyproxy_${nothrflavour}
 
 JOBIDLIB:=-L${glite_location}/lib -lglite_wmsutils_cjobid
@@ -94,14 +93,14 @@ default: all
 compile all: ${LIB} ${THRLIB} ${DAEMON} ${CLIENT}
 
 ${LIB}: ${LIBOBJ}
-	${LINK} -o $@ ${LIBLOBJ} -rpath ${glite_location}/lib ${JOBIDLIB} ${SSL_UTILS_LIB}
+	${LINK} -o $@ ${LIBLOBJ} -rpath ${glite_location}/lib ${JOBIDLIB}
 
 
 ${THRLIB}: ${THRLIBOBJ}
-	${LINK} -o $@ ${THRLIBLOBJ} -rpath ${glite_location}/lib ${SSL_UTILS_LIB}
+	${LINK} -o $@ ${THRLIBLOBJ} -rpath ${glite_location}/lib
 
 ${DAEMON}: ${DAEMONOBJ}
-	${LINK} -o $@ ${DAEMONOBJ} ${JOBIDLIB} ${SSL_UTILS_LIB} ${MYPROXY_LIB} -lglobus_gss_assist_${nothrflavour} ${GLOBUS_LIBS} 
+	${LINK} -o $@ ${DAEMONOBJ} ${JOBIDLIB} ${MYPROXY_LIB} -lglobus_gss_assist_${nothrflavour} ${GLOBUS_LIBS} 
 
 ${CLIENT}: ${CLIENTOBJ} ${LIB}
 	${LINK} -o $@ ${CLIENTOBJ} ${LIB} ${GLOBUS_LIBS}

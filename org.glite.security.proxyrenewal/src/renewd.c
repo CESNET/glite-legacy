@@ -604,6 +604,8 @@ int main(int argc, char *argv[])
       exit(1);
    }
 
+   globus_module_activate(GLOBUS_GSI_CERT_UTILS_MODULE);
+
    if (!debug)
       for (fd = 3; fd < OPEN_MAX; fd++) close(fd);
 
@@ -662,5 +664,46 @@ int main(int argc, char *argv[])
    ret = doit(sock);
 
    close(sock);
+   return ret;
+}
+
+int
+get_proxy_base_name(char *file, char **name)
+{
+   X509 *cert = NULL;
+   EVP_PKEY *key = NULL;
+   STACK_OF(X509) *chain = NULL;
+   X509_NAME *subject = NULL;
+   int ret;
+
+   ret = load_proxy(file, &cert, &key, &chain);
+   if (ret)
+      return ret;
+
+   subject = X509_NAME_dup(X509_get_subject_name(cert));
+
+   sk_X509_insert(chain, cert, 0);
+   cert = NULL;
+
+   ret = globus_gsi_cert_utils_get_base_name(subject, chain);
+   if (ret) {
+      edg_wlpr_Log(LOG_ERR, "Cannot get subject name from proxy %s", file);
+      ret = EDG_WLPR_ERROR_SSL; /* XXX ??? */
+      goto end;
+   }
+
+   *name = X509_NAME_oneline(subject, NULL, 0);
+   ret = 0;
+
+end:
+   if (cert)
+      X509_free(cert);
+   if (key)
+      EVP_PKEY_free(key);
+   if (chain)
+      sk_X509_pop_free(chain, X509_free);
+   if (subject)
+      X509_NAME_free(subject);
+
    return ret;
 }

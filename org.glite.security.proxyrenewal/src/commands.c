@@ -97,39 +97,15 @@ strmd5(const char *s, unsigned char *digest)
 static int
 get_base_filename(char *proxy_file, char **basefilename)
 {
-   FILE *cert_file = NULL;
-   X509 *cert = NULL;
-   X509_NAME *s = NULL;
    char *subject = NULL;
    char file[FILENAME_MAX];
    int ret;
 
    assert(basefilename != NULL);
 
-   cert_file = fopen(proxy_file, "r");
-   if (cert_file == NULL) {
-      edg_wlpr_Log(LOG_ERR, "Cannot open file %s (%s)", 
-                   proxy_file, strerror(errno));
-      return errno;
-   }
-
-   cert = PEM_read_X509(cert_file, NULL, NULL, NULL);
-   if (cert == NULL) {
-      edg_wlpr_Log(LOG_ERR, "Cannot read certificate from %s", proxy_file);
-      ret = EDG_WLPR_ERROR_SSL; /* XXX */
+   ret = get_proxy_base_name(proxy_file, &subject);
+   if (ret)
       goto end;
-   }
-
-   s = X509_NAME_dup(X509_get_subject_name(cert));
-   proxy_get_base_name(s);
-   subject = X509_NAME_oneline(s, NULL, 0);
-   X509_NAME_free(s);
-   X509_free(cert);
-   if (subject == NULL) {
-      edg_wlpr_Log(LOG_ERR, "Cannot read subject name from %s", proxy_file);
-      ret = EDG_WLPR_ERROR_SSL; /* XXX */
-      goto end;
-   }
 
    snprintf(file, sizeof(file), "%s/%s", repository, strmd5(subject, NULL));
    *basefilename = strdup(file); /* XXX test ENOMEM */
@@ -138,7 +114,6 @@ get_base_filename(char *proxy_file, char **basefilename)
 end:
    if (subject)
       free(subject);
-   fclose(cert_file);
    return ret;
 }
 
@@ -236,8 +211,8 @@ get_times(char *proxy_file, proxy_record *record)
 
    asn1_time = ASN1_UTCTIME_new();
    X509_gmtime_adj(asn1_time,0);
-   end_time = ASN1_UTCTIME_mktime(X509_get_notAfter(cert));
-   start_time = ASN1_UTCTIME_mktime(X509_get_notBefore(cert));
+   globus_gsi_cert_utils_make_time(X509_get_notAfter(cert), &end_time);
+   globus_gsi_cert_utils_make_time(X509_get_notBefore(cert), &start_time);
    current_time = time(NULL);
    ASN1_UTCTIME_free(asn1_time);
    /* if (end_time - RENEWAL_CLOCK_SKEW < current_time) { Too short proxy } */
@@ -266,7 +241,7 @@ get_times(char *proxy_file, proxy_record *record)
 	 ret = -1; /* XXX SSL_ERROR */
 	 goto end;
       }
-      tmp_end = ASN1_UTCTIME_mktime(X509_get_notAfter(cert));
+      globus_gsi_cert_utils_make_time(X509_get_notAfter(cert), &tmp_end);
       if (tmp_end + RENEWAL_CLOCK_SKEW < current_time) {
 	 edg_wlpr_Log(LOG_ERR, "Expired proxy in %s", proxy_file);
 	 ret = EDG_WLPR_PROXY_EXPIRED;

@@ -5,8 +5,8 @@
 
 #include <myproxy.h>
 #include <myproxy_delegation.h>
+#include <globus_gsi_cert_utils.h>
 
-#include "glite/wmsutils/thirdparty/globus_ssl_utils/sslutils.h"
 #include "renewal.h"
 
 #ifdef HAVE_DMALLOC_H
@@ -79,5 +79,8 @@ free_record(proxy_record *record);
 int
 load_proxy(const char *filename, X509 **cert, EVP_PKEY **privkey,
            STACK_OF(X509) **chain);
+
+int
+get_proxy_base_name(char *file, char **subject);
 
 #endif /* RENEWALD_LOCL_H */
