@@ -121,7 +121,7 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
            dirlist = string.split(params['dirlist'],',')
            for d in dirlist:
               glib.check_dir(d,0777)
-        glib.check_dir(params['GLITE_CERT_DIR'])
+        glib.check_dir(os.environ['GLITE_CERT_DIR'])
          
         # Create the GLITE_USER if it doesn't exists
         print "Creating/Verifying the GLITE_USER account %s" % params['GLITE_USER']
