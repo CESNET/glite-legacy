@@ -272,7 +272,7 @@ if __name__ == '__main__':
         sys.exit(1)
         
     # Start the service
-    service.stop()
+    # service.stop()
     if service.start() != 0:
         print "An error occurred while starting the %s" % service.friendly_name
         sys.exit(1)
