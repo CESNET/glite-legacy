@@ -6,7 +6,7 @@
 # For license conditions see the license file or http://eu-egee.org/license.html
 #
 ################################################################################
-# glite-lb-config v. 1.2.0
+# glite-lb-config v. 1.2.1
 #
 # Post-installation script for configuring the gLite Logging and Bookkeping Server
 # Robert Harakaly < robert.harakaly@cern.ch >
@@ -42,7 +42,7 @@ class glite_lb:
     def __init__(self):
         self.mysql = MySQL.Mysql()
         self.verbose = 0
-        self.version = "1.2.0"
+        self.version = "1.2.1"
         self.name = "glite-lb"
         self.friendly_name = "gLite Logging and Bookkeeping"
         
@@ -328,6 +328,7 @@ def set_env():
     glib.export('GLITE_CERT_DIR',params['ca.certificates.dir'])
 
     glib.export('GLOBUS_LOCATION',params['GLOBUS_LOCATION'])
+    glib.export('GPT_LOCATION',params['GPT_LOCATION'])
     
     glib.export('JAVA_HOME')
 
@@ -335,6 +336,9 @@ def set_env():
     glib.addEnvPath("PATH","/usr/bin/:%s/bin:%s/bin:%s/externals/bin:%s/bin" \
         % (os.environ['JAVA_HOME'],os.environ['GLOBUS_LOCATION'],os.environ['GLITE_LOCATION'],os.environ['GLITE_LOCATION']))
     glib.addEnvPath("LD_LIBRARY_PATH","/usr/lib:%s/lib:%s/externals/lib:%s/lib" % (os.environ['GLOBUS_LOCATION'], os.environ['GLITE_LOCATION'],os.environ['GLITE_LOCATION']))
+
+    # Perl
+    glib.addEnvPath("PERL5LIB", "%s/lib/perl:%s/lib/perl5" % (os.environ['GPT_LOCATION'],os.environ['GLITE_LOCATION']))
 
     # Set environment
     glib.setUserEnv()
