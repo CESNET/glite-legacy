@@ -20,6 +20,10 @@
 
 	Revision history:
 	$Log$
+	Revision 1.2.2.1  2005/02/18 14:00:16  jpospi
+	- Removed all L&B Proxy related things
+	- Documentation update
+	
 	Revision 1.2  2004/12/08 13:04:29  jpospi
 	first attemtp to generate documentation using doxygen
 	
@@ -66,6 +70,7 @@ INPUT                 = ./events.h \
                         ./jobstat.h \
                         ./producer.h \
                         ../interface/context.h \
+                        ../interface/notification.h \
                         ../interface/consumer.h 
 SHOW_DIRECTORIES      = NO
 EXTRACT_ALL           = YES
