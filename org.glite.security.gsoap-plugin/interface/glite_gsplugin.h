@@ -3,7 +3,7 @@
 
 #include <stdsoap2.h>
 
-#include "lb_gss.h"
+#include "glite_gss.h"
 
 #define PLUGIN_ID		"GLITE_GSOAP_PLUGIN"
 
