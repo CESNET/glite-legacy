@@ -19,68 +19,225 @@
 
 EWL_BEGIN_NAMESPACE
 
-/** Auxiliary class to hold an atomic query condition. */
+/** Auxiliary class to hold atomic query condition. 
+ *
+ * This class is used to construct queries to the L&B database. Each
+ * query is composed of multiple atomic conditions in the form of
+ * <attribute> <predicate> <value>. QueryRecord represents such an
+ * atomic condition. 
+ */
 class QueryRecord {
 public:
 	friend class ServerConnection;
 	friend edg_wll_QueryRec *convertQueryVector(const std::vector<QueryRecord> &in);
 
 	/* IMPORTANT: must match lbapi.h */
+	/** Symbolic names of queryable attributes. 
+	 *
+	 * The queryable attributes correspond to the table columns in
+	 * the bookkeeping server database, they relate both to the
+	 * event records  and job records.
+	 * \see Event::Attr
+	 */
 	enum Attr {
 		UNDEF=0,	/**< Not-defined value, used to terminate lists etc. */
-		JOBID,	        /**< Job Id \see _edg_wll_QueryRec */
-		OWNER,	        /**< Job owner \see _edg_wll_QueryRec */
-		STATUS,	        /**< Current job status */
-		LOCATION,	/**< Where is the job processed */
-		DESTINATION,	/**< Destination CE */
-		DONECODE,	/**< Minor done status (OK,fail,cancel) */
-		USERTAG,	/**< User tag (not implemented yet) */
-		TIME,	        /**< Timestamp \see _edg_wll_QueryRec */
-		LEVEL,	        /**< Logging level (see "dglog.h") * \see _edg_wll_QueryRec */
-		HOST,	        /**< Where the event was generated */
-		SOURCE,	        /**< Source component */
-		INSTANCE,	/**< Instance of the source component */
-		EVENT_TYPE,	/**< Event type \see _edg_wll_QueryRec */
-		CHKPT_TAG,	/**< Checkpoint tag */
+		JOBID,	        /**< Job id. */
+		OWNER,	        /**< Job owner (certificate subject). */
+		STATUS,	        /**< Current job status code. */
+		LOCATION,	/**< Where is the job being processed. */
+		DESTINATION,	/**< Destination CE. */
+		DONECODE,	/**< Minor done status (OK,fail,cancel). */
+		USERTAG,	/**< User tag. */
+		TIME,	        /**< Timestamp of the event. */
+		LEVEL,	        /**< Logging level. */
+		HOST,	        /**< Hostname where the event was generated. */
+		SOURCE,	        /**< Source component that sent the event. */
+		INSTANCE,	/**< Instance of the source component. */
+		EVENT_TYPE,	/**< Event type. */
+		CHKPT_TAG,	/**< Checkpoint tag. */
 		RESUBMITTED,	/**< Job was resubmitted */
-		PARENT,	        /**< Job was resubmitted */
-		EXITCODE,	/**< Unix exit code */
+		PARENT,	        /**< Id of the parent job. */
+		EXITCODE,	/**< Job system exit code. */
 	};
 
+	/** Symbolic names of predicates.
+	 *
+	 * These are the predicates used for creating atomic query
+	 * conditions.
+	 */
 	enum Op {
-		EQUAL=EDG_WLL_QUERY_OP_EQUAL,
-		LESS=EDG_WLL_QUERY_OP_LESS,
-		GREATER=EDG_WLL_QUERY_OP_GREATER,
-		WITHIN=EDG_WLL_QUERY_OP_WITHIN,
-		UNEQUAL=EDG_WLL_QUERY_OP_UNEQUAL
+		EQUAL=EDG_WLL_QUERY_OP_EQUAL, /**< Equal. */
+		LESS=EDG_WLL_QUERY_OP_LESS, /**< Less than. */
+		GREATER=EDG_WLL_QUERY_OP_GREATER, /**< Greater than. */
+		WITHIN=EDG_WLL_QUERY_OP_WITHIN, /**< Within the
+						   range. */
+		UNEQUAL=EDG_WLL_QUERY_OP_UNEQUAL /**< Not equal. */
 	};
   
+
+	/** Default constructor.
+	 *
+	 * Initializes empty query condition.
+	 */
 	QueryRecord();
 
-	/* copy and assignment */
+	/** Copy constructor
+	 * 
+	 * Initializes an exact copy of the object.
+	 * \param[in] src Original object.
+	 */
 	QueryRecord(const QueryRecord &);
+
+	/** Assignment operator.
+	 *
+	 * Initializes an exact copy of the object.
+	 * \param[in] src Original object.
+	 * \returns Reference to this object.
+	 */
 	QueryRecord& operator=(const QueryRecord &);
 
-	/* constructors for simple attribute queries */
+	/** Constructor for condition on string typed value.
+	 *
+	 * Initializes the object to hold condition on string typed
+	 * attribute value.
+	 * \param[in] name Name of the attribute.
+	 * \param[in] op Symbolic name of the predicate.
+	 * \param[in] value Actual value.
+	 * \throw Exception Invalid value type for given attribute.
+	 */
 	QueryRecord(const Attr, const Op, const std::string &);
+
+	/** Constructor for condition on integer typed value.
+	 *
+	 * Initializes the object to hold condition on integer typed
+	 * attribute value.
+	 * \param[in] name Name of the attribute.
+	 * \param[in] op Symbolic name of the predicate.
+	 * \param[in] value Actual value.
+	 * \throw Exception Invalid value type for given attribute.
+	 */
 	QueryRecord(const Attr, const Op, const int);
+
+	/** Constructor for condition on timeval typed value.
+	 *
+	 * Initializes the object to hold condition on timeval typed
+	 * attribute value.
+	 * \param[in] name Name of the attribute.
+	 * \param[in] op Symbolic name of the predicate.
+	 * \param[in] value Actual value.
+	 * \throw Exception Invalid value type for given attribute.
+	 */
 	QueryRecord(const Attr, const Op, const struct timeval &);
+
+	/** Constructor for condition on JobId typed value.
+	 *
+	 * Initializes the object to hold condition on JobId typed
+	 * attribute value.
+	 * \param[in] name Name of the attribute.
+	 * \param[in] op Symbolic name of the predicate.
+	 * \param[in] value Actual value.
+	 * \throw Exception Invalid value type for given attribute.
+	 */
 	QueryRecord(const Attr, const Op, const glite::wmsutils::jobid::JobId&);
+
 	/* this one is for attr==TIME and particular state */
+	/** Constructor for condition on timeval typed value.
+	 *
+	 * Initializes the object to hold condition on the time the job 
+	 * stays in given state.
+	 * \param[in] name Name of the attribute.
+	 * \param[in] state State of thet job.
+	 * \param[in] op Symbolic name of the predicate.
+	 * \param[in] value Actual value.
+	 * \throw Exception Invalid value type for given attribute.
+	 */
 	QueryRecord(const Attr, const Op, const int, const struct timeval &);
 	
 	/* constructors for WITHIN operator */
+	/** Constructor for condition on string typed interval.
+	 *
+	 * Initializes the object to hold condition on string typed
+	 * attribute interval.
+	 * \param[in] name Name of the attribute.
+	 * \param[in] op Symbolic name of the predicate.
+	 * \param[in] value_min Low interval boundary.
+	 * \param[in] value_max High interval boundary.
+	 * \throw Exception Invalid value type for given attribute.
+	 */
 	QueryRecord(const Attr, const Op, const std::string &, const std::string &);
+
+	/** Constructor for condition on integer typed interval.
+	 *
+	 * Initializes the object to hold condition on integer typed
+	 * attribute interval.
+	 * \param[in] name Name of the attribute.
+	 * \param[in] op Symbolic name of the predicate.
+	 * \param[in] value_min Low interval boundary.
+	 * \param[in] value_max High interval boundary.
+	 * \throw Exception Invalid value type for given attribute.
+	 */
 	QueryRecord(const Attr, const Op, const int, const int);
+
+	/** Constructor for condition on timeval typed interval.
+	 *
+	 * Initializes the object to hold condition on timeval typed
+	 * attribute interval.
+	 * \param[in] name Name of the attribute.
+	 * \param[in] op Symbolic name of the predicate.
+	 * \param[in] value_min Low interval boundary.
+	 * \param[in] value_max High interval boundary.
+	 * \throw Exception Invalid value type for given attribute.
+	 */
 	QueryRecord(const Attr, const Op, const struct timeval &, const struct timeval &);
+
+	/** Constructor for condition on timeval typed interval for
+	 * given state.
+	 *
+	 * Initializes the object to hold condition on the time job
+	 * stayed in given state.
+	 * \param[in] name Name of the attribute.
+	 * \param[in] op Symbolic name of the predicate.
+	 * \param[in] value_min Low interval boundary.
+	 * \param[in] value_max High interval boundary.
+	 * \param[in] state State of thet job.
+	 * \throw Exception Invalid value type for given attribute.
+	 */
 	QueryRecord(const Attr, const Op, const int, const struct timeval &, const struct timeval &);
 
 	/* convenience for user tags */
+	/** Convenience constructor for condition on user tags.
+	 *
+	 * Initializes the object to hold condition on the value of
+	 * user tag.
+	 * \param[in] tag Name of the tag.
+	 * \param[in] op Symbolic namen of the predicate.
+	 * \param[in] value Value of the tag.
+	 */
 	QueryRecord(const std::string &, const Op, const std::string &);
+
+	/** Convenience constructor for condition on user tags.
+	 *
+	 * Initializes the object to hold condition on the value of
+	 * user tag.
+	 * \param[in] tag Name of the tag.
+	 * \param[in] op Symbolic namen of the predicate.
+	 * \param[in] value_min Minimal value of the tag.
+	 * \param[in] value_max Maximal value of the tag.
+	 * \throws Exception Predicate is not WITHIN.
+	 */
 	QueryRecord(const std::string &, const Op, const std::string &, const std::string &);
 	
+	/** Destructor.
+	 *
+	 * The actual work is done by member destructors.
+	 */
 	~QueryRecord();
   
+	/** Return the string representation of symbolic attribute
+	 * name.
+	 * \param[in] attr Symbolic attribute name.
+	 * \returns Printable attribute name.
+	 */
 	static const std::string AttrName(const Attr) ;
   
 protected:
@@ -103,7 +260,7 @@ private:
 };
 
 
-/** Supported aggregate operations */
+/** Supported aggregate operations. */
 enum AggOp { AGG_MIN=1, AGG_MAX, AGG_COUNT };
 
 

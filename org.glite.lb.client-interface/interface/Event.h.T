@@ -25,9 +25,9 @@
 
 EWL_BEGIN_NAMESPACE
 
-/** Class representing one event in the LB database.
+/** Class representing one event in the L&B database.
  *
- * This class represents a LB event, which is basically list of
+ * This class represents a L&B event, which is basically list of
  * attribute -- value pairs. For each particular event type (returned
  * by name()) there is a list of allowed attributes (returned by
  * getAttrs()). The Event class provides methods for reading these
