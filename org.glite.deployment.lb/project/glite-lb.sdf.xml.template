@@ -10,7 +10,7 @@
 		<service name="glite-lb-service">
 			<components>
 			    <component name="glite-config"
-			    		version="0.2.0"
+			    		version="0.3.0"
 			    		age="1"
 			    		build="1"
 			    		arch="noarch"/>
