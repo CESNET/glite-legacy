@@ -126,6 +126,11 @@ install:
 	${INSTALL} -m 644 ${top_srcdir}/LICENSE ${PREFIX}/share/doc/${package}-${version}
 	${INSTALL} -m 755 glite_lb_proxy ${PREFIX}/bin/glite-lb-proxy
 	${INSTALL} -m 644 ${top_srcdir}/config/glite-lb-dbsetup.sql ${PREFIX}/etc
+	${INSTALL} -m 755 ${top_srcdir}/config/startup ${PREFIX}/etc/init.d/glite-lb-proxy
+	if [ x${DOSTAGE} != xyes ]; then \
+		${INSTALL} -m 755 ${stagedir}/bin/glite-lb-interlogd ${PREFIX}/bin; \
+	fi
+
 
 clean:
 
