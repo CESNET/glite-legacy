@@ -231,7 +231,7 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
             # Create database
             print ('\n==> Creating MySQL %s database\n' % params['lb.database.name'])
     
-            if os.path.exists['/bin/rm /tmp/mysql_ct']:
+            if os.path.exists('/bin/rm /tmp/mysql_ct'):
                 os.system('/bin/rm /tmp/mysql_ct')
             
             file = open('/tmp/mysql_ct', 'w')
