@@ -50,7 +50,7 @@ ${LTLIB}: ${LOBJS}
 stage: compile
 	$(MAKE) install PREFIX=${stagedir}
 
-check: example_test
+check:
 	-echo "No unit tests so far."
 
 example: srv_example cnt_example

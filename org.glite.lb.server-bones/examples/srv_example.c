@@ -21,8 +21,8 @@ int debug  = 1;
 
 static int writen(int fd, char *ptr, int nbytes);
 static int readln(int fd, char *out, int nbytes);
-static int echo(int, struct timeval, void *);
-static int upper_echo(int, struct timeval, void *);
+static int echo(int, void *);
+static int upper_echo(int, void *);
 
 #define ECHO_PORT			9999
 #define UPPER_ECHO_PORT		9998
@@ -79,7 +79,7 @@ int main(void)
 	return 0;
 }
 
-int upper_echo(int fd, struct timeval client_start, void *data)
+int upper_echo(int fd, void *data)
 {
 	int		n, i;
 	char	line[80];
@@ -105,7 +105,7 @@ int upper_echo(int fd, struct timeval client_start, void *data)
 	return 0;
 }
 
-int echo(int fd, struct timeval client_start, void *data)
+int echo(int fd, void *data)
 {
 	int		n;
 	char	line[80];
