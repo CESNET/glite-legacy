@@ -42,7 +42,7 @@
 				   age="@org.glite.wms-utils.thirdparty-globus_ssl_utils.age@"
 				   build="@org.glite.wms-utils.thirdparty-globus_ssl_utils.build@"/>
 
-			<component name=" glite-security-proxyrenewal"
+			<component name="glite-security-proxyrenewal"
 				   version="@org.glite.security.proxyrenewal.version@"
 				   age="@org.glite.security.proxyrenewal.age@"
 				   build="@org.glite.security.proxyrenewal.build@"/>
