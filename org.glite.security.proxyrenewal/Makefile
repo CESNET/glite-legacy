@@ -125,3 +125,6 @@ stage: compile
 
 check:
 	echo No unit tests
+
+clean:
+	$(RM) $(LIB) $(DAEMON) $(CLIENT) *.o core 
