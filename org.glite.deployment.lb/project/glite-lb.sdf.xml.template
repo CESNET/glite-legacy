@@ -90,11 +90,11 @@
 					age="EGEE"
 					arch="i386"/>				  
 				<external name="vdt_globus_essentials"
-					version="VDT1.2.0rh9"
+					version="VDT1.2.2rh9"
 					age="1"
 					arch="i386"/>
 				<external name="gpt"
-					version="VDT1.2.0rh9"
+					version="VDT1.2.2rh9"
 					age="1"
 					arch="i386"/>						 
 				<external name="myproxy"
