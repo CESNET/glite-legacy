@@ -5,8 +5,7 @@ top_builddir=${top_srcdir}/${builddir}
 stagedir=.
 distdir=.
 globalprefix=glite
-lbprefix=lb
-package=glite-security-gsoap-plugin
+package=gsoap-plugin
 version=1.0.0
 PREFIX=/opt/glite
 
@@ -46,7 +45,7 @@ CFLAGS:= ${DEBUG} \
 LDFLAGS:=${COVERAGE_FLAGS}
 
 COMPILE:=libtool --mode=compile ${CC} ${CFLAGS}
-LINK:=libtool --mode=link ${CC} ${LDFLAGS} 
+LINK:=libtool --mode=link ${CC} -rpath ${stagedir}/lib ${LDFLAGS} 
 LINKXX:=libtool --mode=link ${CXX} ${LDFLAGS} 
 INSTALL:=libtool --mode=install install
 LINKXX:=libtool --mode=link  ${CXX} -rpath ${stagedir}/lib ${LDFLAGS}
@@ -60,7 +59,9 @@ GSOAP_LIBS:= -L${gsoap_prefix}/lib -lgsoap
 
 EX_LIBS:= ${GLOBUS_LIBS} -L${ares_prefix}/lib -lares
 
-GSS_OBJS:=lb_gss.o
+HDRS:=glite_gss.h glite_gsplugin.h
+
+GSS_OBJS:=glite_gss.o
 GSS_LOBJS:=${GSS_OBJS:.o=.lo}
 GSS_THROBJS:=${GSS_OBJS:.o=.thr.o}
 GSS_THRLOBJS:=${GSS_OBJS:.o=.thr.lo}
@@ -79,8 +80,6 @@ STATICLIB:=libglite_security_gsoap_plugin_${nothrflavour}.a
 THRSTATICLIB:=libglite_security_gsoap_plugin_${thrflavour}.a
 LTLIB:=libglite_security_gsoap_plugin_${nothrflavour}.la
 THRLTLIB:=libglite_security_gsoap_plugin_${thrflavour}.la
-
-HDRS:=lb_gss.h
 
 ${GSS_STATICLIB}: ${GSS_OBJS}
 	ar crv $@ ${GSS_OBJS}
@@ -187,13 +186,12 @@ install:
 	-mkdir -p ${PREFIX}/lib
 	-mkdir -p ${PREFIX}/share/doc/${package}-${version}
 	-mkdir -p ${PREFIX}/include/glite/security/${package}
-#	${INSTALL} -m 644 ${LTLIB} ${THRLTLIB} ${PREFIX}/lib
-#	${INSTALL} -m 644 ${GSS_LTLIB} ${GSS_THRLTLIB} ${PREFIX}/lib
-#	${INSTALL} -m 644 ${top_srcdir}/LICENSE ${PREFIX}/share/doc/${package}-${version}
-#	cd ${top_srcdir}/interface && ${INSTALL} -m 644 lb_gss.h glite_gsplugin.h ${PREFIX}/include/glite/security/${package}
-#	if [ x${DOSTAGE} = xyes ]; then \
-#		install -m 644 ${GSS_STATICLIB} ${GSS_THRSTATICLIB} ${STATICLIB} ${THRSTATICLIB} ${PREFIX}/lib; \
-#	fi
+	${INSTALL} -m 644 ${GSS_LTLIB} ${GSS_THRLTLIB} ${PREFIX}/lib
+	${INSTALL} -m 644 ${top_srcdir}/LICENSE ${PREFIX}/share/doc/${package}-${version}
+	cd ${top_srcdir}/interface && ${INSTALL} -m 644 ${HDRS} ${PREFIX}/include/glite/security/
+	if [ x${DOSTAGE} = xyes ]; then \
+		install -m 644 ${GSS_STATICLIB} ${GSS_THRSTATICLIB} ${STATICLIB} ${THRSTATICLIB} ${PREFIX}/lib; \
+	fi
 
 clean:
 

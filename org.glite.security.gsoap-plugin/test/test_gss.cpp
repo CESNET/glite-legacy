@@ -9,7 +9,7 @@
 #include <cppunit/ui/text/TestRunner.h>
 
 
-#include "lb_gss.h"
+#include "glite_gss.h"
 
 class GSSTest: public  CppUnit::TestFixture
 {
