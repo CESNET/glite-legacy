@@ -52,33 +52,39 @@
 			</components>
 			<dependencies>
 						<external name="MySQL-server"
-						  version=""
-						  age=""
-						  build=""/>
-						 <external name="MySQL-client"
-						  version=""
-						  age=""
-						  build=""/>
-						<external name="expat"
-						  version=""
-						  age=""
-						  build=""/>
-						<external name="ares"
-						  version=""
-						  age=""
-						  build=""/>
-						<external name="vdt_globus_essentials"
-						  version=""
-						  age=""
-						  build=""/>
-						<external name="myproxy"
-						  version=""
-						  age=""
-						  build=""/>
-						<external name="perl-Expect.pm"
-						  version=""
-						  age=""
-						  build=""/>
+						  version="4.0.20"
+						  age="0"
+						  build="i386"/>
+		  			<external name="MySQL-client"
+						  version="4.0.20"
+						  age="0"
+						  arch="i386"/>				  
+		  			<external name="expat"
+						  version="1.95.7"
+						  age="EGEE"
+						  arch="i386"/>				  
+		  			<external name="ares"
+						  version="1.1.1"
+						  age="EGEE"
+						  arch="i386"/>				  
+				<external name="vdt_globus_essentials"
+						version="VDT1.2.0rh9"
+						age="1"
+						arch="i386"/>
+						
+				<external name="gpt"
+						version="VDT1.2.0rh9"
+						age="1"
+						arch="i386"/>						 
+
+		  			<external name="myproxy"
+						  version="1.14"
+						  age="EGEE"
+						  arch="i386"/>
+					<external name="perl-Expect.pm"
+							version="1.01"
+							age="9"
+							arch="i386"/>
 			
 			</dependencies>
 		</service>
