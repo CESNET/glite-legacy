@@ -114,7 +114,12 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         return 0
         
     def configure(self):
-        
+        # Create all directories needed
+        if params.has_key('dirlist'):
+           dirlist = string.split(params['dirlist'],',')
+           for d in dirlist:
+              gLib.check_dir(d,0777)
+         
         # Create the GLITE_USER if it doesn't exists
         print "Creating/Verifying the GLITE_USER account %s" % params['GLITE_USER']
         glib.add_user(params['GLITE_USER'],params['GLITE_USER'])

@@ -17,12 +17,14 @@
 
 		<!-- MySQL DB -->
 		<lb.database.name
-			description="The mySQL database name to create for storing LB data"
-			value="changeme"/>
+			description="The mySQL database name to create for storing LB data
+						Now it must be set to the default value"
+			value="lbserver20"/>
 			
 		<lb.database.username
-			description="The username to be used to access the local mySQL server"
-			value="changeme"/>
+			description="The username to be used to access the local mySQL server
+						Now it must be set to the default value"
+			value="lbserver"/>
 			
 		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
 		<!-- Optimization parameters - Change them if you know what you're doing -->
@@ -34,11 +36,11 @@
 			
 		<GLITE_USER
 			description="The account used to run the LB daemons"
-			value="glite"/>
+			value="gproduct"/>
 			
 		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
 		<!-- System parameters - You should leave these alone -->
 		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
-
+		<dirlist value='/opt/glite/var'/>
 	</parameters>
 </config>
