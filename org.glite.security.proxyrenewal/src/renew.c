@@ -30,6 +30,7 @@ load_proxy(const char *cur_file, X509 **cert, EVP_PKEY **priv_key,
 {
    globus_result_t result;
    globus_gsi_cred_handle_t proxy = NULL;
+   int ret;
 
    result = globus_gsi_cred_handle_init(&proxy, NULL);
    if (result) {
@@ -71,12 +72,16 @@ load_proxy(const char *cur_file, X509 **cert, EVP_PKEY **priv_key,
       *cur_proxy = proxy;
       proxy = NULL;
    }
+
+   ret = 0;
    
 end:
    if (proxy)
       globus_gsi_cred_handle_destroy(proxy);
+   if (result)
+      ret = EDG_WLPR_ERROR_GENERIC;
 
-   return 0;
+   return ret;
 }
 
 static void
