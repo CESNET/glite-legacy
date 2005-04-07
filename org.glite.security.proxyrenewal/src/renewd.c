@@ -463,7 +463,7 @@ do_listen(char *socket_name, int *sock)
       return errno;
    }
 
-   ret = listen(s, 5); /* XXX enough ? */
+   ret = listen(s, 50);
    if (ret == -1) {
       edg_wlpr_Log(LOG_ERR, "listen(): %s", strerror(errno));
       close(s);
