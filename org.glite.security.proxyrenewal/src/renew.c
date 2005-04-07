@@ -73,6 +73,8 @@ load_proxy(const char *cur_file, X509 **cert, EVP_PKEY **priv_key,
    }
    
 end:
+   if (proxy)
+      globus_gsi_cred_handle_destroy(proxy);
 
    return 0;
 }
