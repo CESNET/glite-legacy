@@ -18,6 +18,7 @@ char *key = NULL;
 char *vomsconf = NULL;
 
 static volatile int die = 0, child_died = 0;
+double default_timeout = 0;
 
 static struct option opts[] = {
    { "help",       no_argument,       NULL,  'h' },
@@ -114,11 +115,15 @@ proto(int sock)
    edg_wlpr_Response  response;
    edg_wlpr_Request  request;
    command_table  *command;
+   struct timeval timeout;
 
    memset(&request, 0, sizeof(request));
    memset(&response, 0, sizeof(response));
 
-   ret = edg_wlpr_Read(sock, &buf, &buf_len);
+   timeout.tv_sec = (long) default_timeout;
+   timeout.tv_usec = (long) ((default_timeout - timeout.tv_sec) * 1e6);
+
+   ret = edg_wlpr_Read(sock, &timeout, &buf, &buf_len);
    if (ret) {
       edg_wlpr_Log(LOG_ERR, "Error reading from client: %s",
                    edg_wlpr_GetErrorString(ret));
@@ -150,7 +155,7 @@ proto(int sock)
    if (ret)
       goto end;
 
-   ret = edg_wlpr_Write(sock, buf, strlen(buf) + 1);
+   ret = edg_wlpr_Write(sock, &timeout, buf, strlen(buf) + 1);
    free(buf);
    if (ret) {
       edg_wlpr_Log(LOG_ERR, "Error sending response to client: %s",
@@ -171,15 +176,7 @@ doit(int sock)
    int newsock;
    struct sockaddr_un client_addr;
    int client_addr_len = sizeof(client_addr);
-#if 0
-   next_renewal = LONG_MAX;
-   size_of_proxies = PROXIES_ALLOC_SIZE;
-   proxies = malloc((size_of_proxies) * sizeof(struct guarded_proxy *));
-   if (proxies == NULL) {
-       return ENOMEM;
-   }
-   proxies[0] = NULL;
-#endif
+   int flags;
 
    while (!die) {
 
@@ -204,6 +201,14 @@ doit(int sock)
       }
       edg_wlpr_Log(LOG_DEBUG, "Got connection");
 
+      flags = fcntl(newsock, F_GETFL, 0);
+      if (fcntl(newsock, F_SETFL, flags | O_NONBLOCK) < 0) {
+	 edg_wlpr_Log(LOG_ERR, "Can't set O_NONBLOCK mode (%s), closing.\n",
+	              strerror(errno));
+	 close(newsock);
+	 continue;
+      }
+	 
       proto(newsock);
 
       edg_wlpr_Log(LOG_DEBUG, "Connection closed");
@@ -458,7 +463,7 @@ do_listen(char *socket_name, int *sock)
       return errno;
    }
 
-   ret = listen(s, 5); /* XXX enough ? */
+   ret = listen(s, 50);
    if (ret == -1) {
       edg_wlpr_Log(LOG_ERR, "listen(): %s", strerror(errno));
       close(s);
@@ -519,6 +524,7 @@ int main(int argc, char *argv[])
    int   ret;
    pid_t pid;
    struct sigaction	sa;
+   const char *s = NULL;
 
    progname = strrchr(argv[0],'/');
    if (progname) progname++; 
@@ -577,6 +583,9 @@ int main(int argc, char *argv[])
 
    if (cadir)
       setenv("X509_CERT_DIR", cadir, 1);
+
+   s = getenv("GLITE_PR_TIMEOUT");
+   default_timeout = s ? atof(s) : GLITE_PR_TIMEOUT_DEFAULT;
 
    memset(&sa,0,sizeof(sa));
    sa.sa_handler = catchsig;

@@ -76,6 +76,8 @@ load_proxy(const char *cur_file, X509 **cert, EVP_PKEY **priv_key,
    ret = 0;
    
 end:
+   if (proxy)
+      globus_gsi_cred_handle_destroy(proxy);
    if (result)
       ret = EDG_WLPR_ERROR_GENERIC;
 
