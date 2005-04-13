@@ -97,6 +97,9 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         print '    -c, --checkconf     print the service configuration'
         print '    -v, --version       print the version of the configuration script'
         print '    -h, --help          print this usage information'
+        print '    --start             start the service'
+        print '    --stop              stop the service'
+        print '    --status            check service status'
         print '\n'
 
     #-------------------------------------------------------------------------------
@@ -205,6 +208,18 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         return error_level
         
     def configure(self):
+        
+        #--------------------------------------------------------
+        # Installs the Security Utilities
+        #--------------------------------------------------------
+        
+        if os.system("python %s/glite-security-utils-config.py --subservice" % glib.getScriptPath()):
+            print "\nInstalling gLite Security Utilities                   ",
+            glib.printFailedMessage()
+            return 1
+
+        print "\nInstalling gLite Security Utilities                   ",
+        glib.printOkMessage()
         
         # Create the GLITE_USER if it doesn't exists
         print "\nCreating/Verifying the GLITE_USER account %s" % os.environ['GLITE_USER']
