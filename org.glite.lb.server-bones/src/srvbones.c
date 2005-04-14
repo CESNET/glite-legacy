@@ -378,46 +378,46 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 			if ( !services[srv].on_request_hnd )
 			{
 				kick_client = 3;
-				goto kick;
-			}
+			} else {
 
-			to = set_request_to;
-			if ((rv = services[srv].on_request_hnd(conn,to.tv_sec>=0 ? &to : NULL,clnt_data)) == ENOTCONN) {
-				if (services[srv].on_disconnect_hnd
-						&& (rv = services[srv].on_disconnect_hnd(conn,NULL,clnt_data)))
-				{
-					dprintf(("[%d] disconnect handler: %s, terminating\n",getpid(),strerror(rv)));
+				to = set_request_to;
+				if ((rv = services[srv].on_request_hnd(conn,to.tv_sec>=0 ? &to : NULL,clnt_data)) == ENOTCONN) {
+					if (services[srv].on_disconnect_hnd
+							&& (rv = services[srv].on_disconnect_hnd(conn,NULL,clnt_data)))
+					{
+						dprintf(("[%d] disconnect handler: %s, terminating\n",getpid(),strerror(rv)));
+						exit(1);
+					}
+					close(conn);
+					conn = -1;
+					srv = -1;
+					dprintf(("[%d] Connection closed\n", getpid()));
+				}
+				else if (rv > 0) {
+					/*	non-fatal error -> close connection and contiue
+					 * XXX: likely to leak resources but can we call on_disconnect_hnd() on error? 
+					 */
+					close(conn);
+					conn = -1;
+					srv = -1;
+					dprintf(("[%d] %s, connection closed\n",getpid(),strerror(rv)));
+					continue;
+				}
+				else if ( rv < 0 ) {
+					/*	unknown error -> clasified as FATAL -> kill slave
+					 */
+					dprintf(("[%d] %s, terminating\n",getpid(),strerror(-rv)));
 					exit(1);
 				}
-				close(conn);
-				conn = -1;
-				srv = -1;
-				dprintf(("[%d] Connection closed\n", getpid()));
-			}
-			else if (rv > 0) {
-				/*	non-fatal error -> close connection and contiue
-				 * XXX: likely to leak resources but can we call on_disconnect_hnd() on error? 
-				 */
-				close(conn);
-				conn = -1;
-				srv = -1;
-				dprintf(("[%d] %s, connection closed\n",getpid(),strerror(rv)));
-				continue;
-			}
-			else if ( rv < 0 ) {
-				/*	unknown error -> clasified as FATAL -> kill slave
-				 */
-				dprintf(("[%d] %s, terminating\n",getpid(),strerror(-rv)));
-				exit(1);
-			}
-			else {
-				dprintf(("[%d] request done\n", getpid()));
-				gettimeofday(&client_done, NULL);
-			}
+				else {
+					dprintf(("[%d] request done\n", getpid()));
+					gettimeofday(&client_done, NULL);
+				}
 
-			first_request = 0;
-			continue;
-		kick:
+				first_request = 0;
+				continue;
+
+			}
 		}
 
 		if ( !first_request && FD_ISSET(sock, &fds) && conn_cnt < set_slave_conns_max )
