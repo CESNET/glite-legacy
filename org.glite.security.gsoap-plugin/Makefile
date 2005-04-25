@@ -24,9 +24,6 @@ GSPLUGIN_DEBUG:=
 
 version_info=-version-info `echo ${version} | cut -d. -f1,2 | tr . :`
 
-gsoap_version=`${gsoap_prefix}/bin/soapcpp2 -version 2>&1 | cut -d' ' -f4 | perl -F\\\\. -nae '$$F[2] =~ s/\D*$$//; print $$F[2]+100*$$F[1]+10000*$$F[0]'`
-gsoap_min_version=`${gsoap_prefix}/bin/soapcpp2 -version 2>&1 | cut -d' ' -f4 | cut -d'.' -f3`
-
 VPATH=${top_srcdir}/src:${top_srcdir}/test:${top_srcdir}/examples
 
 TEST_LIBS:=-L${cppunit}/lib -lcppunit
@@ -40,8 +37,6 @@ endif
 
 CFLAGS:= ${DEBUG} \
 	-DVERSION=\"${version}\" \
-	-DGSOAP_VERSION=${gsoap_version} \
-	-DGSOAP_MIN_VERSION=\"${gsoap_min_version}\" \
 	-I${top_srcdir}/src -I${top_srcdir}/interface -I. \
 	-I${stagedir}/include \
 	-I${gsoap_prefix}/include \
@@ -211,3 +206,11 @@ clean:
 
 test_gss.o: %.o: %.cpp
 	${CXX} -c ${CFLAGS} ${GLOBUSINC} ${TEST_INC} $<
+
+soap_version.h:
+	${gsoap_prefix}/bin/soapcpp2 /dev/null
+	perl -ne '$$. == 2 && /.*([0-9])\.([0-9])\.(\S+)\s.*/ && printf "#define GSOAP_VERSION %d%02d%02d\n#define GSOAP_MIN_VERSION \"$$3\"\n",$$1,$$2,$$3' soapH.h >$@
+	-rm soapC.cpp soapH.h soapStub.h soapClient.cpp soapServer.cpp soapClientLib.cpp soapServerLib.cpp
+
+glite_gsplugin.o: soap_version.h
+

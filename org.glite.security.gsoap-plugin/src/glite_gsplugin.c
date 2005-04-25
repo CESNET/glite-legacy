@@ -3,6 +3,7 @@
 #include <signal.h>
 #include <stdsoap2.h>
 
+#include "soap_version.h"
 #include "glite_gsplugin.h"
 
 #ifdef GSPLUGIN_DEBUG
