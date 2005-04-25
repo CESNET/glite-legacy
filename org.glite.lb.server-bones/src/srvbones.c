@@ -382,6 +382,7 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 				kick_client = 3;
 			} else {
 
+				first_request = 0;
 				to = set_request_to;
 				if ((rv = services[srv].on_request_hnd(conn,to.tv_sec>=0 ? &to : NULL,clnt_data)) == ENOTCONN) {
 					if (services[srv].on_disconnect_hnd
@@ -416,7 +417,6 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 					gettimeofday(&client_done, NULL);
 				}
 
-				first_request = 0;
 				continue;
 
 			}
