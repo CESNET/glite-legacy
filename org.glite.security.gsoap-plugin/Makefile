@@ -20,7 +20,8 @@ CC=gcc
 -include Makefile.inc
 -include ../Makefile.inc
 
-GSPLUGIN_DEBUG:=
+GSPLUGIN_DEBUG?=no
+GSPLUGIN_VERSION_CHECKING?=yes
 
 version_info=-version-info `echo ${version} | cut -d. -f1,2 | tr . :`
 
@@ -33,6 +34,10 @@ ifeq ($(GSPLUGIN_DEBUG),yes)
 	DEBUG:=-g -O0 -Wall -DGSPLUGIN_DEBUG
 else
 	DEBUG:=-g -O0 -Wall
+endif
+
+ifeq ($(GSPLUGIN_VERSION_CHECKING),yes)
+	DEBUG:=${DEBUG} -DCHECK_GSOAP_VERSION
 endif
 
 CFLAGS:= ${DEBUG} \

@@ -204,7 +204,7 @@ glite_gsplugin_connect(
 
 
 	pdprintf(("GSLITE_GSPLUGIN: glite_gsplugin_connect()\n"));
-#if GSOAP_VERSION <= 20700
+#if defined(CHECK_GSOAP_VERSION) && GSOAP_VERSION <= 20700
 	if (   GSOAP_VERSION < 20700
 		|| (GSOAP_VERSION == 20700
 			&& (strlen(GSOAP_MIN_VERSION) < 1 || GSOAP_MIN_VERSION[1] < 'e')) ) {
