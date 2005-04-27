@@ -20,6 +20,26 @@
 
 	Revision history:
 	$Log$
+	Revision 1.2.2.5  2005/02/25 13:39:29  mmulac
+	remove duplicate notifid in configure.properties.xml
+	
+	Revision 1.2.2.4  2005/02/25 13:37:11  mmulac
+	add notifid to doxygen
+	see -> ref
+	
+	Revision 1.2.2.3  2005/02/25 12:03:11  jpospi
+	Added PDF options to doxygen conf.
+	
+	Revision 1.2.2.2  2005/02/25 09:37:52  mmulac
+	generate doxygen doc for notification.h
+	
+	Revision 1.2.2.1  2005/02/18 14:00:16  jpospi
+	- Removed all L&B Proxy related things
+	- Documentation update
+	
+	Revision 1.2  2004/12/08 13:04:29  jpospi
+	first attemtp to generate documentation using doxygen
+	
 	Revision 1.1  2004/07/06 17:47:31  flammer
 	Update of classpath definitions, targets & configure file.
 	
@@ -55,17 +75,26 @@ PREFIX=${install.dir}
 version=${module.version}
 			</echo>
 			<echo file="${module.build.dir}/C.dox">
-PROJECT_NAME           = "Glite LB Client: C - Interface"
-PROJECT_NUMBER         = ${module.version}
-OUTPUT_DIRECTORY       = ${component.dir}/doc/C
-OPTIMIZE_OUTPUT_FOR_C  = YES
-INPUT                  = ./events.h \
-                         ./jobstat.h \
-                         ./producer.h \
-                         ../interface/context.h \
-                         ../interface/consumer.h 
-#HAVE_DOT               = YES
-#CALL_GRAPH             = YES
+PROJECT_NAME          = "Glite LB Client: C - Interface"
+PROJECT_NUMBER        = ${module.version}
+OUTPUT_DIRECTORY      = ${component.dir}/doc/C
+OPTIMIZE_OUTPUT_FOR_C = YES
+INPUT                 = ./events.h \
+                        ./jobstat.h \
+                        ./producer.h \
+                        ../interface/context.h \
+                        ../interface/notifid.h \
+                        ../interface/notification.h \
+                        ../interface/consumer.h 
+SHOW_DIRECTORIES       = NO
+FULL_PATH_NAMES        = NO
+EXTRACT_ALL            = YES
+PDF_HYPERLINKS         = YES
+USE_PDFLATEX           = YES
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = YES
+PREDEFINED             = _EDG_WLL_EVENT_COMMON 
+HAVE_DOT               = NO
 			</echo>
 			<echo file="${module.build.dir}/CPP.dox">
 PROJECT_NAME           = "Glite LB Client: CPP - Interface"
@@ -78,6 +107,11 @@ INPUT                  = ../build/Event.h \
                          ../interface/LoggingExceptions.h \
                          ../interface/ServerConnection.h \
                          ../interface/Notification.h
+SHOW_DIRECTORIES       = NO
+FULL_PATH_NAMES        = NO
+EXTRACT_ALL            = YES
+PDF_HYPERLINKS         = YES
+USE_PDFLATEX           = YES
 #HAVE_DOT               = YES
 #CALL_GRAPH             = YES
 			</echo>

@@ -13,6 +13,11 @@
 
 	Revision history:
 	$Log$
+	Revision 1.5  2004/10/17 22:34:39  dimeglio
+	Use new installer script format
+	Use global filters
+	Use RH standard expat rpm in sdf template
+	
 	Revision 1.4  2004/10/14 16:07:53  dimeglio
 	Removed wms.thirdparty-globus-ssl-utils
 	
@@ -84,6 +89,7 @@
 		 Load version file 
 		 ========================================= -->
 	<property file="${module.version.file}"/>
+		<property file="${module.build.file}"/>
 
 	<!-- ==============================================
 		 Local private targets
