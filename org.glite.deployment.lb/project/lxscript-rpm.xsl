@@ -9,6 +9,7 @@
 		omit-xml-declaration="yes"/>
 
 	<!-- Definition of variables and parameters -->
+	<xsl:param name="installers"/>
 	<xsl:param name="repository"/>
 	<xsl:param name="ext-repository"/>
 
@@ -52,10 +53,24 @@ function parseRPMList()
         RPMLIST=$newRPMLIST
 }
 
+#Parse the SCRIPTLIST to execute all scripts
+function parseScriptList()
+{
+        for i in $SCRIPTLIST
+        do
+		if [ "$INSTALL" = "true" ]; then
+                        $i
+		else
+                        $i -u
+		fi
+        done
+}
 
 #Downloads and install the module RPMS
 function install()
 {
+
+	INSTALL=true
 	version
 	echo
 	echo xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -75,6 +90,14 @@ function install()
 	
 	<xsl:for-each select="node/services/service">
 
+	# Download <xsl:value-of select="@name"/> scripts from repository
+                <xsl:for-each select=".">
+                        <xsl:apply-templates select="subservice">
+                                <xsl:with-param name="install">true</xsl:with-param>
+                        </xsl:apply-templates>
+                </xsl:for-each>
+
+
 	# Download <xsl:value-of select="@name"/> dependencies RPMS from repository
 		<xsl:for-each select="dependencies">
 			<xsl:apply-templates>
@@ -90,6 +113,10 @@ function install()
 		</xsl:for-each>
 
 	</xsl:for-each>
+
+	# Download and install subservices
+        parseScriptList
+
 		
 	# Install all RPMS
 	echo
@@ -98,12 +125,35 @@ function install()
 	echo xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 	echo
 	parseRPMList
-	rpm -Uvh $RPMLIST
+	if [ ! -z "$RPMLIST" ]; then
+		rpm -Uvh $RPMLIST
+		rpm_return=$?
+	else
+		echo All required RPMS are already installed
+		rpm_return=0
+	fi
+	if [ "$rpm_return" == "0" ]; then
+		echo
+		echo Done!
+		echo
+		echo Before using the gLite LB, please create or update the configuration
+		echo file /opt/glite/etc/config/glite-lb.cfg.xml
+		echo and run the configuration script
+		echo /opt/glite/etc/config/scripts/glite-lb-config.py.
+		echo A template is provided in
+		echo /opt/glite/etc/config/templates/glite-lb.cfg.xml
+	else
+		echo
+		echo An error occurred while installing the LB RPMS.
+		echo Most likely one or more of the RPMS to be installed require
+		echo additional dependencies or are older than already installed packages.
+		echo Please refer to the rpm error message above for more details.
+	fi
 	echo
-	echo Done!
-	echo
-	echo For more information refer to the gLite Installation and User Guides or to the gLite web site \(http:\/\/www.glite.org\)
-	echo Please report problems and comments to the gLite Team at project-eu-egee-middleware-integration-support@cern.ch
+	echo For more information refer to the gLite Installation and User Guides
+	echo or to the gLite web site \(http:\/\/www.glite.org\)
+	echo Please report problems and comments to the gLite Team at
+	echo project-eu-egee-glite-bugs@cern.ch
 
 	cd ..
 }
@@ -144,8 +194,16 @@ function uninstall()
 	echo xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 	echo
 	rpm -ev $RPMLIST
-	echo
-	echo Done!
+	if [ "$?" == "0" ]; then
+		echo
+		echo Done!
+	else
+		echo
+		echo An error occurred while removing the LB RPMS.
+		echo Most likely one or more of the RPMS to be removed have
+		echo dependent packages.
+		echo Please refer to the rpm error message above for more details.
+	fi
 }
 
 ###############################################################################
@@ -208,6 +266,28 @@ install
 
 exit 0
 	</xsl:template>
+
+	<xsl:template name="subservices" match="subservice">
+                <xsl:param name="install"/>
+                <xsl:variable name="package"><xsl:value-of select="@name"/>_installer.sh</xsl:variable>
+                <xsl:choose>
+                        <xsl:when test="$install = 'true'">
+wget -N --non-verbose <xsl:value-of select="$installers"/><xsl:value-of select="$package"/>
+if [ ! -f "<xsl:value-of select="$package"/>" ]
+then
+        echo
+        echo ERROR: <xsl:value-of select="$package"/> could not be downloaded!
+        exit 1
+fi
+chmod u+x <xsl:value-of select="$package"/>
+SCRIPTLIST="$SCRIPTLIST ./<xsl:value-of select="$package"/>"
+                        </xsl:when>
+                        <xsl:otherwise>
+SCRIPTLISTUn="$SCRIPTLISTUn ./<xsl:value-of select="$package"/> -u "
+                        </xsl:otherwise>
+                </xsl:choose>
+        </xsl:template>
+
 
 	<xsl:template name="dependencies" match="external">
 		<xsl:param name="install"/>

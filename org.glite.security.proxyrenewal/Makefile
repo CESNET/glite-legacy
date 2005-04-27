@@ -30,12 +30,11 @@ distdir=.
 globalprefix=glite
 lbprefix=lb
 package=glite-security-proxyrenewal
-version=0.0.0
+version=1.0.0
 PREFIX=/opt/glite
 
 glite_location=$PREFIX
 globus_prefix=/opt/globus
-voms_prefix=/opt/glite
 nothrflavour=gcc32
 thrflavour=gcc32pthr
 myproxy_prefix=$globus_prefix
@@ -55,10 +54,7 @@ MYPROXYTHRINC:= -I${myproxy_prefix}/include/${thrflavour}
 
 DEBUG:=-g -O0
 
-# XXX: until VOMS is ready in SCM
-CFLAGS:= -DNOVOMS \
-	${DEBUG} \
-	-DVOMS_INSTALL_PATH=\"${voms_prefix}\"\
+CFLAGS:= ${DEBUG} \
 	${MYPROXYINC} \
 	-I${top_srcdir}/src -I${top_srcdir}/interface \
 	-I${glite_location}/include
@@ -75,7 +71,7 @@ COMPILE:=libtool --mode=compile ${CC} ${CFLAGS}
 LINK:=libtool --mode=link ${CC} ${LDFLAGS}
 INSTALL:=libtool --mode=install install
 
-DAEMONOBJ:=renewd.o renew.o common.o commands.o api.o
+DAEMONOBJ:=renewd.o renew.o common.o commands.o api.o voms.o
 LIBOBJ:=api.o common.o
 CLIENTOBJ:=client.o
 
@@ -100,7 +96,7 @@ ${THRLIB}: ${THRLIBOBJ}
 	${LINK} -o $@ ${THRLIBLOBJ} -rpath ${glite_location}/lib
 
 ${DAEMON}: ${DAEMONOBJ}
-	${LINK} -o $@ ${DAEMONOBJ} ${JOBIDLIB} ${MYPROXY_LIB} -lglobus_gss_assist_${nothrflavour} ${GLOBUS_LIBS} 
+	${LINK} -o $@ ${DAEMONOBJ} ${JOBIDLIB} ${MYPROXY_LIB} -lvomsc -lglobus_gss_assist_${nothrflavour} ${GLOBUS_LIBS} 
 
 ${CLIENT}: ${CLIENTOBJ} ${LIB}
 	${LINK} -o $@ ${CLIENTOBJ} ${LIB} ${GLOBUS_LIBS}
@@ -138,7 +134,7 @@ install:
 	${INSTALL} -m 644 ${top_srcdir}/LICENSE ${PREFIX}/share/doc/${package}-${version}
 	cd ${top_srcdir}/interface && ${INSTALL} -m 644 renewal.h ${PREFIX}/include/glite/security/proxyrenewal
 
-	${INSTALL} -m 755 ${top_srcdir}/config/startup ${PREFIX}/etc/init.d/${DAEMON}
+	${INSTALL} -m 755 ${top_srcdir}/config/startup ${PREFIX}/etc/init.d/glite-proxy-renewald
 
 
 clean:

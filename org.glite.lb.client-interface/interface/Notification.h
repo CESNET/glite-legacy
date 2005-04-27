@@ -9,7 +9,7 @@
 #include "glite/lb/JobStatus.h"
 
 
-EWL_BEGIN_NAMESPACE; 
+EWL_BEGIN_NAMESPACE
 
 
 /** Manage LB notifications.
@@ -23,18 +23,18 @@ public:
 	 */
 	Notification();
 
-	/** Create from server,port pair
+	/** Create from server host,port pair
 	 * to be used for new notifications, i.e. with Register()
-	 * \param host
-	 * \param port
+	 * \param[in] host		host
+	 * \param[in] port		port
 	 */
-	Notification(const std::string,const u_int16_t);
+	Notification(const std::string host,const u_int16_t port);
 
 	/** Create from NotifId
 	 * to be used for existing notifications, i.e. with Bind()
-	 * \param notifId
+	 * \param[in] notifId		NotifId
 	 */
-	Notification(const std::string);
+	Notification(const std::string notifId);
 
 	~Notification();
 
@@ -45,11 +45,14 @@ public:
 	/** Add this job to the list.
 	 * Local operation only, Register() has to be called
 	 * to propagate changes to server 
+	 * \param[in] jobId		JobId
 	 */
-	void addJob(const glite::wmsutils::jobid::JobId &); 
+	void addJob(const glite::wmsutils::jobid::JobId &jobId); 
 
-	/** Remove job from the list, local op again. */
-	void removeJob(const glite::wmsutils::jobid::JobId &);
+	/** Remove job from the list, local op again. 
+	 * \param[in] jobId		JobId
+	 */
+	void removeJob(const glite::wmsutils::jobid::JobId &jobId);
 
 	/** Get jobs on the list */
 	std::string getJobs();
@@ -67,9 +70,9 @@ public:
 
 	/** Bind to the existing notification at the server
 	 * i.e. change the receiving local address
-	 * \param address_override
+	 * \param[in] address		address override
 	 */
-	void Bind(const std::string);
+	void Bind(const std::string address);
 
 	/** Receive notification.
 	 * Blocks at most the specified timeout (maybe 0 for local polling).
@@ -88,6 +91,6 @@ private:
 };
 
 
-EWL_END_NAMESPACE;
+EWL_END_NAMESPACE
 
 #endif

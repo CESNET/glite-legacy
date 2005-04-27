@@ -6,7 +6,7 @@
 */
 
 /*!
- * \file client/jobstat.h  
+ * \file jobstat.h  
  * \brief edg_wll_JobStat definition and related stuff
  */
 
@@ -15,6 +15,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * \defgroup jobstatus Job Status
+ * \brief Job status structure definition and related definitions.
+ *@{
+ */
 
 /**
  * Miscelaneous job status numeric codes
@@ -101,8 +107,6 @@ typedef struct _edg_wll_JobStat {
  * \name edg_wll_JobStat manipulation
  */
 
-/*@{*/
-
 /**
  * Initialize empty status structure.
  * Fills in the stucture with NULL's or values with no meaning
@@ -133,6 +137,10 @@ extern edg_wll_JobStatCode edg_wll_StringToStat(const char *);
 extern char *edg_wll_StatToString(edg_wll_JobStatCode);
 
 /*@}*/
+
+/*
+ *@} end of group
+ */
 
 #ifdef __cplusplus
 }

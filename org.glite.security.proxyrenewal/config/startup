@@ -1,7 +1,6 @@
 #!/bin/sh
 
 GLITE_LOCATION=${GLITE_LOCATION:-/opt/glite}
-GLITE_USER=${GLITE_USER:-glite}
 GLITE_LOCATION_VAR=${GLITE_LOCATION_VAR:-/opt/glite/var}
 
 [ -f /etc/glite.conf ] && . /etc/glite.conf
@@ -10,11 +9,36 @@ GLITE_LOCATION_VAR=${GLITE_LOCATION_VAR:-/opt/glite/var}
 
 PROXY_REPOSITORY="$GLITE_LOCATION_VAR/spool/glite-renewd"
 
+unset creds
+
 start()
 {
-	[ -n "$GLITE_HOST_CERT" ] && X509_USER_CERT="$GLITE_HOST_CERT"
-	[ -n "$GLITE_HOST_KEY" ] && X509_USER_KEY="$GLITE_HOST_KEY"
-	export X509_USER_CERT X509_USER_KEY
+	if test -z "$GLITE_USER" ;then
+		echo 'Error: GLITE_USER is not set'
+		echo FAILED
+		return 1
+	fi
+
+	[ -n "$GLITE_HOST_CERT" -a -n "$GLITE_HOST_KEY" ] &&
+		creds="-t $GLITE_HOST_CERT -k $GLITE_HOST_KEY"
+
+	if test -z "$creds"; then
+		if su - $GLITE_USER -c "test -r /etc/grid-security/hostkey.pem -a -r /etc/grid-security/hostcert.pem"; then
+			echo "$0: WARNING: /etc/grid-security/hostkey.pem readable by $GLITE_USER"
+			creds="-t /etc/grid-security/hostcert.pem -k /etc/grid-security/hostkey.pem"
+		fi
+	fi
+
+	[ -z "$creds" ] &&
+		echo $0: WARNING: No credentials specified. Using default lookup which is dangerous. >&2
+
+	# workaround for VOMS_FindByVO that seems to always require user's own VOMS config file (bug #7511)
+	user_voms_config=$HOME/.glite/vomses
+	if [ ! -f "$user_voms_config" ]; then
+		rm -f /tmp/renewal_vomses
+		su - $GLITE_USER -c "touch /tmp/renewal_vomses && chmod 644 /tmp/renewal_vomses"
+		user_voms_config=/tmp/renewal_vomses
+	fi
 
 	echo -n Starting ProxyRenewal Daemon: glite-proxy-renewd ...
 
@@ -24,32 +48,26 @@ start()
 		chmod 0700 $PROXY_REPOSITORY
 	fi
 	
-	su $GLITE_USER -c "$GLITE_LOCATION/bin/glite-proxy-renewd \
-		-r $PROXY_REPOSITORY" && echo " done"
+	su - $GLITE_USER -c "VOMS_USERCONF=$user_voms_config \
+		$GLITE_LOCATION/bin/glite-proxy-renewd \
+		-r $PROXY_REPOSITORY $creds -A" && echo " done"
 }
 
 stop()
 {
 	echo -n "Stopping ProxyRenewal Daemon: glite-proxy-renewd ..."
-	PIDS=`ps -C glite-proxy-renewd -o pid --no-heading`
-	if [ -z "$PIDS" ]; then
-		echo " no process glite-proxy-renewd running"
-		exit 1
-	else
-		kill $PIDS && echo " done"
-	fi
+	killall glite-proxy-renewd
+	echo " done"
 }
 
 status()
 {
-	PIDS=`ps -C glite-proxy-renewd -o pid --no-heading`
-	if ps p $PIDS >/dev/null 2>&1; then
-		echo glite-proxy-renewd running \($PIDS\)
-		return 0
+	if netstat -an --unix | grep "^unix .* LISTEN.* /tmp/dgpr_renew_" >/dev/null 2>&1 ;then
+		echo glite-proxy-renewd running
+	else
+		echo glite-proxy-renewd not running
+		return 1
 	fi
-	
-	echo glite-proxy-renewd not running
-	return 1
 }
 
 case x$1 in

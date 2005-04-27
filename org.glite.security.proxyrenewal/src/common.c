@@ -3,63 +3,130 @@
 #ident "$Header$"
 
 /* nread() and nwrite() never return partial data */
-static size_t
-nread(int sock, char *buf, size_t buf_len)
+static int
+nread(int sock, struct timeval *to, char *buf, size_t buf_len, size_t *read_len)
 {
    size_t count;
    size_t remain = buf_len;
    char *cbuf = buf;
+   fd_set fds;
+   struct timeval timeout,before,after;
+   int ret;
+
+   if (to) {
+      memcpy(&timeout,to,sizeof(timeout));
+      gettimeofday(&before,NULL);
+   }
 
    while (remain > 0) {
+      FD_ZERO(&fds);
+      FD_SET(sock,&fds);
+      switch (select(sock+1, &fds, NULL, NULL, to ? &timeout : NULL)) {
+	 case 0:
+	    ret = EDG_WLPR_ERROR_TIMEOUT;
+	    goto end;
+	 case -1:
+	    ret = EDG_WLPR_ERROR_ERRNO;
+	    goto end;
+      }
+      
       count = read(sock, cbuf, remain);
       if (count < 0) {
 	 if (errno == EINTR)
 	    continue;
-	 else
-	    return count;
+	 else {
+	    ret = EDG_WLPR_ERROR_ERRNO;
+	    goto end;
+	 }
       } else
 	 if (count == 0) {
-	    return count;
+	    *read_len = 0;
+	    return 0;
 	 }
       cbuf += count;
       remain -= count;
    }
-   return buf_len;
+   *read_len = buf_len;
+   ret = 0;
+
+end:
+   if (to) {
+      gettimeofday(&after,NULL);
+      edg_wlpr_DecrementTimeout(to, before, after);
+      if (to->tv_sec < 0) {
+	 to->tv_sec = 0;
+	 to->tv_usec = 0;
+      }
+   }
+
+   return ret;
 }
 
 static size_t
-nwrite(int sock, const char *buf, size_t buf_len)
+nwrite(int sock, struct timeval *to, const char *buf, size_t buf_len)
 {
    const char *cbuf = buf;
    size_t count;
    size_t remain = buf_len;
+   fd_set fds;
+   struct timeval timeout,before,after;
+   int ret;
+
+   if (to) {
+      memcpy(&timeout,to,sizeof(timeout));
+      gettimeofday(&before,NULL);
+   }
 
    while (remain > 0) {
+      FD_ZERO(&fds);
+      FD_SET(sock,&fds);
+      switch (select(sock+1, NULL, &fds, NULL, to ? &timeout : NULL)) {
+	 case 0: ret = EDG_WLPR_ERROR_TIMEOUT;
+		 goto end;
+	 case -1: ret = EDG_WLPR_ERROR_ERRNO;
+		  goto end;
+      }
+		 
       count = write(sock, cbuf, remain);
       if (count < 0) {
 	 if (errno == EINTR)
 	    continue;
-	 else
-	    return count;
+	 else {
+	    ret = EDG_WLPR_ERROR_ERRNO;
+	    goto end;
+	 }
       }
       cbuf += count;
       remain -= count;
    }
-   return buf_len;
+   ret = buf_len;
+
+end:
+   if (to) {
+      gettimeofday(&after,NULL);
+      edg_wlpr_DecrementTimeout(to, before, after);
+      if (to->tv_sec < 0) {
+	 to->tv_sec = 0;
+	 to->tv_usec = 0;
+      }
+   }
+
+   return ret;
 }
 
 int
-edg_wlpr_Read(int sock, char **buf, size_t *buf_len)
+edg_wlpr_Read(int sock, struct timeval *timeout, char **buf, size_t *buf_len)
 {
    int ret;
    unsigned char length[4];
+   size_t len;
 
-   ret = nread(sock, length, 4);
-   if (ret == -1) {
+   ret = nread(sock, timeout, length, 4, &len);
+   if (ret) {
       *buf_len = 0;
-      return errno;
+      return ret;
    }
-   if (ret < 4) {
+   if (len != 4) {
       *buf_len = 0;
       return EDG_WLPR_ERROR_UNEXPECTED_EOF; /* XXX vraci i kdyz peer spadne a zavre trubku */
    }
@@ -72,18 +139,21 @@ edg_wlpr_Read(int sock, char **buf, size_t *buf_len)
    if (*buf == NULL)
       return ENOMEM;
 
-   ret = nread(sock, *buf, *buf_len);
-   if (ret != *buf_len) {
+   ret = nread(sock, timeout, *buf, *buf_len, &len);
+   if (ret)
+      return ret;
+
+   if (len != *buf_len) {
       free(*buf);
       *buf_len = 0;
-      return errno;
+      return EDG_WLPR_ERROR_UNEXPECTED_EOF; /* XXX */
    }
 
    return 0;
 }
 
 int
-edg_wlpr_Write(int sock, char *buf, size_t buf_len)
+edg_wlpr_Write(int sock, struct timeval *timeout, char *buf, size_t buf_len)
 {
    unsigned char length[4];
 
@@ -92,8 +162,8 @@ edg_wlpr_Write(int sock, char *buf, size_t buf_len)
    length[2] = (buf_len >> 8)  & 0xFF;
    length[3] = (buf_len >> 0)  & 0xFF;
 
-   if (nwrite(sock, length, 4) != 4 ||
-       nwrite(sock, buf, buf_len) != buf_len)
+   if (nwrite(sock, timeout, length, 4) != 4 ||
+       nwrite(sock, timeout, buf, buf_len) != buf_len)
        return errno;
    
    return 0;
@@ -236,4 +306,18 @@ edg_wlpr_DecodeInt(char *str, int *num)
 {
    *num = atol(str); /* XXX */
    return 0;
+}
+
+int
+edg_wlpr_DecrementTimeout(struct timeval *timeout, struct timeval before, struct timeval after)
+{
+   (*timeout).tv_sec = (*timeout).tv_sec - (after.tv_sec - before.tv_sec);
+   (*timeout).tv_usec = (*timeout).tv_usec - (after.tv_usec - before.tv_usec);
+   while ( (*timeout).tv_usec < 0) {
+      (*timeout).tv_sec--;
+      (*timeout).tv_usec += 1000000;
+   }
+
+   if ( ((*timeout).tv_sec < 0) || (((*timeout).tv_sec == 0) && ((*timeout).tv_usec == 0)) ) return(1);
+   else return(0);
 }

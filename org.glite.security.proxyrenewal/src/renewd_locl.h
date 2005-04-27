@@ -5,7 +5,9 @@
 
 #include <myproxy.h>
 #include <myproxy_delegation.h>
-#include <globus_gsi_cert_utils.h>
+#include <globus_gsi_credential.h>
+#include <globus_gsi_proxy.h>
+#include <globus_gsi_cert_utils_constants.h>
 
 #include "renewal.h"
 
@@ -33,17 +35,6 @@ typedef struct {
    time_t end_time;
    time_t next_renewal;
 } proxy_record;
-
-typedef struct vomses_record {
-   char *nick;
-   char *hostname;
-   int port;
-} vomses_record;
-
-typedef struct vomses_records {
-   unsigned int len;
-   struct vomses_record **val;
-} vomses_records;
 
 /* commands */
 void
@@ -78,9 +69,12 @@ free_record(proxy_record *record);
 
 int
 load_proxy(const char *filename, X509 **cert, EVP_PKEY **privkey,
-           STACK_OF(X509) **chain);
+           STACK_OF(X509) **chain, globus_gsi_cred_handle_t *proxy);
 
 int
 get_proxy_base_name(char *file, char **subject);
+
+int
+renew_voms_creds(const char *cur_file, const char *renewed_file, const char *new_file);
 
 #endif /* RENEWALD_LOCL_H */
