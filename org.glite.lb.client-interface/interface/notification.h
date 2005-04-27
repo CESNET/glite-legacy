@@ -13,6 +13,12 @@ extern "C" {
 #endif
 
 /**
+ * \defgroup notifications Notifications handling
+ * \brief Notifications handling.
+ *@{
+ */
+
+/**
  * default and maximal notif timeout (in seconds)
  */
 #define EDG_WLL_NOTIF_TIMEOUT_DEFAULT   120
@@ -22,17 +28,19 @@ extern "C" {
 /** Register for receiving notifications.
  * Connects to the server specified by EDG_WLL_NOTIF_SERVER context parameter
  * (temporary workaround, should be resolved by registry in future).
- * \param conditions: the same conditions as for \see edg_wll_QueryJobsExt.
+ * \param[in,out] context	context to work with
+ * \param[in] conditions	the same conditions as for \ref edg_wll_QueryJobsExt.
  * 		currently one or more JOBID's are required.
  * 		Only a single occurence of a specific attribute is allowed
  * 		among ANDed conditions (due to the ability to modify them
  * 		further).
- * \param fd = -1 create or reuse the default listening socket (one per context)
+ * \param[in] fd		= -1 create or reuse the default listening socket (one per context)
  * 	     >= 0 non-default listening socket 
- * \param address_override if not NULL, use this address instead of extracting it
+ * \param[in] address_override 	if not NULL, use this address instead of extracting it
  * 		from the connection (useful when multiple interfaces are present,
  * 		circumventing NAT problems etc.)
- * \param valid until when the registration is valid (NULL means no interest in
+ * \param[in] valid 		until when the registration is valid (NULL means no interest in
+ * \param[out] id_out		returened NotifId
  * 		the value
  * \retval 0 OK
  * \retval EINVAL restrictions on conditions are not met
@@ -51,9 +59,11 @@ int edg_wll_NotifNew(
 /** Change the receiving local address.
  * Report the new address to the server.
  *
- * \param fd 
- * \param address_override 
- * \param valid all same as for \see edg_wll_NotifNew
+ * \param[in,out] context	context to work with
+ * \param[in] id		notification ID you are binding to
+ * \param[in] fd		same as for \ref edg_wll_NotifNew 
+ * \param[in] address_override 	same as for \ref edg_wll_NotifNew
+ * \param[in] valid 		same as for \ref edg_wll_NotifNew
  */
 
 int edg_wll_NotifBind(
@@ -65,9 +75,13 @@ int edg_wll_NotifBind(
 );
 
 typedef enum _edg_wll_NotifChangeOp {
+	/** No operation, equal to not defined */
 	EDG_WLL_NOTIF_NOOP = 0,
+	/** Replace notification registration with new one */
 	EDG_WLL_NOTIF_REPLACE,
+	/** Add new condition when to be notifed */
 	EDG_WLL_NOTIF_ADD,
+	/** Remove condition on notification */
 	EDG_WLL_NOTIF_REMOVE
 /*      if adding new attribute, add conversion string to common/xml_conversions.c too !! */
 } edg_wll_NotifChangeOp;
@@ -78,8 +92,11 @@ typedef enum _edg_wll_NotifChangeOp {
  * of uniqueness the original conditions must have contained only a single
  * OR-ed row of conditions on the attributes infolved in the change.
  * 
- * \param op action to be taken on existing conditions,
- * 	\see edg_wll_NotifChangeOp
+ * \param[in,out] context	context to work with
+ * \param[in] id		notification ID you are working with
+ * \param[in] conditions	same as for \ref edg_wll_NotifNew
+ * \param[in] op 		action to be taken on existing conditions,
+ * 	\ref edg_wll_NotifChangeOp
  */
 int edg_wll_NotifChange(
 	edg_wll_Context		context,
@@ -89,7 +106,9 @@ int edg_wll_NotifChange(
 );
 
 /** Refresh the registration, i.e. extend its validity period.
- * \param valid until when the registration is valid (NULL means no interest in
+ * \param[in,out] context	context to work with
+ * \param[in] id		notification ID you are working with
+ * \param[in] valid 		until when the registration is valid (NULL means no interest in
  * 		the value
  */
 
@@ -102,6 +121,8 @@ int edg_wll_NotifRefresh(
 /** Drop the registration.
  * Server is instructed not to send notifications anymore, pending ones
  * are discarded, listening socket is closed, and allocated memory freed.
+ * \param[in,out] context	context to work with
+ * \param[in] id		notification ID you are working with
  */
 
 int edg_wll_NotifDrop(
@@ -111,10 +132,12 @@ int edg_wll_NotifDrop(
 
 /** Receive notification.
  * The first incoming notification is returned.
- * \param fd receive on this socket (-1 means the default for the context)
- * \param timeout wait atmost this time long. (0,0) means polling, NULL waiting
+ * \param[in,out] context	context to work with
+ * \param[in] fd 		receive on this socket (-1 means the default for the context)
+ * \param[in] timeout 		wait atmost this time long. (0,0) means polling, NULL waiting
  * 	indefinitely
- * 	
+ * \param[out] state_out	returned JobStatus
+ * \param[out] id_out		returned NotifId
  * \retval 0 notification received, state_out contains the current job state
  * \retval EAGAIN no notification available, timeout occured
  */
@@ -129,10 +152,11 @@ int edg_wll_NotifReceive(
 
 
 /** Default socket descriptor where to select(2) for notifications.
- * Even if nothing is available for reading freom the socket, 
- * there may be some data cached so calling \see edg_wll_NotifReceive
+ * Even if nothing is available for reading from the socket, 
+ * there may be some data cached so calling \ref edg_wll_NotifReceive
  * may return notifications immediately.
  *
+ * \param[in,out] context	context to work with
  * \retval >=0 socket descriptor
  * \retval -1 error, details set in context
  */
@@ -142,13 +166,18 @@ int edg_wll_NotifGetFd(
 );
 
 /** Close the default local listening socket.
- * Useful to force following \see edg_wll_NotifBind to open
+ * Useful to force following \ref edg_wll_NotifBind to open
  * a new one.
+ * \param[in,out] context	context to work with
  */
 
 int edg_wll_NotifCloseFd(
 	edg_wll_Context		context
 );
+
+/*
+ *@} end of group
+ */
 
 #ifdef __cplusplus
 }

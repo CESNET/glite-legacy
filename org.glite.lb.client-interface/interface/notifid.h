@@ -7,21 +7,79 @@
 extern "C" {
 #endif
 
+/**
+ * \defgroup notifid Notification Id (NotifId)
+ * \brief NotifId description and handling.
+ *@{
+ */
+
 /** Notification handle.
  * Refers to a particular registration for receiving notifications.
  */
 typedef void *edg_wll_NotifId;
 
-/** Parse and unparse the Id. */
-int edg_wll_NotifIdParse(const char *,edg_wll_NotifId *);
-char* edg_wll_NotifIdUnparse(const edg_wll_NotifId);
+/**
+ * Create a Job ID.
+ * \param[in] server		notification server hostname
+ * \param[in] port		port of the notification server
+ * \param[out] notifid		newly created NotifId
+ * \retval 0 for success
+ * \retval EINVAL invalid notification server
+ * \retval ENOMEM if memory allocation fails
+ */
+int edg_wll_NotifIdCreate(const char *server, int port ,edg_wll_NotifId *notifid);
 
-int edg_wll_NotifIdCreate(const char *,int,edg_wll_NotifId *);
-void edg_wll_NotifIdFree(edg_wll_NotifId);
+/**
+ * Free the NotifId structure
+ * \param[in] notifid 		for dealocation
+ */
+void edg_wll_NotifIdFree(edg_wll_NotifId notifid);
 
-void edg_wll_NotifIdGetServerParts(const edg_wll_NotifId, char **, unsigned int *);
-char *edg_wll_NotifIdGetUnique(const edg_wll_NotifId);
-int edg_wll_NotifIdSetUnique(edg_wll_NotifId *, const char *);
+/** Parse the NotifId string and creates NotifId structure
+ * \param[in] notifidstr	string representation of NotifId
+ * \param[out] notifid		parsed NotifId
+ * \retval 0 for success
+ * \retval EINVAL notifidstr can't be parsed
+ * \retval ENOMEM if memory allocation fails
+ */
+int edg_wll_NotifIdParse(const char *notifidstr, edg_wll_NotifId *notifid);
+
+/** Unparse the NotifId (produce the string form of NotifId).
+ * \param[in] notifid		NotifId to be converted to string
+ * \return allocated string which represents the NotifId
+ */
+char* edg_wll_NotifIdUnparse(const edg_wll_NotifId notifid);
+
+/**
+ * Extract notification server address (address:port)
+ * \param[in] notifid 		NotifId from which the address should be extracted
+ * \param[in,out] srvName	pointer where to return server name
+ * \param[in,out] srvPort	pointer where to return server port
+ */
+void edg_wll_NotifIdGetServerParts(const edg_wll_NotifId notifid, char **srvName, unsigned int *srvPort);
+
+/**
+ * Extract unique string 
+ * \param[in] notifid	NotifId 
+ * \retval pointer to allocated unique string representing jobid
+ * \retval NULL if jobid is 0 or memory allocation fails
+ */ 
+char *edg_wll_NotifIdGetUnique(const edg_wll_NotifId notifid);
+
+/**
+ * Recreate a NotifId by a new unique string
+ * \param[in] unique	string which represent created notifid (if NULL then new
+ * one is created)
+ * \param[in,out] notifid       newly created NotifId 
+ * \retval 0 success
+ * \retval EINVAL invalid NotifId
+ * \retval ENOMEM if memory allocation fails
+ */
+int edg_wll_NotifIdSetUnique(edg_wll_NotifId *notifid, const char *unique);
+
+/*
+ *@} end of group
+ */
 
 #ifdef __cplusplus
 }

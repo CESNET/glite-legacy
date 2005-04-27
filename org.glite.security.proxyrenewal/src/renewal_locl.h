@@ -21,6 +21,7 @@
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/file.h>
+#include <sys/wait.h>
 #include <openssl/md5.h>
 #include <openssl/x509.h>
 #include <openssl/pem.h>
@@ -63,6 +64,12 @@ typedef enum {
 #define EDG_WLPR_VERSION "EDG Proxy Renewal 1.0"
 
 #define MAX_PROXIES 4 /* max. number of jobids sharing one proxy */
+
+#define RENEWAL_CLOCK_SKEW (5 * 60)
+
+#define DGPR_RETRIEVE_DEFAULT_HOURS 10
+
+#define GLITE_PR_TIMEOUT_DEFAULT	120
 
 typedef struct {
   char *version;
@@ -107,10 +114,10 @@ edg_wlpr_StoreToken(char **buf, size_t *buf_len, char *command,
                     char *value, const char *separator);
 
 int
-edg_wlpr_Read(int sock, char **buf, size_t *buf_len);
+edg_wlpr_Read(int sock, struct timeval *timeout, char **buf, size_t *buf_len);
 
 int
-edg_wlpr_Write(int sock, char *buf, size_t buf_len);
+edg_wlpr_Write(int sock, struct timeval *timeout, char *buf, size_t buf_len);
 
 void
 edg_wlpr_CleanRequest(edg_wlpr_Request *request);
@@ -129,5 +136,8 @@ edg_wlpr_DecodeInt(char *str, int *num);
 
 int
 edg_wlpr_RequestSend(edg_wlpr_Request *request, edg_wlpr_Response *response);
+
+int
+edg_wlpr_DecrementTimeout(struct timeval *timeout, struct timeval before, struct timeval after);
 
 #endif /* RENEWAL_LOCL_H */

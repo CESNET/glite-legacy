@@ -1,11 +1,6 @@
 #ifndef __EDG_WORKLOAD_LOGGING_CLIENT_EVENTS_H__
 #define __EDG_WORKLOAD_LOGGING_CLIENT_EVENTS_H__
 
-/**
- * \file edg/workload/logging/client/events.h
- * \brief contains definition of event type codes for use both by lbapi.h and dglog.h
- */
-
 #ident "$Header$"
 /*
 @@@AUTO
@@ -23,6 +18,12 @@
 extern "C" {
 #endif
 
+/**
+ * \defgroup events Events
+ * \brief All L&B event types.
+ *
+ *@{
+ */
 
 /**
  * Predefined type for ULM string 
@@ -49,22 +50,22 @@ for my $e (sort { $event->{order}->{$a} <=> $event->{order}->{$b} }
 } edg_wll_EventCode;
 
 /**
- * \fn edg_wll_EventCode edg_wll_StringToEvent(char *name)
- * \param name		a string event name (e.g. "JobTransfer")
+ * \fn edg_wll_EventCode edg_wll_StringToEvent(const char *name)
+ * \param[in] name		a string event name (e.g. "JobTransfer")
  * \return corresponding numeric code (edg_wll_EventCode)
  * \brief convert a string event name to the corresponding numeric code
  */
 
-extern edg_wll_EventCode edg_wll_StringToEvent(char *);
+extern edg_wll_EventCode edg_wll_StringToEvent(const char *name);
 
 /**
  * \fn char *edg_wll_EventToString(edg_wll_EventCode event)
- * \param event		an event numeric code (edg_wll_EventCode)
+ * \param[in] event		an event numeric code (edg_wll_EventCode)
  * \return corresponding string (e.g. "JobTransfer")
  * \brief convert an event numeric code to the corresponding string
  */
 
-extern char *edg_wll_EventToString(edg_wll_EventCode);
+extern char *edg_wll_EventToString(edg_wll_EventCode event);
 
 
 /**
@@ -103,22 +104,22 @@ for my $t (sort { $event->{order}->{$a} <=> $event->{order}->{$b} }
 } edg_wll_KeyNameCode;
 
 /**
- * \fn edg_wll_KeyNameCode edg_wll_StringToKeyName(char *name)
- * \param name		a string ULM key name (e.g. "DG.JOB.TRANSFER.DEST")
+ * \fn edg_wll_KeyNameCode edg_wll_StringToKeyName(const char *name)
+ * \param[in] name		a string ULM key name (e.g. "DG.JOB.TRANSFER.DEST")
  * \return corresponding numeric code (edg_wll_KeyNameCode)
  * \brief convert a string ULM key name to the corresponding numeric code
  */
 
-extern edg_wll_KeyNameCode edg_wll_StringToKeyName(char *);
+extern edg_wll_KeyNameCode edg_wll_StringToKeyName(const char *name);
 
 /**
  * \fn char *edg_wll_KeyNameToString(edg_wll_KeyNameCode key)
- * \param key		a ULM key name numeric code (edg_wll_KeyNameCode)
+ * \param[in] key		a ULM key name numeric code (edg_wll_KeyNameCode)
  * \return corresponding string (e.g. "DG.JOB.TRANSFER.DEST")
  * \brief convert a ULM key name numeric code to the corresponding string
  */
 
-extern char *edg_wll_KeyNameToString(edg_wll_KeyNameCode);
+extern char *edg_wll_KeyNameToString(edg_wll_KeyNameCode key);
 
 
 /**
@@ -139,7 +140,7 @@ for ($event->getFieldsOrdered) {
 # enum
 		gen qq{
 /**
- * \\enum $enum
+ * \\$enum
  * $fn codes 
  */
 $enum \{
@@ -153,19 +154,19 @@ $enum \{
 # function StringTo:
 		gen qq{
 /**
- * \\fn $enum edg_wll_StringTo${c}(char *name);
- * \\param name		a string representing $fn code (e.g. \"${$f->{codes}}[1]->{name}\")
+ * \\fn $enum edg_wll_StringTo${c}(const char *name);
+ * \\param[in] name		a string representing $fn code (e.g. \"${$f->{codes}}[1]->{name}\")
  * \\return corresponding numeric code ($enum)
  * \\brief converts a string $fn code to corresponding numeric code
  */
-extern $enum edg_wll_StringTo${c}(char *name);
+extern $enum edg_wll_StringTo${c}(const char *name);
 };
 
 # function ToString:
 		gen qq{
 /**
  * \\fn char *edg_wll\_${c}ToString($enum code);
- * \\param code		a $fn numeric code ($enum)
+ * \\param[in] code		a $fn numeric code ($enum)
  * \\return corresponding string (e.g. \"${$f->{codes}}[1]->{name}\")
  * \\brief converts a $fn numeric code to corresponding string
  */
@@ -187,7 +188,7 @@ for my $t (sort { $event->{order}->{$a} <=> $event->{order}->{$b} }
 # enum
 			gen qq{
 /**
- * \\enum $enum
+ * \\$enum
  * $fn codes of the $t event
  */
 $enum \{
@@ -201,19 +202,19 @@ $enum \{
 # function StringTo:
 			gen qq{
 /**
- * \\fn $enum edg_wll_StringTo${c}(char *name);
- * \\param name		a string representing $t $fn code (e.g. \"${$f->{codes}}[1]->{name}\")
+ * \\fn $enum edg_wll_StringTo${c}(const char *name);
+ * \\param[in] name		a string representing $t $fn code (e.g. \"${$f->{codes}}[1]->{name}\")
  * \\return corresponding numeric code ($enum)
  * \\brief converts a string $t $fn code to corresponding numeric code
  */
-extern $enum edg_wll_StringTo${c}(char *name);
+extern $enum edg_wll_StringTo${c}(const char *name);
 };
 
 # function ToString:
 			gen qq{
 /**
  * \\fn char *edg_wll\_${c}ToString($enum code);
- * \\param code		a $t $fn numeric code ($enum)
+ * \\param[in] code		a $t $fn numeric code ($enum)
  * \\return corresponding string (e.g. \"${$f->{codes}}[1]->{name}\")
  * \\brief converts a $t $fn numeric code to corresponding string
  */
@@ -243,6 +244,10 @@ for ($event->getFieldsOrdered) {
 gen "\n";
 @@@}
 
+/**
+ * \typedef edg_wll_AnyEvent
+ * common structure definition contained in all types of the events
+ */
 typedef struct _edg_wll_AnyEvent {
 _EDG_WLL_EVENT_COMMON
 } edg_wll_AnyEvent;
@@ -314,7 +319,7 @@ extern edg_wll_Event *edg_wll_InitEvent(edg_wll_EventCode eventcode);
 
 /**
  * Free the contents of event structure
- * \param IN event structure to be freed
+ * \param[in] event 		structure to be freed
  * \warning As event structures are likely to be allocated in arrays,
  *      the structure itself is not freed.
  *      Its the responsibility of the caller to call free(event)
@@ -324,6 +329,9 @@ void edg_wll_FreeEvent(
 	edg_wll_Event * event
 );
 
+/*
+ *@} end of group
+ */
 
 #ifdef __cplusplus
 }

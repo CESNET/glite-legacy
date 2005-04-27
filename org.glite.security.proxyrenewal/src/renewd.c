@@ -13,11 +13,12 @@ time_t condor_limit = CONDOR_MINIMUM_PROXY_TIME;
 char *cadir = NULL;
 char *vomsdir = NULL;
 int voms_enabled = 0;
+char *cert = NULL;
+char *key = NULL;
+char *vomsconf = NULL;
 
-char *vomsconf = "/opt/edg/etc/vomses";
-#ifndef NOVOMS
-struct vomses_records vomses;
-#endif
+static volatile int die = 0, child_died = 0;
+double default_timeout = 0;
 
 static struct option opts[] = {
    { "help",       no_argument,       NULL,  'h' },
@@ -29,6 +30,8 @@ static struct option opts[] = {
    { "VOMSdir",    required_argument, NULL,  'V' },
    { "enable-voms", no_argument,     NULL,  'A' },
    { "voms-config", required_argument, NULL, 'G' },
+   { "cert",        required_argument, NULL, 't' },
+   { "key",         required_argument, NULL, 'k' },
    { NULL, 0, NULL, 0 }
 };
 
@@ -71,6 +74,26 @@ doit(int sock);
 static int
 decode_request(const char *msg, const size_t msg_len, edg_wlpr_Request *request);
 
+int
+start_watchdog(pid_t *pid);
+
+static void
+catchsig(int sig)
+{
+   switch (sig) {
+      case SIGINT:
+      case SIGTERM:
+      case SIGQUIT:
+	 die = sig;
+	 break;
+      case SIGCHLD:
+	 child_died = 1;
+	 break;
+      default:
+	 break;
+   }
+}
+
 static command_table *
 find_command(edg_wlpr_Command code)
 {
@@ -92,11 +115,15 @@ proto(int sock)
    edg_wlpr_Response  response;
    edg_wlpr_Request  request;
    command_table  *command;
+   struct timeval timeout;
 
    memset(&request, 0, sizeof(request));
    memset(&response, 0, sizeof(response));
 
-   ret = edg_wlpr_Read(sock, &buf, &buf_len);
+   timeout.tv_sec = (long) default_timeout;
+   timeout.tv_usec = (long) ((default_timeout - timeout.tv_sec) * 1e6);
+
+   ret = edg_wlpr_Read(sock, &timeout, &buf, &buf_len);
    if (ret) {
       edg_wlpr_Log(LOG_ERR, "Error reading from client: %s",
                    edg_wlpr_GetErrorString(ret));
@@ -117,9 +144,10 @@ proto(int sock)
       goto end;
    }
 
-   edg_wlpr_Log(LOG_INFO, "Received command code %d for proxy %s",
+   edg_wlpr_Log(LOG_INFO, "Received command code %d for proxy %s and jobid %s",
                 request.command,
-                request.proxy_filename ? request.proxy_filename : "(unspecified)");
+		request.proxy_filename ? request.proxy_filename : "(unspecified)",
+		request.jobid ? request.jobid : "(unspecified)");
 
    command->handler(&request, &response);
 
@@ -127,7 +155,7 @@ proto(int sock)
    if (ret)
       goto end;
 
-   ret = edg_wlpr_Write(sock, buf, strlen(buf) + 1);
+   ret = edg_wlpr_Write(sock, &timeout, buf, strlen(buf) + 1);
    free(buf);
    if (ret) {
       edg_wlpr_Log(LOG_ERR, "Error sending response to client: %s",
@@ -148,54 +176,46 @@ doit(int sock)
    int newsock;
    struct sockaddr_un client_addr;
    int client_addr_len = sizeof(client_addr);
-#if 0
-   next_renewal = LONG_MAX;
-   size_of_proxies = PROXIES_ALLOC_SIZE;
-   proxies = malloc((size_of_proxies) * sizeof(struct guarded_proxy *));
-   if (proxies == NULL) {
-       return ENOMEM;
-   }
-   proxies[0] = NULL;
-#endif
+   int flags;
 
-#if 0
-   sigemptyset(&sset);
-   sigaddset(&sset,SIGTERM);
-   sigaddset(&sset,SIGINT);
-   sigaddset(&sset, SIGKILL);
-   sigaddset(&sset, SIGUSR1);
-   sigaddset(&sset, SIGALRM);
-   sigprocmask(SIG_BLOCK,&sset,NULL);
-#endif
+   while (!die) {
 
-   while (1) {
-#if 0
-      sigprocmask(SIG_UNBLOCK,&sset,NULL);
-      newsock = accept(sock, (struct sockaddr *) &client_addr, &client_addr_len);
-      sigprocmask(SIG_BLOCK,&sset,NULL);
+      if (child_died) {
+	 int pid, newpid, ret;
 
-      if (newsock == -1) {
-         if (errno == EINTR) /* ERESTARTSYS */
-             proxy_renewal(received_signal);
-         else
-            log();
-         continue;
+	 while ((pid=waitpid(-1,NULL,WNOHANG))>0)
+	    ;
+	 ret = start_watchdog(&newpid);
+	 if (ret)
+	    return ret;
+	 edg_wlpr_Log(LOG_DEBUG, "Renewal slave process re-started");
+	 child_died = 0;
+	 continue;
       }
-#else
+
       newsock = accept(sock, (struct sockaddr *) &client_addr, &client_addr_len);
       if (newsock == -1) {
-         edg_wlpr_Log(LOG_ERR, "accept() failed");
+	 if (errno != EINTR)
+	    edg_wlpr_Log(LOG_ERR, "accept() failed");
          continue;
       }
       edg_wlpr_Log(LOG_DEBUG, "Got connection");
 
-#endif
-
+      flags = fcntl(newsock, F_GETFL, 0);
+      if (fcntl(newsock, F_SETFL, flags | O_NONBLOCK) < 0) {
+	 edg_wlpr_Log(LOG_ERR, "Can't set O_NONBLOCK mode (%s), closing.\n",
+	              strerror(errno));
+	 close(newsock);
+	 continue;
+      }
+	 
       proto(newsock);
 
       edg_wlpr_Log(LOG_DEBUG, "Connection closed");
       close(newsock);
    }
+   edg_wlpr_Log(LOG_DEBUG, "Terminating on signal %d\n",die);
+   return 0;
 }
 
 static int
@@ -443,7 +463,7 @@ do_listen(char *socket_name, int *sock)
       return errno;
    }
 
-   ret = listen(s, 5); /* XXX enough ? */
+   ret = listen(s, 50);
    if (ret == -1) {
       edg_wlpr_Log(LOG_ERR, "listen(): %s", strerror(errno));
       close(s);
@@ -494,74 +514,6 @@ start_watchdog(pid_t *pid)
    exit(0);
 }
 
-#ifdef NOVOMS
-static int
-load_vomses()
-{
-	return ENOSYS;
-}
-
-#else
-static int
-load_vomses()
-{
-   FILE *fd = NULL;
-   char line[1024];
-   char *nick, *hostname;
-   int port;
-   vomses_record *rec;
-   vomses_record **tmp;
-   char *p;
-   
-   fd = fopen(vomsconf, "r");
-   if (fd == NULL) {
-      edg_wlpr_Log(LOG_ERR, "Cannot open vomses configuration file (%s)",
-	           strerror(errno));
-      return errno;
-   }
-   while (fgets(line, sizeof(line), fd) != NULL) {
-      p = line;
-      if (*p != '"') {
-	 edg_wlpr_Log(LOG_ERR, "Parsing error when reading vomses configuration file");
-	 return EINVAL;
-      }
-      nick = strdup(strtok(p+1, "\""));
-
-      p = strtok(NULL, "\"");
-      hostname = strdup(strtok(NULL, "\""));
-
-      p = strtok(NULL, "\"");
-      port = atoi(strdup(strtok(NULL, "\"")));
-
-      if (nick == NULL || hostname == NULL) {
-	 edg_wlpr_Log(LOG_ERR, "Parsing error when reading vomses configuration file");
-	 return EINVAL;
-      }
-
-      rec = calloc(1, sizeof(*rec));
-      if (rec == NULL) {
-	 edg_wlpr_Log(LOG_ERR, "Not enough memory");
-	 return ENOMEM;
-      }
-      rec->nick = nick;
-      rec->hostname = hostname;
-      rec->port = port;
-
-      tmp = realloc(vomses.val, vomses.len + 1);
-      if (tmp == NULL) {
-	 edg_wlpr_Log(LOG_ERR, "Not enough memory");
-	 return ENOMEM;
-      }
-      vomses.val = tmp;
-      vomses.len++;
-
-      vomses.val[vomses.len-1] = rec;
-   }
-   fclose(fd);
-   return 0;
-}
-#endif
-
 int main(int argc, char *argv[])
 {
    int   sock;
@@ -571,6 +523,8 @@ int main(int argc, char *argv[])
    char  sockname[PATH_MAX];
    int   ret;
    pid_t pid;
+   struct sigaction	sa;
+   const char *s = NULL;
 
    progname = strrchr(argv[0],'/');
    if (progname) progname++; 
@@ -579,7 +533,7 @@ int main(int argc, char *argv[])
    repository = EDG_WLPR_REPOSITORY_ROOT;
    debug = 0;
 
-   while ((opt = getopt_long(argc, argv, "hvdr:c:C:V:AG:", opts, NULL)) != EOF)
+   while ((opt = getopt_long(argc, argv, "hvdr:c:C:V:AG:t:k:", opts, NULL)) != EOF)
       switch (opt) {
 	 case 'h': usage(progname); exit(0);
 	 case 'v': fprintf(stdout, "%s:\t%s\n", progname, rcsid); exit(0);
@@ -590,6 +544,8 @@ int main(int argc, char *argv[])
 	 case 'V': vomsdir = optarg; break;
 	 case 'A': voms_enabled = 1; break;
 	 case 'G': vomsconf = optarg; break;
+	 case 't': cert = optarg; break;
+	 case 'k': key = optarg; break;
 	 case '?': usage(progname); return 1;
       }
 
@@ -605,6 +561,7 @@ int main(int argc, char *argv[])
    }
 
    globus_module_activate(GLOBUS_GSI_CERT_UTILS_MODULE);
+   globus_module_activate(GLOBUS_GSI_PROXY_MODULE);
 
    if (!debug)
       for (fd = 3; fd < OPEN_MAX; fd++) close(fd);
@@ -618,20 +575,26 @@ int main(int argc, char *argv[])
       openlog(progname, LOG_PID, LOG_DAEMON);
    }
 
-   if (voms_enabled) {
-      char *path;
-      char *new_path;
-      ret = load_vomses();
-      if (ret)
-	 return 1;
-      setenv("GLOBUS_VERSION", "22", 0);
-      if (VOMS_INSTALL_PATH != NULL && *VOMS_INSTALL_PATH != '\0') {
-	 path = getenv("PATH");
-	 asprintf(&new_path, "%s:%s/bin", path, VOMS_INSTALL_PATH);
-         setenv("PATH", new_path, 1);
-      }
-   }
-   
+   if (cert)
+      setenv("X509_USER_CERT", cert, 1);
+
+   if (key)
+      setenv("X509_USER_KEY", key, 1);
+
+   if (cadir)
+      setenv("X509_CERT_DIR", cadir, 1);
+
+   s = getenv("GLITE_PR_TIMEOUT");
+   default_timeout = s ? atof(s) : GLITE_PR_TIMEOUT_DEFAULT;
+
+   memset(&sa,0,sizeof(sa));
+   sa.sa_handler = catchsig;
+   sigaction(SIGINT,&sa,NULL);
+   sigaction(SIGQUIT,&sa,NULL);
+   sigaction(SIGTERM,&sa,NULL);
+   sigaction(SIGCHLD,&sa,NULL);
+   sigaction(SIGPIPE,&sa,NULL);
+
    ret = start_watchdog(&pid);
    if (ret)
       return 1;
@@ -644,22 +607,6 @@ int main(int argc, char *argv[])
    if (ret)
       return 1;
    edg_wlpr_Log(LOG_DEBUG, "Listening at %s", sockname);
-
-#if 0
-   /* XXX ??? */
-   install_handlers();
-#endif
-   
-
-#if 0
-   /* XXX this overrides setings done by install_handlers()? */
-   signal(SIGTERM, cleanup);
-   signal(SIGINT, cleanup);
-   signal(SIGKILL, cleanup);
-   signal(SIGPIPE, SIG_IGN);
-
-   atexit(cleanup);
-#endif
 
    ret = doit(sock);
 
@@ -676,7 +623,7 @@ get_proxy_base_name(char *file, char **name)
    X509_NAME *subject = NULL;
    int ret;
 
-   ret = load_proxy(file, &cert, &key, &chain);
+   ret = load_proxy(file, &cert, &key, &chain, NULL);
    if (ret)
       return ret;
 

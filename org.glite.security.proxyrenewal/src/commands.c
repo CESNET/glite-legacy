@@ -1,15 +1,12 @@
 #include "renewal_locl.h"
 #include "renewd_locl.h"
 
-#ifndef NOVOMS
-#include <voms_apic.h>
-#endif
+#include "glite/security/voms/voms_apic.h"
 
 #ident "$Header$"
 
 #define SEPARATORS ",\n"
 #define RENEWAL_START_FRACTION 0.75 /* XXX */
-#define RENEWAL_CLOCK_SKEW (5 * 60)
 #define RENEWAL_MIN_LIFETIME (15 * 60)
 
 extern char *repository;
@@ -144,42 +141,58 @@ copy_file_content(FILE *in, FILE *out)
 static time_t
 get_delta(time_t current_time, time_t start_time, time_t end_time)
 {
-   time_t length, lifetime;
+   time_t remaining_life;
+   time_t life_to_lose;
+   time_t limit;
    time_t delta;
-   int condor_tested = 0;
 
-   lifetime = end_time - start_time;
-   delta = 0;
-   while (1) {
-      if (end_time - current_time <= RENEWAL_MIN_LIFETIME)
-	 /* if the proxy is too short, renew it as soon as possible */
-	 return RENEWAL_CLOCK_SKEW;
+   if (RENEWAL_MIN_LIFETIME > condor_limit) {
+     limit = RENEWAL_MIN_LIFETIME;
+   } else {
+     limit = condor_limit;
+   }
 
-      /* renewal starts at 3/4 of lifetime */
-      length = end_time - (start_time + delta);
-      delta += length * RENEWAL_START_FRACTION;
+   limit += RENEWAL_CLOCK_SKEW;
 
-      if (!condor_tested && delta > lifetime - condor_limit) {
-	 /* Condor requires the proxies to be renewed a specified time interval
-            before the proxies have expired (see the 
-	    GRIDMANAGER_MINIMUM_PROXY_TIME variable). We must ensure that
-	    renewal takes place before Condor does this check */
-	 if (current_time > end_time - condor_limit) {
-	    edg_wlpr_Log(LOG_ERR, "Proxy lifetime exceeded value of the Condor limit!"); 
-	 }
-	 else
-	    delta = lifetime - condor_limit - RENEWAL_CLOCK_SKEW;
-	 condor_tested = 1;
-      }
+   if (current_time + limit >= end_time) {
+     /* if the proxy is too short, renew it as soon as possible */
 
-      if (abs(current_time - (start_time + delta)) < RENEWAL_CLOCK_SKEW)
-	 continue;
-      
-      return (start_time + delta) - current_time;
-   };
+     if (current_time + condor_limit > end_time ) {
+       edg_wlpr_Log(LOG_ERR, "Remaining proxy lifetime fell below the value of the Condor limit!");
+     }
 
-   /* not reachable */
-   return 0;
+     return 0;
+   }
+
+   remaining_life = end_time - current_time;
+
+   /* renewal should gain the jobs an extra lifetime of
+      RENEWAL_START_FRACTION (default 3/4) of the new proxy's
+      lifetime. If the time remaining on the current proxy is already
+      small then the jobs may gain an extra lifetime of more than that.
+
+      In any case, a renewal will be scheduled to happen before the
+      lifetime limit.
+
+      'life_to_lose' is the lifetime that will be lost, ie the time that
+      will still remain on the current proxy when it is renewed
+   */
+
+   life_to_lose = (1.0-RENEWAL_START_FRACTION)*60*60*DGPR_RETRIEVE_DEFAULT_HOURS;
+
+   if (life_to_lose < limit) {
+     life_to_lose = limit;
+   }
+
+   delta = life_to_lose - limit;
+
+   while( remaining_life < (limit + delta) ) {
+     delta *= (1.0-RENEWAL_START_FRACTION);
+   }
+
+   life_to_lose = limit + delta;
+
+   return (remaining_life - life_to_lose);
 }
 
 int
@@ -506,19 +519,23 @@ get_record_ext(FILE *fd, proxy_record *record, int *last_used_suffix)
    char *p;
    proxy_record tmp_record;
    time_t current_time;
+   int line_num = 0;
 
    assert(record != NULL);
    memset(&tmp_record, 0, sizeof(tmp_record));
 
    current_time = time(NULL);
    while (fgets(line, sizeof(line), fd) != NULL) {
+      line_num++;
       free_record(&tmp_record);
       p = strchr(line, '\n');
       if (p)
 	 *p = '\0';
       ret = decode_record(line, &tmp_record);
-      if (ret)
-	 return ret; /* XXX continue */
+      if (ret) {
+	 edg_wlpr_Log(LOG_ERR, "Skipping invalid entry at line %d", line_num);
+	 continue;
+      }
       if (record->suffix >= 0) {
 	 if (record->suffix == tmp_record.suffix) {
 	    record->suffix = tmp_record.suffix;
@@ -547,26 +564,29 @@ get_record_ext(FILE *fd, proxy_record *record, int *last_used_suffix)
       if (tmp_record.jobids.len == 0) {
 	 /* no jobs registered for this record, so use it initialized with the
 	  * parameters (currently myproxy location) provided by user */
-	 char *server = record->myproxy_server;
-
-	 memset(record, sizeof(*record), 0);
 	 record->suffix = tmp_record.suffix;
-	 if (record->myproxy_server)
-	    free(record->myproxy_server);
-	 record->myproxy_server = server;
+	 record->next_renewal = record->end_time = 0;
 	 free_record(&tmp_record);
 	 return 0;
       }
+
+      /* Proxies with VOMS attributes require a separate record, which is not
+       * shared with another proxies. The same applies it the unique flag was
+       * set by the caller */
+      if (record->voms_exts || record->unique)
+	 continue;
 
       if (tmp_record.jobids.len > 0 && record->myproxy_server &&
 	  strcmp(record->myproxy_server, tmp_record.myproxy_server) != 0)
 	 continue;
 
       if (tmp_record.jobids.len > 0 &&
-	  tmp_record.end_time - current_time < condor_limit) {
-	 /* skip expired proxy (and that ones that are going to expire soon),
+          current_time + condor_limit + RENEWAL_CLOCK_SKEW > tmp_record.end_time) {
+
+	 /* skip expired proxy (or ones that are going to expire soon),
 	    leaving it untouched (it will be removed after next run of the 
-	    renewal process */
+	    renewal process) */
+
 	 continue;
       }
 
@@ -615,6 +635,7 @@ store_record(char *basename, proxy_record *record)
    proxy_record tmp_record;
    char tmp_file[FILENAME_MAX];
    char meta_file[FILENAME_MAX];
+   int line_num = 0;
 
    assert (record != NULL);
 
@@ -633,13 +654,16 @@ store_record(char *basename, proxy_record *record)
       goto end;
    }
    while (fgets(line, sizeof(line), fd) != NULL) {
+      line_num++;
       free_record(&tmp_record);
       p = strchr(line, '\n');
       if (p)
 	 *p = '\0';
       ret = decode_record(line, &tmp_record);
-      if (ret)
-	 goto end;
+      if (ret) {
+	 edg_wlpr_Log(LOG_ERR, "Removing invalid entry at line %d in %s", line_num, basename);
+	 continue;
+      }
       if (record->suffix == tmp_record.suffix &&
 	  record->unique == tmp_record.unique) {
 	 tmp_record.next_renewal = record->next_renewal;
@@ -854,7 +878,7 @@ find_voms_cert(char *file, int *present)
       return EDG_WLPR_ERROR_VOMS;
    }
 
-   ret = load_proxy(file, &cert, &privkey, &chain);
+   ret = load_proxy(file, &cert, &privkey, &chain, NULL);
    if (ret) {
       VOMS_Destroy(voms_info);
       return ret;
@@ -1194,8 +1218,7 @@ update_db(edg_wlpr_Request *request, edg_wlpr_Response *response)
 	       free_record(&record);
 	       record.suffix = suffix;
 	       record.myproxy_server = server;
-	       edg_wlpr_Log(LOG_WARNING, "Removed expired proxy (suffix %d)",
-			    suffix);
+	       edg_wlpr_Log(LOG_WARNING, "Removed expired proxy %s", cur_proxy);
 	    } else
 	       get_times(cur_proxy, &record);
 	 } else {

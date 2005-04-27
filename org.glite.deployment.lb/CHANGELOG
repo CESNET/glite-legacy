@@ -1,0 +1,20 @@
+DATE: 21-03-2005 17:21
+[dimeglio] Implemented status method
+
+DATE: 21-03-2005 00:32
+[dimeglio] Added PERL5LIB env var
+
+DATE: 17-03-2005 17:33
+[gdiez] Stopping and starting the database before the index creation (just after the database is created and the user granted)
+
+DATE: 09-03-2005 23:05
+[dimeglio] Moved creation of indices inside database creation (if database
+		   exists indices are not recreated)
+
+DATE: 02-03-2005 11:05
+[dimeglio] Started CHANGELOG
+[dimeglio] Fixed formatting, improved display of message using glib.printXxxMessage functions
+[dimeglio] Fixed some problems when starting/stopping services
+[dimeglio] GLITE_USER parameter not exposed anymore in config file, use same user parameters
+		   as WMS to allow installation on same node
+[dimeglio] Increased module version number to 1.2.0

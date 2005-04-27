@@ -6,7 +6,22 @@
 		<!-- User-defined parameters - Please change them -->
 		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
 
-		<!-- gLite configuration -->
+		<!--  gLite services user accounts  -->
+ 		<glite.user.name 
+			description="Name of the user account used to run the gLite services
+			on this LB node"
+			value="changeme"/>
+
+		<glite.user.group
+			description="Group of the user specified in the 'glite.user.name'
+			parameter. Leave it empty of comment it out to use the same as 'glite.user.name'"
+			value="changeme"/>
+             	
+		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
+		<!-- Advanced parameters - Change them if you know what you're doing -->
+		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
+
+		<!-- Installer configuration -->
 		<glite.installer.verbose
 			description="Enable verbose output"
 			value="true"/>
@@ -18,40 +33,102 @@
 		<!-- MySQL DB -->
 		<lb.database.name
 			description="The mySQL database name to create for storing LB data
-						Now it must be set to the default value"
+			In this version it must be set to the given value"
 			value="lbserver20"/>
+
+		<lb.index.list
+			description="Definitions of indices on all the currently supported indexed system attributes">
+			
+			<value>owner</value>
+			<value>location</value>
+			<value>destination</value>
+
+		</lb.index.list>
 			
 		<lb.database.username
 			description="The username to be used to access the local mySQL server
-						Now it must be set to the default value"
+			In this version it must be set to the given value"
 			value="lbserver"/>
-			
-		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
-		<!-- Optimization parameters - Change them if you know what you're doing -->
-		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
-
-		<GLOBUS_LOCATION
-			description="The location of the Globus Toolkit"
-			value="/opt/globus"/>
-			
-		<GLITE_USER
-			description="The account used to run the LB daemons"
-			value="gproduct"/>
-			
-		<GLITE_CERT_DIR
-			value='/etc/grid-security/certificates/'/>
 			
 		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
 		<!-- System parameters - You should leave these alone -->
-		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
-		<lb.certificate.file
-			description="The host certificate (public key) file location"
-			value="/home/gproduct/.certs/hostcert.pem"/>
-		
-		<lb.key.file
-			description="The host certificate (private key) file location"
-			value="/home/gproduct/.certs/hostkey.pem"/>
-		
-		<dirlist value='/opt/glite/var'/>
+		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->		
+	
 	</parameters>
+
+	<!--RGMA service publishing: log server -->
+	<instance name="lb.rgma" service="rgma-servicetool">
+		<parameters>
+		
+			<rgma.servicetool.enable
+				description="Publish log server via RGMA servicetool. If this variable is set to 'false': the other
+				values of this instance are not taken into account.[Example: 'true'] [Type: 'boolean']"
+				
+				value="true"/>
+				
+			<rgma.servicetool.name
+				description="Name of the service. This should be globally unique.
+					Example: your.host.name_Logging_Bookkeeping_Server
+					[Type: 'String']"
+				value="${HOSTNAME}_Logging_Bookkeeping_Server"/>
+
+			<rgma.servicetool.url_endpoint
+				description="URL to contact the service at. 
+					This should be unique for each service. Use example and adapt host. 
+					Example: http://your.host.name/LB/LBServer
+					[Type: 'string']"
+				value="http://${HOSTNAME}/LB/LBServer"/>
+
+			<rgma.servicetool.service_type
+				description="The service type. This should be uniquely defined for 
+					each service type. Currently two methods of type naming are recommended:
+					(1) The targetNamespace from the WSDL document,
+						followed by a space and then the service name.
+					(2) A URL owned by the body or individual who defines the service type.
+					Example: Logging and Bookkeeping Server
+					[Type: 'string']"
+				value="Logging and Bookkeeping Server"/>
+
+			<rgma.servicetool.service_version
+				description="Service version in the form 'major.minor.patch'
+					Example: 1.2.3
+					[Type: 'string']"
+				value="${module.version}"/>
+
+			<rgma.servicetool.publish_interval
+				description="How often to check and publish service information.
+					Example: 3600 [Type: 'string'] [Unit: 'seconds']"
+				value="3600"/>
+
+			<rgma.servicetool.status_script
+				description="Script to run when determining the service status. 
+					This script should return an exit code of 0 to indicate the service is OK, other values
+					should indicate an error. The first line of the standard output should be a brief message 
+					describing the service status (e.g. 'Accepting connections')
+					Example: ${GLITE_LOCATION}/etc/init.d/glite-lb-bkserverd status
+					[Type: 'string']"
+				value="${GLITE_LOCATION}/etc/init.d/glite-lb-bkserverd status"/>
+
+			<rgma.servicetool.status_interval
+				description="How often to check and publish service status.
+					Example: 60 [Type: 'string'] [Unit: 'seconds']"
+				value="60"/>
+
+			<rgma.servicetool.url_wsdl
+				description="URL of a WSDL document for the service (leave blank if the 
+					service has no WSDL).
+					Example: http://example.rl.ac.uk/service?WSDL
+					[Type: 'string']"
+				value="n/a"/>
+
+			<rgma.servicetool.url_semantics
+				description="URL of a document containing a detailed description of the service
+					and how it should be used.
+					Example: http://example.rl.ac.uk/service/semantics.html
+					[Type: 'string']"
+				value="n/a"/>
+
+		</parameters>
+	</instance>
+						
 </config>
