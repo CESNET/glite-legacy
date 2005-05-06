@@ -98,10 +98,10 @@ ${GSS_THRSTATICLIB}: ${GSS_THROBJS}
 	ranlib $@
 
 ${GSS_LTLIB}: ${GSS_OBJS}
-	${LINK} ${version_info} -o $@ ${GSS_LOBJS} ${EX_LIBS}
+	${LINK} ${version_info} -o $@ ${GSS_LOBJS} 
 
 ${GSS_THRLTLIB}: ${GSS_THROBJS}
-	${LINK} ${version_info} -o $@ ${GSS_THRLOBJS} ${EX_LIBS}
+	${LINK} ${version_info} -o $@ ${GSS_THRLOBJS} 
 
 ${STATICLIB}: ${OBJS}
 	ar crv $@ ${OBJS}
