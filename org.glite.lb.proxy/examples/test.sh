@@ -11,6 +11,7 @@ JOBLOG=${JOBLOG:-glite-lb-job_log}
 JOBREG=${JOBREG:-glite-lb-job_reg}
 USERJOBS=${USERJOBS:-glite-lb-user_jobs}
 JOBSTAT=${JOBSTAT:-glite-lb-job_status}
+PURGE=${PURGE:-glite-lb-purge}
 
 # -m host
 BKSERVER_HOST=${BKSERVER_HOST:-`hostname -f`:9000}
@@ -22,10 +23,15 @@ LBPROXY_PURGE_STATES="cleared done aborted cancelled"
 JOBS_ARRAY_SIZE=10
 SAMPLE_JOBS_ARRAY[0]=
 SAMPLE_JOBS_STATES[0]=
+SAMPLE_JOBS_RESPONSES[0]=
 
 # some defaults
 DEBUG=2
 LOGFD=${LOGFD:-1}
+
+# timeouts for polling the bkserver
+timeout=10
+maxtimeout=300
 
 #
 # Procedures
@@ -48,7 +54,7 @@ show_help()
 
 check_exec()
 {
-	[ $DEBUG -gt 0 ] && [ -n "$2" ] && echo -n -e "$2\t\t" || echo -n -e "$1\t\t"
+	[ $DEBUG -gt 0 ] && [ -n "$2" ] && echo -n -e "$2\t" || echo -n -e "$1\t"
 	eval $1
 	RV=$?
 	[ $DEBUG -gt 0 ] && [ $RV -eq 0 ] && echo "OK" || echo "FAILED"
@@ -65,44 +71,58 @@ check_utils()
 	check_exec 'JOBSTAT=`which $JOBSTAT`' "Checkig $JOBSTAT utility" || exit 1
 }
 
-log_ev_proxy()
-{
-#	./glite-lb-logevent -x -j https://nain.ics.muni.cz:9000/o50UnpiwMbHocS-nKZ5aaQ -s NetworkServer -e UserTag --name color --value red
-
-	echo "$LOGEV -j \"$EDG_JOBID\" -c \"$EDG_WL_SEQUENCE\" $@"
-	EDG_WL_SEQUENCE=`$LOGEV -j $EDG_JOBID -c $EDG_WL_SEQUENCE -s $SRCID "$@"`
-	test $? -ne 0 -o -z "$EDG_WL_SEQUENCE" && echo "missing EDG_WL_SEQUENCE from $LOGEV"
-}
-
 log_ev()
 {
-	echo "$LOGEV -x -S -j \"$EDG_JOBID\" -c \"$EDG_WL_SEQUENCE\" $@"
-	EDG_WL_SEQUENCE=`$LOGEV -j $EDG_JOBID -c $EDG_WL_SEQUENCE -s $SRCID "$@"`
+#	$LOGEV -j $EDG_JOBID -s NetworkServer -e UserTag --name color --value red
+	[ $DEBUG -gt 2 ] && echo "$LOGEV -j \"$EDG_JOBID\" -s UserInterface -c \"$EDG_WL_SEQUENCE\" $@"
+	EDG_WL_SEQUENCE=`$LOGEV -j $EDG_JOBID -s UserInterface -c $EDG_WL_SEQUENCE "$@"`
 	test $? -ne 0 -o -z "$EDG_WL_SEQUENCE" && echo "missing EDG_WL_SEQUENCE from $LOGEV"
 }
+
+log_ev_proxy()
+{
+#	$LOGEV -x -j $EDG_JOBID -s NetworkServer -e UserTag --name color --value red
+
+	[ $DEBUG -gt 2 ] && echo "$LOGEV -x -j \"$EDG_JOBID\" -s UserInterface -c \"$EDG_WL_SEQUENCE\" $@"
+	EDG_WL_SEQUENCE=`$LOGEV -x -j $EDG_JOBID -s UserInterface -c $EDG_WL_SEQUENCE "$@"`
+	test $? -ne 0 -o -z "$EDG_WL_SEQUENCE" && echo "missing EDG_WL_SEQUENCE from $LOGEV"
+}
+
+purge()
+{
+	[ $DEBUG -gt 2 ] && echo "$PURGE -a 0 -c 0 -n 0 -o 0 $@"
+	$PURGE -a 0 -c 0 -n 0 -o 0 "$@"
+}
+
+purge_proxy()
+{
+	[ $DEBUG -gt 2 ] && echo "$PURGE -x -a 0 -c 0 -n 0 -o 0 $@"
+	$PURGE -x -a 0 -c 0 -n 0 -o 0 "$@"
+}
+
 
 db_clear_jobs()
 {
-	[ $DEBUG -gt 0 ] && echo -n -e "Puging test jobs from db\t\t"
+	[ $DEBUG -gt 0 ] && echo -n -e "Purging test jobs from db\t\t"
 	job=0
 	while [ $job -lt $JOBS_ARRAY_SIZE ] ; do
-#		EDG_WL_SEQUENCE="UI=999999:NS=9999999999:WM=999999:BH=9999999999:JSS=999999:LM=999999:LRMS=999999:APP=999999"
+		EDG_WL_SEQUENCE="UI=999999:NS=9999999999:WM=999999:BH=9999999999:JSS=999999:LM=999999:LRMS=999999:APP=999999"
+#		log_ev_proxy -e Clear --reason=PurgingDB
+#		purge_proxy
 #		log_ev -e Clear --reason=PurgingDB
-#		$LOGFLUSH
-#		do_purge -n 0 -o 0
+#		purge 
 
 		job=$(($job + 1))
 	done
 	[ $DEBUG -gt 0 ] && echo "OK"
 }
 
-
-#	First simple test
+# Test thet registers jobs 
+# and checks against lbproxy and bkserver
 #
-#	register jobs and check against lbproxy and bkserver also
 test_gen_sample_jobs()
 {
-	[ $DEBUG -gt 0 ] && echo -n -e "Registering sample jobs\t\t"
+	[ $DEBUG -gt 0 ] && echo -n -e "Registering sample jobs\t\t\t"
 	job=0
 	while [ $job -lt $JOBS_ARRAY_SIZE ] ; do
 #		eval `$JOBREG -x -m $BKSERVER_HOST -s UserInterface 2>&1 | tail -n 2`
@@ -136,12 +156,13 @@ test_gen_sample_jobs()
 	}
 }
 
-# Test which logs random set of events to the registered jobs
-# and chcecks the state in LBProxy
+# Test that logs random set of events (for registered jobs) to lbproxy
+# and chcecks the state in lbproxy
+# and measures the time it takes the state to propagate to bkserver
 #
 test_logging_events()
 {
-	[ $DEBUG -gt 0 ] && echo -n -e "Logging events to the lbproxy\t\n"
+	[ $DEBUG -gt 0 ] && echo -n -e "Logging events to the lbproxy\t\t"
 	st_count=`echo $STATES | wc -w`
 	job=0
 	while [ $job -lt $JOBS_ARRAY_SIZE ] ; do
@@ -152,6 +173,7 @@ test_logging_events()
 		[ $? -ne 0 ] && echo -e "ERROR\n\tglite-lb-$state.sh ${SAMPLE_JOBS_ARRAY[$job]} error!"
 		proxy_state=`$JOBSTAT -x $LBPROXY_SERVE_SOCK ${SAMPLE_JOBS_ARRAY[$job]} 2>&1 | grep "state :" | cut -d " " -f 3 | tr A-Z a-z`
 		purged=`echo $LBPROXY_PURGE_STATES | grep $state`
+		bkserver_state=`$JOBSTAT ${SAMPLE_JOBS_ARRAY[$job]} 2>&1 | grep "state :" | cut -d " " -f 3 | tr A-Z a-z`
 
 		if test -n "$purged" ; then
 			echo $proxy_state | grep "No such file or directory"
@@ -166,11 +188,32 @@ test_logging_events()
 			  	exit 1;
 			fi
 		fi
+		
+		response=0
+		while [ "$state" != "$bkserver_state" ] ; do
+			bkserver_state=`$JOBSTAT ${SAMPLE_JOBS_ARRAY[$job]} 2>&1 | grep "state :" | cut -d " " -f 3 | tr A-Z a-z`
+			[ $DEBUG -gt 0 ] && echo -n "."
+			sleep $timeout
+			response=$(($response + $timeout ))
+			if test $response -gt $maxtimeout ; then
+				echo -e "ERROR\n\tstatus of job ${SAMPLE_JOBS_ARRAY[$job]} as queried from bkserver ($bkserver_state) has not become $state for more than $response seconds!"
+			  	exit 1;
+			fi
+		done
 
 		SAMPLE_JOBS_STATES[$job]=$state
+		SAMPLE_JOBS_RESPONSES[$job]=$response
 		job=$(($job + 1))
 	done
-	[ $DEBUG -gt 0 ] && echo "OK ($jobs)"
+	[ $DEBUG -gt 0 ] && echo "OK"
+	[ $DEBUG -gt 1 ] && {
+		job=0
+		echo "Polling the bkserver took for individual jobs the following time"
+		while [ $job -lt $JOBS_ARRAY_SIZE ] ; do
+			echo -e "${SAMPLE_JOBS_ARRAY[$job]} (${SAMPLE_JOBS_STATES[$job]})\t${SAMPLE_JOBS_RESPONSES[$job]} seconds"
+			job=$(($job + 1))
+		done
+	}
 }
 
 
