@@ -67,6 +67,8 @@ GSOAP_LIBS:= -L${gsoap_prefix}/lib -lgsoap
 
 EX_LIBS:= ${GLOBUS_LIBS} -L${ares_prefix}/lib -lares
 
+PATCHED_GSOAP_SRC:=stdsoap2_2.6.2.c
+
 HDRS:=glite_gss.h glite_gsplugin.h
 
 GSS_OBJS:=glite_gss.o
@@ -199,6 +201,7 @@ install:
 	cd ${top_srcdir}/interface && ${INSTALL} -m 644 ${HDRS} ${PREFIX}/include/glite/security/
 	if [ x${DOSTAGE} = xyes ]; then \
 		install -m 644 ${GSS_STATICLIB} ${GSS_THRSTATICLIB} ${STATICLIB} ${THRSTATICLIB} ${PREFIX}/lib; \
+		install -m 644 ${top_srcdir}/src/${PATCHED_GSOAP_SRC} ${PREFIX}/lib; \
 	fi
 
 clean:
