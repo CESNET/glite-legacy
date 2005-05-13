@@ -14,6 +14,7 @@ globus_prefix=/opt/globus
 nothrflavour=gcc32
 thrflavour=gcc32pthr
 gsoap_prefix=/opt/gsoap
+gsplugin_version_checking=yes
 
 CC=gcc
 
@@ -21,7 +22,6 @@ CC=gcc
 -include ../Makefile.inc
 
 GSPLUGIN_DEBUG?=no
-GSPLUGIN_VERSION_CHECKING?=yes
 
 version_info=-version-info `echo ${version} | cut -d. -f1,2 | tr . :`
 
@@ -30,7 +30,7 @@ VPATH=${top_srcdir}/src:${top_srcdir}/test:${top_srcdir}/examples
 TEST_LIBS:=-L${cppunit}/lib -lcppunit
 TEST_INC:=-I${cppunit}/include
 
-ifeq ($(GSPLUGIN_DEBUG),yes)
+ifeq ($(gsplugin_version_checking),yes)
 	DEBUG:=-g -O0 -Wall -DGSPLUGIN_DEBUG
 else
 	DEBUG:=-g -O0 -Wall
@@ -122,6 +122,10 @@ ${THRLTLIB}: ${THROBJS}
 default: all
 
 all compile: ${GSS_STATICLIB} ${GSS_LTLIB} ${GSS_THRSTATICLIB} ${GSS_THRLTLIB} ${STATICLIB} ${LTLIB} ${THRSTATICLIB} ${THRLTLIB} examples
+
+v: 
+	echo "check: ${CHECK_GSOAP_VERSION}"
+	echo "DEBUG: ${DEBUG}"
 
 check: compile check.gss
 
