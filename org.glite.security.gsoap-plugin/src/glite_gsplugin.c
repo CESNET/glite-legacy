@@ -212,7 +212,7 @@ glite_gsplugin_connect(
 		return ENOSYS;
 	}
 #else
-# warn "gSOAP version checking is switched off!"
+# warning "gSOAP version checking is switched off!"
 #endif
 
 	ctx = ((int_plugin_data_t *)soap_lookup_plugin(soap, plugin_id))->ctx;
