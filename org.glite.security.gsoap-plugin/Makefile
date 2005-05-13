@@ -123,10 +123,6 @@ default: all
 
 all compile: ${GSS_STATICLIB} ${GSS_LTLIB} ${GSS_THRSTATICLIB} ${GSS_THRLTLIB} ${STATICLIB} ${LTLIB} ${THRSTATICLIB} ${THRLTLIB} examples
 
-v: 
-	echo "check: ${CHECK_GSOAP_VERSION}"
-	echo "DEBUG: ${DEBUG}"
-
 check: compile check.gss
 
 check.gss: test_gss
