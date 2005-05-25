@@ -45,6 +45,7 @@ class glite_lb:
         self.version = "1.3.0"
         self.name = "glite-lb"
         self.friendly_name = "gLite Logging and Bookkeeping"
+        params['module.version'] = self.version
         
     #-------------------------------------------------------------------------------
     # Banner 
