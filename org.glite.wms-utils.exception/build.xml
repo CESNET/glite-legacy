@@ -21,6 +21,9 @@
 
 	Revision history:
 	$Log$
+	Revision 1.1.1.1  2004/07/21 18:16:57  eronchie
+	Moved out exception from org.glite.wms.common/src/utilitiesY
+	
 
 -->
 
@@ -80,6 +83,7 @@
 		 Load version file 
 	     ========================================= -->
 	<property file="${module.version.file}"/>
+	<property file="${module.build.file}"/>
 		
 	<!-- ==============================================
 		 Local private targets

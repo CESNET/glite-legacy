@@ -20,6 +20,9 @@
 
 	Revision history:
 	$Log$
+	Revision 1.4  2004/11/02 15:10:43  dkouril
+	RPM description
+	
 	Revision 1.3  2004/07/30 08:31:07  dimeglio
 	Changed default Ant target from compile to dist
 	
@@ -92,6 +95,7 @@
 		 Load version file 
 	     ========================================= -->
 	<property file="${module.version.file}"/>
+	<property file="${module.build.file}"/>
 		
 	<!-- ==============================================
 		 Local private targets
