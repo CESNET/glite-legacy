@@ -57,7 +57,11 @@ GLOBUS_LIBS:= -L${globus_prefix}/lib \
 	-lglobus_gssapi_gsi_${nothrflavour} \
 
 ifneq (${mysql_prefix},/usr)
-	myslqlib := -L${mysql_prefix}/lib
+	ifeq ($(shell echo ${mysql_version} | cut -d. -f1,2),4.1)
+		mysqlib := -L${mysql_prefix}/lib/mysql
+	else
+		mysqlib := -L${mysql_prefix}/lib
+	endif
 endif
 
 ifneq (${expat_prefix},/usr)

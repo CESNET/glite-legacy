@@ -47,6 +47,7 @@ nothrflavour=${with.globus.nothr.flavor}
 expat_prefix=${with.expat.prefix}
 ares_prefix=${with.ares.prefix}
 mysql_prefix=${with.mysql.prefix}
+mysql_version=${ext.mysql.version}
 cppunit=${with.cppunit.prefix}
 gridsite_prefix=${with.gridsite.prefix}
 gsoap_prefix=${with.gsoap.prefix}
