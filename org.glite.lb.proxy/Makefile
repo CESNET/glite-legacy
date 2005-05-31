@@ -71,6 +71,13 @@ LB_PROXY_COMMON_LIB:= -L${stagedir}/lib -lglite_lb_common_${nothrflavour}
 COMMON_LIBS:= -L${stagedir}/lib -lglite_lb_common_${nothrflavour} -lglite_security_gss_${nothrflavour}
 GRIDSITE_LIBS = -lgridsite_globus `xml2-config --libs`
 
+vomsflavour := _${nothrflavour}
+ifeq (${nothrflavour},gcc32)
+        vomsflavour :=
+endif
+ifeq (${nothrflavour},gcc32dbg)
+        vomsflavour :=
+endif
 
 EXT_LIBS:= -L${ares_prefix}/lib -lares \
 	${myslqlib} -lmysqlclient -lz\
@@ -83,10 +90,10 @@ EXT_LIBS:= -L${ares_prefix}/lib -lares \
 
 LB_PROXY_LIBS:= \
 	${LB_SERVER_SHARE_LIB} \
-	${EXT_LIBS} \
 	${SRVBONES_LIB} \
 	-lglite_lb_common_${nothrflavour} \
-	-lglite_security_gss_${nothrflavour}
+	-lglite_security_gss_${nothrflavour} \
+	${EXT_LIBS}
 
 
 
