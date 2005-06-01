@@ -84,7 +84,7 @@ ifeq (${nothrflavour},gcc32dbg)
 endif
 
 EXT_LIBS:= -L${ares_prefix}/lib -lares \
-	${myslqlib} -lmysqlclient -lz\
+	${mysqlib} -lmysqlclient -lz\
 	${expatlib} -lexpat \
 	${GRIDSITE_LIBS} \
 	-lvomsc${vomsflavour} \
