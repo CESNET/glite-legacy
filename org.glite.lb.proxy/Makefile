@@ -102,6 +102,8 @@ LB_PROXY_LIBS:= \
 
 
 glite_lb_proxy: lbproxy.o
+	@echo DEBUG: mysql_version=${mysql_version} mysql_prefix=${mysql_prefix}
+	@echo DEBUG: shell: x$(shell echo ${mysql_version} | cut -d. -f1,2)x
 	${LINK} -o $@ lbproxy.o ${LB_PROXY_LIBS}
 
 default all: compile
