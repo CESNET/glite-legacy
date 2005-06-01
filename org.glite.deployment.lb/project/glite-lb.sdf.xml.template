@@ -86,34 +86,34 @@
                     arch="i386"/>
 			</components>
 			<dependencies>
-				<external name="MySQL-server"
-					version="4.0.20"
-					age="0"
-					arch="i386"/>
-	  			<external name="MySQL-client"
-					version="4.0.20"
-					age="0"
-					arch="i386"/>				  
-	  			<external name="ares"
-					version="1.1.1"
-					age="EGEE"
-					arch="i386"/>				  
-				<external name="vdt_globus_essentials"
-					version="VDT1.2.2rh9"
-					age="1"
-					arch="i386"/>
-				<external name="gpt"
-					version="VDT1.2.2rh9"
-					age="1"
-					arch="i386"/>						 
-				<external name="myproxy"
-					version="1.14"
-					age="EGEE"
-					arch="i386"/>
-				<external name="perl-Expect.pm"
-					version="1.01"
-					age="9"
-					arch="i386"/>
+	  			<external name="@ext.mysql-server.rpm.name@"
+					  version="@ext.mysql-server.version@"
+					  age="@ext.mysql-server.rpm.age@"
+					  arch="@ext.mysql-server.platform@"/>				  
+	  			<external name="@ext.mysql-client.rpm.name@"
+					  version="@ext.mysql-client.version@"
+					  age="@ext.mysql-client.rpm.age@"
+					  arch="@ext.mysql-client.platform@"/>				  
+	  			<external name="@ext.ares.rpm.name@"
+					version="@ext.ares.version@"
+					age="@ext.ares.rpm.age@"
+					arch="@ext.ares.platform@"/>
+				<external name="@ext.globus-essentials.rpm.name@"
+					version="@ext.globus-essentials.version@"
+					age="@ext.globus-essentials.rpm.age@"
+					arch="@ext.globus-essentials.platform@"/>
+				<external name="@ext.gpt.rpm.name@"
+					version="@ext.gpt.rpm.version@"
+					age="@ext.gpt.rpm.age@"
+					arch="@ext.gpt.rpm.platform@"/>
+				<external name="@ext.myproxy.rpm.name@"
+					version="@ext.myproxy.rpm.version@"
+					age="@ext.myproxy.rpm.age@"
+					arch="@ext.myproxy.rpm.platform@"/>
+				<external name="@ext.perl-expect-pm.rpm.name@"
+					version="@ext.perl-expect-pm.version@"
+					age="@ext.perl-expect-pm.rpm.age@"
+					arch="@ext.perl-expect-pm.platform@"/>
 			</dependencies>
 		</service>
 
