@@ -99,7 +99,7 @@
 					age="@ext.ares.rpm.age@"
 					arch="@ext.ares.platform@"/>
 				<external name="@ext.globus-essentials.rpm.name@"
-					version="@ext.globus-essentials.version@"
+					version="@ext.globus-essentials.rpm.version@"
 					age="@ext.globus-essentials.rpm.age@"
 					arch="@ext.globus-essentials.platform@"/>
 				<external name="@ext.gpt.rpm.name@"
