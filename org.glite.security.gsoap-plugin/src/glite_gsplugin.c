@@ -234,6 +234,8 @@ glite_gsplugin_connect(
 				ctx->timeout,
 				ctx->connection, &gss_stat);
 	if ( ret ) {
+		free(ctx->connection);
+		ctx->connection = NULL;
 		edg_wll_gss_get_error(&gss_stat, "edg_wll_gss_connect()", &ctx->error_msg);
 		goto err;
 	}
