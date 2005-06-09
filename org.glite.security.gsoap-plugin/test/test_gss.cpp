@@ -1,13 +1,15 @@
-#include <iostream>
+#include <fstream>
 #include <sys/types.h>
 #include <unistd.h>
-
+#include <assert.h>
 
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/CompilerOutputter.h>
 #include <cppunit/extensions/TestFactoryRegistry.h>
-#include <cppunit/ui/text/TestRunner.h>
-
+#include <cppunit/XmlOutputter.h>
+#include <cppunit/TestRunner.h>
+#include <cppunit/TestResult.h>
+#include <cppunit/TestResultCollector.h>
 
 #include "glite_gss.h"
 
@@ -15,11 +17,13 @@ class GSSTest: public  CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE(GSSTest);
 	CPPUNIT_TEST(echo);
+	CPPUNIT_TEST(bigecho);
 	CPPUNIT_TEST(errorTest);
 	CPPUNIT_TEST_SUITE_END();
 
 public:
 	void echo();
+	void bigecho();
 	void errorTest();
 
 	void setUp();
@@ -31,7 +35,6 @@ private:
 	struct timeval	timeout;
 	
 	void replier();
-	
 };
 
 
@@ -41,7 +44,7 @@ void GSSTest::replier() {
 	struct sockaddr_in      a;
 	socklen_t		alen = sizeof(a);
 	int                     s, len;
-	char 			buf[100];
+	char 			buf[8*BUFSIZ];
 	
 
 	if ( (s = accept(sock, (struct sockaddr *) &a, &alen)) < 0 ) exit(1);
@@ -122,6 +125,31 @@ void GSSTest::echo()
 		
 }
 
+void GSSTest::bigecho()
+{
+	edg_wll_GssConnection	conn;
+	edg_wll_GssStatus	stat;
+	size_t			total;
+	int			err;
+	char 			buf[7*BUFSIZ];
+	char			buf2[7*BUFSIZ];	
+
+
+	err = edg_wll_gss_connect(my_cred, "localhost", port, &timeout, &conn, &stat);
+	CPPUNIT_ASSERT_MESSAGE("edg_wll_gss_connect()", !err);
+	
+	err = edg_wll_gss_write(&conn, buf, sizeof buf, &timeout, &stat);
+	CPPUNIT_ASSERT_MESSAGE("edg_wll_gss_write()", !err);
+	
+	err = edg_wll_gss_read_full(&conn, buf2, sizeof buf2, &timeout, &total, &stat);
+	CPPUNIT_ASSERT_MESSAGE("edg_wll_gss_read_full()", !err);
+
+	CPPUNIT_ASSERT(sizeof buf == total && !memcmp(buf,buf2,sizeof buf) );
+
+	edg_wll_gss_close(&conn, &timeout);
+		
+}
+
 
 void GSSTest::errorTest()
 {
@@ -141,9 +169,24 @@ CPPUNIT_TEST_SUITE_REGISTRATION( GSSTest );
 
 int main (int ac,const char *av[])
 {
+	assert(ac == 2);
+	std::ofstream	xml(av[1]);
+
 	CppUnit::Test *suite = CppUnit::TestFactoryRegistry::getRegistry().makeTest();
-	CppUnit::TextUi::TestRunner runner;
-	
+	CppUnit::TestRunner runner;
+
+	CppUnit::TestResult controller;
+	CppUnit::TestResultCollector result;
+	controller.addListener( &result );
+
 	runner.addTest(suite);
-	return runner.run() ? 0 : 1;
+	runner.run(controller);
+
+
+	CppUnit::XmlOutputter xout( &result, xml );
+	CppUnit::CompilerOutputter tout( &result, std::cout);
+	xout.write();
+	tout.write();
+
+	return result.wasSuccessful() ? 0 : 1 ;
 }
