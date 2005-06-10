@@ -1,3 +1,4 @@
+#include <iostream>
 #include <fstream>
 #include <sys/types.h>
 #include <unistd.h>
@@ -16,6 +17,7 @@
 class GSSTest: public  CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE(GSSTest);
+	CPPUNIT_TEST(echo);
 	CPPUNIT_TEST(echo);
 	CPPUNIT_TEST(bigecho);
 	CPPUNIT_TEST(errorTest);
@@ -46,7 +48,8 @@ void GSSTest::replier() {
 	int                     s, len;
 	char 			buf[8*BUFSIZ];
 	
-
+	std::cerr << "replier " << getpid() << std::endl;
+	
 	if ( (s = accept(sock, (struct sockaddr *) &a, &alen)) < 0 ) exit(1);
 	
 	if ( edg_wll_gss_accept(my_cred, s, &timeout, &conn, &stat) ) exit(1);
@@ -66,8 +69,9 @@ void GSSTest::setUp(void) {
 	socklen_t 		alen = sizeof(a);
 	char *			cred_file = NULL;
 	char *			key_file = NULL;
+	char * 			to = getenv("GSS_TEST_TIMEOUT");
 
-	timeout.tv_sec = 10;
+	timeout.tv_sec = to ? atoi(to) : 10 ;
 	timeout.tv_usec = 0;
 	
 	key_file = cred_file = getenv("X509_USER_PROXY");
@@ -109,6 +113,7 @@ void GSSTest::echo()
 	char 			buf[] = "f843fejwfanczn nc4*&686%$$&^(*)*#$@WSH";	
 	char			buf2[100];	
 
+	std::cerr << "echo " << getpid() << std::endl;
 
 	err = edg_wll_gss_connect(my_cred, "localhost", port, &timeout, &conn, &stat);
 	CPPUNIT_ASSERT_MESSAGE("edg_wll_gss_connect()", !err);
@@ -134,6 +139,7 @@ void GSSTest::bigecho()
 	char 			buf[7*BUFSIZ];
 	char			buf2[7*BUFSIZ];	
 
+	std::cerr << "bigecho " << getpid() << std::endl;
 
 	err = edg_wll_gss_connect(my_cred, "localhost", port, &timeout, &conn, &stat);
 	CPPUNIT_ASSERT_MESSAGE("edg_wll_gss_connect()", !err);
