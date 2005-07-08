@@ -12,6 +12,9 @@
 	
 	Revision history:
 	$Log$
+	Revision 1.1  2004/10/06 09:19:24  dimeglio
+	First version of this file
+	
 -->
 
 <project name="gLite LB Server Deployment Unit common properties">
@@ -47,4 +50,14 @@
 		 Define extra properties here ...
 		 ====================================================== -->
 		 
+	<property name="build.package.summary" value="gLite Logging and Bookkeeping node configuration files" />
+	<property name="build.package.description" value="gLite Logging and Bookkeeping node configuration files" />
+	<property name="build.package.files" value="
+%attr(755,root,root) %{prefix}/etc/config/scripts/glite-lb-config.py\n
+%attr(644,root,root) %{prefix}/etc/config/templates/glite-lb.cfg.xml\n
+%attr(644,root,root) %{prefix}/share/doc/glite-lb/release_notes/release_notes.doc\n
+%attr(644,root,root) %{prefix}/share/doc/glite-lb/release_notes/release_notes.pdf\n
+%attr(644,root,root) %{prefix}/share/doc/glite-lb/release_notes/release_notes.html\n"
+	/>
+
 </project>
