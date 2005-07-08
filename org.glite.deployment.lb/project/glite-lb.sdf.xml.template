@@ -74,10 +74,10 @@
 					age="@org.glite.security.proxyrenewal.info.age@"
 					build="@org.glite.security.proxyrenewal.info.build@"
 					arch="i386"/>
-				<component name="glite-security-voms"
-                    version="@org.glite.security.voms.info.version@"
-                    age="@org.glite.security.voms.info.age@"
-                    build="@org.glite.security.voms.info.build@"
+				<component name="glite-security-voms-api-c"
+                    version="@org.glite.security.voms-api-c.info.version@"
+                    age="@org.glite.security.voms-api-c.info.age@"
+                    build="@org.glite.security.voms-api-c.info.build@"
                     arch="i386"/>
                 <component name="gridsite"
                     version="@org.gridsite.core.info.version@"
