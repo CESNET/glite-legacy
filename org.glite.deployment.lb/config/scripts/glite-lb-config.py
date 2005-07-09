@@ -420,7 +420,7 @@ if __name__ == '__main__':
     
     # Command line opts if any
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'chv', ['checkconf', 'help', 'version','stop','start','status','siteconfig='])
+        opts, args = getopt.getopt(sys.argv[1:], 'chv', ['checkconf', 'help', 'version','configure','stop','start','status','siteconfig='])
     except getopt.GetoptError:
         service.usage(msg = "Unknown options(s)")
         sys.exit(1)
@@ -515,7 +515,7 @@ if __name__ == '__main__':
         if o in ("stop", "--stop"): 
             # Stop the service
             if service.stop() == 0:
-                print "\n\nThe %s was successfully stoped           " % service.friendly_name,
+                print "\n\nThe %s was successfully stopped           " % service.friendly_name,
                 glib.printOkMessage()
                 sys.exit(0)
             else:
