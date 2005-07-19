@@ -1,33 +1,38 @@
 LB proxy usage
 ==============
 
-LB proxy is designed to track jobs and serve loging requests from user as full
-LB server does.
+LB proxy accepts LB events, passes them to the full-featured LB servers, and
+serves both event and job state queries similarly to the LB server. However,
+the results of the queries reflect ONLY LOCAL VIEW of the proxy, i.e. the
+events that were logged through it, not regarding other events which may affect
+job state too. On the other hand, all the LB proxy operation is synchronous,
+i.e.  it is guaranteed that a successfully logged event is visible in a query
+result immediately, unlike the standard LB logging chain.
 
-LB proxy runs on the same machine as >>i.e. RB<< is running on and every event
-is logged to the LB proxy synchronously through unix local socket. The
-connection to the LB proxy is not encrypted -- only plain read/write calls are
-used according to the short response time needs.
+LB proxy is supposed to run on the RB machine, providing the WMS daemons
+with optimal LB performance, while offloading the user LB queries to
+a dedicated LB server.
 
-The LB proxy takes care of all job events -- it forwards event to the propper
-LB server and stores last sequence number. Connection to the LB server uses
-standard LB server protocol as used by localloger.  It's encrypted using SSL
-and host certificates. Jobs/events are logged with user DN, which can be set by
-user explicitly or can be taken from standard environment by default.
+Events are logged to the LB proxy through local UNIX socket. The connection to
+the LB proxy is not encrypted, and no SSL-like authentication/authorisation is
+used, relying completely on UNIX security mechanism.  Because of the missing
+SSL authentication the logging user identity has to be specified explicitely
+via LB proxy API.
 
-It has to be considered, that the job state is valid only in terms of LB proxy
-and its usage.  Jobs can be modified by other components outside the local
-machine which affects only the full LB server records but not the LB proxy.
-
-LB Proxy stores the sequence code itself and it allows user skip the sequence
-code when logs into lbproxy. On the othe hand, user can overide seq. code with
-her own.
+Due to the synchornous operation LB proxy can help with management of LB
+sequence codes. It records the most recent sequence code which can be retrieved
+and used later, even by another WMS component. However, this mechanism works
+for the "one job instance at time" model only. Once multiple instances of the
+same job may co-exist (which may be the case of shallow resubmission), these
+are distinguished exactly with the LB seqence code, hence LB proxy cannot
+do the job. For this case LB proxy API still provides means of specifying
+the sequence code explicitely.
 
 All jobs are recorded localy in the LB proxy database until job gets into
 CLEARED, ABORTED, CANCELED, DONE state. These jobs are then purged from LB
-proxy but they are still available on the propper LB server.
+proxy (but they are still available on the LB server).
 >>A timeout should be set also, after which job should be purged from LB proxy.
-It has to be done by extern purge client. <<
+This has to be done by external purge client. <<
 
 LB proxy uses same API functions for consumer and producer as LB does except the
 function names are postfixed with 'Proxy'. I.e. edg_wll_SetLoggingJob()
