@@ -1,0 +1,40 @@
+LB proxy usage
+==============
+
+LB proxy is designed to track jobs and serve loging requests from user as full
+LB server does.
+
+LB proxy runs on the same machine as >>i.e. RB<< is running on and every event
+is logged to the LB proxy synchronously through unix local socket. The
+connection to the LB proxy is not encrypted -- only plain read/write calls are
+used according to the short response time needs.
+
+The LB proxy takes care of all job events -- it forwards event to the propper
+LB server and stores last sequence number. Connection to the LB server uses
+standard LB server protocol as used by localloger.  It's encrypted using SSL
+and host certificates. Jobs/events are logged with user DN, which can be set by
+user explicitly or can be taken from standard environment by default.
+
+It has to be considered, that the job state is valid only in terms of LB proxy
+and its usage.  Jobs can be modified by other components outside the local
+machine which affects only the full LB server records but not the LB proxy.
+
+LB Proxy stores the sequence code itself and it allows user skip the sequence
+code when logs into lbproxy. On the othe hand, user can overide seq. code with
+her own.
+
+All jobs are recorded localy in the LB proxy database until job gets into
+CLEARED, ABORTED, CANCELED, DONE state. These jobs are then purged from LB
+proxy but they are still available on the propper LB server.
+>>A timeout should be set also, after which job should be purged from LB proxy.
+It has to be done by extern purge client. <<
+
+LB proxy uses same API functions for consumer and producer as LB does except the
+function names are postfixed with 'Proxy'. I.e. edg_wll_SetLoggingJob()
+has its own LB proxy variant edg_wll_SetLoggingJobProxy().
+
+Other important difference is in edg_wll_SetLoggingJobProxy(), where it is not
+neccessary to give the sequence code parameter. If user do not specify it, LB
+proxy gets the actual one from its database. The 'user' attribute of this call
+should be the user certificate DN string. If not set, it is set from the unix
+environment by default.
