@@ -8,14 +8,14 @@ extern "C" {
 #endif
 
 /** Count the number of jobs which entered the specified state.
- * \param group IN: group of jobs of interest, eg. DESTINATION = something
+ * \param[in] group 		group of jobs of interest, eg. DESTINATION = something
  * 		(XXX: this is the only query supported right now)
- * \param major IN: major code of the state of interest
- * \param minor IN: minor state code, eg. DONE_FAILED
- * \param from,to INOUT: on input - requested interval of interest
+ * \param[in] major 		major code of the state of interest
+ * \param[in] minor 		minor state code, eg. DONE_FAILED
+ * \param[in,out] from,to 	on input - requested interval of interest
  * 	on output - when the data were available
- * \param rate OUT: average rate per second in which the jobs enter this state
- * \param res_from, res_to: time resolution of the data (seconds)
+ * \param[out] rate 		average rate per second in which the jobs enter this state
+ * \param[out] res_from,res_to	time resolution of the data (seconds)
  */
 
 int edg_wll_StateRate(

@@ -25,14 +25,14 @@ public:
 
 	/** Create from server host,port pair
 	 * to be used for new notifications, i.e. with Register()
-	 * \param host		IN host
-	 * \param port		IN port
+	 * \param[in] host		host
+	 * \param[in] port		port
 	 */
 	Notification(const std::string host,const u_int16_t port);
 
 	/** Create from NotifId
 	 * to be used for existing notifications, i.e. with Bind()
-	 * \param notifId	IN NotifId
+	 * \param[in] notifId		NotifId
 	 */
 	Notification(const std::string notifId);
 
@@ -45,12 +45,12 @@ public:
 	/** Add this job to the list.
 	 * Local operation only, Register() has to be called
 	 * to propagate changes to server 
-	 * \param jobId		IN JobId
+	 * \param[in] jobId		JobId
 	 */
 	void addJob(const glite::wmsutils::jobid::JobId &jobId); 
 
 	/** Remove job from the list, local op again. 
-	 * \param jobId		IN JobId
+	 * \param[in] jobId		JobId
 	 */
 	void removeJob(const glite::wmsutils::jobid::JobId &jobId);
 
@@ -70,7 +70,7 @@ public:
 
 	/** Bind to the existing notification at the server
 	 * i.e. change the receiving local address
-	 * \param address	IN address override
+	 * \param[in] address		address override
 	 */
 	void Bind(const std::string address);
 

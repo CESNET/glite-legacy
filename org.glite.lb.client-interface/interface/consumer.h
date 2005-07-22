@@ -4,15 +4,6 @@
 /*!
  * \file consumer.h
  * \brief L&B consumer API
- *
- * General rules:
- * - functions return 0 on success, nonzero on error, errror details can 
- *   be found via edg_wll_ErrorCode()
- * - OUT are ** types, functions malloc()-ate objects and fill in the pointer 
- *   pointed to by the OUT argument
- * - returned lists of pointers are NULL-terminated malloc()-ed arrays
- * - edg_wll_Query + wrapper terminate arrays with EDG_WLL_EVENT_UNDEF event
- * - OUT is NULL if the list is empty
  */
 
 #ident "$Header$"
@@ -26,7 +17,27 @@
 extern "C" {
 #endif
 
-/*!
+/**
+ * \defgroup querying Server querying
+ * \brief The core part of the LB querying API.
+ * 
+ * The functions in this part of the API are responsible for
+ * transforming the user query to the LB protocol, contacting the server,
+ * receiving back the response and transforming back the results to the
+ * API data structures. 
+ *
+ * General rules:
+ * - functions return 0 on success, nonzero on error, errror details can 
+ *   be found via edg_wll_ErrorCode()
+ * - OUT are ** types, functions malloc()-ate objects and fill in the pointer 
+ *   pointed to by the OUT argument
+ * - returned lists of pointers are NULL-terminated malloc()-ed arrays
+ * - edg_wll_Query + wrapper terminate arrays with EDG_WLL_EVENT_UNDEF event
+ * - OUT is NULL if the list is empty
+ *@{
+ */
+
+/**
  * Predefined types for query attributes
  */
 typedef enum _edg_wll_QueryAttr{
@@ -53,7 +64,7 @@ typedef enum _edg_wll_QueryAttr{
 } edg_wll_QueryAttr;
 
 
-/*!
+/**
  * Predefined types for query operands
  */
 typedef enum _edg_wll_QueryOp{
@@ -65,7 +76,7 @@ typedef enum _edg_wll_QueryOp{
 } edg_wll_QueryOp;
 
 
-/*!
+/**
  * Single query condition for edg_wll_Query().
  * Those records are composed to form an SQL \a where clause
  * when processed at the L&B server
@@ -93,36 +104,15 @@ typedef struct _edg_wll_QueryRec {
 	} value, value2;
 } edg_wll_QueryRec;
 
-/************************************************
- * API FUNCTION DECLARATIONS			*
+/**
+ * default query timeout (in seconds)
  */
-
-
-#ifdef CLIENT_SBIN_PROG
-extern int edg_wll_http_send_recv(
-	edg_wll_Context,
-	char *, const char * const *, char *,
-	char **,char ***,char **
-);
-
-extern int http_check_status(
-	edg_wll_Context,
-	char *,
-	char **
-);
-
-extern int set_server_name_and_port(
-	edg_wll_Context,
-	const edg_wll_QueryRec **
-);
-
-#endif
+#define EDG_WLL_QUERY_TIMEOUT_DEFAULT   120
 
 /**
- * \name Server querying
- *
- *@{
+ * maximal query timeout (in seconds)
  */
+#define EDG_WLL_QUERY_TIMEOUT_MAX       1800
 
 /**
  * General query on events.
@@ -131,10 +121,10 @@ extern int set_server_name_and_port(
  * \a attr \a op \a value eg. time > 87654321.
  * \see edg_wll_QueryRec
  *
- * \param context 		IN: context to work with
- * \param job_conditions 	IN: query conditions (ANDed) on current job status, null (i.e. ATTR_UNDEF) terminated list. NULL means empty list, i.e. always TRUE
- * \param event_conditions: 	IN: conditions on events, null terminated list, NULL means empty list, i.e. always TRUE
- * \param events 		OUT: list of matching events
+ * \param[in] context 		context to work with
+ * \param[in] job_conditions 	query conditions (ANDed) on current job status, null (i.e. ATTR_UNDEF) terminated list. NULL means empty list, i.e. always TRUE
+ * \param[in] event_conditions 	conditions on events, null terminated list, NULL means empty list, i.e. always TRUE
+ * \param[out] events 		list of matching events
  */
 int edg_wll_QueryEvents(
 	edg_wll_Context			context,
@@ -142,6 +132,14 @@ int edg_wll_QueryEvents(
 	const edg_wll_QueryRec *	event_conditions,
 	edg_wll_Event **		events
 );
+
+/**
+ * Extended event query interface.
+ * Similar to \ref edg_wll_QueryEvents but the conditions are nested lists.
+ * Elements of the inner lists have to refer to the same attribute and they
+ * are logically ORed. 
+ * The inner lists themselves are logically ANDed then.
+ */
 
 int edg_wll_QueryEventsExt(
 	edg_wll_Context			context,
@@ -153,6 +151,7 @@ int edg_wll_QueryEventsExt(
 
 /**
  * Query LBProxy and use plain communication
+ * \warning edg_wll_*Proxy() functions are not implemented in release 1.
  */
 int edg_wll_QueryEventsProxy(
 	edg_wll_Context			context,
@@ -160,6 +159,10 @@ int edg_wll_QueryEventsProxy(
 	const edg_wll_QueryRec *	event_conditions,
 	edg_wll_Event **		events
 );
+
+/**
+ * \warning edg_wll_*Proxy() functions are not implemented in release 1.
+ */
 
 int edg_wll_QueryEventsExtProxy(
 	edg_wll_Context			context,
@@ -173,11 +176,11 @@ int edg_wll_QueryEventsExtProxy(
  * Return jobs (and possibly their states) for which an event satisfying the conditions
  * exists.
  * \see edg_wll_QueryEvents
- * \param context 	IN: context to work with
- * \param conditions 	IN: query records (ANDed), null (i.e. EDG_WLL_ATTR_UNDEF) terminated list
- * \param flags 	IN: additional status fields to retrieve (\see edg_wll_JobStatus)
- * \param jobs 		OUT: list of job ids. May be NULL.
- * \param states 	OUT: list of corresponding states (returned only if not NULL)
+ * \param[in] context 		context to work with
+ * \param[in] conditions 	query records (ANDed), null (i.e. EDG_WLL_ATTR_UNDEF) terminated list
+ * \param[in] flags 		additional status fields to retrieve (\see edg_wll_JobStatus)
+ * \param[out] jobs 		list of job ids. May be NULL.
+ * \param[out] states 		list of corresponding states (returned only if not NULL)
  */
 int edg_wll_QueryJobs(
 	edg_wll_Context			context,
@@ -186,6 +189,15 @@ int edg_wll_QueryJobs(
 	edg_wlc_JobId **		jobs,
 	edg_wll_JobStat **		states
 );
+
+/**
+ * Extended job query interface.
+ * Similar to \ref edg_wll_QueryJobs but the conditions are nested lists.
+ * Elements of the inner lists have to refer to the same attribute and they
+ * are logically ORed. 
+ * The inner lists themselves are logically ANDed then.
+ */
+
 
 int edg_wll_QueryJobsExt(
 	edg_wll_Context			context,
@@ -198,6 +210,7 @@ int edg_wll_QueryJobsExt(
 
 /**
  * Query LBProxy and use plain communication
+ * \warning edg_wll_*Proxy() functions are not implemented in release 1.
  */
 int edg_wll_QueryJobsProxy(
 	edg_wll_Context			context,
@@ -206,6 +219,10 @@ int edg_wll_QueryJobsProxy(
 	edg_wlc_JobId **		jobs,
 	edg_wll_JobStat **		states
 );
+
+/**
+ * \warning edg_wll_*Proxy() functions are not implemented in release 1.
+ */
 
 int edg_wll_QueryJobsExtProxy(
 	edg_wll_Context			context,
@@ -227,11 +244,11 @@ int edg_wll_QueryJobsExtProxy(
 /* starting from bit 10 private flags begins - do not add 1024 and more! */
 
 /** Return status of a single job.
- * \param context 	IN: context to operate on
- * \param jobid 	IN: query this job
- * \param flags 	IN: specifies optional status fields to retrieve,
+ * \param[in] context 		context to operate on
+ * \param[in] jobid 		query this job
+ * \param[in] flags 		specifies optional status fields to retrieve,
  * 	\see EDG_WLL_STAT_CLASSADS, EDG_WLL_STAT_CHILDREN, EDG_WLL_STAT_CHILDSTAT
- * \param status	OUT: status
+ * \param[out] status		status
  */
 
 int edg_wll_JobStatus(
@@ -243,11 +260,13 @@ int edg_wll_JobStatus(
 
 /**
  * Query LBProxy and use plain communication
- * \param context 	IN: context to operate on
- * \param jobid 	IN: query this job
- * \param flags 	IN: specifies optional status fields to retrieve,
+ * \param[in] context 		context to operate on
+ * \param[in] jobid 		query this job
+ * \param[in] flags 		specifies optional status fields to retrieve,
  *     \see EDG_WLL_STAT_CLASSADS, EDG_WLL_STAT_CHILDREN, EDG_WLL_STAT_CHILDSTAT
- * \param status 	OUT: the status of the job
+ * \param[out] status 		the status of the job
+
+ * \warning edg_wll_*Proxy() functions are not implemented in release 1.
  */
 int edg_wll_JobStatusProxy(
 	edg_wll_Context		context,
@@ -259,9 +278,9 @@ int edg_wll_JobStatusProxy(
 /**
  * Return all events related to a single job.
  * Convenience wrapper around edg_wll_Query()
- * \param context 	IN: context to work with
- * \param jobId 	IN: job to query
- * \param events 	OUT: list of events 
+ * \param[in] context 		context to work with
+ * \param[in] jobId 		job to query
+ * \param[out] events 		list of events 
  */
 
 int edg_wll_JobLog(
@@ -273,6 +292,8 @@ int edg_wll_JobLog(
 
 /**
  * Query LBProxy and use plain communication
+ * \warning edg_wll_*Proxy() functions are not implemented in release 1.
+
  */
 int edg_wll_JobLogProxy(
 	edg_wll_Context		context,
@@ -282,9 +303,9 @@ int edg_wll_JobLogProxy(
 
 /**
  * All current user's jobs.
- * \param context 	IN: context to work with
- * \param jobs 		OUT: list of the user's jobs
- * \param states 	OUT: list of the jobs' states
+ * \param[in] context 		context to work with
+ * \param[out] jobs 		list of the user's jobs
+ * \param[out] states 		list of the jobs' states
  */
 int edg_wll_UserJobs(
 	edg_wll_Context		context,
@@ -295,6 +316,8 @@ int edg_wll_UserJobs(
 
 /**
  * Query LBProxy and use plain communication
+ * \warning edg_wll_*Proxy() functions are not implemented in release 1.
+
  */
 int edg_wll_UserJobsProxy(
 	edg_wll_Context		context,
@@ -305,8 +328,8 @@ int edg_wll_UserJobsProxy(
 /**
  * Server supported indexed attributes
  * \see DataGrid-01-TEN-0125
- * \param context 	IN: context to work with
- * \param attrs 	OUT: configured indices (each index is an UNDEF-terminated
+ * \param[in] context 		context to work with
+ * \param[out] attrs 		configured indices (each index is an UNDEF-terminated
  * 		array of QueryRec's from which only attr (and attr_id 
  * 		eventually) are meaningful
  */
@@ -317,10 +340,10 @@ int edg_wll_GetIndexedAttrs(
 
 /**
  * Retrieve limit on query result size (no. of events or jobs).
- * FIXME: not implemented.
+ * \warning not implemented.
  * \see DataGrid-01-TEN-0125
- * \param context 	IN: context to work with
- * \param limit 	OUT: server imposed limit
+ * \param[in] context 		context to work with
+ * \param[out] limit 		server imposed limit
  */
 int edg_wll_GetServerLimit(
 	edg_wll_Context	context,
@@ -328,12 +351,12 @@ int edg_wll_GetServerLimit(
 );
 
 /**
- * UI port for the job
- * \param context 	IN: context to work with
- * \param jobId 	IN: job to query
- * \param name 		IN: name of the UI-port
- * \param host 		OUT: hostname of port
- * \param port 		OUT: port number
+ * UI port for intactive jobs. Used internally by WMS.
+ * \param[in] context 		context to work with
+ * \param[in] jobId 		job to query
+ * \param[in] name 		name of the UI-port
+ * \param[out] host 		hostname of port
+ * \param[out] port 		port number
  */
 int edg_wll_QueryListener(
 	edg_wll_Context	context,
@@ -346,6 +369,8 @@ int edg_wll_QueryListener(
 
 /**
  * Query LBProxy and use plain communication
+ * \warning edg_wll_*Proxy() functions are not implemented in release 1.
+
  */
 int edg_wll_QueryListenerProxy(
 	edg_wll_Context	context,
@@ -357,9 +382,11 @@ int edg_wll_QueryListenerProxy(
 
 /**
  * Ask LB Proxy server for sequence number
- * \param context 	IN: context to work with
- * \param jobId 	IN: job to query
- * \param code 		OUT: sequence code
+ * \param[in] context 		context to work with
+ * \param[in] jobId 		job to query
+ * \param[out] code 		sequence code
+ * \warning edg_wll_*Proxy() functions are not implemented in release 1.
+
  */
 
 
@@ -369,8 +396,6 @@ int edg_wll_QuerySequenceCodeProxy(
 	char **		code
 );
 		
-/*@}*/
-
 /*
  * edg_wll_QueryRec manipulation
  */
@@ -378,17 +403,29 @@ int edg_wll_QuerySequenceCodeProxy(
 /** Free edg_wll_QueryRec internals, not the structure itself */
 void edg_wll_QueryRecFree(edg_wll_QueryRec *);
 
-
-
-/**
- * default query timeout (in seconds)
+/*
+ *@} end of group
  */
-#define EDG_WLL_QUERY_TIMEOUT_DEFAULT   120
 
-/**
- * maximal query timeout (in seconds)
- */
-#define EDG_WLL_QUERY_TIMEOUT_MAX       1800
+#ifdef CLIENT_SBIN_PROG
+extern int edg_wll_http_send_recv(
+	edg_wll_Context,
+	char *, const char * const *, char *,
+	char **,char ***,char **
+);
+
+extern int http_check_status(
+	edg_wll_Context,
+	char *,
+	char **
+);
+
+extern int set_server_name_and_port(
+	edg_wll_Context,
+	const edg_wll_QueryRec **
+);
+
+#endif
 
 #ifdef __cplusplus
 }

@@ -93,7 +93,7 @@
 		 Load version file 
 	     ========================================= -->
 	<property file="${module.version.file}"/>
-	<property file="${module.build.file}"/>
+		<property file="${module.build.file}"/>
 		
 	<!-- ==============================================
 		 Local private targets

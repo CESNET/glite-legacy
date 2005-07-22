@@ -211,6 +211,8 @@ glite_gsplugin_connect(
 		fprintf(stderr, "Client connect will work only with gSOAP v2.7.0e and later");
 		return ENOSYS;
 	}
+#else
+# warning "gSOAP version checking is switched off!"
 #endif
 
 	ctx = ((int_plugin_data_t *)soap_lookup_plugin(soap, plugin_id))->ctx;
