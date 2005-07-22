@@ -6,7 +6,7 @@
 # For license conditions see the license file or http://eu-egee.org/license.html
 #
 ################################################################################
-# glite-lb-config v. 1.3.0
+# glite-lb-config v. 2.0.0
 #
 # Post-installation script for configuring the gLite Logging and Bookkeping Server
 # Robert Harakaly < robert.harakaly@cern.ch >
@@ -16,9 +16,13 @@
 # Version info: $Id$
 #
 # Usage: python glite-lb-config [-c|-v|-h|--help]
-#        -c          print configuration
-#        -v          print version
-#        -h,--help   print usage info
+#        -c, --checkconf         print configuration
+#        -v, --version           print version
+#        -h,--help               print usage info
+#        --configure             configure the service
+#        --start                 start the service
+#        --stop                  stop the service
+#        --status                show service status
 #
 # Return codes: 0 - Ok
 #               1 - Configuration failed
@@ -42,7 +46,7 @@ class glite_lb:
     def __init__(self):
         self.mysql = MySQL.Mysql()
         self.verbose = 0
-        self.version = "1.3.0"
+        self.version = "2.0.0"
         self.name = "glite-lb"
         self.friendly_name = "gLite Logging and Bookkeeping"
         params['module.version'] = self.version
@@ -98,6 +102,7 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         print '    -c, --checkconf     print the service configuration'
         print '    -v, --version       print the version of the configuration script'
         print '    -h, --help          print this usage information'
+        print '    --configure         configure the service'
         print '    --start             start the service'
         print '    --stop              stop the service'
         print '    --status            check service status'
@@ -415,66 +420,109 @@ if __name__ == '__main__':
     
     # Command line opts if any
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'chv', ['checkconf', 'help', 'version','stop','start','status','siteconfig='])
+        opts, args = getopt.getopt(sys.argv[1:], 'chv', ['checkconf', 'help', 'version','configure','stop','start','status','siteconfig='])
     except getopt.GetoptError:
         service.usage(msg = "Unknown options(s)")
         sys.exit(1)
 
+    if len(opts) == 0:
+        service.usage()
+        sys.exit(0)
+    
     # Check cli options
     for o, a in opts:
+
         if o in ("-h", "--help"):
             service.usage()
             sys.exit(0)
+
         if o in ("-v", "--version"):
             service.showVersion()
             sys.exit(0)
+
         if o in ("-c", "--checkconf"):
             service.copyright()
             service.showVersion()
             glib.print_params(params)
             sys.exit(0)
-   	if o in ("stop", "--stop"): 
+
+        if o == "--configure":
+
+            # Check certificates
+            if params.has_key('glite.installer.checkcerts'):
+                if params['glite.installer.checkcerts'] == "true":
+                    if glib.check_certs(params) != 0:
+                        print "An error occurred while configuring the %s service" \
+                            % service.friendly_name
+                        sys.exit(1)
+            
+            # Print configuration parameters
+            if verbose:
+                glib.print_params(params)
+        
+            service.copyright()
+            service.showVersion()
+            service.banner()
+                
+            # Stop all services
+            glib.printInfoMessage("\n\nStopping all running LB services...")
             service.stop()
-            sys.exit(0)
-	if o in ("start", "--start"):
-            service.start()
-            sys.exit(0)
+            
+            # Configure the service
+            return_result = service.configure()
+
+            if return_result == 0:
+
+                # Stop all services
+                glib.printInfoMessage("\n\nStopping all running LB services...")
+                service.stop()
+                
+                print "\n\nThe %s configuration was successfully completed\n" % service.friendly_name
+                print "You can now start the service using the --start option of this script\n\n"
+                glib.registerService()
+
+                sys.exit(0)
+
+            elif return_result == 2:
+
+                # Stop all services
+                glib.printInfoMessage("\n\nStopping all running LB services...")
+                service.stop()
+                
+                print "\n\nThe %s configuration was completed,\n" % service.friendly_name
+                print "but warnings were issued. Please revise them and re-run the script\n"
+                print "or configure LB manually\n"
+
+                sys.exit(2)
+
+            else:
+                print "\n\nAn unrecoverable error occurred while configuring the %s" \
+                    % service.friendly_name
+
+                sys.exit(1)
+            
+        if o in ("start", "--start"):
+            # Start the service
+            if service.start() == 0:
+                print "\n\nThe %s was successfully started           " % service.friendly_name,
+                glib.printOkMessage()
+                sys.exit(0)
+            else:
+                print "\n\nAn error occurred while starting the %s            " % service.friendly_name,
+                glib.printFailedMessage()
+                sys.exit(1)
+            
+        if o in ("stop", "--stop"): 
+            # Stop the service
+            if service.stop() == 0:
+                print "\n\nThe %s was successfully stopped           " % service.friendly_name,
+                glib.printOkMessage()
+                sys.exit(0)
+            else:
+                print "\n\nAn unrecoverable error occurred while stopping the %s " % service.friendly_name,
+                glib.printFailedMessage()
+                sys.exit(1)
+        
         if o == "--status":
             sys.exit(service.status())
                 
-
-    # Check certificates
-    if params.has_key('glite.installer.checkcerts'):
-        if params['glite.installer.checkcerts'] == "true":
-            if glib.check_certs(params) != 0:
-                print "An error occurred while configuring the %s service" \
-                    % service.friendly_name
-                sys.exit(1)
-    
-    # Print configuration parameters
-    if verbose:
-        glib.print_params(params)
-
-    service.copyright()
-    service.showVersion()
-    service.banner()
-        
-    # Configure the service
-    if service.configure() == 0:
-        print "\n%s configuration successfully completed                " % service.friendly_name,
-        glib.printOkMessage()
-        glib.registerService()
-    else:
-        print "\nAn error occurred while configuring the %s            " % service.friendly_name,
-        glib.printFailedMessage()
-        sys.exit(1)
-        
-    # Start the service
-    if service.start() == 0:
-        print "\nThe %s was successfully started           " % service.friendly_name,
-        glib.printOkMessage()
-    else:
-        print "\nAn error occurred while starting the %s            " % service.friendly_name,
-        glib.printFailedMessage()
-        sys.exit(1)
-

@@ -14,6 +14,7 @@ globus_prefix=/opt/globus
 nothrflavour=gcc32
 thrflavour=gcc32pthr
 gsoap_prefix=/opt/gsoap
+gsplugin_version_checking=yes
 
 CC=gcc
 
@@ -21,7 +22,6 @@ CC=gcc
 -include ../Makefile.inc
 
 GSPLUGIN_DEBUG?=no
-GSPLUGIN_VERSION_CHECKING?=yes
 
 version_info=-version-info `echo ${version} | cut -d. -f1,2 | tr . :`
 
@@ -30,7 +30,7 @@ VPATH=${top_srcdir}/src:${top_srcdir}/test:${top_srcdir}/examples
 TEST_LIBS:=-L${cppunit}/lib -lcppunit
 TEST_INC:=-I${cppunit}/include
 
-ifeq ($(GSPLUGIN_DEBUG),yes)
+ifeq ($(gsplugin_version_checking),yes)
 	DEBUG:=-g -O0 -Wall -DGSPLUGIN_DEBUG
 else
 	DEBUG:=-g -O0 -Wall
@@ -66,6 +66,8 @@ GLOBUS_LIBS:= -L${globus_prefix}/lib \
 GSOAP_LIBS:= -L${gsoap_prefix}/lib -lgsoap
 
 EX_LIBS:= ${GLOBUS_LIBS} -L${ares_prefix}/lib -lares
+
+PATCHED_GSOAP_SRC:=stdsoap2_2.6.2.c
 
 HDRS:=glite_gss.h glite_gsplugin.h
 
@@ -199,6 +201,7 @@ install:
 	cd ${top_srcdir}/interface && ${INSTALL} -m 644 ${HDRS} ${PREFIX}/include/glite/security/
 	if [ x${DOSTAGE} = xyes ]; then \
 		install -m 644 ${GSS_STATICLIB} ${GSS_THRSTATICLIB} ${STATICLIB} ${THRSTATICLIB} ${PREFIX}/lib; \
+		install -m 644 ${top_srcdir}/src/${PATCHED_GSOAP_SRC} ${PREFIX}/lib; \
 	fi
 
 clean:
