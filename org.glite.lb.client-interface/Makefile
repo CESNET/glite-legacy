@@ -20,7 +20,8 @@ AT3=perl -I${top_srcdir}/project ${top_srcdir}/project/at3
 STAGETO=include/${globalprefix}/${lbprefix}
 STATIC_H=consumer.h context.h dump.h load.h notification.h notifid.h purge.h \
 	Notification.h CountRef.h Job.h LoggingExceptions.h ServerConnection.h \
-	consumer_fake.h producer_fake.h statistics.h
+	statistics.h
+FAKE_H=consumer_fake.h producer_fake.h
 GEN_H=events.h jobstat.h producer.h Event.h JobStatus.h interface_version.h
 
 
@@ -39,7 +40,7 @@ check:
 interface_version.h: ${top_srcdir}/project/version.properties
 	echo "#define GLITE_LB_CLIENT_INTERFACE \"${version}\"" >$@ 
 stage: generate
-	$(MAKE) install PREFIX=${top_srcdir}/${stagedir}
+	$(MAKE) install PREFIX=${top_srcdir}/${stagedir} DOSTAGE=yes
 
 dist: distsrc distbin
 
@@ -65,6 +66,9 @@ install: generate doc
 	install -m 644 ${top_srcdir}/LICENSE ${PREFIX}/share/doc/${package}-${version}
 	cd ${top_srcdir}/interface && install -m 644 ${STATIC_H} ${PREFIX}/${STAGETO}
 	cd ${top_srcdir}/doc && cp -r C CPP ${PREFIX}/share/doc/${package}-${version}
+	if [ x${DOSTAGE} = xyes ]; then \
+		cd ${top_srcdir}/interface && install -m 644 ${FAKE_H} ${PREFIX}/${STAGETO} ; \
+	fi
 
 clean:
 	rm -f *.h

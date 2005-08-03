@@ -20,8 +20,31 @@
 
 	Revision history:
 	$Log$
+	Revision 1.4  2005/02/25 09:37:43  mmulac
+	generate doxygen doc for notification.h
+	
 	Revision 1.3  2005/01/17 11:40:09  jpospi
 	Documentation update.
+	
+	Revision 1.2.2.6  2005/02/25 18:12:17  jpospi
+	Added MACRO_EXPANSION option to doxygen conf to be able to expand _EDG_WLL_EVENT_COMMON in the generated documentation.
+	
+	Revision 1.2.2.5  2005/02/25 13:39:29  mmulac
+	remove duplicate notifid in configure.properties.xml
+	
+	Revision 1.2.2.4  2005/02/25 13:37:11  mmulac
+	add notifid to doxygen
+	see -> ref
+	
+	Revision 1.2.2.3  2005/02/25 12:03:11  jpospi
+	Added PDF options to doxygen conf.
+	
+	Revision 1.2.2.2  2005/02/25 09:37:52  mmulac
+	generate doxygen doc for notification.h
+	
+	Revision 1.2.2.1  2005/02/18 14:00:16  jpospi
+	- Removed all L&B Proxy related things
+	- Documentation update
 	
 	Revision 1.2  2004/12/08 13:04:29  jpospi
 	first attemtp to generate documentation using doxygen
@@ -69,12 +92,18 @@ INPUT                 = ./events.h \
                         ./jobstat.h \
                         ./producer.h \
                         ../interface/context.h \
+                        ../interface/notifid.h \
                         ../interface/notification.h \
                         ../interface/consumer.h 
-SHOW_DIRECTORIES      = NO
-EXTRACT_ALL           = YES
-#HAVE_DOT              = YES
-#CALL_GRAPH            = YES
+SHOW_DIRECTORIES       = NO
+FULL_PATH_NAMES        = NO
+EXTRACT_ALL            = YES
+PDF_HYPERLINKS         = YES
+USE_PDFLATEX           = YES
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = YES
+PREDEFINED             = _EDG_WLL_EVENT_COMMON 
+HAVE_DOT               = NO
 			</echo>
 			<echo file="${module.build.dir}/CPP.dox">
 PROJECT_NAME           = "Glite LB Client: CPP - Interface"
@@ -88,7 +117,10 @@ INPUT                  = ../build/Event.h \
                          ../interface/ServerConnection.h \
                          ../interface/Notification.h
 SHOW_DIRECTORIES       = NO
+FULL_PATH_NAMES        = NO
 EXTRACT_ALL            = YES
+PDF_HYPERLINKS         = YES
+USE_PDFLATEX           = YES
 #HAVE_DOT               = YES
 #CALL_GRAPH             = YES
 			</echo>

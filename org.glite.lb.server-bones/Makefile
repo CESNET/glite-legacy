@@ -50,7 +50,7 @@ ${LTLIB}: ${LOBJS}
 	${LINK} -o $@ ${LOBJS}
 
 stage: compile
-	$(MAKE) install PREFIX=${stagedir}
+	$(MAKE) install PREFIX=${stagedir} DOSTAGE=yes
 
 check:
 	-echo "No unit tests so far."
@@ -81,9 +81,11 @@ distbin:
 install:
 	mkdir -p ${PREFIX}/include/${globalprefix}/${lbprefix}
 	mkdir -p ${PREFIX}/lib
-	${INSTALL} -m 644 ${STATICLIB} ${PREFIX}/lib
 	${INSTALL} -m 644 ${LTLIB} ${PREFIX}/lib
-	cd ${top_srcdir}/interface && install -m 644 ${HDRS} ${PREFIX}/include/${globalprefix}/${lbprefix}
+	if [ x${DOSTAGE} = xyes ]; then \
+		${INSTALL} -m 644 ${STATICLIB} ${PREFIX}/lib ; \
+		cd ${top_srcdir}/interface && install -m 644 ${HDRS} ${PREFIX}/include/${globalprefix}/${lbprefix} ; \
+	fi
 
 clean:
 
