@@ -1,0 +1,68 @@
+LB proxy usage
+==============
+
+LB proxy accepts LB events, passes them to the full-featured LB servers, and
+serves both event and job state queries similarly to the LB server. However,
+the results of the queries reflect ONLY LOCAL VIEW of the proxy, i.e. the
+events that were logged through it, not regarding other events which may affect
+job state too. On the other hand, all the LB proxy operation is synchronous,
+i.e.  it is guaranteed that a successfully logged event is visible in a query
+result immediately, unlike the standard LB logging chain.
+
+LB proxy is supposed to run on the RB machine, providing the WMS daemons
+with optimal LB performance, while offloading the user LB queries to
+a dedicated LB server.
+
+Events are logged to the LB proxy through local UNIX socket. The connection to
+the LB proxy is not encrypted, and no SSL-like authentication/authorisation is
+used, relying completely on UNIX security mechanism.  Because of the missing
+SSL authentication the logging user identity has to be specified explicitely
+via LB proxy API.
+
+Due to the synchornous operation LB proxy can help with management of LB
+sequence codes. It records the most recent sequence code which can be retrieved
+and used later, even by another WMS component. However, this mechanism works
+for the "one job instance at time" model only. Once multiple instances of the
+same job may co-exist (which may be the case of shallow resubmission), these
+are distinguished exactly with the LB seqence code, hence LB proxy cannot
+do the job. For this case LB proxy API still provides means of specifying
+the sequence code explicitely.
+
+All jobs are recorded localy in the LB proxy database until job gets into
+CLEARED, ABORTED, CANCELED, DONE state. These jobs are then purged from LB
+proxy (but they are still available on the LB server).
+>>A timeout should be set also, after which job should be purged from LB proxy.
+This has to be done by external purge client. <<
+
+Using API
+=========
+LB proxy uses same API functions for consumer and producer as LB does except the
+function names are postfixed with 'Proxy'. I.e. edg_wll_SetLoggingJob()
+has its own LB proxy variant edg_wll_SetLoggingJobProxy().
+
+For LB proxy comunication are used two separated local unix sockets. One for
+consumer other for producer API calls. Their values are set when the LB context
+is initialized according to unix enironment variables EDG_WL_LBPROXY_STORE_SOCK
+(producer API) and EDG_WL_LBPROXY_SERVE_SOCK (consumer API). If these variables
+are not set, default values are used (producer: "/tmp/lb_proxy_store.sock",
+consumer: "/tmp/lb_proxy_serve.sock"). After all you can overwrite them with
+edg_wll_SetParam(ctx, EDG_WLL_PARAM_LBPROXY_STORE_SOCK, "path_to_store_socket");
+and
+edg_wll_SetParam(ctx, EDG_WLL_PARAM_LBPROXY_SERVE_SOCK, "path_to_serve_socket");
+
+Other important difference is in edg_wll_SetLoggingJobProxy(), where it is not
+neccessary to give the sequence code parameter. If user do not specify it, LB
+proxy gets the actual one from its database. The 'user' attribute of this call
+should be the user certificate DN string. If not set, it is set from the unix
+environment by default.
+
+For example you could use:
+char *user = "/O=CESNET/O=Masaryk University/CN=Jiri Skrabal";
+edg_wll_SetLoggingJobProxy(ctx, jobid, NULL, user, EDG_WLL_SEQ_NORMAL);
+
+Only very different LB Proxy call is the 'RegisterJob'. The current
+implementation of RegisterJobProxy() talks both to the LB server
+bypassing interlogger, and to the LB proxy at once.  So for job
+registration you should supply the user's credentials to the
+context in the same way as it was done until now. The other proxy calls
+don't need it.
