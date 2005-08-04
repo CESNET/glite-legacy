@@ -1,14 +1,15 @@
 The LB Proxy RPM package contains following files:
 bin/glite-lb-interlogd
 bin/glite-lb-proxy
-etc/glite-lb-dbsetup.sql
+etc/glite-lb-dbsetup-proxy.sql
 etc/init.d/glite-lb-proxy
 share/doc/glite-lb-proxy-1.1.1/LICENSE
 
 The LB Proxy RPM package depends on glite-lb-client-interface and
-glite-lb-common RPM packages.
+glite-lb-common RPM packages. In addition, a reasonable run-time functionality
+depends also on glite-lb-logger and running interlogger.
 
-LB Proxu usualy runs on RB machine and its outgoing communication goes through
+LB Proxu is supposed to run on RB machine and its outgoing communication goes through
 interlogger. As a interlogger could be used that one which is used for any other
 logging calls. In fact, using more than one standard interlogger on one machine
 has usually not a valid reason. For full LB Proxy functionality you need to
@@ -22,7 +23,7 @@ LB Proxy install should follow several steps described bellow:
    Database name: lbproxy
    Grant privileges to user: lbserver
    Database has the same structure as bkserver has (you can use
-   sql script etc/glite-lb-dbsetup.sql to create propper tables).
+   sql script etc/glite-lb-dbsetup-proxy.sql to create propper tables).
  
 2) Start servers with scripts from distribution
    /opt/glite/etc/init.d/glite-lb-locallogger start
