@@ -409,14 +409,13 @@ int accept_store(int conn, struct timeval *timeout, void *cdata)
 {
 	edg_wll_Context		ctx = ((struct clnt_data_t *) cdata)->ctx;
 	struct timeval		before, after;
+	char			   *errt, *errd;
+	int					err;
 
 	memcpy(&ctx->p_tmp_timeout, timeout, sizeof(ctx->p_tmp_timeout));
 	gettimeofday(&before, NULL);
-	if ( edg_wll_StoreProtoProxy(ctx) ) { 
-		char    *errt, *errd;
-		int		err;
-
-		errt = errd = NULL;
+	errt = errd = NULL;
+	if ( edg_wll_StoreProtoProxy(ctx) ) {
 		switch ( (err = edg_wll_Error(ctx, &errt, &errd)) ) {
 		case ETIMEDOUT:
 		case EPIPE:
@@ -445,6 +444,11 @@ int accept_store(int conn, struct timeval *timeout, void *cdata)
 			return -1;
 		} 
 		free(errt); free(errd);
+	} else if ( edg_wll_Error(ctx, &errt, &errd) ) { 
+		dprintf(("[%d] %s (%s)\n", getpid(), errt, errd));
+		if ( !debug ) syslog(LOG_ERR, "%s (%s)", errt, errd);
+		free(errt); free(errd);
+		edg_wll_ResetError(ctx);
 	}
 	gettimeofday(&after, NULL);
 	if ( decrement_timeout(timeout, before, after) ) {
