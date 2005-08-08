@@ -169,7 +169,7 @@ test_logging_events()
 		tmp=`echo $RANDOM % $st_count + 1 | bc`
 		state=`echo $STATES | cut -d " " -f $tmp | tr A-Z a-z`
 
-		source glite-lb-$state.sh -x $LBPROXY_STORE_SOCK -m $BKSERVER_HOST -j ${SAMPLE_JOBS_ARRAY[$job]} 2>&1 1>/dev/null
+		source glite-lb-$state.sh -X $LBPROXY_STORE_SOCK -m $BKSERVER_HOST -j ${SAMPLE_JOBS_ARRAY[$job]} 2>&1 1>/dev/null
 		[ $? -ne 0 ] && echo -e "ERROR\n\tglite-lb-$state.sh ${SAMPLE_JOBS_ARRAY[$job]} error!"
 		proxy_state=`$JOBSTAT -x $LBPROXY_SERVE_SOCK ${SAMPLE_JOBS_ARRAY[$job]} 2>&1 | grep "state :" | cut -d " " -f 3 | tr A-Z a-z`
 		purged=`echo $LBPROXY_PURGE_STATES | grep $state`
