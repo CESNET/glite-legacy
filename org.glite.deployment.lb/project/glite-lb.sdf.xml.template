@@ -69,16 +69,12 @@
 					build="@org.glite.wms-utils.exception.info.build@"
 					arch="i386"/>
 	
-				<component name="glite-security-proxyrenewal"
-					version="@org.glite.security.proxyrenewal.info.version@"
-					age="@org.glite.security.proxyrenewal.info.age@"
-					build="@org.glite.security.proxyrenewal.info.build@"
-					arch="i386"/>
-				<component name="glite-security-voms"
-                    version="@org.glite.security.voms.info.version@"
-                    age="@org.glite.security.voms.info.age@"
-                    build="@org.glite.security.voms.info.build@"
+				<component name="glite-security-voms-api-c"
+                    version="@org.glite.security.voms-api-c.info.version@"
+                    age="@org.glite.security.voms-api-c.info.age@"
+                    build="@org.glite.security.voms-api-c.info.build@"
                     arch="i386"/>
+
                 <component name="gridsite"
                     version="@org.gridsite.core.info.version@"
                     age="@org.gridsite.core.info.age@"
@@ -105,11 +101,11 @@
 				<external name="@ext.gpt.rpm.name@"
 					version="@ext.gpt.rpm.version@"
 					age="@ext.gpt.rpm.age@"
-					arch="@ext.gpt.rpm.platform@"/>
+					arch="@ext.gpt.platform@"/>
 				<external name="@ext.myproxy.rpm.name@"
-					version="@ext.myproxy.rpm.version@"
+					version="@ext.myproxy.version@"
 					age="@ext.myproxy.rpm.age@"
-					arch="@ext.myproxy.rpm.platform@"/>
+					arch="@ext.myproxy.platform@"/>
 				<external name="@ext.perl-expect-pm.rpm.name@"
 					version="@ext.perl-expect-pm.version@"
 					age="@ext.perl-expect-pm.rpm.age@"

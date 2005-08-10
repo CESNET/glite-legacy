@@ -21,13 +21,8 @@ int debug  = 1;
 
 static int writen(int fd, char *ptr, int nbytes);
 static int readln(int fd, char *out, int nbytes);
-
-static int new_conn(int, struct timeval *, void *);
-static int reject(int);
-static int disconnect(int, struct timeval *, void *);
-
-static int echo(int, struct timeval *, void *);
-static int upper_echo(int, struct timeval *, void *);
+static int echo(int, void *);
+static int upper_echo(int, void *);
 
 #define ECHO_PORT			9999
 #define UPPER_ECHO_PORT		9998
@@ -36,8 +31,8 @@ static int upper_echo(int, struct timeval *, void *);
 #define SRV_UPPER_ECHO		1
 
 static struct glite_srvbones_service service_table[] = {
-	{ "Echo Service",		-1, new_conn, echo, reject, disconnect },
-	{ "Upper Echo Service",	-1, new_conn, upper_echo, reject, disconnect }
+	{ "Echo Service",		-1, NULL, echo, NULL, NULL },
+	{ "Upper Echo Service",	-1, NULL, upper_echo, NULL, NULL }
 };
 
 int main(void)
@@ -78,15 +73,13 @@ int main(void)
 		exit(1);
 	}
 
-
-	glite_srvbones_set_param(GLITE_SBPARAM_SLAVES_COUNT, 1);
 	glite_srvbones_run(NULL, service_table, sizofa(service_table), 1);
 
 
 	return 0;
 }
 
-int upper_echo(int fd, struct timeval *to, void *data)
+int upper_echo(int fd, void *data)
 {
 	int		n, i;
 	char	line[80];
@@ -98,7 +91,7 @@ int upper_echo(int fd, struct timeval *to, void *data)
 		return n;
 	}
 	else if ( n == 0 )
-		return ENOTCONN;
+		return 0;
 
 	for ( i = 0; i < n; i++ )
 		line[i] = toupper(line[i]);
@@ -112,7 +105,7 @@ int upper_echo(int fd, struct timeval *to, void *data)
 	return 0;
 }
 
-int echo(int fd, struct timeval *to, void *data)
+int echo(int fd, void *data)
 {
 	int		n;
 	char	line[80];
@@ -125,7 +118,7 @@ int echo(int fd, struct timeval *to, void *data)
 		return n;
 	}
 	else if ( n == 0 )
-		return ENOTCONN;
+		return 0;
 
 	if ( writen(fd, line, n) != n )
 	{
@@ -133,24 +126,6 @@ int echo(int fd, struct timeval *to, void *data)
 		return -1;
 	}
 
-	return 0;
-}
-
-int new_conn(int conn, struct timeval *to, void *cdata)
-{
-	dprintf(("srv-bones example: new_conn handler\n"));
-	return 0;
-}
-
-int reject(int conn)
-{
-	dprintf(("srv-bones example: reject handler\n"));
-	return 0;
-}
-
-int disconnect(int conn, struct timeval *to, void *cdata)
-{
-	dprintf(("srv-bones example: disconnect handler\n"));
 	return 0;
 }
 

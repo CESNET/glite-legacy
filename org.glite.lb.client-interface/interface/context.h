@@ -2,7 +2,6 @@
 #define _EDG_WORKLOAD_LOGGING_CLIENT_CONTEXT_H
 
 /**
- * \file context.h
  * \brief L&B API common context (publicly visible) and related definitions
  */
 
@@ -14,6 +13,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * \defgroup context Context
+ *
+ *@{
+ */
 
 /** Opaque context type */
 typedef struct _edg_wll_Context *edg_wll_Context;
@@ -71,27 +76,23 @@ typedef enum _edg_wll_Source {
 	EDG_WLL_SOURCE__LAST		/* marker, for internal use only */
 } edg_wll_Source;
 
-/** Currently an alias. Will be replaced when migration NS -> WMProxy
- * is finished. */
-#define EDG_WLL_SOURCE_WM_PROXY EDG_WLL_SOURCE_NETWORK_SERVER
-
 
 /** Allocate an initialize a new context object.
- * \param context OUT returned context
+ * \param[out] context 		returned context
  * \return 0 on success, ENOMEM if malloc() fails
  */
 int edg_wll_InitContext(edg_wll_Context *context);
 
 /** Destroy and free context object.
  * Also performs necessary cleanup (closing connections etc.)
- * \param context IN context to free
+ * \param[in] context 		context to free
  */
 void edg_wll_FreeContext(edg_wll_Context context);
 
 /** Set a context parameter.
- * \param context INOUT context to work with
- * \param param IN parameter to set
- * \param ... IN value to set (if NULL or 0, default is used)
+ * \param[in,out] context 	context to work with
+ * \param[in] param 		parameter to set
+ * \param[in] ... 		value to set (if NULL or 0, default is used)
  * \retval 0 success
  * \retval EINVAL param is not a valid parameter, or invalid value
  */
@@ -101,39 +102,39 @@ int edg_wll_SetParam(
 	...
 );
 
-struct timeval;	/* XXX: gcc, shut up! */
+struct timeval; /* XXX: gcc, shut up! */
 
 /** Set a context parameter of type int.
- * \param ctx 		INOUT context to work with
- * \param param 	IN parameter to set
- * \param val 		IN value to set
- * \retval 0 		success
- * \retval EINVAL 	param is not a valid parameter, or invalid value
+ * \param[in,out] ctx           context to work with
+ * \param[in] param		parameter to set
+ * \param[in] val		value to set
+ * \retval 0 success
+ * \retval EINVAL param is not a valid parameter, or invalid value
  */
 int edg_wll_SetParamInt(edg_wll_Context ctx,edg_wll_ContextParam param,int val);
 
 /** Set a context parameter of type string.
- * \param ctx 		INOUT context to work with
- * \param param 	IN parameter to set
- * \param val 		In value to set (if NULL, default is used)
- * \retval 0 		success
- * \retval EINVAL 	param is not a valid parameter, or invalid value
+ * \param[in,out] ctx		context to work with
+ * \param[in] param		parameter to set
+ * \param[in] val		value to set (if NULL, default is used)
+ * \retval 0 success
+ * \retval EINVAL param is not a valid parameter, or invalid value
  */
 int edg_wll_SetParamString(edg_wll_Context ctx,edg_wll_ContextParam param,const char *val);
 
 /** Set a context parameter of type timeval.
- * \param ctx		INOUT context to work with
- * \param param		IN parameter to set
- * \param val		IN value to set (if NULL, default is used)
- * \retval 0 		success
- * \retval EINVAL 	param is not a valid parameter, or invalid value
+ * \param[in,out] ctx		context to work with
+ * \param[in] param		parameter to set
+ * \param[in] val		value to set (if NULL, default is used)
+ * \retval 0 success
+ * \retval EINVAL param is not a valid parameter, or invalid value
  */
 int edg_wll_SetParamTime(edg_wll_Context ctx,edg_wll_ContextParam param,const struct timeval *val);
 
 /** Get current parameter value.
- * \param context INOUT context to work with
- * \param param IN parameter to retrieve
- * \param ... OUT pointer to output variable
+ * \param[in,out] context 	context to work with
+ * \param[in] param 		parameter to retrieve
+ * \param[out] ... 		pointer to output variable
  * \retval 0 success
  * \retval EINVAL param is not a valid parameter
  */
@@ -177,15 +178,14 @@ typedef enum _edg_wll_ErrorCode {
 	EDG_WLL_IL_SYS,         /**< Interlogger internal error. */
 	EDG_WLL_IL_EVENTS_WAITING, /**< Interlogger still has events pending delivery. */
 	EDG_WLL_ERROR_COMPARE_EVENTS, /**< Two compared events differ. */
-	EDG_WLL_ERROR_SQL_PARSE, /**< Error in SQL parsing. */
 } edg_wll_ErrorCode;
 
 /**
  * Retrieve error details on recent API call
- * \param context IN: context to work with
- * \param errText OUT: standard error text
+ * \param[in] context 		context to work with
+ * \param[out] errText		standard error text
  *      (may be NULL - no text returned)
- * \param errDesc OUT: additional error description
+ * \param[out] errDesc		additional error description
  *      (may be NULL - no text returned)
  * \return Error code of the recent error
  */
@@ -223,6 +223,7 @@ edg_wll_QueryResults edg_wll_StringToQResult(const char *name);
 /**
  * initial sequence code for BigHelper
  */
+
 #define EDG_WLL_SEQ_BIGHELPER_INITIAL "UI=2:NS=0:WM=0:BH=1:JSS=0:LM=0:LRMS=0:APP=0"
 
 /** Retrieve current sequence code from the context */
@@ -237,6 +238,10 @@ int edg_wll_GetLoggingJob(
 	const edg_wll_Context	context,
 	edg_wlc_JobId	*jobid_out
 );
+
+/*
+ *@} end of group
+ */
 
 #ifdef __cplusplus
 }
