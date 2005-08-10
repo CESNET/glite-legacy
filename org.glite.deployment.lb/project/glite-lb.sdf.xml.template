@@ -101,11 +101,11 @@
 				<external name="@ext.gpt.rpm.name@"
 					version="@ext.gpt.rpm.version@"
 					age="@ext.gpt.rpm.age@"
-					arch="@ext.gpt.rpm.platform@"/>
+					arch="@ext.gpt.platform@"/>
 				<external name="@ext.myproxy.rpm.name@"
-					version="@ext.myproxy.rpm.version@"
+					version="@ext.myproxy.version@"
 					age="@ext.myproxy.rpm.age@"
-					arch="@ext.myproxy.rpm.platform@"/>
+					arch="@ext.myproxy.platform@"/>
 				<external name="@ext.perl-expect-pm.rpm.name@"
 					version="@ext.perl-expect-pm.version@"
 					age="@ext.perl-expect-pm.rpm.age@"
