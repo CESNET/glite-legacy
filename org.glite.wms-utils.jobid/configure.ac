@@ -19,6 +19,9 @@
 #
 #       Revision history:
 #       $Log$
+#       Revision 1.16  2004/12/10 07:33:42  eronchie
+#       Increased version
+#
 #       Revision 1.15  2004/11/16 15:35:22  eronchie
 #       Increased version
 #
@@ -103,15 +106,23 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([bzero endpwent ftruncate getmntent memset mkdir pow strerror strtol])
 
 have_globus=no
-                                                                                
+
 AC_GLOBUS([], have_globus=yes, have_globus=no)
 AC_MSG_RESULT(["GLOBUS found $have_globus"])
 
-have_glite_wmsutils_exception=no
-                                                                                
+if test "$have_globus" = "no"; then
+  AC_MSG_RESULT(["Please verify GLOBUS package"])
+fi
+
+if test "$have_globus" = "no"; then
+  AC_MSG_ERROR([Cannot continue building])
+fi
+
 AC_GLITE
 
-GLITE_WMSUTILS_EXCEPTION_LIBS="-L$GLITE_LOCATION/lib -lglite_wmsutils_exception"AC_SUBST(GLITE_WMSUTILS_EXCEPTION_LIBS)
+GLITE_WMSUTILS_EXCEPTION_LIBS="-L$GLITE_LOCATION/lib -lglite_wmsutils_exception"
+
+AC_SUBST(GLITE_WMSUTILS_EXCEPTION_LIBS)
 
 AC_OPTIMIZE
 
