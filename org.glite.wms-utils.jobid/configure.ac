@@ -19,6 +19,9 @@
 #
 #       Revision history:
 #       $Log$
+#       Revision 1.16.2.1  2005/08/17 11:45:41  eronchie
+#       Added ERROR Message that breaks configure
+#
 #       Revision 1.16  2004/12/10 07:33:42  eronchie
 #       Increased version
 #
@@ -57,7 +60,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.57)
-AC_INIT([GLite WMS Utils Jobid], [1.0.0])
+AC_INIT([GLite WMS Utils Jobid], [1.0.1])
 AC_CONFIG_AUX_DIR([./project])
 AM_INIT_AUTOMAKE([1.6.3 subdir-objects])
 AC_CONFIG_SRCDIR([src/jobid/strmd5.h])
