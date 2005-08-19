@@ -17,6 +17,10 @@
 			parameter. Leave it empty of comment it out to use the same as 'glite.user.name'"
 			value="changeme"/>
              	
+	    <mysql.root.password
+	        description="The mysql root password"
+	        value="changeme"/>
+	
 		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
 		<!-- Advanced parameters - Change them if you know what you're doing -->
 		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
@@ -30,12 +34,10 @@
 			description="Enable check of host certificates"
 			value="true"/>
 
-		<!-- MySQL DB -->
-		<lb.database.name
-			description="The mySQL database name to create for storing LB data
-			In this version it must be set to the given value"
-			value="lbserver20"/>
-
+		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
+		<!-- System parameters - You should leave these alone -->
+		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->		
+	
 		<lb.index.list
 			description="Definitions of indices on all the currently supported indexed system attributes">
 			
@@ -45,15 +47,6 @@
 
 		</lb.index.list>
 			
-		<lb.database.username
-			description="The username to be used to access the local mySQL server
-			In this version it must be set to the given value"
-			value="lbserver"/>
-			
-		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
-		<!-- System parameters - You should leave these alone -->
-		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->		
-	
 	</parameters>
 
 	<!--RGMA service publishing: log server -->

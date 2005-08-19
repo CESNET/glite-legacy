@@ -6,7 +6,7 @@
 # For license conditions see the license file or http://eu-egee.org/license.html
 #
 ################################################################################
-# glite-lb-config v. 2.0.0
+# glite-lb-config v. 2.0.1
 #
 # Post-installation script for configuring the gLite Logging and Bookkeping Server
 # Robert Harakaly < robert.harakaly@cern.ch >
@@ -46,7 +46,7 @@ class glite_lb:
     def __init__(self):
         self.mysql = MySQL.Mysql()
         self.verbose = 0
-        self.version = "2.0.0"
+        self.version = "2.0.1"
         self.name = "glite-lb"
         self.friendly_name = "gLite Logging and Bookkeeping"
         params['module.version'] = self.version
@@ -249,17 +249,28 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         os.chmod("%s/hostkey.pem" % lb_cert_path, 0400)
         glib.printOkMessage()
 
-        # Create the MySQL database
-        print "\nCreate/Verify the %s database" % params['lb.database.name']
+        #--------------------------------------------------------
+        # Configure MySQL
+        #--------------------------------------------------------
+
+        # start MySQL
         self.mysql.stop()
         time.sleep(5)
-        self.mysql.start()
+        self.mysql.start()                
+
+        # Set root password
+        mysql_root_password = params['mysql.root.password']
+        if mysql_root_password != "":
+            self.mysql.setpassword(mysql_root_password)
+
+        # Create the MySQL database
+        print "\nCreate/Verify the %s database" % params['lb.database.name']
         
         if not os.path.exists('/tmp/mysql.sock'):
             os.symlink('/var/lib/mysql/mysql.sock', '/tmp/mysql.sock')
 
         # Check if database exists
-        if self.mysql.existsDB(params['lb.database.name']) != 0:
+        if self.mysql.existsDB(params['lb.database.name'],mysql_root_password) != 0:
             # Create database
             print ('\n==> Creating MySQL %s database\n' % params['lb.database.name'])
     
@@ -275,7 +286,7 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
     
             file.writelines(text)
             file.close()
-            os.system('/usr/bin/mysql < /tmp/mysql_ct')
+            os.system('/usr/bin/mysql -p%s < /tmp/mysql_ct' % mysql_root_password)
             os.system('/bin/rm /tmp/mysql_ct')
             
             #Starting and stopping the database before the index creation
@@ -335,6 +346,14 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
 # Set all environment variables
 #-------------------------------------------------------------------------------
 
+def loadDefaults(params):
+
+    params['GLITE_LOCATION'] = "/opt/glite"
+    params['GLITE_LOCATION'] = "/opt/glite"
+    params['mysql.root.password'] = ""
+    params['lb.database.name'] = "lbserver20"
+    params['lb.database.username'] = "lbserver"
+
 def set_env():
 
     # gLite
@@ -390,6 +409,7 @@ if __name__ == '__main__':
     
     # Load parameters
     params = {}
+    loadDefaults(params)
     try:
         opts, args = getopt.getopt(sys.argv[1:], '', ['siteconfig='])
         for o, a in opts:
