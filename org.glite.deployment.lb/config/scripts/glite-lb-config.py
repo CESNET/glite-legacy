@@ -183,6 +183,10 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
             print 'The LB Server service has been stopped            ',
             glib.printOkMessage()
         
+        #-------------------------------------------------------------------
+        # MySQL
+        #-------------------------------------------------------------------
+
         self.mysql.stop()
 
         #-------------------------------------------------------------------
@@ -220,12 +224,11 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         #--------------------------------------------------------
         
         if os.system("python %s/glite-security-utils-config.py --subservice" % glib.getScriptPath()):
-            print "\nInstalling gLite Security Utilities                   ",
+            print "\nConfiguring gLite Security Utilities                   ",
             glib.printFailedMessage()
-            return 1
-
-        print "\nInstalling gLite Security Utilities                   ",
-        glib.printOkMessage()
+        else:
+            print "\nConfiguring gLite Security Utilities                   ",
+            glib.printOkMessage()
         
         # Create the GLITE_USER if it doesn't exists
         print "\nCreating/Verifying the GLITE_USER account %s" % os.environ['GLITE_USER']
@@ -258,6 +261,9 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         time.sleep(5)
         self.mysql.start()                
 
+        if not os.path.exists('/tmp/mysql.sock'):
+            os.symlink('/var/lib/mysql/mysql.sock', '/tmp/mysql.sock')
+
         # Set root password
         mysql_root_password = params['mysql.root.password']
         if mysql_root_password != "":
@@ -266,9 +272,6 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         # Create the MySQL database
         print "\nCreate/Verify the %s database" % params['lb.database.name']
         
-        if not os.path.exists('/tmp/mysql.sock'):
-            os.symlink('/var/lib/mysql/mysql.sock', '/tmp/mysql.sock')
-
         # Check if database exists
         if self.mysql.existsDB(params['lb.database.name'],mysql_root_password) != 0:
             # Create database
@@ -348,7 +351,6 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
 
 def loadDefaults(params):
 
-    params['GLITE_LOCATION'] = "/opt/glite"
     params['GLITE_LOCATION'] = "/opt/glite"
     params['mysql.root.password'] = ""
     params['lb.database.name'] = "lbserver20"
