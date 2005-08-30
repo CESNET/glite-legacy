@@ -12,6 +12,7 @@
 
 	<!-- global processing -->
 	<xsl:template match="/">
+
 template pro_software_glite_lb;
 
 #
