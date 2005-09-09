@@ -68,7 +68,13 @@
 					age="@org.glite.wms-utils.exception.info.age@"
 					build="@org.glite.wms-utils.exception.info.build@"
 					arch="i386"/>
-	
+				
+				<component name="glite-security-gsoap-plugin"
+					version="@org.glite.security.gsoap-plugin.info.version@"
+					age="@org.glite.security.gsoap-plugin.info.age@"
+					build="@org.glite.security.gsoap-plugin.info.build@"
+					arch="i386"/>
+				
 				<component name="glite-security-voms-api-c"
                     version="@org.glite.security.voms-api-c.info.version@"
                     age="@org.glite.security.voms-api-c.info.age@"
