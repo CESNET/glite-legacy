@@ -45,6 +45,7 @@ thrflavour=${with.globus.thr.flavor}
 nothrflavour=${with.globus.nothr.flavor}
 cppunit=${with.cppunit.prefix}
 gsoap_prefix=${with.gsoap.prefix}
+gsplugin_version_checking=${gsplugin.version.checking}
 			</echo>
 	    </target>
 	</project>
