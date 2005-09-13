@@ -6,7 +6,7 @@
 # For license conditions see the license file or http://eu-egee.org/license.html
 #
 ################################################################################
-# glite-lb-config v. 2.0.1
+# glite-lb-config v. 2.0.2
 #
 # Post-installation script for configuring the gLite Logging and Bookkeping Server
 # Robert Harakaly < robert.harakaly@cern.ch >
@@ -46,7 +46,7 @@ class glite_lb:
     def __init__(self):
         self.mysql = MySQL.Mysql()
         self.verbose = 0
-        self.version = "2.0.1"
+        self.version = "2.0.2"
         self.name = "glite-lb"
         self.friendly_name = "gLite Logging and Bookkeeping"
         params['module.version'] = self.version
@@ -281,11 +281,10 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
                 os.remove('/tmp/mysql_ct')
             
             file = open('/tmp/mysql_ct', 'w')
-            text = ['CREATE DATABASE %s;\n' % params['lb.database.name'], 
-                       'GRANT ALL PRIVILEGES ON %s.* TO %s@localhost IDENTIFIED BY "";\n' \
-                       % (params['lb.database.name'],params['lb.database.username']),
-                       'USE %s;\n' % params['lb.database.name'],
-                       '\. %s/etc/glite-lb-dbsetup.sql\n' % os.environ['GLITE_LOCATION']]
+
+            self.mysql.add_user(params['lb.database.name'],params['lb.database.username'],"",mysql_root_password)
+            text = ['USE %s;\n' % params['lb.database.name'],
+                    '\. %s/etc/glite-lb-dbsetup.sql\n' % os.environ['GLITE_LOCATION']]
     
             file.writelines(text)
             file.close()
