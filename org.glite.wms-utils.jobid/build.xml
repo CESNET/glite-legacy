@@ -21,6 +21,9 @@
 
 	Revision history:
 	$Log$
+	Revision 1.4.2.1  2005/02/12 01:52:34  glbuild
+	Changed start time
+	
 	Revision 1.4  2004/07/21 17:53:36  eronchie
 	Moved out org.glite.wms.jobid from org.glite.wms and put in org.glite.wms-utils
 	
@@ -83,7 +86,6 @@
 		 Load version file 
 	     ========================================= -->
 	<property file="${module.version.file}"/>
-		<property file="${module.build.file}"/>
 	<property file="${module.build.file}" />
 		
 	<!-- ==============================================
