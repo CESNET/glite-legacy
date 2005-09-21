@@ -57,6 +57,7 @@ LINK:=libtool --mode=link ${CC} -rpath ${stagedir}/lib ${LDFLAGS}
 LINKXX:=libtool --mode=link ${CXX} ${LDFLAGS} 
 INSTALL:=libtool --mode=install install
 LINKXX:=libtool --mode=link  ${CXX} -rpath ${stagedir}/lib ${LDFLAGS}
+LTSPLIT:=${top_srcdir}/project/libtool-paths-split.pl
 
 GLOBUS_INC:= -I${globus_prefix}/include/${nothrflavour}
 GLOBUS_LIBS:= -L${globus_prefix}/lib \
@@ -80,9 +81,9 @@ GSS_LTLIB:=libglite_security_gss_${nothrflavour}.la
 GSS_THRLTLIB:=libglite_security_gss_${thrflavour}.la
 
 OBJS:=${GSS_OBJS} glite_gsplugin.o
-LOBJS:=${GSS_OBJS:.o=.lo}
-THROBJS:=${GSS_OBJS:.o=.thr.o}
-THRLOBJS:=${GSS_OBJS:.o=.thr.lo}
+LOBJS:=${OBJS:.o=.lo}
+THROBJS:=${OBJS:.o=.thr.o}
+THRLOBJS:=${OBJS:.o=.thr.lo}
 
 STATICLIB:=libglite_security_gsoap_plugin_${nothrflavour}.a
 THRSTATICLIB:=libglite_security_gsoap_plugin_${thrflavour}.a
@@ -98,10 +99,10 @@ ${GSS_THRSTATICLIB}: ${GSS_THROBJS}
 	ranlib $@
 
 ${GSS_LTLIB}: ${GSS_OBJS}
-	${LINK} ${version_info} -o $@ ${GSS_LOBJS} 
+	${LINK} ${version_info} -o $@ ${GSS_LOBJS} ${EX_LIBS}
 
 ${GSS_THRLTLIB}: ${GSS_THROBJS}
-	${LINK} ${version_info} -o $@ ${GSS_THRLOBJS} 
+	${LINK} ${version_info} -o $@ ${GSS_THRLOBJS} ${EX_LIBS}
 
 ${STATICLIB}: ${OBJS}
 	ar crv $@ ${OBJS}
@@ -112,10 +113,10 @@ ${THRSTATICLIB}: ${THROBJS}
 	ranlib $@
 
 ${LTLIB}: ${OBJS}
-	${LINK} ${version_info} -o $@ ${LOBJS}
+	${LINK} ${version_info} -o $@ ${LOBJS} ${EX_LIBS}
 
 ${THRLTLIB}: ${THROBJS}
-	${LINK} ${version_info} -o $@ ${THRLOBJS}
+	${LINK} ${version_info} -o $@ ${THRLOBJS} ${EX_LIBS}
 
 default: all
 
@@ -128,7 +129,7 @@ check.gss: test_gss
 	echo test_gss not run automatically util we have got some credentials
 
 test_gss: test_gss.o
-	${LINKXX} -o $@ test_gss.o ${GSS_LTLIB} ${TEST_LIBS} ${GLOBUS_LIBS} ${EX_LIBS}
+	${LINKXX} -o $@ test_gss.o ${GSS_LTLIB} ${TEST_LIBS} 
 
 test_coverage:
 	-mkdir coverage
@@ -155,13 +156,13 @@ endif
 
 
 wscalc_clt_ex: ${WSCALC_CLT_OBJS} ${STATICLIB}
-	${LINK} -o $@ ${STATICLIB} ${GSOAP_LIBS} ${EX_LIBS} ${WSCALC_CLT_OBJS}
+	${LINK} -o $@ ${WSCALC_CLT_OBJS} ${LTLIB} ${GSOAP_LIBS}
 
 wscalc_srv_ex: ${WSCALC_SRV_OBJS} ${STATICLIB}
-	${LINK} -o $@ ${STATICLIB} ${GSOAP_LIBS} ${EX_LIBS} ${WSCALC_SRV_OBJS}
+	${LINK} -o $@ ${WSCALC_SRV_OBJS} ${LTLIB} ${GSOAP_LIBS}
 
 wscalc_srv_ex2: ${WSCALC_SRV2_OBJS} ${STATICLIB}
-	${LINK} -o $@ ${STATICLIB} ${GSOAP_LIBS} ${EX_LIBS} ${WSCALC_SRV2_OBJS}
+	${LINK} -o $@ ${WSCALC_SRV2_OBJS} ${LTLIB} ${GSOAP_LIBS}
 
 ${GSOAP_FPREFIX}H.h ${GSOAP_FPREFIX}C.c ${GSOAP_FPREFIX}Server.c ${GSOAP_FPREFIX}Client.c ${GSOAP_FPREFIX}ServerLib.c ${GSOAP_FPREFIX}ClientLib.c soap_gen:  calc.h.S
 	${gsoap_prefix}/bin/soapcpp2 -c -p ${GSOAP_FPREFIX} ${top_srcdir}/examples/calc.h.S
@@ -195,6 +196,7 @@ install:
 	-mkdir -p ${PREFIX}/share/doc/${package}-${version}
 	-mkdir -p ${PREFIX}/include/glite/security/${package}
 	${INSTALL} -m 644 ${GSS_LTLIB} ${GSS_THRLTLIB} ${PREFIX}/lib
+	${LTSPLIT} ${PREFIX}/lib/${GSS_LTLIB} ${PREFIX}/lib/${GSS_THRLTLIB}
 	${INSTALL} -m 644 ${top_srcdir}/LICENSE ${PREFIX}/share/doc/${package}-${version}
 	cd ${top_srcdir}/interface && ${INSTALL} -m 644 ${HDRS} ${PREFIX}/include/glite/security/
 	if [ x${DOSTAGE} = xyes ]; then \
