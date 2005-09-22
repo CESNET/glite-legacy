@@ -29,6 +29,7 @@ CFLAGS:= ${DEBUG} -I${top_srcdir}/interface
 COMPILE:=libtool --mode=compile ${CC} ${CFLAGS}
 LINK:=libtool --mode=link ${CC} -rpath ${stagedir}/lib ${LDFLAGS} 
 INSTALL:=libtool --mode=install install
+CHRPATH:=${chrpath}/bin/chrpath
 
 STATICLIB:=libglite_lb_server_bones.a
 LTLIB:=libglite_lb_server_bones.la
@@ -48,6 +49,7 @@ ${STATICLIB}: ${OBJS}
 
 ${LTLIB}: ${LOBJS}
 	${LINK} -o $@ ${LOBJS}
+	${CHRPATH} -d .libs/${@:.la=.so}
 
 stage: compile
 	$(MAKE) install PREFIX=${stagedir} DOSTAGE=yes
@@ -59,9 +61,11 @@ example: srv_example cnt_example
 
 srv_example: srv_example.o
 	${LINK} -o $@ ${LTLIB} srv_example.o
+	${CHRPATH} -d .libs/$@
 
 cnt_example: cnt_example.o
 	${LINK} -o $@ cnt_example.o
+	${CHRPATH} -d $@
 
 doc:
 
