@@ -51,10 +51,11 @@ LINK:=libtool --mode=link ${CC} ${LDFLAGS}
 LINKXX:=libtool --mode=link ${CXX} ${LDFLAGS} 
 INSTALL:=libtool --mode=install install
 LINKXX:=libtool --mode=link  ${CXX} -rpath ${stagedir}/lib ${LDFLAGS}
+CHRPATH:=${chrpath}/bin/chrpath
 
-GLOBUS_LIBS:= -L${globus_prefix}/lib \
-	-lglobus_common_${nothrflavour} \
-	-lglobus_gssapi_gsi_${nothrflavour} \
+#GLOBUS_LIBS:= -L${globus_prefix}/lib \
+#	-lglobus_common_${nothrflavour} \
+#	-lglobus_gssapi_gsi_${nothrflavour} \
 
 ifneq (${mysql_prefix},/usr)
 	ifeq ($(shell echo ${mysql_version} | cut -d. -f1,2),4.1)
@@ -64,15 +65,15 @@ ifneq (${mysql_prefix},/usr)
 	endif
 endif
 
-ifneq (${expat_prefix},/usr)
-	expatlib := -L${expat_prefix}/lib
-endif
+#ifneq (${expat_prefix},/usr)
+#	expatlib := -L${expat_prefix}/lib
+#endif
 
 
 SRVBONES_LIB:= -L${stagedir}/lib -lglite_lb_server_bones
 LB_SERVER_SHARE_LIB:= -L${stagedir}/lib -lglite_lb_bkserver
 LB_PROXY_COMMON_LIB:= -L${stagedir}/lib -lglite_lb_common_${nothrflavour}
-COMMON_LIBS:= -L${stagedir}/lib -lglite_lb_common_${nothrflavour} -lglite_security_gss_${nothrflavour}
+#COMMON_LIBS:= -L${stagedir}/lib -lglite_lb_common_${nothrflavour} -lglite_security_gss_${nothrflavour}
 GRIDSITE_LIBS = -lgridsite_globus `xml2-config --libs`
 
 vomsflavour := _${nothrflavour}
@@ -83,12 +84,17 @@ ifeq (${nothrflavour},gcc32dbg)
         vomsflavour :=
 endif
 
-EXT_LIBS:= -L${ares_prefix}/lib -lares \
+#EXT_LIBS:= -L${ares_prefix}/lib -lares \
+#	${mysqlib} -lmysqlclient -lz\
+#	${expatlib} -lexpat \
+#	${GRIDSITE_LIBS} \
+#	-lvomsc${vomsflavour} \
+#	${GLOBUS_LIBS}
+
+EXT_LIBS:= \
 	${mysqlib} -lmysqlclient -lz\
-	${expatlib} -lexpat \
 	${GRIDSITE_LIBS} \
-	-lvomsc${vomsflavour} \
-	${GLOBUS_LIBS}
+	-lvomsc${vomsflavour} 
 
 
 
@@ -96,15 +102,15 @@ LB_PROXY_LIBS:= \
 	${LB_SERVER_SHARE_LIB} \
 	${SRVBONES_LIB} \
 	-lglite_lb_common_${nothrflavour} \
-	-lglite_security_gss_${nothrflavour} \
 	${EXT_LIBS}
-
+#	-lglite_security_gss_${nothrflavour} \
 
 
 glite_lb_proxy: lbproxy.o
 	@echo DEBUG: mysql_version=${mysql_version} mysql_prefix=${mysql_prefix}
 	@echo DEBUG: shell: x$(shell echo ${mysql_version} | cut -d. -f1,2)x
 	${LINK} -o $@ lbproxy.o ${LB_PROXY_LIBS}
+	${CHRPATH} -d $@
 
 default all: compile
 

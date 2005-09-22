@@ -51,6 +51,7 @@ mysql_version=${ext.mysql.version}
 cppunit=${with.cppunit.prefix}
 gridsite_prefix=${with.gridsite.prefix}
 gsoap_prefix=${with.gsoap.prefix}
+chrpath=${with.chrpath.prefix}
 			</echo>
 	    </target>
 	</project>
