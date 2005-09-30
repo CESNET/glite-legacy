@@ -87,6 +87,8 @@ THRLOBJS:=${GSS_OBJS:.o=.thr.lo}
 STATICLIB:=libglite_security_gsoap_plugin_${nothrflavour}.a
 THRSTATICLIB:=libglite_security_gsoap_plugin_${thrflavour}.a
 LTLIB:=libglite_security_gsoap_plugin_${nothrflavour}.la
+LT_262_LIB:=libglite_security_gsoap_plugin_262_${nothrflavour}.la
+LT_270_LIB:=libglite_security_gsoap_plugin_262_${nothrflavour}.la
 THRLTLIB:=libglite_security_gsoap_plugin_${thrflavour}.la
 
 ${GSS_STATICLIB}: ${GSS_OBJS}
@@ -111,15 +113,18 @@ ${THRSTATICLIB}: ${THROBJS}
 	ar crv $@ ${THROBJS}
 	ranlib $@
 
-${LTLIB}: ${OBJS}
+${LTLIB}: ${OBJS} 
 	${LINK} ${version_info} -o $@ ${LOBJS}
+
+${LT_262_LIB}: ${OBJS} stdsoap2_2.6.2.o
+	${LINK} ${version_info} -o $@ ${LOBJS} stdsoap2_2.6.2.lo
 
 ${THRLTLIB}: ${THROBJS}
 	${LINK} ${version_info} -o $@ ${THRLOBJS}
 
 default: all
 
-all compile: ${GSS_STATICLIB} ${GSS_LTLIB} ${GSS_THRSTATICLIB} ${GSS_THRLTLIB} ${STATICLIB} ${LTLIB} ${THRSTATICLIB} ${THRLTLIB} examples
+all compile: ${GSS_STATICLIB} ${GSS_LTLIB} ${GSS_THRSTATICLIB} ${GSS_THRLTLIB} ${STATICLIB} ${LTLIB} ${THRSTATICLIB} ${THRLTLIB}  ${LT_262_LIB} examples
 
 check: compile check.gss
 
@@ -169,6 +174,11 @@ ${GSOAP_FPREFIX}H.h ${GSOAP_FPREFIX}C.c ${GSOAP_FPREFIX}Server.c ${GSOAP_FPREFIX
 wscalc_clt_ex.o: wscalc_clt_ex.c
 	${CC} -c ${CFLAGS} ${GLOBUS_INC} -o $@ $<
 	
+stdsoap2_2.6.2.o: stdsoap2_2.6.2.c stdsoap2_2.6.2.h
+	ln -sf ${top_srcdir}/src/stdsoap2_2.6.2.h stdsoap2.h
+	libtool --mode=compile ${CC} -c ${DEBUG} -I${top_srcdir}/src -I${top_srcdir}/interface -I. -o $@ $<
+	rm -f stdsoap2.h
+
 stdsoap2.o: ${gsoap_prefix}/devel/stdsoap2.c
 	${CC} -c ${CFLAGS} -o $@ $<
 
@@ -195,6 +205,7 @@ install:
 	-mkdir -p ${PREFIX}/share/doc/${package}-${version}
 	-mkdir -p ${PREFIX}/include/glite/security/${package}
 	${INSTALL} -m 644 ${GSS_LTLIB} ${GSS_THRLTLIB} ${PREFIX}/lib
+	${INSTALL} -m 644 ${LT_262_LIB} ${PREFIX}/lib
 	${INSTALL} -m 644 ${top_srcdir}/LICENSE ${PREFIX}/share/doc/${package}-${version}
 	cd ${top_srcdir}/interface && ${INSTALL} -m 644 ${HDRS} ${PREFIX}/include/glite/security/
 	if [ x${DOSTAGE} = xyes ]; then \
