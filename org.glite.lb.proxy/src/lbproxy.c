@@ -265,14 +265,15 @@ int main(int argc, char *argv[])
 
 
 	/* Just check the database and let it be. The slaves do the job. */
-	/* XXX: InitContextProxy() !!!
-	 * edg_wll_InitContext(&ctx) causes segfault
-	 */
+	edg_wll_InitContext(&ctx);
+	/* XXX: obsolete
+	 * edg_wll_InitContext(&ctx) used to cause segfault
 	if ( !(ctx = (edg_wll_Context) malloc(sizeof(*ctx))) ) {
 		perror("InitContext()");
 		return -1;
 	}
 	memset(ctx, 0, sizeof(*ctx));
+	*/
 	wait_for_open(ctx, dbstring);
 	if (edg_wll_DBCheckVersion(ctx)) {
 		char	*et,*ed;
