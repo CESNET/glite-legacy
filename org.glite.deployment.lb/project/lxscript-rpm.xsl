@@ -274,7 +274,7 @@ exit 0
                 <xsl:variable name="package"><xsl:value-of select="@name"/>_installer.sh</xsl:variable>
                 <xsl:choose>
                         <xsl:when test="$install = 'true'">
-wget -N --non-verbose <xsl:value-of select="$installers"/><xsl:value-of select="$package"/>
+wget -N -nv <xsl:value-of select="$installers"/><xsl:value-of select="$package"/>
 if [ ! -f "<xsl:value-of select="$package"/>" ]
 then
         echo
@@ -297,7 +297,7 @@ SCRIPTLISTUn="$SCRIPTLISTUn ./<xsl:value-of select="$package"/> -u "
 		<xsl:variable name="package.name"><xsl:value-of select="@name"/>-<xsl:value-of select="@version"/>-<xsl:value-of select="@age"/></xsl:variable>
 		<xsl:choose>
 			<xsl:when test="$install = 'true'">
-wget -N --non-verbose <xsl:value-of select="$ext-repository"/><xsl:value-of select="$package"/>
+wget -N -nv <xsl:value-of select="$ext-repository"/><xsl:value-of select="$package"/>
 if [ ! -f "<xsl:value-of select="$package"/>" ]
 then
 	echo 
@@ -318,7 +318,7 @@ RPMLIST="$RPMLIST <xsl:value-of select="$package.name"/>"
 		<xsl:variable name="package.name"><xsl:value-of select="@name"/>-<xsl:value-of select="@version"/>-<xsl:value-of select="@age"/></xsl:variable>
 		<xsl:choose>
 			<xsl:when test="$install='true'">
-wget -N --non-verbose <xsl:value-of select="$repository"/><xsl:value-of select="@arch"/>/RPMS/<xsl:value-of select="$package"/>
+wget -N -nv <xsl:value-of select="$repository"/><xsl:value-of select="@arch"/>/RPMS/<xsl:value-of select="$package"/>
 if [ ! -f "<xsl:value-of select="$package"/>" ]
 then
 	echo 
