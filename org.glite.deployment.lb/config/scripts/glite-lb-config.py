@@ -412,7 +412,7 @@ if __name__ == '__main__':
     params = {}
     loadDefaults(params)
     try:
-        opts, args = getopt.getopt(sys.argv[1:], '', ['siteconfig='])
+        opts, args = glib.getopt(sys.argv[1:], '', ['siteconfig='])
         for o, a in opts:
             if o == "--siteconfig":
                 params['site.config.url'] = a
@@ -441,7 +441,7 @@ if __name__ == '__main__':
     
     # Command line opts if any
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'chv', ['checkconf', 'help', 'version','configure','stop','start','status','siteconfig='])
+        opts, args = glib.getopt(sys.argv[1:], 'chv', ['checkconf', 'help', 'version','configure','stop','start','status','siteconfig='])
     except getopt.GetoptError:
         service.usage(msg = "Unknown options(s)")
         sys.exit(1)
