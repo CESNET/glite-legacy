@@ -17,7 +17,7 @@ gsoap_prefix=/opt/gsoap
 
 CC=gcc
 
-gsoap_versions=2.6.2 2.7.0
+gsoap_versions?=2.6.2 2.7.0
 
 -include Makefile.inc
 -include ../Makefile.inc
@@ -48,9 +48,9 @@ CFLAGS:= ${DEBUG} \
 	-DVERSION=\"${version}\" \
 	-I. -I${top_srcdir}/interface \
 	-I${stagedir}/include \
-	-I${ares_prefix}/include \
 	-I${globus_prefix}/include/${nothrflavour} \
 	-I${globus_prefix}/include/${nothrflavour}/openssl \
+	-I${ares_prefix}/include \
 	${COVERAGE_FLAGS} -D_GNU_SOURCE -DDATAGRID_EXTENSION
 
 LDFLAGS:=${COVERAGE_FLAGS}
