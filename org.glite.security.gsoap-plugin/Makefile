@@ -150,8 +150,8 @@ all compile: \
 	link-gsoap-default \
 	${GSS_STATICLIB} ${GSS_LTLIB} ${GSS_THRSTATICLIB} ${GSS_THRLTLIB} \
 	${STATICLIB} ${LTLIB} ${THRSTATICLIB} ${THRLTLIB} \
-	examples \
-	all-libs-with-soap
+	all-libs-with-soap \
+	examples
 
 check: compile check.gss
 
@@ -222,8 +222,14 @@ wscalc_srv_ex: ${WSCALC_SRV_OBJS} ${STATICLIB}
 wscalc_srv_ex2: ${WSCALC_SRV2_OBJS} ${STATICLIB}
 	${LINK} -o $@ ${WSCALC_SRV2_OBJS} ${EXALIB}
 
+
+soapcpp:=${shell if [ -x ${gsoap_prefix}/bin/soapcpp2 ]; then \
+	echo ${gsoap_prefix}/bin/soapcpp2; \
+	else echo ${gsoap_prefix}/soapcpp2; \
+	fi}
+
 ${GSOAP_FPREFIX}H.h ${GSOAP_FPREFIX}C.c ${GSOAP_FPREFIX}Server.c ${GSOAP_FPREFIX}Client.c ${GSOAP_FPREFIX}ServerLib.c ${GSOAP_FPREFIX}ClientLib.c soap_gen:  calc.h.S
-	${gsoap_prefix}/bin/soapcpp2 -c -p ${GSOAP_FPREFIX} ${top_srcdir}/examples/calc.h.S
+	${soapcpp} -c -p ${GSOAP_FPREFIX} ${top_srcdir}/examples/calc.h.S
 
 wscalc_clt_ex.o: wscalc_clt_ex.c
 	${CC} -c ${CFLAGS} ${GLOBUS_INC} -o $@ $<
