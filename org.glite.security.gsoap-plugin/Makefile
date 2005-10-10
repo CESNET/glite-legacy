@@ -96,10 +96,10 @@ ${GSS_THRSTATICLIB}: ${GSS_THROBJS}
 	ranlib $@
 
 ${GSS_LTLIB}: ${GSS_OBJS}
-	${LINK} ${version_info} -o $@ ${GSS_LOBJS} 
+	${LINK} ${version_info} -o $@ ${GSS_LOBJS} ${EX_LIBS}
 
 ${GSS_THRLTLIB}: ${GSS_THROBJS}
-	${LINK} ${version_info} -o $@ ${GSS_THRLOBJS} 
+	${LINK} ${version_info} -o $@ ${GSS_THRLOBJS} ${EX_LIBS}
 
 
 OBJS:=${GSS_OBJS} glite_gsplugin.o
@@ -127,10 +127,10 @@ ${THRSTATICLIB}: ${THROBJS}
 	ranlib $@
 
 ${LTLIB}: ${OBJS} 
-	${LINK} ${version_info} -o $@ ${LOBJS}
+	${LINK} ${version_info} -o $@ ${LOBJS} ${EX_LIBS}
 
 ${THRLTLIB}: ${THROBJS}
-	${LINK} ${version_info} -o $@ ${THRLOBJS}
+	${LINK} ${version_info} -o $@ ${THRLOBJS} ${EX_LIBS}
 
 ${STATICLIB_S}: ${OBJS_S}
 	ar crv $@ ${OBJS_S}
@@ -141,10 +141,10 @@ ${THRSTATICLIB_S}: ${THROBJS_S}
 	ranlib $@
 
 ${LTLIB_S}: ${OBJS_S} 
-	${LINK} ${version_info} -o $@ ${LOBJS_S}
+	${LINK} ${version_info} -o $@ ${LOBJS_S} ${EX_LIBS}
 
 ${THRLTLIB_S}: ${THROBJS_S}
-	${LINK} ${version_info} -o $@ ${THRLOBJS_S}
+	${LINK} ${version_info} -o $@ ${THRLOBJS_S} ${EX_LIBS}
 
 all compile: \
 	link-gsoap-default \
@@ -168,7 +168,7 @@ test_coverage:
 	cd coverage && for i in ${OBJS}; do gcov -o .libs/ $$i ; done
 
 
-examples: soap_gen wscalc_clt_ex wscalc_srv_ex wscalc_srv_ex2
+examples: link-gsoap-default soap_gen wscalc_clt_ex wscalc_srv_ex wscalc_srv_ex2
 
 all-libs-with-soap:
 	for v in ${gsoap_versions}; do	\
@@ -210,14 +210,17 @@ else
 endif
 
 
+dotless_def_ver:=${shell echo ${gsoap_default_version} | tr -d .}
+EXALIB:=libglite_security_gsoap_plugin_${dotless_def_ver}_${nothrflavour}.la
+
 wscalc_clt_ex: ${WSCALC_CLT_OBJS} ${STATICLIB}
-	${LINK} -o $@ ${STATICLIB} ${GSOAP_LIBS} ${EX_LIBS} ${WSCALC_CLT_OBJS}
+	${LINK} -o $@ ${WSCALC_CLT_OBJS} ${EXALIB}
 
 wscalc_srv_ex: ${WSCALC_SRV_OBJS} ${STATICLIB}
-	${LINK} -o $@ ${STATICLIB} ${GSOAP_LIBS} ${EX_LIBS} ${WSCALC_SRV_OBJS}
+	${LINK} -o $@ ${WSCALC_SRV_OBJS} ${EXALIB}
 
 wscalc_srv_ex2: ${WSCALC_SRV2_OBJS} ${STATICLIB}
-	${LINK} -o $@ ${STATICLIB} ${GSOAP_LIBS} ${EX_LIBS} ${WSCALC_SRV2_OBJS}
+	${LINK} -o $@ ${WSCALC_SRV2_OBJS} ${EXALIB}
 
 ${GSOAP_FPREFIX}H.h ${GSOAP_FPREFIX}C.c ${GSOAP_FPREFIX}Server.c ${GSOAP_FPREFIX}Client.c ${GSOAP_FPREFIX}ServerLib.c ${GSOAP_FPREFIX}ClientLib.c soap_gen:  calc.h.S
 	${gsoap_prefix}/bin/soapcpp2 -c -p ${GSOAP_FPREFIX} ${top_srcdir}/examples/calc.h.S
@@ -281,7 +284,7 @@ test_gss.o: %.o: %.cpp
 
 soap_version.h:
 	head stdsoap2.h | \
-	perl -ne '/^stdsoap2.h\s+([0-9])\.([0-9])\.(\S+)\s.*/ && printf "#define GSOAP_VERSION %d%02d%02d\n#define GSOAP_MIN_VERSION \"$$3\"\n",$$1,$$2,$$3' >$@
+	perl -ne '/^stdsoap2.h\s+([0-9])\.([0-9])\.(\S+)\s.*/ && printf "#define GSOAP_VERSION %d%02d%02d\n#define GSOAP_MIN_VERSION \"$$3\"\n#ident \"soap_version.h $$1.$$2.$$3\"\n",$$1,$$2,$$3' >$@
 
 glite_gsplugin.o: soap_version.h
 
