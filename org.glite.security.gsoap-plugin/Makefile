@@ -235,7 +235,7 @@ wscalc_clt_ex.o: wscalc_clt_ex.c
 
 doc:
 
-stage: compile
+stage:
 	$(MAKE) install PREFIX=${stagedir} DOSTAGE=yes
 
 dist: distsrc distbin
@@ -255,13 +255,18 @@ install:
 	-mkdir -p ${PREFIX}/lib
 	-mkdir -p ${PREFIX}/share/doc/${package}-${version}
 	-mkdir -p ${PREFIX}/include/glite/security/${package}
-	${INSTALL} -m 644 ${GSS_LTLIB} ${GSS_THRLTLIB} ${PREFIX}/lib
-	${INSTALL} -m 644 ${LT_262_LIB} ${PREFIX}/lib
+	${INSTALL} -m 755 ${GSS_LTLIB} ${GSS_THRLTLIB} ${PREFIX}/lib
 	${INSTALL} -m 644 ${top_srcdir}/LICENSE ${PREFIX}/share/doc/${package}-${version}
 	cd ${top_srcdir}/interface && ${INSTALL} -m 644 ${HDRS} ${PREFIX}/include/glite/security/
 	if [ x${DOSTAGE} = xyes ]; then \
 		install -m 644 ${GSS_STATICLIB} ${GSS_THRSTATICLIB} ${STATICLIB} ${THRSTATICLIB} ${PREFIX}/lib; \
 	fi
+	for v in ${gsoap_versions}; do \
+		${MAKE} install-soaplib gsoap_version=$$v PREFIX=${PREFIX}; \
+	done
+
+install-soaplib:
+	${INSTALL} -m 755 ${LTLIB_S} ${THRLTLIB_S} ${PREFIX}/lib
 
 clean:
 
