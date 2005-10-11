@@ -1,3 +1,6 @@
+DATE: 12-10-2005 00:15
+[dimeglio] Use checkMySQLConfiguration function to check root password
+
 DATE: 13-09-2005 23:00
 [dimeglio] Use standard mysql module functions to create db
 

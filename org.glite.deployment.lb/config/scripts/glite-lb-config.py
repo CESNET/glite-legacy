@@ -6,7 +6,7 @@
 # For license conditions see the license file or http://eu-egee.org/license.html
 #
 ################################################################################
-# glite-lb-config v. 2.0.3
+# glite-lb-config v. 2.0.4
 #
 # Post-installation script for configuring the gLite Logging and Bookkeping Server
 # Robert Harakaly < robert.harakaly@cern.ch >
@@ -46,7 +46,7 @@ class glite_lb:
     def __init__(self):
         self.mysql = MySQL.Mysql()
         self.verbose = 0
-        self.version = "2.0.3"
+        self.version = "2.0.4"
         self.name = "glite-lb"
         self.friendly_name = "gLite Logging and Bookkeeping"
         params['module.version'] = self.version
@@ -264,11 +264,17 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         if not os.path.exists('/tmp/mysql.sock'):
             os.symlink('/var/lib/mysql/mysql.sock', '/tmp/mysql.sock')
 
-        # Set root password
-        mysql_root_password = params['mysql.root.password']
-        if mysql_root_password != "":
-            self.mysql.setpassword(mysql_root_password)
-
+        # ------------------------------------------------------------
+        # Check password of MySQL
+        # ------------------------------------------------------------
+        
+        self.mysql_root_password = params['mysql.root.password']
+        if not params.has_key('set.mysql.root.password'):
+            params['set.mysql.root.password'] = 'false'
+        setempty = params['set.mysql.root.password']
+        if self.mysql.checkMySQLConfiguration(self.mysql_root_password,setempty):
+            return 1
+        
         # Create the MySQL database
         print "\nCreate/Verify the %s database" % params['lb.database.name']
         

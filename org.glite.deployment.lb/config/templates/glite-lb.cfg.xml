@@ -34,6 +34,14 @@
 			description="Enable check of host certificates"
 			value="true"/>
 
+		<!-- mysql configuration -->
+		<set.mysql.root.password
+			description="If this parameter is true, then the root password of the mysql database
+			is set to the value specified in mysql.root.password if it not yet set. This parameter has
+			no effect if the database root password is already set. It can be used to ease automated
+			installation and configuration of the service, if mysql is not managed in some other way"
+			value="false"/>
+
 		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
 		<!-- System parameters - You should leave these alone -->
 		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->		
