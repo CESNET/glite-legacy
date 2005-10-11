@@ -69,14 +69,16 @@ extern char *lbproxy_ilog_file_prefix;
 #define sizofa(a)			(sizeof(a)/sizeof((a)[0]))
 
 
-int						debug  = 0;
-static const int		one = 1;
-static char			   *dbstring = NULL;
-static char				sock_store[PATH_MAX],
-						sock_serve[PATH_MAX];
-static int				slaves = 10,
-						semaphores = -1,
-						semset;
+int			debug  = 0;
+static const int	one = 1;
+static char		*dbstring = NULL;
+static char		sock_store[PATH_MAX],
+			sock_serve[PATH_MAX];
+static int		slaves = 10,
+			semaphores = -1,
+			semset;
+static char		host[300];
+static char *		port;
 
 
 static struct option opts[] = {
@@ -211,6 +213,11 @@ int main(int argc, char *argv[])
 		if (semop(semset,&s,1) == -1) { perror("semop()"); return 1; }
 	}
 
+	gethostname(host, sizeof host);
+	host[sizeof host - 1] = 0;
+	asprintf(&port, "%d", GLITE_WMSC_JOBID_DEFAULT_PORT);
+	dprintf(("server address: %s:%d\n", host, port));
+
 	service_table[SRV_SERVE].conn = socket(PF_UNIX, SOCK_STREAM, 0);
 	if ( service_table[SRV_SERVE].conn < 0 ) { perror("socket()"); return 1; }
 	memset(&a, 0, sizeof(a));
@@ -308,14 +315,13 @@ int main(int argc, char *argv[])
 
 	glite_srvbones_run(clnt_data_init, service_table, sizofa(service_table), debug);
 
-
 	semctl(semset, 0, IPC_RMID, 0);
 	unlink(pidfile);
 	for ( i = 0; i < sizofa(service_table); i++ )
 		if ( service_table[i].conn >= 0 ) close(service_table[i].conn);
 	unlink(sock_serve);
 	unlink(sock_store);
-
+	if (port) free(port);
 
 	return 0;
 }
@@ -350,7 +356,6 @@ int handle_conn(int conn, struct timeval *timeout, void *data)
 	struct timeval		total_to = { TOTAL_CLNT_TIMEOUT,0 },
 						conn_start, now;
 
-
 	if ( !(ctx = (edg_wll_Context) calloc(1, sizeof(*ctx))) ) {
 		fprintf(stderr, "Couldn't create context");
 		return -1;
@@ -376,6 +381,9 @@ int handle_conn(int conn, struct timeval *timeout, void *data)
 		ctx->p_tmp_timeout.tv_sec = total_to.tv_sec;
 		ctx->p_tmp_timeout.tv_usec = total_to.tv_usec;
 	}
+	
+	ctx->srvName = strdup(host);
+	ctx->srvPort = atoi(port);
 	
 	ctx->connProxy = (edg_wll_ConnProxy *) calloc(1, sizeof(edg_wll_ConnProxy));
 	if ( !ctx->connProxy ) {
