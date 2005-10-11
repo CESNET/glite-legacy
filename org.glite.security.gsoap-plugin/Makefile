@@ -25,7 +25,12 @@ gsoap_versions?=2.6.2 2.7.0
 GSPLUGIN_DEBUG?=no
 GSPLUGIN_VERSION_CHECKING?=yes
 
-version_info=-version-info `echo ${version} | cut -d. -f1,2 | tr . :`
+
+offset=1
+version_info:=-version-info ${shell \
+	perl -e '$$,=":"; @F=split "\\.","${version}"; print $$F[0]+$$F[1]+${offset},$$F[2],$$F[1]' }
+
+# version_info=-version-info `echo ${version} | cut -d. -f1,2 | tr . :`
 
 gsoap_version=${gsoap_default_version}
 
