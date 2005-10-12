@@ -53,6 +53,7 @@ default: all
 
 CFLAGS:= ${DEBUG} \
 	-DVERSION=\"${version}\" \
+	-DWITH_NONAMESPACES \
 	-I. -I${top_srcdir}/interface \
 	-I${stagedir}/include \
 	-I${globus_prefix}/include/${nothrflavour} \
