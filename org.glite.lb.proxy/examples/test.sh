@@ -28,6 +28,7 @@ SAMPLE_JOBS_RESPONSES[0]=
 # some defaults
 DEBUG=2
 LOGFD=${LOGFD:-1}
+LARGE_STRESS=${LARGE_STRESS:-}
 
 # timeouts for polling the bkserver
 timeout=10
@@ -47,6 +48,8 @@ show_help()
 	echo  " -j | --jobs-count             Count of test(ed) jobs."
 	echo  " -s | --states                 List of states in which could tested jobs fall."
 	echo  " -p | --proxy-purge-states     List of states in which LBProxy purges the job."
+	echo  " -l | --large-stress 'size'    Do a large stress logging ('size' random data added to the messages."
+	echo  " -g | --log 'logfile'          Redirect all output to the 'logfile'."
 	echo  ""
 	echo  "For proper operation check your grid-proxy-info"
 	grid-proxy-info
@@ -75,7 +78,7 @@ log_ev()
 {
 #	$LOGEV -j $EDG_JOBID -s NetworkServer -e UserTag --name color --value red
 	[ $DEBUG -gt 2 ] && echo "$LOGEV -j \"$EDG_JOBID\" -s UserInterface -c \"$EDG_WL_SEQUENCE\" $@"
-	EDG_WL_SEQUENCE=`$LOGEV -j $EDG_JOBID -s UserInterface -c $EDG_WL_SEQUENCE "$@"`
+	EDG_WL_SEQUENCE=`$LOGEV $LARGE_STRESS -j $EDG_JOBID -s UserInterface -c $EDG_WL_SEQUENCE "$@"`
 	test $? -ne 0 -o -z "$EDG_WL_SEQUENCE" && echo "missing EDG_WL_SEQUENCE from $LOGEV"
 }
 
@@ -84,7 +87,7 @@ log_ev_proxy()
 #	$LOGEV -x -j $EDG_JOBID -s NetworkServer -e UserTag --name color --value red
 
 	[ $DEBUG -gt 2 ] && echo "$LOGEV -x -j \"$EDG_JOBID\" -s UserInterface -c \"$EDG_WL_SEQUENCE\" $@"
-	EDG_WL_SEQUENCE=`$LOGEV -x -j $EDG_JOBID -s UserInterface -c $EDG_WL_SEQUENCE "$@"`
+	EDG_WL_SEQUENCE=`$LOGEV -x $LARGE_STRESS -j $EDG_JOBID -s UserInterface -c $EDG_WL_SEQUENCE "$@"`
 	test $? -ne 0 -o -z "$EDG_WL_SEQUENCE" && echo "missing EDG_WL_SEQUENCE from $LOGEV"
 }
 
@@ -106,6 +109,7 @@ db_clear_jobs()
 	[ $DEBUG -gt 0 ] && echo -n -e "Purging test jobs from db\t\t"
 	job=0
 	while [ $job -lt $JOBS_ARRAY_SIZE ] ; do
+		LARGE_STRESS=""
 		EDG_WL_SEQUENCE="UI=999999:NS=9999999999:WM=999999:BH=9999999999:JSS=999999:LM=999999:LRMS=999999:APP=999999"
 #		log_ev_proxy -e Clear --reason=PurgingDB
 #		purge_proxy
@@ -169,7 +173,7 @@ test_logging_events()
 		tmp=`echo $RANDOM % $st_count + 1 | bc`
 		state=`echo $STATES | cut -d " " -f $tmp | tr A-Z a-z`
 
-		source glite-lb-$state.sh -X $TEST_LBPROXY_STORE_SOCK -m $BKSERVER_HOST -j ${SAMPLE_JOBS_ARRAY[$job]} 2>&1 1>/dev/null
+		source glite-lb-$state.sh $LARGE_STRESS -X $TEST_LBPROXY_STORE_SOCK -m $BKSERVER_HOST -j ${SAMPLE_JOBS_ARRAY[$job]} 2>&1 1>/dev/null
 		[ $? -ne 0 ] && echo -e "ERROR\n\tglite-lb-$state.sh ${SAMPLE_JOBS_ARRAY[$job]} error!"
 		proxy_state=`$JOBSTAT -x $TEST_LBPROXY_SERVE_SOCK ${SAMPLE_JOBS_ARRAY[$job]} 2>&1 | grep "state :" | cut -d " " -f 3 | tr A-Z a-z`
 		purged=`echo $LBPROXY_PURGE_STATES | grep $state`
@@ -236,7 +240,8 @@ do
 	"-j" | "--jobs-count") shift; JOBS_ARRAY_SIZE=$1 ;;
 	"-s" | "--states") shift; STATES="$1" ;;
 	"-p" | "--proxy-purge-states") shift; LBPROXY_PURGE_STATES="$1" ;;
-	"-l" | "--log") shift ; logfile=$1 ;;
+	"-l" | "--large-stress") shift ; LARGE_STRESS="-l $1" ;;
+	"-g" | "--log") shift ; logfile=$1 ;;
 
 	*) echo "Unrecognized option $1" ;;
 
