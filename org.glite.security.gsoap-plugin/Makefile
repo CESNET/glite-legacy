@@ -1,5 +1,5 @@
 # defaults
-top_srcdir=.
+top_srcdir=..
 builddir=build
 top_builddir=${top_srcdir}/${builddir}
 stagedir=.
@@ -17,7 +17,7 @@ gsoap_prefix=/opt/gsoap
 
 CC=gcc
 
-gsoap_versions=2.6.2 2.7.0
+gsoap_versions?=2.6.2 2.7.0 2.7.6b
 
 -include Makefile.inc
 -include ../Makefile.inc
@@ -25,7 +25,14 @@ gsoap_versions=2.6.2 2.7.0
 GSPLUGIN_DEBUG?=no
 GSPLUGIN_VERSION_CHECKING?=yes
 
-version_info=-version-info `echo ${version} | cut -d. -f1,2 | tr . :`
+
+offset=1
+version_info:=-version-info ${shell \
+	perl -e '$$,=":"; @F=split "\\.","${version}"; print $$F[0]+$$F[1]+${offset},$$F[2],$$F[1]' }
+
+# version_info=-version-info `echo ${version} | cut -d. -f1,2 | tr . :`
+
+gsoap_version=${gsoap_default_version}
 
 VPATH=${top_srcdir}/src:${top_srcdir}/test:${top_srcdir}/examples
 
@@ -46,11 +53,12 @@ default: all
 
 CFLAGS:= ${DEBUG} \
 	-DVERSION=\"${version}\" \
+	-DWITH_NONAMESPACES \
 	-I. -I${top_srcdir}/interface \
 	-I${stagedir}/include \
-	-I${ares_prefix}/include \
 	-I${globus_prefix}/include/${nothrflavour} \
 	-I${globus_prefix}/include/${nothrflavour}/openssl \
+	-I${ares_prefix}/include \
 	${COVERAGE_FLAGS} -D_GNU_SOURCE -DDATAGRID_EXTENSION
 
 LDFLAGS:=${COVERAGE_FLAGS}
@@ -96,10 +104,10 @@ ${GSS_THRSTATICLIB}: ${GSS_THROBJS}
 	ranlib $@
 
 ${GSS_LTLIB}: ${GSS_OBJS}
-	${LINK} ${version_info} -o $@ ${GSS_LOBJS} 
+	${LINK} ${version_info} -o $@ ${GSS_LOBJS} ${EX_LIBS}
 
 ${GSS_THRLTLIB}: ${GSS_THROBJS}
-	${LINK} ${version_info} -o $@ ${GSS_THRLOBJS} 
+	${LINK} ${version_info} -o $@ ${GSS_THRLOBJS} ${EX_LIBS}
 
 
 OBJS:=${GSS_OBJS} glite_gsplugin.o
@@ -127,10 +135,10 @@ ${THRSTATICLIB}: ${THROBJS}
 	ranlib $@
 
 ${LTLIB}: ${OBJS} 
-	${LINK} ${version_info} -o $@ ${LOBJS}
+	${LINK} ${version_info} -o $@ ${LOBJS} ${EX_LIBS}
 
 ${THRLTLIB}: ${THROBJS}
-	${LINK} ${version_info} -o $@ ${THRLOBJS}
+	${LINK} ${version_info} -o $@ ${THRLOBJS} ${EX_LIBS}
 
 ${STATICLIB_S}: ${OBJS_S}
 	ar crv $@ ${OBJS_S}
@@ -141,16 +149,14 @@ ${THRSTATICLIB_S}: ${THROBJS_S}
 	ranlib $@
 
 ${LTLIB_S}: ${OBJS_S} 
-	${LINK} ${version_info} -o $@ ${LOBJS_S}
+	${LINK} ${version_info} -o $@ ${LOBJS_S} ${EX_LIBS}
 
 ${THRLTLIB_S}: ${THROBJS_S}
-	${LINK} ${version_info} -o $@ ${THRLOBJS_S}
+	${LINK} ${version_info} -o $@ ${THRLOBJS_S} ${EX_LIBS}
 
 all compile: \
-	link-gsoap-default \
 	${GSS_STATICLIB} ${GSS_LTLIB} ${GSS_THRSTATICLIB} ${GSS_THRLTLIB} \
 	${STATICLIB} ${LTLIB} ${THRSTATICLIB} ${THRLTLIB} \
-	examples \
 	all-libs-with-soap
 
 check: compile check.gss
@@ -168,14 +174,16 @@ test_coverage:
 	cd coverage && for i in ${OBJS}; do gcov -o .libs/ $$i ; done
 
 
-examples: soap_gen wscalc_clt_ex wscalc_srv_ex wscalc_srv_ex2
+examples: wscalc_clt_ex wscalc_srv_ex wscalc_srv_ex2
 
 all-libs-with-soap:
 	for v in ${gsoap_versions}; do	\
-		${MAKE} gsoap_version=$$v libs-with-soap; \
+		dir=`echo $$v | tr -d .`; \
+		mkdir $$dir; \
+		( cd $$dir && ${MAKE} -f ../Makefile gsoap_version=$$v top_srcdir=../.. libs-with-soap examples) ; \
 	done
 
-libs-with-soap: clean-objs link-gsoap ${LTLIB_S} ${THRLTLIB_S} ${STATICLIB_S} ${THRSTATICLIB_S}
+libs-with-soap: ${LTLIB_S} ${THRLTLIB_S} ${STATICLIB_S} ${THRSTATICLIB_S}
 
 link-gsoap:
 	if [ -f ${top_srcdir}/src/stdsoap2_${gsoap_version}.c ]; then \
@@ -188,54 +196,41 @@ link-gsoap:
 	else false ; \
 	fi
 
-link-gsoap-default:
-	${MAKE} link-gsoap gsoap_version=${gsoap_default_version}
-
-clean-objs:
-	rm -f *.o *.lo soap_version.h
+stdsoap2.c stdsoap2.h: link-gsoap
 
 GSOAP_FPREFIX:= GSOAP_
 
-ifeq ($(GSPLUGIN_DEBUG),yes)
-	WSCALC_CLT_OBJS = wscalc_clt_ex.o ${GSOAP_FPREFIX}C.o ${GSOAP_FPREFIX}Client.o \
-					  stdsoap2.o
-	WSCALC_SRV_OBJS = wscalc_srv_ex.o ${GSOAP_FPREFIX}C.o ${GSOAP_FPREFIX}Server.o \
-					  stdsoap2.o
-	WSCALC_SRV2_OBJS = wscalc_srv_ex2.o ${GSOAP_FPREFIX}C.o ${GSOAP_FPREFIX}Server.o \
-					  stdsoap2.o
-else
-	WSCALC_CLT_OBJS = wscalc_clt_ex.o ${GSOAP_FPREFIX}C.o ${GSOAP_FPREFIX}Client.o
-	WSCALC_SRV_OBJS = wscalc_srv_ex.o ${GSOAP_FPREFIX}C.o ${GSOAP_FPREFIX}Server.o
-	WSCALC_SRV2_OBJS = wscalc_srv_ex2.o ${GSOAP_FPREFIX}C.o ${GSOAP_FPREFIX}Server.o
-endif
+WSCALC_CLT_OBJS = wscalc_clt_ex.o ${GSOAP_FPREFIX}C.o ${GSOAP_FPREFIX}Client.o
+WSCALC_SRV_OBJS = wscalc_srv_ex.o ${GSOAP_FPREFIX}C.o ${GSOAP_FPREFIX}Server.o
+WSCALC_SRV2_OBJS = wscalc_srv_ex2.o ${GSOAP_FPREFIX}C.o ${GSOAP_FPREFIX}Server.o
+
+wscalc_clt_ex.o wscalc_srv_ex.o wscalc_srv_ex2.o: ${GSOAP_FPREFIX}H.h
+
+wscalc_clt_ex: ${WSCALC_CLT_OBJS} ${LTLIB_S}
+	${LINK} -o $@ ${WSCALC_CLT_OBJS} ${LTLIB_S}
+
+wscalc_srv_ex: ${WSCALC_SRV_OBJS} ${LTLIB_S}
+	${LINK} -o $@ ${WSCALC_SRV_OBJS} ${LTLIB_S}
+
+wscalc_srv_ex2: ${WSCALC_SRV2_OBJS} ${LTLIB_S}
+	${LINK} -o $@ ${WSCALC_SRV2_OBJS} ${LTLIB_S}
 
 
-wscalc_clt_ex: ${WSCALC_CLT_OBJS} ${STATICLIB}
-	${LINK} -o $@ ${STATICLIB} ${GSOAP_LIBS} ${EX_LIBS} ${WSCALC_CLT_OBJS}
+gsoap_prefix:=${repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}
+soapcpp:=${shell if [ -x ${gsoap_prefix}/bin/soapcpp2 ]; then \
+	echo ${gsoap_prefix}/bin/soapcpp2; \
+	else echo ${gsoap_prefix}/soapcpp2; \
+	fi}
 
-wscalc_srv_ex: ${WSCALC_SRV_OBJS} ${STATICLIB}
-	${LINK} -o $@ ${STATICLIB} ${GSOAP_LIBS} ${EX_LIBS} ${WSCALC_SRV_OBJS}
-
-wscalc_srv_ex2: ${WSCALC_SRV2_OBJS} ${STATICLIB}
-	${LINK} -o $@ ${STATICLIB} ${GSOAP_LIBS} ${EX_LIBS} ${WSCALC_SRV2_OBJS}
-
-${GSOAP_FPREFIX}H.h ${GSOAP_FPREFIX}C.c ${GSOAP_FPREFIX}Server.c ${GSOAP_FPREFIX}Client.c ${GSOAP_FPREFIX}ServerLib.c ${GSOAP_FPREFIX}ClientLib.c soap_gen:  calc.h.S
-	${gsoap_prefix}/bin/soapcpp2 -c -p ${GSOAP_FPREFIX} ${top_srcdir}/examples/calc.h.S
+${GSOAP_FPREFIX}H.h ${GSOAP_FPREFIX}C.c ${GSOAP_FPREFIX}Server.c ${GSOAP_FPREFIX}Client.c ${GSOAP_FPREFIX}ServerLib.c ${GSOAP_FPREFIX}ClientLib.c:  calc.h.S
+	${soapcpp} -c -p ${GSOAP_FPREFIX} ${top_srcdir}/examples/calc.h.S
 
 wscalc_clt_ex.o: wscalc_clt_ex.c
 	${CC} -c ${CFLAGS} ${GLOBUS_INC} -o $@ $<
 	
-#stdsoap2_2.6.2.o: stdsoap2_2.6.2.c stdsoap2_2.6.2.h
-#	ln -sf ${top_srcdir}/src/stdsoap2_2.6.2.h stdsoap2.h
-#	libtool --mode=compile ${CC} -c ${DEBUG} -I${top_srcdir}/src -I${top_srcdir}/interface -I. -o $@ $<
-#	rm -f stdsoap2.h
-#
-#stdsoap2.o: ${gsoap_prefix}/devel/stdsoap2.c
-#	${CC} -c ${CFLAGS} -o $@ $<
-
 doc:
 
-stage: compile
+stage:
 	$(MAKE) install PREFIX=${stagedir} DOSTAGE=yes
 
 dist: distsrc distbin
@@ -255,13 +250,18 @@ install:
 	-mkdir -p ${PREFIX}/lib
 	-mkdir -p ${PREFIX}/share/doc/${package}-${version}
 	-mkdir -p ${PREFIX}/include/glite/security/${package}
-	${INSTALL} -m 644 ${GSS_LTLIB} ${GSS_THRLTLIB} ${PREFIX}/lib
-	${INSTALL} -m 644 ${LT_262_LIB} ${PREFIX}/lib
+	${INSTALL} -m 755 ${GSS_LTLIB} ${GSS_THRLTLIB} ${PREFIX}/lib
 	${INSTALL} -m 644 ${top_srcdir}/LICENSE ${PREFIX}/share/doc/${package}-${version}
 	cd ${top_srcdir}/interface && ${INSTALL} -m 644 ${HDRS} ${PREFIX}/include/glite/security/
 	if [ x${DOSTAGE} = xyes ]; then \
 		install -m 644 ${GSS_STATICLIB} ${GSS_THRSTATICLIB} ${STATICLIB} ${THRSTATICLIB} ${PREFIX}/lib; \
 	fi
+	for v in ${gsoap_versions}; do \
+		(cd `echo $$v | tr -d .` && ${MAKE} -f ../Makefile install-soaplib gsoap_version=$$v PREFIX=${PREFIX} ); \
+	done
+
+install-soaplib:
+	${INSTALL} -m 755 ${LTLIB_S} ${THRLTLIB_S} ${PREFIX}/lib
 
 clean:
 
@@ -274,9 +274,11 @@ clean:
 test_gss.o: %.o: %.cpp
 	${CXX} -c ${CFLAGS} ${GLOBUSINC} ${TEST_INC} $<
 
-soap_version.h:
+glite_gsplugin.o: soap_version.h
+
+soap_version.h: stdsoap2.h
 	head stdsoap2.h | \
-	perl -ne '/^stdsoap2.h\s+([0-9])\.([0-9])\.(\S+)\s.*/ && printf "#define GSOAP_VERSION %d%02d%02d\n#define GSOAP_MIN_VERSION \"$$3\"\n",$$1,$$2,$$3' >$@
+	perl -ne '/^stdsoap2.h\s+([0-9])\.([0-9])\.(\S+)\s.*/ && printf "#define GSOAP_VERSION %d%02d%02d\n#define GSOAP_MIN_VERSION \"$$3\"\n#ident \"soap_version.h $$1.$$2.$$3\"\n",$$1,$$2,$$3' >$@
 
 glite_gsplugin.o: soap_version.h
 
