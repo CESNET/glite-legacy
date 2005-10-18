@@ -17,7 +17,7 @@ gsoap_prefix=/opt/gsoap
 
 CC=gcc
 
-gsoap_versions?=2.6.2 2.7.0
+gsoap_versions?=2.6.2 2.7.0 2.7.6b
 
 -include Makefile.inc
 -include ../Makefile.inc
