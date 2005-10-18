@@ -45,10 +45,7 @@ thrflavour=${with.globus.thr.flavor}
 nothrflavour=${with.globus.nothr.flavor}
 cppunit=${with.cppunit.prefix}
 gsoap_prefix=${with.gsoap.prefix}
-gsoap_default_version=${ext.gsoap.version}
-gsoap_name=${ext.gsoap.name}
-gsoap_platform=${ext.gsoap.platform}
-repository=${repository}
+gsplugin_version_checking=${gsplugin.version.checking}
 			</echo>
 	    </target>
 	</project>

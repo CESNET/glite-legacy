@@ -76,7 +76,7 @@
 		 Load version file 
 	     ========================================= -->
 	<property file="${module.version.file}"/>
-	<property file="${module.build.file}"/>
+        <property file="${module.build.file}"/>
 		
 	<!-- ==============================================
 		 Local private targets
@@ -84,20 +84,6 @@
 	
 	<target name="localinit"
 		description="Module specific initialization tasks">
-		<property name="ext.gsoap.platform" value="src"/>
-		<antcall target="gsoap" inheritAll="false">
-			<param name="ext.gsoap.version" value="2.6.2"/>
-		</antcall>
-
-		<antcall target="gsoap" inheritAll="false">
-			<param name="ext.gsoap.version" value="2.7.0"/>
-		</antcall>
-
-		<antcall target="gsoap" inheritAll="false">
-			<param name="ext.gsoap.version" value="2.7.6b"/>
-			<param name="ext.gsoap.platform" value="src"/>
-		</antcall>
-
 		<antcall target="secmakefiles" />
 	</target>
 		

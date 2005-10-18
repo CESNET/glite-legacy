@@ -1,16 +1,13 @@
 #include <iostream>
-#include <fstream>
 #include <sys/types.h>
 #include <unistd.h>
-#include <assert.h>
+
 
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/CompilerOutputter.h>
 #include <cppunit/extensions/TestFactoryRegistry.h>
-#include <cppunit/XmlOutputter.h>
-#include <cppunit/TestRunner.h>
-#include <cppunit/TestResult.h>
-#include <cppunit/TestResultCollector.h>
+#include <cppunit/ui/text/TestRunner.h>
+
 
 #include "glite_gss.h"
 
@@ -18,14 +15,11 @@ class GSSTest: public  CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE(GSSTest);
 	CPPUNIT_TEST(echo);
-	CPPUNIT_TEST(echo);
-	CPPUNIT_TEST(bigecho);
 	CPPUNIT_TEST(errorTest);
 	CPPUNIT_TEST_SUITE_END();
 
 public:
 	void echo();
-	void bigecho();
 	void errorTest();
 
 	void setUp();
@@ -37,6 +31,7 @@ private:
 	struct timeval	timeout;
 	
 	void replier();
+	
 };
 
 
@@ -46,10 +41,9 @@ void GSSTest::replier() {
 	struct sockaddr_in      a;
 	socklen_t		alen = sizeof(a);
 	int                     s, len;
-	char 			buf[8*BUFSIZ];
+	char 			buf[100];
 	
-	std::cerr << "replier " << getpid() << std::endl;
-	
+
 	if ( (s = accept(sock, (struct sockaddr *) &a, &alen)) < 0 ) exit(1);
 	
 	if ( edg_wll_gss_accept(my_cred, s, &timeout, &conn, &stat) ) exit(1);
@@ -69,9 +63,8 @@ void GSSTest::setUp(void) {
 	socklen_t 		alen = sizeof(a);
 	char *			cred_file = NULL;
 	char *			key_file = NULL;
-	char * 			to = getenv("GSS_TEST_TIMEOUT");
 
-	timeout.tv_sec = to ? atoi(to) : 10 ;
+	timeout.tv_sec = 10;
 	timeout.tv_usec = 0;
 	
 	key_file = cred_file = getenv("X509_USER_PROXY");
@@ -113,7 +106,6 @@ void GSSTest::echo()
 	char 			buf[] = "f843fejwfanczn nc4*&686%$$&^(*)*#$@WSH";	
 	char			buf2[100];	
 
-	std::cerr << "echo " << getpid() << std::endl;
 
 	err = edg_wll_gss_connect(my_cred, "localhost", port, &timeout, &conn, &stat);
 	CPPUNIT_ASSERT_MESSAGE("edg_wll_gss_connect()", !err);
@@ -125,32 +117,6 @@ void GSSTest::echo()
 	CPPUNIT_ASSERT_MESSAGE("edg_wll_gss_read_full()", !err);
 
 	CPPUNIT_ASSERT(strlen(buf)+1 == total && !strcmp(buf,buf2) );
-
-	edg_wll_gss_close(&conn, &timeout);
-		
-}
-
-void GSSTest::bigecho()
-{
-	edg_wll_GssConnection	conn;
-	edg_wll_GssStatus	stat;
-	size_t			total;
-	int			err;
-	char 			buf[7*BUFSIZ];
-	char			buf2[7*BUFSIZ];	
-
-	std::cerr << "bigecho " << getpid() << std::endl;
-
-	err = edg_wll_gss_connect(my_cred, "localhost", port, &timeout, &conn, &stat);
-	CPPUNIT_ASSERT_MESSAGE("edg_wll_gss_connect()", !err);
-	
-	err = edg_wll_gss_write(&conn, buf, sizeof buf, &timeout, &stat);
-	CPPUNIT_ASSERT_MESSAGE("edg_wll_gss_write()", !err);
-	
-	err = edg_wll_gss_read_full(&conn, buf2, sizeof buf2, &timeout, &total, &stat);
-	CPPUNIT_ASSERT_MESSAGE("edg_wll_gss_read_full()", !err);
-
-	CPPUNIT_ASSERT(sizeof buf == total && !memcmp(buf,buf2,sizeof buf) );
 
 	edg_wll_gss_close(&conn, &timeout);
 		
@@ -175,24 +141,9 @@ CPPUNIT_TEST_SUITE_REGISTRATION( GSSTest );
 
 int main (int ac,const char *av[])
 {
-	assert(ac == 2);
-	std::ofstream	xml(av[1]);
-
 	CppUnit::Test *suite = CppUnit::TestFactoryRegistry::getRegistry().makeTest();
-	CppUnit::TestRunner runner;
-
-	CppUnit::TestResult controller;
-	CppUnit::TestResultCollector result;
-	controller.addListener( &result );
-
+	CppUnit::TextUi::TestRunner runner;
+	
 	runner.addTest(suite);
-	runner.run(controller);
-
-
-	CppUnit::XmlOutputter xout( &result, xml );
-	CppUnit::CompilerOutputter tout( &result, std::cout);
-	xout.write();
-	tout.write();
-
-	return result.wasSuccessful() ? 0 : 1 ;
+	return runner.run() ? 0 : 1;
 }
