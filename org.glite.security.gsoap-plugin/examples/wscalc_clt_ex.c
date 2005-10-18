@@ -19,6 +19,7 @@ main(int argc, char **argv)
 	}
 
 	soap_init(&soap);
+	soap_set_namespaces(&soap,namespaces);
 	soap_register_plugin(&soap, glite_gsplugin);
 
 	a = strtod(argv[2], NULL);
