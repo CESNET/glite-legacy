@@ -137,6 +137,7 @@ install:
 	-mkdir -p ${PREFIX}/bin ${PREFIX}/etc ${PREFIX}/etc/init.d
 	-mkdir -p ${PREFIX}/share/doc/${package}-${version}
 	${INSTALL} -m 644 ${top_srcdir}/LICENSE ${PREFIX}/share/doc/${package}-${version}
+	${INSTALL} -m 644 ${top_srcdir}/doc/README ${top_srcdir}/doc/README.deploy ${PREFIX}/share/doc/${package}-${version}
 	${INSTALL} -m 755 glite_lb_proxy ${PREFIX}/bin/glite-lb-proxy
 	${INSTALL} -m 644 ${top_srcdir}/config/glite-lb-dbsetup-proxy.sql ${PREFIX}/etc
 	${INSTALL} -m 755 ${top_srcdir}/config/startup ${PREFIX}/etc/init.d/glite-lb-proxy
