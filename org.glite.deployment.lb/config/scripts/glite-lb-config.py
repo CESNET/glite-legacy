@@ -279,7 +279,7 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         print "\nCreate/Verify the %s database" % params['lb.database.name']
         
         # Check if database exists
-        if self.mysql.existsDB(params['lb.database.name'],mysql_root_password) != 0:
+        if self.mysql.existsDB(params['lb.database.name'],self.mysql_root_password) != 0:
             # Create database
             print ('\n==> Creating MySQL %s database\n' % params['lb.database.name'])
     
@@ -288,13 +288,13 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
             
             file = open('/tmp/mysql_ct', 'w')
 
-            self.mysql.add_user(params['lb.database.name'],params['lb.database.username'],"",mysql_root_password)
+            self.mysql.add_user(params['lb.database.name'],params['lb.database.username'],"",self.mysql_root_password)
             text = ['USE %s;\n' % params['lb.database.name'],
                     '\. %s/etc/glite-lb-dbsetup.sql\n' % os.environ['GLITE_LOCATION']]
     
             file.writelines(text)
             file.close()
-            os.system('/usr/bin/mysql -p%s < /tmp/mysql_ct' % mysql_root_password)
+            os.system('/usr/bin/mysql -p%s < /tmp/mysql_ct' % self.mysql_root_password)
             os.system('/bin/rm /tmp/mysql_ct')
             
             #Starting and stopping the database before the index creation
