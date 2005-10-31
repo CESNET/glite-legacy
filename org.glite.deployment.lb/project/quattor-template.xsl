@@ -12,6 +12,7 @@
 
 	<!-- global processing -->
 	<xsl:template match="/">
+
 template pro_software_glite_lb;
 
 #
@@ -21,6 +22,12 @@ template pro_software_glite_lb;
 #
 # glite-lb Quattor template v. <xsl:value-of select="/node/@version"/>
 #
+
+## CAs 
+		
+include pro_software_glite_CA;
+		
+		
 
 # Global dependencies	
 		<xsl:for-each select="node/dependencies">
@@ -38,6 +45,11 @@ template pro_software_glite_lb;
 			<xsl:for-each select="components">
 				<xsl:apply-templates/>
 			</xsl:for-each>
+
+			<xsl:for-each select="subservice">
+include pro_software_<xsl:value-of select="translate(@name, '-', '_')"/>;
+			</xsl:for-each>			
+			
 
 		</xsl:for-each>
 	</xsl:template>

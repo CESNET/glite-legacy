@@ -1,3 +1,12 @@
+DATE: 12-10-2005 00:15
+[dimeglio] Use checkMySQLConfiguration function to check root password
+
+DATE: 13-09-2005 23:00
+[dimeglio] Use standard mysql module functions to create db
+
+DATE: 08-07-2005 15:20
+[dimeglio] Increased major version because of interface changes in the config scripts
+
 DATE: 08-07-2005 15:20
 [dimeglio] Merged from branch 1.2.2
 

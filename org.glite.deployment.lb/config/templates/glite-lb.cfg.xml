@@ -17,6 +17,10 @@
 			parameter. Leave it empty of comment it out to use the same as 'glite.user.name'"
 			value="changeme"/>
              	
+	    <mysql.root.password
+	        description="The mysql root password"
+	        value="changeme"/>
+	
 		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
 		<!-- Advanced parameters - Change them if you know what you're doing -->
 		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
@@ -30,12 +34,18 @@
 			description="Enable check of host certificates"
 			value="true"/>
 
-		<!-- MySQL DB -->
-		<lb.database.name
-			description="The mySQL database name to create for storing LB data
-			In this version it must be set to the given value"
-			value="lbserver20"/>
+		<!-- mysql configuration -->
+		<set.mysql.root.password
+			description="If this parameter is true, then the root password of the mysql database
+			is set to the value specified in mysql.root.password if it not yet set. This parameter has
+			no effect if the database root password is already set. It can be used to ease automated
+			installation and configuration of the service, if mysql is not managed in some other way"
+			value="false"/>
 
+		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
+		<!-- System parameters - You should leave these alone -->
+		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->		
+	
 		<lb.index.list
 			description="Definitions of indices on all the currently supported indexed system attributes">
 			
@@ -45,15 +55,6 @@
 
 		</lb.index.list>
 			
-		<lb.database.username
-			description="The username to be used to access the local mySQL server
-			In this version it must be set to the given value"
-			value="lbserver"/>
-			
-		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
-		<!-- System parameters - You should leave these alone -->
-		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->		
-	
 	</parameters>
 
 	<!--RGMA service publishing: log server -->
@@ -66,28 +67,23 @@
 				
 				value="true"/>
 				
+			<rgma.servicetool.service_type
+				description="The service type. This should be uniquely defined for each service type. 
+					The recommended format is the service namespace in
+					reversed domain name format [Type: 'string']"
+				value="org.glite.lb.lbserver"/>
+
 			<rgma.servicetool.name
-				description="Name of the service. This should be globally unique.
-					Example: your.host.name_Logging_Bookkeeping_Server
-					[Type: 'String']"
-				value="${HOSTNAME}_Logging_Bookkeeping_Server"/>
+				description="Name of the service. This should be globally unique.							 
+					[Example: 'HOSTANME_LB_LocalLogger'] [Type: 'String']"
+				value="${HOSTNAME}_${rgma.servicetool.service_type}"/>
 
 			<rgma.servicetool.url_endpoint
 				description="URL to contact the service at. 
 					This should be unique for each service. Use example and adapt host. 
 					Example: http://your.host.name/LB/LBServer
 					[Type: 'string']"
-				value="http://${HOSTNAME}/LB/LBServer"/>
-
-			<rgma.servicetool.service_type
-				description="The service type. This should be uniquely defined for 
-					each service type. Currently two methods of type naming are recommended:
-					(1) The targetNamespace from the WSDL document,
-						followed by a space and then the service name.
-					(2) A URL owned by the body or individual who defines the service type.
-					Example: Logging and Bookkeeping Server
-					[Type: 'string']"
-				value="Logging and Bookkeeping Server"/>
+				value="not available"/>
 
 			<rgma.servicetool.service_version
 				description="Service version in the form 'major.minor.patch'
@@ -112,21 +108,21 @@
 			<rgma.servicetool.status_interval
 				description="How often to check and publish service status.
 					Example: 60 [Type: 'string'] [Unit: 'seconds']"
-				value="60"/>
+				value="30"/>
 
 			<rgma.servicetool.url_wsdl
 				description="URL of a WSDL document for the service (leave blank if the 
 					service has no WSDL).
 					Example: http://example.rl.ac.uk/service?WSDL
 					[Type: 'string']"
-				value="n/a"/>
+				value="not available"/>
 
 			<rgma.servicetool.url_semantics
 				description="URL of a document containing a detailed description of the service
 					and how it should be used.
 					Example: http://example.rl.ac.uk/service/semantics.html
 					[Type: 'string']"
-				value="n/a"/>
+				value="not available"/>
 
 		</parameters>
 	</instance>

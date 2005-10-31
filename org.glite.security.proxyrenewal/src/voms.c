@@ -6,7 +6,7 @@
 
 #include "glite/security/voms/voms_apic.h"
 
-#include "newformat.h"
+#include "glite/security/voms/newformat.h"
 
 char * Decode(const char *, int, int *);
 char **listadd(char **, char *, int);
