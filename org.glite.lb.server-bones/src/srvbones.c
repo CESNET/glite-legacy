@@ -26,6 +26,8 @@
 #define IDLE_TIMEOUT		30		/* keep idle connection that many seconds */
 #define CONNECT_TIMEOUT		5		/* timeout for establishing a connection */
 #define REQUEST_TIMEOUT		10		/* timeout for a single request */ 
+#define NEW_CLIENT_DURATION	10		/* how long a client is considered new, i.e. busy
+						   connection is not closed to serve other clients */
 
 #ifndef dprintf
 #define dprintf(x)			{ if (debug) printf x; }
@@ -276,7 +278,8 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 	sigset_t		sset;
 	struct sigaction	sa;
 	struct timeval		client_done,
-				client_start;
+				client_start,
+				new_client_duration = { NEW_CLIENT_DURATION, 0 };
 
 	void	*clnt_data = NULL;
 	int	conn = -1,
@@ -422,7 +425,7 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 					gettimeofday(&client_done, NULL);
 				}
 
-				continue;
+				if (!check_timeout(new_client_duration,client_start,now)) continue;
 
 			}
 		}
@@ -509,6 +512,10 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 		dprintf(("[%d] Terminating on signal %d\n", getpid(), die));
 		if ( !debug ) syslog(LOG_INFO, "Terminating on signal %d", die);
 	}
+
+	if (conn >= 0  && services[srv].on_disconnect_hnd )
+		services[srv].on_disconnect_hnd(conn, NULL, clnt_data);
+
 	dprintf(("[%d] Terminating after %d connections\n", getpid(), req_cnt));
 	if ( !debug ) syslog(LOG_INFO, "Terminating after %d connections", req_cnt);
 
