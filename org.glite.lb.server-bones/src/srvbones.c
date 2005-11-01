@@ -516,8 +516,8 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 	if (conn >= 0  && services[srv].on_disconnect_hnd )
 		services[srv].on_disconnect_hnd(conn, NULL, clnt_data);
 
-	dprintf(("[%d] Terminating after %d connections\n", getpid(), req_cnt));
-	if ( !debug ) syslog(LOG_INFO, "Terminating after %d connections", req_cnt);
+	dprintf(("[%d] Terminating after %d requests\n", getpid(), req_cnt));
+	if ( !debug ) syslog(LOG_INFO, "Terminating after %d requests", req_cnt);
 
 
 	exit(0);
