@@ -22,7 +22,7 @@
 
 #define SLAVES_COUNT		5		/* default number of slaves */
 #define SLAVE_OVERLOAD		10		/* queue items per slave */
-#define SLAVE_CONNS_MAX		500		/* commit suicide after that many connections */
+#define SLAVE_REQS_MAX		500		/* commit suicide after that many connections */
 #define IDLE_TIMEOUT		30		/* keep idle connection that many seconds */
 #define CONNECT_TIMEOUT		5		/* timeout for establishing a connection */
 #define REQUEST_TIMEOUT		10		/* timeout for a single request */ 
@@ -44,7 +44,7 @@ static int				services_ct;
 
 static int		set_slaves_ct = SLAVES_COUNT;
 static int		set_slave_overload = SLAVE_OVERLOAD;
-static int		set_slave_conns_max = SLAVE_CONNS_MAX;
+static int		set_slave_reqs_max = SLAVE_REQS_MAX;
 static struct timeval	set_idle_to = {IDLE_TIMEOUT, 0};
 static struct timeval	set_connect_to = {CONNECT_TIMEOUT, 0};
 static struct timeval	set_request_to = {REQUEST_TIMEOUT, 0};
@@ -281,7 +281,7 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 	void	*clnt_data = NULL;
 	int	conn = -1,
 		srv = -1,
-		conn_cnt = 0,
+		req_cnt = 0,
 		sockflags,
 		h_errno,
 		pid, i,
@@ -322,19 +322,23 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 		 */
 		exit(1);
 
-	while ( !die && (conn_cnt < set_slave_conns_max || conn >= 0) )
+	while ( !die && req_cnt < set_slave_reqs_max)
 	{
 		fd_set				fds;
 		int					max = sock,
 							connflags,
 							newconn = -1,
-							newsrv = -1,
-							kick_client = 0;
+							newsrv = -1;
+
+		enum { KICK_DONT = 0, KICK_IDLE, KICK_LOAD, KICK_HANDLER, KICK_COUNT }
+			kick_client = KICK_DONT;
+
 		static char * kicks[] = {
 			"don't kick",
 			"idle client",
 			"high load",
-			"no request handler"
+			"no request handler",
+			"request count limit reached",
 		};
 		unsigned long		seq;
 		struct timeval		now,to;
@@ -367,7 +371,7 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 		sigprocmask(SIG_BLOCK, &sset, NULL);
 
 		gettimeofday(&now,NULL);
-		if (conn >= 0 && check_timeout(set_idle_to, client_done, now)) kick_client = 1;
+		if (conn >= 0 && check_timeout(set_idle_to, client_done, now)) kick_client = KICK_IDLE;
 
 		if ( conn >= 0 && !kick_client && FD_ISSET(conn, &fds) )
 		{
@@ -377,11 +381,12 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 			int		rv;
 
 			dprintf(("[%d] incoming request\n", getpid()));
+
 			if ( !services[srv].on_request_hnd )
 			{
-				kick_client = 3;
+				kick_client = KICK_HANDLER;
 			} else {
-
+				req_cnt++;
 				first_request = 0;
 				to = set_request_to;
 				if ((rv = services[srv].on_request_hnd(conn,to.tv_sec>=0 ? &to : NULL,clnt_data)) == ENOTCONN) {
@@ -422,7 +427,7 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 			}
 		}
 
-		if ( !first_request && FD_ISSET(sock, &fds) && conn_cnt < set_slave_conns_max )
+		if ( !first_request && FD_ISSET(sock, &fds) && req_cnt < set_slave_reqs_max )
 		{
 			if ( conn >= 0 ) usleep(100000 + 1000 * (random() % 200));
 			if ( do_recvmsg(sock, &newconn, &seq, &newsrv) ) switch ( errno )
@@ -434,8 +439,10 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 				if (!debug) syslog(LOG_CRIT,"recvmsg(): %m\n");
 				exit(1);
 			}
-			kick_client = 2;
+			kick_client = KICK_LOAD;
 		}
+
+		if (req_cnt >= set_slave_reqs_max) kick_client = KICK_COUNT;
 
 		if ( kick_client && conn >= 0 )
 		{
@@ -469,7 +476,7 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 				exit(1);
 			}
 	
-			conn_cnt++;
+			req_cnt++;
 			dprintf(("[%d] serving %s connection %lu\n", getpid(),
 					services[srv].id? services[srv].id: "", seq));
 	
@@ -502,8 +509,8 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 		dprintf(("[%d] Terminating on signal %d\n", getpid(), die));
 		if ( !debug ) syslog(LOG_INFO, "Terminating on signal %d", die);
 	}
-	dprintf(("[%d] Terminating after %d connections\n", getpid(), conn_cnt));
-	if ( !debug ) syslog(LOG_INFO, "Terminating after %d connections", conn_cnt);
+	dprintf(("[%d] Terminating after %d connections\n", getpid(), req_cnt));
+	if ( !debug ) syslog(LOG_INFO, "Terminating after %d connections", req_cnt);
 
 
 	exit(0);
@@ -618,7 +625,7 @@ static void glite_srvbones_set_slave_overload(int n)
 
 static void glite_srvbones_set_slave_conns_max(int n)
 {
-	set_slave_conns_max = (n == -1)? SLAVE_CONNS_MAX: n;
+	set_slave_reqs_max = (n == -1)? SLAVE_REQS_MAX: n;
 }
 
 static void set_timeout(struct timeval *to, struct timeval *val)
