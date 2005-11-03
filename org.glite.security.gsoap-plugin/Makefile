@@ -14,7 +14,6 @@ globus_prefix=/opt/globus
 nothrflavour=gcc32
 thrflavour=gcc32pthr
 gsoap_prefix=/opt/gsoap
-
 CC=gcc
 
 gsoap_versions?=2.6.2 2.7.0 2.7.6b
@@ -58,7 +57,7 @@ CFLAGS:= ${DEBUG} \
 	-I${stagedir}/include \
 	-I${globus_prefix}/include/${nothrflavour} \
 	-I${globus_prefix}/include/${nothrflavour}/openssl \
-	-I${ares_prefix}/include \
+	-I${c-ares_prefix}/include \
 	${COVERAGE_FLAGS} -D_GNU_SOURCE -DDATAGRID_EXTENSION
 
 LDFLAGS:=${COVERAGE_FLAGS}
@@ -76,7 +75,7 @@ GLOBUS_LIBS:= -L${globus_prefix}/lib \
 
 GSOAP_LIBS:= -L${gsoap_prefix}/lib -lgsoap
 
-EX_LIBS:= ${GLOBUS_LIBS} -L${ares_prefix}/lib -lares
+EX_LIBS:= ${GLOBUS_LIBS} -L${c-ares_prefix}/lib -lcares
 
 HDRS:=glite_gss.h glite_gsplugin.h
 
