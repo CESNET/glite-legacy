@@ -15,7 +15,7 @@ globus_prefix=/opt/globus
 nothrflavour=gcc32
 thrflavour=gcc32pthr
 expat_prefix=/opt/expat
-ares_prefix=/opt/ares
+c-ares_prefix=/opt/c-ares
 gsoap_prefix=/opt/gsoap
 
 -include Makefile.inc
@@ -38,7 +38,7 @@ CFLAGS:= ${DEBUG} \
 	-DVERSION=\"${version}\" \
 	-I${stagedir}/include -I${top_srcdir}/src -I. \
 	-I${expat_prefix}/include \
-	-I${ares_prefix}/include \
+	-I${c-ares_prefix}/include \
 	-I${gsoap_prefix}/include \
 	${COVERAGE_FLAGS} \
 	-I${mysql_prefix}/include -I${mysql_prefix}/include/mysql \
@@ -83,12 +83,19 @@ ifeq (${nothrflavour},gcc32dbg)
         vomsflavour :=
 endif
 
-EXT_LIBS:= -L${ares_prefix}/lib -lares \
+#EXT_LIBS:= -L${c-ares_prefix}/usr/lib -lcares \
+#	${mysqlib} -lmysqlclient -lz\
+#	${expatlib} -lexpat \
+#	${GRIDSITE_LIBS} \
+#	-lvomsc${vomsflavour} \
+#	${GLOBUS_LIBS}
+
+EXT_LIBS:=  \
+	-L${c-ares_prefix}/lib -lcares \
 	${mysqlib} -lmysqlclient -lz\
-	${expatlib} -lexpat \
 	${GRIDSITE_LIBS} \
-	-lvomsc${vomsflavour} \
-	${GLOBUS_LIBS}
+	-lvomsc${vomsflavour}
+
 
 
 
