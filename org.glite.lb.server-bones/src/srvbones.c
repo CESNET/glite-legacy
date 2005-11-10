@@ -542,6 +542,7 @@ static int do_sendmsg(int to_sock, int sock, unsigned long clnt_dispatched, int 
 	char				sendbuf[MSG_BUFSIZ];			/* to store unsigned int + \0 */
 
 
+	memset(sendbuf, 0, sizeof(sendbuf));
 	snprintf(sendbuf, sizeof(sendbuf), "%u %lu", srv, clnt_dispatched);
 
 	msg.msg_name = NULL;
