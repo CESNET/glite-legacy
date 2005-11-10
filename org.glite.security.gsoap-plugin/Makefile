@@ -50,7 +50,8 @@ default: all
 #	DEBUG:=${DEBUG} -DCHECK_GSOAP_VERSION
 #endif
 
-CFLAGS:= ${DEBUG} \
+
+CFLAGS:= ${DEBUG} ${GSOAP_DEBUG}\
 	-DVERSION=\"${version}\" \
 	-DWITH_NONAMESPACES \
 	-I. -I${top_srcdir}/interface \
