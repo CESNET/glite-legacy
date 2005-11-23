@@ -137,11 +137,13 @@ function install()
 		echo Done!
 		echo
 		echo Before using the gLite LB, please create or update the configuration
-		echo file /opt/glite/etc/config/glite-lb.cfg.xml
+		echo files /opt/glite/etc/config/glite-lb.cfg.xml
+		echo and /opt/glite/etc/config/glite-global.cfg.xml
 		echo and run the configuration script
 		echo /opt/glite/etc/config/scripts/glite-lb-config.py.
 		echo A template is provided in
 		echo /opt/glite/etc/config/templates/glite-lb.cfg.xml
+		echo Alternatively site configuration files can be used
 	else
 		echo
 		echo An error occurred while installing the LB RPMS.
@@ -153,7 +155,7 @@ function install()
 	echo For more information refer to the gLite Installation and User Guides
 	echo or to the gLite web site \(http:\/\/www.glite.org\)
 	echo Please report problems and comments to the gLite Team at
-	echo project-eu-egee-glite-bugs@cern.ch
+	echo glite-bugs@cern.ch
 
 	cd ..
 }
@@ -272,7 +274,7 @@ exit 0
                 <xsl:variable name="package"><xsl:value-of select="@name"/>_installer.sh</xsl:variable>
                 <xsl:choose>
                         <xsl:when test="$install = 'true'">
-wget -N --non-verbose <xsl:value-of select="$installers"/><xsl:value-of select="$package"/>
+wget -N -nv <xsl:value-of select="$installers"/><xsl:value-of select="$package"/>
 if [ ! -f "<xsl:value-of select="$package"/>" ]
 then
         echo
@@ -295,7 +297,7 @@ SCRIPTLISTUn="$SCRIPTLISTUn ./<xsl:value-of select="$package"/> -u "
 		<xsl:variable name="package.name"><xsl:value-of select="@name"/>-<xsl:value-of select="@version"/>-<xsl:value-of select="@age"/></xsl:variable>
 		<xsl:choose>
 			<xsl:when test="$install = 'true'">
-wget -N --non-verbose <xsl:value-of select="$ext-repository"/><xsl:value-of select="$package"/>
+wget -N -nv <xsl:value-of select="$ext-repository"/><xsl:value-of select="$package"/>
 if [ ! -f "<xsl:value-of select="$package"/>" ]
 then
 	echo 
@@ -316,7 +318,7 @@ RPMLIST="$RPMLIST <xsl:value-of select="$package.name"/>"
 		<xsl:variable name="package.name"><xsl:value-of select="@name"/>-<xsl:value-of select="@version"/>-<xsl:value-of select="@age"/></xsl:variable>
 		<xsl:choose>
 			<xsl:when test="$install='true'">
-wget -N --non-verbose <xsl:value-of select="$repository"/><xsl:value-of select="@arch"/>/RPMS/<xsl:value-of select="$package"/>
+wget -N -nv <xsl:value-of select="$repository"/><xsl:value-of select="@arch"/>/RPMS/<xsl:value-of select="$package"/>
 if [ ! -f "<xsl:value-of select="$package"/>" ]
 then
 	echo 

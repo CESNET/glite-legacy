@@ -16,9 +16,13 @@
 # Version info: $Id$
 #
 # Usage: python glite-lb-config [-c|-v|-h|--help]
-#        -c          print configuration
-#        -v          print version
+#        -c, --checkconf         print configuration
+#        -v, --version           print version
 #        -h,--help   print usage info
+#        --configure             configure the service
+#        --start                 start the service
+#        --stop                  stop the service
+#        --status                show service status
 #
 # Return codes: 0 - Ok
 #               1 - Configuration failed
@@ -42,7 +46,7 @@ class glite_lb:
     def __init__(self):
         self.mysql = MySQL.Mysql()
         self.verbose = 0
-        self.version = "1.3.0"
+        self.version = "2.1.0"
         self.name = "glite-lb"
         self.friendly_name = "gLite Logging and Bookkeeping"
         params['module.version'] = self.version
@@ -98,6 +102,7 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         print '    -c, --checkconf     print the service configuration'
         print '    -v, --version       print the version of the configuration script'
         print '    -h, --help          print this usage information'
+        print '    --configure         configure the service'
         print '    --start             start the service'
         print '    --stop              stop the service'
         print '    --status            check service status'
@@ -178,6 +183,10 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
             print 'The LB Server service has been stopped            ',
             glib.printOkMessage()
         
+        #-------------------------------------------------------------------
+        # MySQL
+        #-------------------------------------------------------------------
+
         self.mysql.stop()
 
         #-------------------------------------------------------------------
@@ -215,11 +224,10 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         #--------------------------------------------------------
         
         if os.system("python %s/glite-security-utils-config.py --subservice" % glib.getScriptPath()):
-            print "\nInstalling gLite Security Utilities                   ",
+            print "\nConfiguring gLite Security Utilities                   ",
             glib.printFailedMessage()
-            return 1
-
-        print "\nInstalling gLite Security Utilities                   ",
+        else:
+            print "\nConfiguring gLite Security Utilities                   ",
         glib.printOkMessage()
         
         # Create the GLITE_USER if it doesn't exists
@@ -244,8 +252,11 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         os.chmod("%s/hostkey.pem" % lb_cert_path, 0400)
         glib.printOkMessage()
 
-        # Create the MySQL database
-        print "\nCreate/Verify the %s database" % params['lb.database.name']
+        #--------------------------------------------------------
+        # Configure MySQL
+        #--------------------------------------------------------
+
+        # start MySQL
         self.mysql.stop()
         time.sleep(5)
         self.mysql.start()
@@ -253,8 +264,22 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         if not os.path.exists('/tmp/mysql.sock'):
             os.symlink('/var/lib/mysql/mysql.sock', '/tmp/mysql.sock')
 
+        # ------------------------------------------------------------
+        # Check password of MySQL
+        # ------------------------------------------------------------
+        
+        self.mysql_root_password = params['mysql.root.password']
+        if not params.has_key('set.mysql.root.password'):
+            params['set.mysql.root.password'] = 'false'
+        setempty = params['set.mysql.root.password']
+        if self.mysql.checkMySQLConfiguration(self.mysql_root_password,setempty):
+            return 1
+        
+        # Create the MySQL database
+        print "\nCreate/Verify the %s database" % params['lb.database.name']
+        
         # Check if database exists
-        if self.mysql.existsDB(params['lb.database.name']) != 0:
+        if self.mysql.existsDB(params['lb.database.name'],self.mysql_root_password) != 0:
             # Create database
             print ('\n==> Creating MySQL %s database\n' % params['lb.database.name'])
     
@@ -262,15 +287,14 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
                 os.remove('/tmp/mysql_ct')
             
             file = open('/tmp/mysql_ct', 'w')
-            text = ['CREATE DATABASE %s;\n' % params['lb.database.name'], 
-                       'GRANT ALL PRIVILEGES ON %s.* TO %s@localhost IDENTIFIED BY "";\n' \
-                       % (params['lb.database.name'],params['lb.database.username']),
-                       'USE %s;\n' % params['lb.database.name'],
+
+            self.mysql.add_user(params['lb.database.name'],params['lb.database.username'],"",self.mysql_root_password)
+            text = ['USE %s;\n' % params['lb.database.name'],
                        '\. %s/etc/glite-lb-dbsetup.sql\n' % os.environ['GLITE_LOCATION']]
     
             file.writelines(text)
             file.close()
-            os.system('/usr/bin/mysql < /tmp/mysql_ct')
+            os.system('/usr/bin/mysql -p%s < /tmp/mysql_ct' % self.mysql_root_password)
             os.system('/bin/rm /tmp/mysql_ct')
             
             #Starting and stopping the database before the index creation
@@ -330,6 +354,13 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
 # Set all environment variables
 #-------------------------------------------------------------------------------
 
+def loadDefaults(params):
+
+    params['GLITE_LOCATION'] = "/opt/glite"
+    params['mysql.root.password'] = ""
+    params['lb.database.name'] = "lbserver20"
+    params['lb.database.username'] = "lbserver"
+
 def set_env():
 
     # gLite
@@ -385,8 +416,9 @@ if __name__ == '__main__':
     
     # Load parameters
     params = {}
+    loadDefaults(params)
     try:
-        opts, args = getopt.getopt(sys.argv[1:], '', ['siteconfig='])
+        opts, args = glib.getopt(sys.argv[1:], '', ['siteconfig='])
         for o, a in opts:
             if o == "--siteconfig":
                 params['site.config.url'] = a
@@ -415,11 +447,15 @@ if __name__ == '__main__':
     
     # Command line opts if any
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'chv', ['checkconf', 'help', 'version','stop','start','status','siteconfig='])
+        opts, args = glib.getopt(sys.argv[1:], 'chv', ['checkconf', 'help', 'version','configure','stop','start','status','siteconfig='])
     except getopt.GetoptError:
         service.usage(msg = "Unknown options(s)")
         sys.exit(1)
 
+    if len(opts) == 0:
+        service.usage()
+        sys.exit(0)
+    
     # Check cli options
     for o, a in opts:
         if o in ("-h", "--help"):
@@ -433,15 +469,8 @@ if __name__ == '__main__':
             service.showVersion()
             glib.print_params(params)
             sys.exit(0)
-   	if o in ("stop", "--stop"): 
-            service.stop()
-            sys.exit(0)
-	if o in ("start", "--start"):
-            service.start()
-            sys.exit(0)
-        if o == "--status":
-            sys.exit(service.status())
                 
+        if o == "--configure":
 
     # Check certificates
     if params.has_key('glite.installer.checkcerts'):
@@ -459,22 +488,64 @@ if __name__ == '__main__':
     service.showVersion()
     service.banner()
         
+            # Stop all services
+            glib.printInfoMessage("\n\nStopping all running LB services...")
+            service.stop()
+            
     # Configure the service
-    if service.configure() == 0:
-        print "\n%s configuration successfully completed                " % service.friendly_name,
-        glib.printOkMessage()
+            return_result = service.configure()
+
+            if return_result == 0:
+
+                # Stop all services
+                glib.printInfoMessage("\n\nStopping all running LB services...")
+                service.stop()
+                
+                print "\n\nThe %s configuration was successfully completed\n" % service.friendly_name
+                print "You can now start the service using the --start option of this script\n\n"
         glib.registerService()
+
+                sys.exit(0)
+
+            elif return_result == 2:
+
+                # Stop all services
+                glib.printInfoMessage("\n\nStopping all running LB services...")
+                service.stop()
+                
+                print "\n\nThe %s configuration was completed,\n" % service.friendly_name
+                print "but warnings were issued. Please revise them and re-run the script\n"
+                print "or configure LB manually\n"
+
+                sys.exit(2)
+
     else:
-        print "\nAn error occurred while configuring the %s            " % service.friendly_name,
-        glib.printFailedMessage()
+                print "\n\nAn unrecoverable error occurred while configuring the %s" \
+                    % service.friendly_name
+
         sys.exit(1)
         
+        if o in ("start", "--start"):
     # Start the service
     if service.start() == 0:
-        print "\nThe %s was successfully started           " % service.friendly_name,
+                print "\n\nThe %s was successfully started           " % service.friendly_name,
         glib.printOkMessage()
+                sys.exit(0)
     else:
-        print "\nAn error occurred while starting the %s            " % service.friendly_name,
+                print "\n\nAn error occurred while starting the %s            " % service.friendly_name,
         glib.printFailedMessage()
         sys.exit(1)
 
+        if o in ("stop", "--stop"): 
+            # Stop the service
+            if service.stop() == 0:
+                print "\n\nThe %s was successfully stopped           " % service.friendly_name,
+                glib.printOkMessage()
+                sys.exit(0)
+            else:
+                print "\n\nAn unrecoverable error occurred while stopping the %s " % service.friendly_name,
+                glib.printFailedMessage()
+                sys.exit(1)
+        if o == "--status":
+            sys.exit(service.status())
+                
