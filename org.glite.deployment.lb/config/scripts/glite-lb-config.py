@@ -161,6 +161,7 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         if (pid != 0):
             print 'Could not stop the LB Server service            ',
             glib.printFailedMessage()
+            error_level = 1
         else:
             print 'The LB Server service has been stopped            ',
             glib.printOkMessage()
@@ -178,7 +179,7 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         if rgmaServicetool.stop():
             error_level = 1
 
-        return 0
+        return error_level
         
     def status(self):
 
