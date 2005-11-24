@@ -153,6 +153,8 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         
     def stop(self):
 
+        error_level = 0
+        
         pid = glib.getPID('bkserverd')
         if (pid != 0):
             os.system('%s/etc/init.d/glite-lb-bkserverd stop' % os.environ['GLITE_LOCATION'])
