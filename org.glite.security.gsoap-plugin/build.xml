@@ -93,6 +93,10 @@
 			<param name="ext.gsoap.version" value="2.7.0"/>
 		</antcall>
 
+		<antcall target="gsoap" inheritAll="false">
+			<param name="ext.gsoap.version" value="2.7.6b"/>
+		</antcall>
+
 		<antcall target="secmakefiles" />
 	</target>
 		
