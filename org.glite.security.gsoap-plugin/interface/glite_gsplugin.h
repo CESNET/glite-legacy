@@ -5,6 +5,10 @@
 
 #include "glite_gss.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define PLUGIN_ID		"GLITE_GSOAP_PLUGIN"
 
 struct _glite_gsplugin_ctx {
@@ -33,5 +37,9 @@ extern void glite_gsplugin_set_timeout(glite_gsplugin_Context, struct timeval co
 
 extern int glite_gsplugin(struct soap *, struct soap_plugin *, void *);
 extern char *glite_gsplugin_errdesc(struct soap *);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
