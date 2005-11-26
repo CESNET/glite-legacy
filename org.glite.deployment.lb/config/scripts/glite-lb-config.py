@@ -144,10 +144,12 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         #-------------------------------------------------------------------
         # Start Servicetool
         #-------------------------------------------------------------------
-    
-        errorcode = rgmaServicetool.start()
-        if (errorcode != 0):
-            return 1
+
+        if params['rgma.servicetool.activate'] == "true":
+        
+            errorcode = rgmaServicetool.start()
+            if (errorcode != 0):
+                return 1
         
         return 0
         
@@ -178,9 +180,11 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         # Servicetool
         #-------------------------------------------------------------------
 
-        if rgmaServicetool.stop():
-            error_level = 1
-
+        if params['rgma.servicetool.activate'] == "true":
+            
+            if rgmaServicetool.stop():
+                error_level = 1
+    
         return error_level
         
     def status(self):
@@ -195,9 +199,11 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         # Servicetool
         #-------------------------------------------------------------------
 
-        if rgmaServicetool.status() != 0:
-            error_level = 1
-
+        if params['rgma.servicetool.activate'] == "true":
+            
+            if rgmaServicetool.status() != 0:
+                error_level = 1
+    
         return error_level
         
     def configure(self):
@@ -319,30 +325,33 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         #-------------------------------------------------------------------
         # RGMA servicetool: configure servicetool
         #-------------------------------------------------------------------
-        # Instantiate the rgma-servicetool class
-        rgmaServicetool = gliteRgmaServicetool()
-        rgmaServicetool.verbose = self.verbose
-        
-        # Create Local Logger instance
-        serviceId = "%s_%s" % (glib.fq_hostname, params['locallogger.serviceType'])
-        servicetoolInstance = gliteRgmaServicetoolInstance(glib, serviceId)
-        
-        # set params
-        servicetoolInstance.setServiceName(params['lbserver.serviceName'])
-        servicetoolInstance.setServiceType(params['lbserver.serviceType'])
-        servicetoolInstance.setServiceVersion(self.version)
-        servicetoolInstance.setStatusScript(params['lbserver.statusScript'])
-        servicetoolInstance.setEndpoint(params['lbserver.endpoint'])
-        
-        # add instance to the gLite configuration
-        if servicetoolInstance.add() == 1:
-            return 1
-        
-        # Configure servicetool
-        if rgmaServicetool.configure(glib):
-            # error in configuring servicetool
-            return 1
-        
+
+        if params['rgma.servicetool.activate'] == "true":
+            
+            # Instantiate the rgma-servicetool class
+            rgmaServicetool = gliteRgmaServicetool()
+            rgmaServicetool.verbose = self.verbose
+            
+            # Create Local Logger instance
+            serviceId = "%s_%s" % (glib.fq_hostname, params['locallogger.serviceType'])
+            servicetoolInstance = gliteRgmaServicetoolInstance(glib, serviceId)
+            
+            # set params
+            servicetoolInstance.setServiceName(params['lbserver.serviceName'])
+            servicetoolInstance.setServiceType(params['lbserver.serviceType'])
+            servicetoolInstance.setServiceVersion(self.version)
+            servicetoolInstance.setStatusScript(params['lbserver.statusScript'])
+            servicetoolInstance.setEndpoint(params['lbserver.endpoint'])
+            
+            # add instance to the gLite configuration
+            if servicetoolInstance.add() == 1:
+                return 1
+            
+            # Configure servicetool
+            if rgmaServicetool.configure(glib):
+                # error in configuring servicetool
+                return 1
+            
         return 0
         
 #-------------------------------------------------------------------------------
@@ -427,7 +436,8 @@ if __name__ == '__main__':
                 break
     except getopt.GetoptError:
         pass
-    if glib.loadConfiguration("%s/../glite-lb.cfg.xml" % glib.getScriptPath(),params):
+    if glib.loadConfiguration(["%s/../glite-lb.cfg.xml" % glib.getScriptPath(), \
+            "%s/../glite-rgma-servicetool.cfg.xml" % glib.getScriptPath()],params):
         print "An error occurred while configuring the service"
         sys.exit(1)
     
