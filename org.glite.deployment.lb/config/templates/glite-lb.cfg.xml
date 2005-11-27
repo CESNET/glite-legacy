@@ -1,4 +1,4 @@
-<!--  Parameters for  configuring the org.glite.data.io-daemon service -->
+<!--  Parameters for  configuring the LB Server service -->
 <config>
 	<parameters>
 
