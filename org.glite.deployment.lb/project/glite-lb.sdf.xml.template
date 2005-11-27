@@ -96,10 +96,10 @@
 					  version="@ext.mysql-client.version@"
 					  age="@ext.mysql-client.rpm.age@"
 					  arch="@ext.mysql-client.platform@"/>				  
-	  			<external name="@ext.ares.rpm.name@"
-					version="@ext.ares.version@"
-					age="@ext.ares.rpm.age@"
-					arch="@ext.ares.platform@"/>
+	  			<external name="@ext.c-ares.rpm.name@"
+					version="@ext.c-ares.version@"
+					age="@ext.c-ares.rpm.age@"
+					arch="@ext.c-ares.platform@"/>
 				<external name="@ext.globus-essentials.rpm.name@"
 					version="@ext.globus-essentials.rpm.version@"
 					age="@ext.globus-essentials.rpm.age@"
