@@ -333,7 +333,7 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
             rgmaServicetool.verbose = self.verbose
             
             # Create Local Logger instance
-            serviceId = "%s_%s" % (glib.fq_hostname, params['locallogger.serviceType'])
+            serviceId = "%s_%s" % (glib.fq_hostname, params['lbserver.serviceType'])
             servicetoolInstance = gliteRgmaServicetoolInstance(glib, serviceId)
             
             # set params
