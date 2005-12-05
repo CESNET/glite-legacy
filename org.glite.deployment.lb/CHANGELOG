@@ -1,3 +1,6 @@
+DATE: 04-12-2005 21:15
+[dimeglio] Added configuration parameter for setting mysql max_allowed_packet
+
 DATE: 23-11-2005 23:50
 [dimeglio] Use ConfigParams class
 [dimeglio] Removed servietool instabce config params, put instance creation in script

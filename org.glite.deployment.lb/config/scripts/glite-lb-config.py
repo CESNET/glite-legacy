@@ -6,7 +6,7 @@
 # For license conditions see the license file or http://eu-egee.org/license.html
 #
 ################################################################################
-# glite-lb-config v. 2.1.0
+# glite-lb-config v. 2.1.1
 #
 # Post-installation script for configuring the gLite Logging and Bookkeping Server
 # Robert Harakaly < robert.harakaly@cern.ch >
@@ -48,7 +48,7 @@ class glite_lb:
     def __init__(self):
         self.mysql = MySQL.Mysql()
         self.verbose = 0
-        self.version = "2.1.0"
+        self.version = "2.1.1"
         self.name = "glite-lb"
         self.friendly_name = "gLite Logging and Bookkeeping"
         
@@ -213,10 +213,10 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         #--------------------------------------------------------
         
         if os.system("python %s/glite-security-utils-config.py --subservice" % glib.getScriptPath()):
-            print "\nConfiguring gLite Security Utilities                   ",
+            print "\nConfiguring gLite Security Utilities                      ",
             glib.printFailedMessage()
         else:
-            print "\nConfiguring gLite Security Utilities                   ",
+            print "\nConfiguring gLite Security Utilities                      ",
             glib.printOkMessage()
         
         # Create the GLITE_USER if it doesn't exists
@@ -228,8 +228,8 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         glib.printOkMessage()
 
         # Create all directories needed
-        print "\nVerify CA certificates directory            ",
         glib.check_dir(os.environ['GLITE_CERT_DIR'])
+        print "\nVerify CA certificates directory                          ",
         glib.printOkMessage()
          
         # Copy certificates
@@ -245,6 +245,10 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         # Configure MySQL
         #--------------------------------------------------------
 
+        # Set mysql parameters
+        #self.mysql.setConfiguration('client','max_allowed_packet',params['mysql.max_allowed_packet'])
+        self.mysql.setConfiguration('mysqld','max_allowed_packet',params['mysql.max_allowed_packet'])
+        
         # start MySQL
         self.mysql.stop()
         time.sleep(5)
@@ -364,6 +368,7 @@ def loadDefaults(params):
     params['mysql.root.password'] = ""
     params['lb.database.name'] = "lbserver20"
     params['lb.database.username'] = "lbserver"
+    params['mysql.max_allowed_packet'] = "17"
     
     params['lbserver.serviceName'] = 'LB Server service at %s' % glib.fq_hostname
     params['lbserver.serviceType'] = 'org.glite.lb.server'
