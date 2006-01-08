@@ -81,6 +81,12 @@
                     build="@org.glite.security.voms-api-c.info.build@"
                     arch="i386"/>
 
+				<component name="glite-jp-primary"
+                    version="@org.glite.jp.primary.info.version@"
+                    age="@org.glite.jp.primary.info.age@"
+                    build="@org.glite.jp.primary.info.build@"
+                    arch="i386"/>
+
                 <component name="gridsite"
                     version="@org.gridsite.core.info.version@"
                     age="@org.gridsite.core.info.age@"
