@@ -42,15 +42,16 @@
 		<!-- mysql configuration -->
 		<set.mysql.root.password
 			description="If this parameter is true, then the root password of the mysql database
-			is set to the value specified in mysql.root.password if it not yet set. This parameter has
-			no effect if the database root password is already set. It can be used to ease automated
-			installation and configuration of the service, if mysql is not managed in some other way"
+				is set to the value specified in mysql.root.password if it not yet set. This parameter has
+				no effect if the database root password is already set. It can be used to ease automated
+				installation and configuration of the service, if mysql is not managed in some other way.
+				[Example: false] [Type: boolean]"
 			value="false"/>
 
 		<mysql.max_allowed_packet
 			description="This parameter allows to set the max_allowed_packet parameter in the mysql
-			configuration file /etc/my.cnf. The default recommended value for the LB server is 17MB
-			[Example: 17][Type: Integer][Unit: MB]"
+				configuration file /etc/my.cnf. The default recommended value for the LB server is 17MB
+				[Example: 17][Type: Integer][Unit: MB]"
 			value="17"/>
 
 		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->

@@ -14,14 +14,8 @@
 	{font-family:Wingdings;
 	panose-1:5 0 0 0 0 0 0 0 0 0;}
 @font-face
-	{font-family:"MS Mincho";
-	panose-1:2 2 6 9 4 2 5 8 3 4;}
-@font-face
 	{font-family:Tahoma;
 	panose-1:2 11 6 4 3 5 4 4 2 4;}
-@font-face
-	{font-family:"\@MS Mincho";
-	panose-1:2 2 6 9 4 2 5 8 3 4;}
 @font-face
 	{font-family:ZWAdobeF;
 	panose-1:0 0 0 0 0 0 0 0 0 0;}
@@ -985,7 +979,7 @@ text-transform:uppercase'>gLite Logging &amp; Bookkeeping Server</span></p>
 <h1><span lang=FR>1. </span><span lang=FR>Release Description</span></h1>
 
 <p class=MsoNormal>This release contains the gLite Logging &amp; Bookkeeping
-Server module v. 2.0.2. The following sections provide additional information about
+Server module v. 2.1.1. The following sections provide additional information about
 the release content, the module dependencies, the know bugs and issues and a
 list of bugs closed since the previous release. For information about
 installing and using the gLite Logging &amp; Bookkeeping Server, please refer
@@ -996,14 +990,13 @@ lang=FR>Changes in this release</span></h1>
 
 <h2><span lang=FR>2.1. </span><span lang=FR>Changes in functionality</span></h2>
 
-<p class=MsoNormal><span lang=EN-US>The mysql database can now be protected
-with a root password. The mysql root password can be set in the configuration
-file.</span></p>
+<p class=MsoNormal><span lang=EN-US>There are no functional changes in this
+release.</span></p>
 
 <h2>2.2. Changes in Configuration</h2>
 
 <p class=MsoNormal><span lang=EN-US>The following new parameters have been
-added to the glite-security-utils.cfg.xml file:</span></p>
+added to the glite-lb.cfg.xml file:</span></p>
 
 <p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
 
@@ -1026,94 +1019,69 @@ added to the glite-security-utils.cfg.xml file:</span></p>
  <tr>
   <td width=185 valign=top style='width:138.8pt;border:solid windowtext 1.0pt;
   border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span lang=EN-US>mysql.root.password</span></p>
+  <p class=MsoNormal><span lang=EN-US>rgma.servicetool.activate</span></p>
   </td>
   <td width=101 valign=top style='width:75.9pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span lang=EN-US>&lt;changeme&gt;</span></p>
+  <p class=MsoNormal><span lang=EN-US>true</span></p>
   </td>
   <td width=333 valign=top style='width:249.7pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span lang=EN-US>The mysql root password</span></p>
-  </td>
- </tr>
-</table>
-
-<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>The following parameters have been changed
-in the glite-security-utils.cfg.xml file:</span></p>
-
-<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
-
-<table class=MsoTableGrid border=1 cellspacing=0 cellpadding=0
- style='border-collapse:collapse;border:none'>
- <tr>
-  <td width=134 valign=top style='width:100.5pt;border:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><b><span lang=EN-US>Parameter name</span></b></p>
-  </td>
-  <td width=210 valign=top style='width:157.45pt;border:solid windowtext 1.0pt;
-  border-left:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><b><span lang=EN-US>Old value</span></b></p>
-  </td>
-  <td width=141 valign=top style='width:105.45pt;border:solid windowtext 1.0pt;
-  border-left:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><b><span lang=EN-US>New value</span></b></p>
-  </td>
-  <td width=135 valign=top style='width:101.0pt;border:solid windowtext 1.0pt;
-  border-left:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><b><span lang=EN-US>Description</span></b></p>
-  </td>
- </tr>
-</table>
-
-<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>The following new parameters have been
-removed from the glite-security-utils.cfg.xml file:</span></p>
-
-<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
-
-<table class=MsoTableGrid border=1 cellspacing=0 cellpadding=0
- style='border-collapse:collapse;border:none'>
- <tr>
-  <td width=185 valign=top style='width:138.8pt;border:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><b><span lang=EN-US>Parameter name</span></b></p>
-  </td>
-  <td width=333 valign=top style='width:249.7pt;border:solid windowtext 1.0pt;
-  border-left:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><b><span lang=EN-US>Comment</span></b></p>
+  <p class=MsoNormal><span lang=EN-US>Turn on/off servicetool for the node.</span></p>
+  <p class=MsoNormal><span lang=EN-US>[Example: true ] [Type: 'boolean']</span></p>
   </td>
  </tr>
  <tr>
   <td width=185 valign=top style='width:138.8pt;border:solid windowtext 1.0pt;
   border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span lang=EN-US>lb.database.name</span></p>
+  <p class=MsoNormal><span lang=EN-US>set.mysql.root.password</span></p>
+  </td>
+  <td width=101 valign=top style='width:75.9pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span lang=EN-US>false</span></p>
   </td>
   <td width=333 valign=top style='width:249.7pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span lang=EN-US>The LB database name cannot be configured
-  internally, therefore this parameter was ignored</span></p>
+  <p class=MsoNormal><span lang=EN-US>If this parameter is true, then the root
+  password of the mysql database is set to the value specified in
+  mysql.root.password if it not yet set. This parameter has       no effect if
+  the database root password is already set. It can be used to ease automated installation
+  and configuration of the service, if mysql is not managed in some other way.</span></p>
+  <p class=MsoNormal><span lang=EN-US>[Example: false][Type: boolean]</span></p>
   </td>
  </tr>
  <tr>
   <td width=185 valign=top style='width:138.8pt;border:solid windowtext 1.0pt;
   border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span lang=EN-US>lb.database.username</span></p>
+  <p class=MsoNormal><span lang=EN-US>mysql.max_allowed_packet</span></p>
+  </td>
+  <td width=101 valign=top style='width:75.9pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span lang=EN-US>17</span></p>
   </td>
   <td width=333 valign=top style='width:249.7pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span lang=EN-US>The LB database user cannot be configured
-  internally, therefore this parameter was ignored</span></p>
+  <p class=MsoNormal><span lang=EN-US>This parameter allows to set the
+  max_allowed_packet parameter in the mysql configuration file /etc/my.cnf. The
+  default recommended value for the LB server is 17MB.</span></p>
+  <p class=MsoNormal><span lang=EN-US>[Example: 17][Type: Integer][Unit: MB]</span></p>
   </td>
  </tr>
 </table>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>The R-GMA Service Publisher (aka R-GMA
+servicetool) parameters are now automatically handled by the configuration
+script and do not need to be explicitly set anymore in the configuration file.
+The parameters can be set in the configuration file to override the default
+values.</span></p>
 
 <p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
 
@@ -1142,7 +1110,7 @@ specific release notes and installation instructions.</p>
 
 <h2>3.2. Glite RPMS</h2>
 
-<p class=MsoNormal>The gLite Logging &amp; Bookkeeping Server v. 2.0.2 is
+<p class=MsoNormal>The gLite Logging &amp; Bookkeeping Server v. 2.1.1 is
 composed of the following gLite components:</p>
 
 <p class=MsoNormal>&nbsp;</p>
@@ -1150,485 +1118,500 @@ composed of the following gLite components:</p>
 <table class=MsoTableGrid border=1 cellspacing=0 cellpadding=0 width="100%"
  style='width:100.36%;border-collapse:collapse;border:none'>
  <tr>
-  <td width="20%" valign=top style='width:20.94%;border:solid windowtext 1.0pt;
+  <td width="20%" valign=top style='width:20.92%;border:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><b><span
-  style='font-size:8.0pt'>Component name</span></b></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>Component name</span></p>
   </td>
   <td width="22%" valign=top style='width:22.8%;border:solid windowtext 1.0pt;
   border-left:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><b><span
-  style='font-size:8.0pt'>Description</span></b></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>Description</span></p>
   </td>
   <td width="10%" valign=top style='width:10.66%;border:solid windowtext 1.0pt;
   border-left:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><b><span
-  style='font-size:8.0pt'>Version</span></b></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>Version</span></p>
   </td>
-  <td width="45%" valign=top style='width:45.6%;border:solid windowtext 1.0pt;
+  <td width="45%" valign=top style='width:45.62%;border:solid windowtext 1.0pt;
   border-left:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><b><span
-  style='font-size:8.0pt'>File</span></b></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>File</span></p>
   </td>
  </tr>
  <tr>
-  <td width="20%" valign=top style='width:20.94%;border:solid windowtext 1.0pt;
+  <td width="20%" valign=top style='width:20.92%;border:solid windowtext 1.0pt;
   border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>glite-config</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>glite-config</span></p>
   </td>
   <td width="22%" valign=top style='width:22.8%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>gLite configuration scripts</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>gLite configuration scripts</span></p>
   </td>
   <td width="10%" valign=top style='width:10.66%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>1.4.5</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>1.6.20</span></p>
   </td>
-  <td width="45%" valign=top style='width:45.6%;border-top:none;border-left:
+  <td width="45%" valign=top style='width:45.62%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'><a
-  href="http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/noarch/RPMS/glite-config-1.4.2-1.noarch.rpm">http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/noarch/RPMS/glite-config-1.4.2-1.noarch.rpm</a></span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'><a
+  href="http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/noarch/RPMS/glite-config-1.6.20-1.noarch.rpm">http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/noarch/RPMS/glite-config-1.6.20-1.noarch.rpm</a></span></p>
   </td>
  </tr>
  <tr>
-  <td width="20%" valign=top style='width:20.94%;border:solid windowtext 1.0pt;
+  <td width="20%" valign=top style='width:20.92%;border:solid windowtext 1.0pt;
   border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>glite-lb-client-interface</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>glite-jp-common</span></p>
   </td>
   <td width="22%" valign=top style='width:22.8%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>L&amp;B client library
-  header files</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>&nbsp;</span></p>
   </td>
   <td width="10%" valign=top style='width:10.66%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>2.0.0</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>1.1.0</span></p>
   </td>
-  <td width="45%" valign=top style='width:45.6%;border-top:none;border-left:
+  <td width="45%" valign=top style='width:45.62%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'><a
-  href="http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/i386/RPMS/glite-lb-client-interface-2.0.0-1.i386.rpm">http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/i386/RPMS/glite-lb-client-interface-2.0.0-1.i386.rpm</a></span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'><a
+  href="http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/i386/RPMS/glite-jp-common-1.1.0-1.i386.rpm">http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/i386/RPMS/glite-jp-common-1.1.0-1.i386.rpm</a></span></p>
   </td>
  </tr>
  <tr>
-  <td width="20%" valign=top style='width:20.94%;border:solid windowtext 1.0pt;
+  <td width="20%" valign=top style='width:20.92%;border:solid windowtext 1.0pt;
   border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>glite-lb-common</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>glite-jp-primary</span></p>
   </td>
   <td width="22%" valign=top style='width:22.8%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>L&amp;B common subroutines
-  library</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>&nbsp;</span></p>
   </td>
   <td width="10%" valign=top style='width:10.66%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>2.0.1</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>1.1.1</span></p>
   </td>
-  <td width="45%" valign=top style='width:45.6%;border-top:none;border-left:
+  <td width="45%" valign=top style='width:45.62%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'><a
-  href="http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/i386/RPMS/glite-lb-common-2.0.1-1.i386.rpm">http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/i386/RPMS/glite-lb-common-2.0.1-1.i386.rpm</a></span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'><a
+  href="http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/i386/RPMS/glite-jp-primary-1.1.1-1.i386.rpm">http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/i386/RPMS/glite-jp-primary-1.1.1-1.i386.rpm</a></span></p>
   </td>
  </tr>
  <tr>
-  <td width="20%" valign=top style='width:20.94%;border:solid windowtext 1.0pt;
+  <td width="20%" valign=top style='width:20.92%;border:solid windowtext 1.0pt;
   border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>glite-lb-config</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>glite-jp-server-common</span></p>
   </td>
   <td width="22%" valign=top style='width:22.8%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>gLite Logging and
-  Bookkeeping node configuration files</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>&nbsp;</span></p>
   </td>
   <td width="10%" valign=top style='width:10.66%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>2.0.1</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>1.0.0</span></p>
   </td>
-  <td width="45%" valign=top style='width:45.6%;border-top:none;border-left:
+  <td width="45%" valign=top style='width:45.62%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'><a
-  href="http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/noarch/RPMS/glite-lb-config-2.0.1-1.noarch.rpm">http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/noarch/RPMS/glite-lb-config-2.0.1-1.noarch.rpm</a></span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'><a
+  href="http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/i386/RPMS/glite-jp-server-common-1.0.0-1.i386.rpm">http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/i386/RPMS/glite-jp-server-common-1.0.0-1.i386.rpm</a></span></p>
   </td>
  </tr>
  <tr>
-  <td width="20%" valign=top style='width:20.94%;border:solid windowtext 1.0pt;
+  <td width="20%" valign=top style='width:20.92%;border:solid windowtext 1.0pt;
   border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>glite-lb-logger</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>glite-jp-ws-interface</span></p>
   </td>
   <td width="22%" valign=top style='width:22.8%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>L&amp;B local logger</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>&nbsp;</span></p>
   </td>
   <td width="10%" valign=top style='width:10.66%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>1.1.2</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>1.1.0</span></p>
   </td>
-  <td width="45%" valign=top style='width:45.6%;border-top:none;border-left:
+  <td width="45%" valign=top style='width:45.62%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'><a
-  href="http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/i386/RPMS/glite-lb-logger-1.1.2-1.i386.rpm">http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/i386/RPMS/glite-lb-logger-1.1.2-1.i386.rpm</a></span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'><a
+  href="http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/i386/RPMS/glite-jp-ws-interface-1.1.0-0.i386.rpm">http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/i386/RPMS/glite-jp-ws-interface-1.1.0-0.i386.rpm</a></span></p>
   </td>
  </tr>
  <tr>
-  <td width="20%" valign=top style='width:20.94%;border:solid windowtext 1.0pt;
+  <td width="20%" valign=top style='width:20.92%;border:solid windowtext 1.0pt;
   border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>glite-lb-server</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>glite-lb-client-interface</span></p>
   </td>
   <td width="22%" valign=top style='width:22.8%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>L&amp;B bookkeeping server</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>L&amp;B client library header files</span></p>
   </td>
   <td width="10%" valign=top style='width:10.66%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>1.2.5</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>2.1.0</span></p>
   </td>
-  <td width="45%" valign=top style='width:45.6%;border-top:none;border-left:
+  <td width="45%" valign=top style='width:45.62%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'><a
-  href="http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/i386/RPMS/glite-lb-server-1.2.5-1.i386.rpm">http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/i386/RPMS/glite-lb-server-1.2.5-1.i386.rpm</a></span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'><a
+  href="http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/i386/RPMS/glite-lb-client-interface-2.1.0-1.i386.rpm">http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/i386/RPMS/glite-lb-client-interface-2.1.0-1.i386.rpm</a></span></p>
   </td>
  </tr>
  <tr>
-  <td width="20%" valign=top style='width:20.94%;border:solid windowtext 1.0pt;
+  <td width="20%" valign=top style='width:20.92%;border:solid windowtext 1.0pt;
   border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>glite-lb-server-bones</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>glite-lb-common</span></p>
   </td>
   <td width="22%" valign=top style='width:22.8%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>L&amp;B server bones</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>L&amp;B common subroutines library</span></p>
   </td>
   <td width="10%" valign=top style='width:10.66%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>2.0.0</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>3.0.1</span></p>
   </td>
-  <td width="45%" valign=top style='width:45.6%;border-top:none;border-left:
+  <td width="45%" valign=top style='width:45.62%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'><a
-  href="http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/i386/RPMS/glite-lb-server-bones-2.0.0-1.i386.rpm">http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/i386/RPMS/glite-lb-server-bones-2.0.0-1.i386.rpm</a></span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'><a
+  href="http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/i386/RPMS/glite-lb-common-3.0.1-1.i386.rpm">http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/i386/RPMS/glite-lb-common-3.0.1-1.i386.rpm</a></span></p>
   </td>
  </tr>
  <tr>
-  <td width="20%" valign=top style='width:20.94%;border:solid windowtext 1.0pt;
+  <td width="20%" valign=top style='width:20.92%;border:solid windowtext 1.0pt;
   border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>glite-lb-ws-interface</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>glite-lb-logger</span></p>
   </td>
   <td width="22%" valign=top style='width:22.8%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>&nbsp;</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>L&amp;B local logger</span></p>
   </td>
   <td width="10%" valign=top style='width:10.66%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>2.0.0</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>1.2.1</span></p>
   </td>
-  <td width="45%" valign=top style='width:45.6%;border-top:none;border-left:
+  <td width="45%" valign=top style='width:45.62%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'><a
-  href="http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/i386/RPMS/glite-lb-ws-interface-2.0.0-1.i386.rpm">http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/i386/RPMS/glite-lb-ws-interface-2.0.0-1.i386.rpm</a></span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'><a
+  href="http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/i386/RPMS/glite-lb-logger-1.2.1-1.i386.rpm">http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/i386/RPMS/glite-lb-logger-1.2.1-1.i386.rpm</a></span></p>
   </td>
  </tr>
  <tr>
-  <td width="20%" valign=top style='width:20.94%;border:solid windowtext 1.0pt;
+  <td width="20%" valign=top style='width:20.92%;border:solid windowtext 1.0pt;
   border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>glite-rgma-api-java</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>glite-lb-server</span></p>
   </td>
   <td width="22%" valign=top style='width:22.8%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span lang=IT style='font-size:8.0pt'>Java API for R-GMA</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>L&amp;B bookkeeping server</span></p>
   </td>
   <td width="10%" valign=top style='width:10.66%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>4.1.5</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>1.3.3</span></p>
   </td>
-  <td width="45%" valign=top style='width:45.6%;border-top:none;border-left:
+  <td width="45%" valign=top style='width:45.62%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'><a
-  href="http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/noarch/RPMS/glite-rgma-api-java-4.1.5-1.noarch.rpm">http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/noarch/RPMS/glite-rgma-api-java-4.1.5-1.noarch.rpm</a></span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'><a
+  href="http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/i386/RPMS/glite-lb-server-1.3.3-1.i386.rpm">http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/i386/RPMS/glite-lb-server-1.3.3-1.i386.rpm</a></span></p>
   </td>
  </tr>
  <tr>
-  <td width="20%" valign=top style='width:20.94%;border:solid windowtext 1.0pt;
+  <td width="20%" valign=top style='width:20.92%;border:solid windowtext 1.0pt;
   border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>glite-rgma-base</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>glite-lb-server-bones</span></p>
   </td>
   <td width="22%" valign=top style='width:22.8%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>R-GMA basic configuration
-  and documentation</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>L&amp;B server bones</span></p>
   </td>
   <td width="10%" valign=top style='width:10.66%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>4.1.19</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>2.1.1</span></p>
   </td>
-  <td width="45%" valign=top style='width:45.6%;border-top:none;border-left:
+  <td width="45%" valign=top style='width:45.62%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'><a
-  href="http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/noarch/RPMS/glite-rgma-base-4.1.19-1.noarch.rpm">http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/noarch/RPMS/glite-rgma-base-4.1.19-1.noarch.rpm</a></span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'><a
+  href="http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/i386/RPMS/glite-lb-server-bones-2.1.1-1.i386.rpm">http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/i386/RPMS/glite-lb-server-bones-2.1.1-1.i386.rpm</a></span></p>
   </td>
  </tr>
  <tr>
-  <td width="20%" valign=top style='width:20.94%;border:solid windowtext 1.0pt;
+  <td width="20%" valign=top style='width:20.92%;border:solid windowtext 1.0pt;
   border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>glite-rgma-common-config</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>glite-lb-ws-interface</span></p>
   </td>
   <td width="22%" valign=top style='width:22.8%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>gLite rgma common
-  configuration items installation</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>&nbsp;</span></p>
   </td>
   <td width="10%" valign=top style='width:10.66%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>5.0.0</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>2.1.0</span></p>
   </td>
-  <td width="45%" valign=top style='width:45.6%;border-top:none;border-left:
+  <td width="45%" valign=top style='width:45.62%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'><a
-  href="http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/noarch/RPMS/glite-rgma-common-config-5.0.0-1.noarch.rpm">http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/noarch/RPMS/glite-rgma-common-config-5.0.0-1.noarch.rpm</a></span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'><a
+  href="http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/i386/RPMS/glite-lb-ws-interface-2.1.0-1.i386.rpm">http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/i386/RPMS/glite-lb-ws-interface-2.1.0-1.i386.rpm</a></span></p>
   </td>
  </tr>
  <tr>
-  <td width="20%" valign=top style='width:20.94%;border:solid windowtext 1.0pt;
+  <td width="20%" valign=top style='width:20.92%;border:solid windowtext 1.0pt;
   border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>glite-rgma-servicetool</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>glite-rgma-servicetool-config</span></p>
   </td>
   <td width="22%" valign=top style='width:22.8%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>R-GMA service tool</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>gLite R-GMA servicetool installation</span></p>
   </td>
   <td width="10%" valign=top style='width:10.66%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>4.1.19</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>5.2.2</span></p>
   </td>
-  <td width="45%" valign=top style='width:45.6%;border-top:none;border-left:
+  <td width="45%" valign=top style='width:45.62%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'><a
-  href="http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/noarch/RPMS/glite-rgma-servicetool-4.1.19-3.noarch.rpm">http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/noarch/RPMS/glite-rgma-servicetool-4.1.19-3.noarch.rpm</a></span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'><a
+  href="http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/noarch/RPMS/glite-rgma-servicetool-config-5.2.2-1.noarch.rpm">http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/noarch/RPMS/glite-rgma-servicetool-config-5.2.2-1.noarch.rpm</a></span></p>
   </td>
  </tr>
  <tr>
-  <td width="20%" valign=top style='width:20.94%;border:solid windowtext 1.0pt;
+  <td width="20%" valign=top style='width:20.92%;border:solid windowtext 1.0pt;
   border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>glite-rgma-servicetool-config</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>glite-security-gsoap-plugin</span></p>
   </td>
   <td width="22%" valign=top style='width:22.8%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>gLite R-GMA servicetool
-  installation</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>gSOAP plugin and gss libraries</span></p>
   </td>
   <td width="10%" valign=top style='width:10.66%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>5.1.0</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>1.2.1</span></p>
   </td>
-  <td width="45%" valign=top style='width:45.6%;border-top:none;border-left:
+  <td width="45%" valign=top style='width:45.62%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'><a
-  href="http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/noarch/RPMS/glite-rgma-servicetool-config-5.1.0-1.noarch.rpm">http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/noarch/RPMS/glite-rgma-servicetool-config-5.1.0-1.noarch.rpm</a></span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'><a
+  href="http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/i386/RPMS/glite-security-gsoap-plugin-1.2.1-0.i386.rpm">http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/i386/RPMS/glite-security-gsoap-plugin-1.2.1-0.i386.rpm</a></span></p>
   </td>
  </tr>
  <tr>
-  <td width="20%" valign=top style='width:20.94%;border:solid windowtext 1.0pt;
+  <td width="20%" valign=top style='width:20.92%;border:solid windowtext 1.0pt;
   border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span lang=FR style='font-size:8.0pt'>glite-rgma-stubs-servlet-java</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>glite-security-utils-config</span></p>
   </td>
   <td width="22%" valign=top style='width:22.8%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>Java client implementation
-  stubs for R-GMA</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>gLite Security Utilities configuration files</span></p>
   </td>
   <td width="10%" valign=top style='width:10.66%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>4.1.13</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>1.2.1</span></p>
   </td>
-  <td width="45%" valign=top style='width:45.6%;border-top:none;border-left:
+  <td width="45%" valign=top style='width:45.62%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'><a
-  href="http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/noarch/RPMS/glite-rgma-stubs-servlet-java-4.1.13-1.noarch.rpm">http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/noarch/RPMS/glite-rgma-stubs-servlet-java-4.1.13-1.noarch.rpm</a></span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'><a
+  href="http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/noarch/RPMS/glite-security-utils-config-1.2.1-1.noarch.rpm">http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/noarch/RPMS/glite-security-utils-config-1.2.1-1.noarch.rpm</a></span></p>
   </td>
  </tr>
  <tr>
-  <td width="20%" valign=top style='width:20.94%;border:solid windowtext 1.0pt;
+  <td width="20%" valign=top style='width:20.92%;border:solid windowtext 1.0pt;
   border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>glite-security-gsoap-plugin</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>glite-security-voms-api-c</span></p>
   </td>
   <td width="22%" valign=top style='width:22.8%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>gSOAP plugin and gss
-  libraries</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>&nbsp;</span></p>
   </td>
   <td width="10%" valign=top style='width:10.66%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>1.1.1</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>1.6.10</span></p>
   </td>
-  <td width="45%" valign=top style='width:45.6%;border-top:none;border-left:
+  <td width="45%" valign=top style='width:45.62%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'><a
-  href="http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/i386/RPMS/glite-security-gsoap-plugin-1.1.1-0.i386.rpm">http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/i386/RPMS/glite-security-gsoap-plugin-1.1.1-0.i386.rpm</a></span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'><a
+  href="http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/i386/RPMS/glite-security-voms-api-c-1.6.10-0.i386.rpm">http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/i386/RPMS/glite-security-voms-api-c-1.6.10-0.i386.rpm</a></span></p>
   </td>
  </tr>
  <tr>
-  <td width="20%" valign=top style='width:20.94%;border:solid windowtext 1.0pt;
+  <td width="20%" valign=top style='width:20.92%;border:solid windowtext 1.0pt;
   border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>glite-security-trustmanager</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>glite-wms-utils-exception</span></p>
   </td>
   <td width="22%" valign=top style='width:22.8%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>The java certificate path
-  checkin for proxy certs in SSL with plugins for tomcat and axis.</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>&nbsp;</span></p>
   </td>
   <td width="10%" valign=top style='width:10.66%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>1.7.3</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>1.0.3</span></p>
   </td>
-  <td width="45%" valign=top style='width:45.6%;border-top:none;border-left:
+  <td width="45%" valign=top style='width:45.62%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'><a
-  href="http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/noarch/RPMS/glite-security-trustmanager-1.7.3-1.noarch.rpm">http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/noarch/RPMS/glite-security-trustmanager-1.7.3-1.noarch.rpm</a></span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'><a
+  href="http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/i386/RPMS/glite-wms-utils-exception-1.0.3-1.i386.rpm">http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/i386/RPMS/glite-wms-utils-exception-1.0.3-1.i386.rpm</a></span></p>
   </td>
  </tr>
  <tr>
-  <td width="20%" valign=top style='width:20.94%;border:solid windowtext 1.0pt;
+  <td width="20%" valign=top style='width:20.92%;border:solid windowtext 1.0pt;
   border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>glite-security-util-java</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>glite-wms-utils-jobid</span></p>
   </td>
   <td width="22%" valign=top style='width:22.8%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>The java utilities library
-  for security</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>&nbsp;</span></p>
   </td>
   <td width="10%" valign=top style='width:10.66%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>1.1.2</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>1.0.2</span></p>
   </td>
-  <td width="45%" valign=top style='width:45.6%;border-top:none;border-left:
+  <td width="45%" valign=top style='width:45.62%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'><a
-  href="http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/noarch/RPMS/glite-security-util-java-1.1.2-2.noarch.rpm">http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/noarch/RPMS/glite-security-util-java-1.1.2-2.noarch.rpm</a></span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'><a
+  href="http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/i386/RPMS/glite-wms-utils-jobid-1.0.2-1.i386.rpm">http://glite.web.cern.ch/glite/packages/R1.5/R20051130/bin/rhel30/i386/RPMS/glite-wms-utils-jobid-1.0.2-1.i386.rpm</a></span></p>
   </td>
  </tr>
  <tr>
-  <td width="20%" valign=top style='width:20.94%;border:solid windowtext 1.0pt;
+  <td width="20%" valign=top style='width:20.92%;border:solid windowtext 1.0pt;
   border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>glite-security-utils-config</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>gridsite</span></p>
   </td>
   <td width="22%" valign=top style='width:22.8%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>gLite Security Utilities
-  configuration files</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>GridSite</span></p>
   </td>
   <td width="10%" valign=top style='width:10.66%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>1.0.4</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>1.1.15</span></p>
   </td>
-  <td width="45%" valign=top style='width:45.6%;border-top:none;border-left:
+  <td width="45%" valign=top style='width:45.62%;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'><a
-  href="http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/noarch/RPMS/glite-security-utils-config-1.0.4-1.noarch.rpm">http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/noarch/RPMS/glite-security-utils-config-1.0.4-1.noarch.rpm</a></span></p>
-  </td>
- </tr>
- <tr>
-  <td width="20%" valign=top style='width:20.94%;border:solid windowtext 1.0pt;
-  border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>glite-security-voms-api-c</span></p>
-  </td>
-  <td width="22%" valign=top style='width:22.8%;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>&nbsp;</span></p>
-  </td>
-  <td width="10%" valign=top style='width:10.66%;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>1.6.3</span></p>
-  </td>
-  <td width="45%" valign=top style='width:45.6%;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'><a
-  href="http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/i386/RPMS/glite-security-voms-api-c-1.6.3-0.i386.rpm">http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/i386/RPMS/glite-security-voms-api-c-1.6.3-0.i386.rpm</a></span></p>
-  </td>
- </tr>
- <tr>
-  <td width="20%" valign=top style='width:20.94%;border:solid windowtext 1.0pt;
-  border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>glite-wms-utils-exception</span></p>
-  </td>
-  <td width="22%" valign=top style='width:22.8%;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>&nbsp;</span></p>
-  </td>
-  <td width="10%" valign=top style='width:10.66%;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>1.0.2</span></p>
-  </td>
-  <td width="45%" valign=top style='width:45.6%;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'><a
-  href="http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/i386/RPMS/glite-wms-utils-exception-1.0.2-1.i386.rpm">http://glite.web.cern.ch/glite/packages/R1.4/R20050916/bin/rhel30/i386/RPMS/glite-wms-utils-exception-1.0.2-1.i386.rpm</a></span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'><a
+  href="http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/gridsite-1.1.15-1.i386.rpm">http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/gridsite-1.1.15-1.i386.rpm</a></span></p>
   </td>
  </tr>
 </table>
 
-<p class=MsoNormal>&nbsp;</p>
-
 <h1>4. Dependencies</h1>
 
-<p class=MsoNormal>The gLite Logging &amp; Bookkeeping Server v. 2.0.2 module
+<p class=MsoNormal>The gLite Logging &amp; Bookkeeping Server v. 2.1.1 module
 has the following dependencies:</p>
 
 <p class=MsoNormal>&nbsp;</p>
@@ -1636,204 +1619,230 @@ has the following dependencies:</p>
 <table class=MsoTableGrid border=1 cellspacing=0 cellpadding=0 width=621
  style='width:466.1pt;border-collapse:collapse;border:none'>
  <tr>
-  <td width=158 valign=top style='width:118.6pt;border:solid windowtext 1.0pt;
+  <td width=130 valign=top style='width:97.55pt;border:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
   8.0pt'>Component name</span></p>
   </td>
-  <td width=66 valign=top style='width:49.25pt;border:solid windowtext 1.0pt;
+  <td width=142 valign=top style='width:106.3pt;border:solid windowtext 1.0pt;
+  border-left:none;padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>Description</span></p>
+  </td>
+  <td width=66 valign=top style='width:49.65pt;border:solid windowtext 1.0pt;
   border-left:none;padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal><span style='font-size:8.0pt'>Version</span></p>
   </td>
-  <td width=398 valign=top style='width:298.25pt;border:solid windowtext 1.0pt;
+  <td width=283 valign=top style='width:212.6pt;border:solid windowtext 1.0pt;
   border-left:none;padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal><span style='font-size:8.0pt'>RPM file name</span></p>
   </td>
  </tr>
  <tr>
-  <td width=158 valign=top style='width:118.6pt;border:solid windowtext 1.0pt;
+  <td width=130 valign=top style='width:97.55pt;border:solid windowtext 1.0pt;
   border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  8.0pt'>GPT</span></p>
+  8.0pt'>c-ares</span></p>
   </td>
-  <td width=66 valign=top style='width:49.25pt;border-top:none;border-left:
+  <td width=142 valign=top style='width:106.3pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>VDT 1.2.2</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>A library that performs asynchronous DNS operations</span></p>
   </td>
-  <td width=398 valign=top style='width:298.25pt;border-top:none;border-left:
+  <td width=66 valign=top style='width:49.65pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal style='text-autospace:ideograph-numeric'><span
-  class=MsoHyperlink><span lang=EN-US style='font-size:1.0pt;font-family:ZWAdobeF;
-  color:windowtext;text-decoration:none'>H</span></span><span
-  class=MsoHyperlink><span lang=EN-US style='font-size:8.0pt'><a
-  href="http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/gpt-VDT1.2.2rh9-1.i386.rpm">http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/gpt-<span
-  lang=EN-GB>VDT1.2.2rh9</span>-1.i386.rpm</a></span></span><span
-  class=MsoHyperlink><span lang=EN-US style='font-size:1.0pt;font-family:ZWAdobeF;
-  color:windowtext;text-decoration:none'>H</span></span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>1.3.0</span></p>
+  </td>
+  <td width=283 valign=top style='width:212.6pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'><a
+  href="http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/c-ares-1.3.0-1.slc3.i386.rpm">http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/c-ares-1.3.0-1.slc3.i386.rpm</a></span></p>
   </td>
  </tr>
  <tr>
-  <td width=158 valign=top style='width:118.6pt;border:solid windowtext 1.0pt;
+  <td width=130 valign=top style='width:97.55pt;border:solid windowtext 1.0pt;
   border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  8.0pt'>VDT Globus Essentials</span></p>
+  8.0pt'>gpt</span></p>
   </td>
-  <td width=66 valign=top style='width:49.25pt;border-top:none;border-left:
+  <td width=142 valign=top style='width:106.3pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>VDT 1.2.2</span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>The Grid Packaging Toolkit (GPT)</span></p>
   </td>
-  <td width=398 valign=top style='width:298.25pt;border-top:none;border-left:
+  <td width=66 valign=top style='width:49.65pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal style='text-autospace:ideograph-numeric'><span
-  class=MsoHyperlink><span lang=EN-US style='font-size:1.0pt;font-family:ZWAdobeF;
-  color:windowtext;text-decoration:none'>H</span></span><span
-  class=MsoHyperlink><span lang=EN-US style='font-size:8.0pt'><a
-  href="http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/vdt_globus_essentials-VDT1.2.2rh9-1.i386.rpm">http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/vdt_globus_essentials-<span
-  lang=EN-GB>VDT1.2.2rh9</span>-1.i386.rpm</a></span></span><span
-  class=MsoHyperlink><span lang=EN-US style='font-size:1.0pt;font-family:ZWAdobeF;
-  color:windowtext;text-decoration:none'>H</span></span></p>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>VDT1.2.2rh9</span></p>
+  </td>
+  <td width=283 valign=top style='width:212.6pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'><a
+  href="http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/gpt-VDT1.2.2rh9-1.i386.rpm">http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/gpt-VDT1.2.2rh9-1.i386.rpm</a></span></p>
   </td>
  </tr>
  <tr>
-  <td width=158 valign=top style='width:118.6pt;border:solid windowtext 1.0pt;
+  <td width=130 valign=top style='width:97.55pt;border:solid windowtext 1.0pt;
   border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  8.0pt'>MySQL-server</span></p>
+  8.0pt'>j2re</span></p>
   </td>
-  <td width=66 valign=top style='width:49.25pt;border-top:none;border-left:
+  <td width=142 valign=top style='width:106.3pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>4.1.11</span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt'>Java </span><span lang=PL
+  style='font-size:8.0pt'>JR</span><span style='font-size:8.0pt'>E</span></p>
   </td>
-  <td width=398 valign=top style='width:298.25pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal style='text-autospace:ideograph-numeric'><span
-  class=MsoHyperlink><span lang=EN-US style='font-size:1.0pt;font-family:ZWAdobeF;
-  color:windowtext;text-decoration:none'>H</span></span><span
-  class=MsoHyperlink><span lang=EN-US style='font-size:8.0pt'><a
-  href="http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/MySQL-server-4.0.20-0.i386.rpm">http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/MySQL-server-<span
-  lang=EN-GB>4.0.20</span>-0.i386.rpm</a></span></span><span
-  class=MsoHyperlink><span lang=EN-US style='font-size:1.0pt;font-family:ZWAdobeF;
-  color:windowtext;text-decoration:none'>H</span></span></p>
-  </td>
- </tr>
- <tr>
-  <td width=158 valign=top style='width:118.6pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  8.0pt'>MySQL-client</span></p>
-  </td>
-  <td width=66 valign=top style='width:49.25pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>4.1.11</span></p>
-  </td>
-  <td width=398 valign=top style='width:298.25pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal style='text-autospace:ideograph-numeric'><span
-  class=MsoHyperlink><span lang=EN-US style='font-size:1.0pt;font-family:ZWAdobeF;
-  color:windowtext;text-decoration:none'>H</span></span><span
-  class=MsoHyperlink><span lang=EN-US style='font-size:8.0pt'><a
-  href="http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/MySQL-client-4.0.20-0.i386.rpm">http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/MySQL-client-<span
-  lang=EN-GB>4.0.20</span>-0.i386.rpm</a></span></span><span
-  class=MsoHyperlink><span lang=EN-US style='font-size:1.0pt;font-family:ZWAdobeF;
-  color:windowtext;text-decoration:none'>H</span></span></p>
-  </td>
- </tr>
- <tr>
-  <td width=158 valign=top style='width:118.6pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  8.0pt'>ares</span></p>
-  </td>
-  <td width=66 valign=top style='width:49.25pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>1.1.1</span></p>
-  </td>
-  <td width=398 valign=top style='width:298.25pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal style='text-autospace:ideograph-numeric'><span
-  class=MsoHyperlink><span lang=EN-US style='font-size:1.0pt;font-family:ZWAdobeF;
-  color:windowtext;text-decoration:none'>H</span></span><span
-  class=MsoHyperlink><span lang=EN-US style='font-size:8.0pt'><a
-  href="http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/ares-1.1.1-EGEE.i386.rpm">http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/ares-<span
-  lang=EN-GB>1.1.1</span>-EGEE.i386.rpm</a></span></span><span
-  class=MsoHyperlink><span lang=EN-US style='font-size:1.0pt;font-family:ZWAdobeF;
-  color:windowtext;text-decoration:none'>H</span></span></p>
-  </td>
- </tr>
- <tr>
-  <td width=158 valign=top style='width:118.6pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  8.0pt'>myproxy</span></p>
-  </td>
-  <td width=66 valign=top style='width:49.25pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>1.14</span></p>
-  </td>
-  <td width=398 valign=top style='width:298.25pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal style='text-autospace:ideograph-numeric'><span
-  class=MsoHyperlink><span lang=EN-US style='font-size:1.0pt;font-family:ZWAdobeF;
-  color:windowtext;text-decoration:none'>H</span></span><span
-  class=MsoHyperlink><span lang=EN-US style='font-size:8.0pt'><a
-  href="http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/myproxy-1.14-EGEE.i386.rpm">http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/myproxy-<span
-  lang=EN-GB>1.14</span>-EGEE.i386.rpm</a></span></span><span
-  class=MsoHyperlink><span lang=EN-US style='font-size:1.0pt;font-family:ZWAdobeF;
-  color:windowtext;text-decoration:none'>H</span></span></p>
-  </td>
- </tr>
- <tr>
-  <td width=158 valign=top style='width:118.6pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  8.0pt'>perl-Expect.pm</span></p>
-  </td>
-  <td width=66 valign=top style='width:49.25pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:8.0pt'>1.01</span></p>
-  </td>
-  <td width=398 valign=top style='width:298.25pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal style='text-autospace:ideograph-numeric'><span
-  class=MsoHyperlink><span lang=EN-US style='font-size:1.0pt;font-family:ZWAdobeF;
-  color:windowtext;text-decoration:none'>H</span></span><span
-  class=MsoHyperlink><span lang=EN-US style='font-size:8.0pt'><a
-  href="http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/per-Expect.pm-1.01-9.i386.rpm">http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/per-Expect.pm-<span
-  lang=EN-GB>1.01</span>-9.i386.rpm</a></span></span><span class=MsoHyperlink><span
-  lang=EN-US style='font-size:1.0pt;font-family:ZWAdobeF;color:windowtext;
-  text-decoration:none'>H</span></span></p>
-  </td>
- </tr>
- <tr>
-  <td width=158 valign=top style='width:118.6pt;border:solid windowtext 1.0pt;
-  border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  8.0pt'>Java SDK/JRE</span></p>
-  </td>
-  <td width=66 valign=top style='width:49.25pt;border-top:none;border-left:
+  <td width=66 valign=top style='width:49.65pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal><span style='font-size:8.0pt'>1.4.2</span></p>
   </td>
-  <td width=398 valign=top style='width:298.25pt;border-top:none;border-left:
+  <td width=283 valign=top style='width:212.6pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span class=MsoHyperlink><span lang=EN-US
-  style='font-size:8.0pt'>http://java.sun.com/j2se/1.4.2/download.html</span></span></p>
+  <p class=MsoNormal><span style='font-size:8.0pt'><a
+  href="http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/j2re-1_4_2_08-linux-i586.rpm">http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/<span
+  lang=EN-US>j2re-1_4_2_08-linux-i586.rpm</span></a></span></p>
+  </td>
+ </tr>
+ <tr>
+  <td width=130 valign=top style='width:97.55pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>myproxy</span></p>
+  </td>
+  <td width=142 valign=top style='width:106.3pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>Credential repository for the Grid.</span></p>
+  </td>
+  <td width=66 valign=top style='width:49.65pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>1.14</span></p>
+  </td>
+  <td width=283 valign=top style='width:212.6pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'><a
+  href="http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/myproxy-1.14-EGEE.i386.rpm">http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/myproxy-1.14-EGEE.i386.rpm</a></span></p>
+  </td>
+ </tr>
+ <tr>
+  <td width=130 valign=top style='width:97.55pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>MySQL-client</span></p>
+  </td>
+  <td width=142 valign=top style='width:106.3pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>MySQL - Client</span></p>
+  </td>
+  <td width=66 valign=top style='width:49.65pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>4.1.11</span></p>
+  </td>
+  <td width=283 valign=top style='width:212.6pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'><a
+  href="http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/MySQL-client-4.1.11-0.i386.rpm">http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/MySQL-client-4.1.11-0.i386.rpm</a></span></p>
+  </td>
+ </tr>
+ <tr>
+  <td width=130 valign=top style='width:97.55pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>MySQL-server</span></p>
+  </td>
+  <td width=142 valign=top style='width:106.3pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>MySQL</span></p>
+  </td>
+  <td width=66 valign=top style='width:49.65pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>4.1.11</span></p>
+  </td>
+  <td width=283 valign=top style='width:212.6pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'><a
+  href="http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/MySQL-server-4.1.11-0.i386.rpm">http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/MySQL-server-4.1.11-0.i386.rpm</a></span></p>
+  </td>
+ </tr>
+ <tr>
+  <td width=130 valign=top style='width:97.55pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>perl-Expect.pm</span></p>
+  </td>
+  <td width=142 valign=top style='width:106.3pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>Expect.pm module for perl (./id/A/AU/AUSCHUTZ)</span></p>
+  </td>
+  <td width=66 valign=top style='width:49.65pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>1.01</span></p>
+  </td>
+  <td width=283 valign=top style='width:212.6pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'><a
+  href="http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/perl-Expect.pm-1.01-9.i386.rpm">http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/perl-Expect.pm-1.01-9.i386.rpm</a></span></p>
+  </td>
+ </tr>
+ <tr>
+  <td width=130 valign=top style='width:97.55pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>vdt_globus_essentials</span></p>
+  </td>
+  <td width=142 valign=top style='width:106.3pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>Virtual Data Toolkit</span></p>
+  </td>
+  <td width=66 valign=top style='width:49.65pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'>VDT1.2.2rh9</span></p>
+  </td>
+  <td width=283 valign=top style='width:212.6pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  8.0pt'><a
+  href="http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/vdt_globus_essentials-VDT1.2.2rh9-1.i386.rpm">http://glite.web.cern.ch/glite/packages/externals/bin/rhel30/RPMS/vdt_globus_essentials-VDT1.2.2rh9-1.i386.rpm</a></span></p>
   </td>
  </tr>
 </table>
@@ -1852,6 +1861,8 @@ style='font-size:1.0pt;font-family:ZWAdobeF'>H</span> .</p>
 <p class=MsoNormal align=left style='text-align:left'>&nbsp;</p>
 
 <ul style='margin-top:0mm' type=disc>
+ <li class=MsoNormal style='text-align:left'>There is an infinite loop during
+     the initialization of the LB_Events data structure</li>
  <li class=MsoNormal style='text-align:left'>No removal procedure is provided
      with this release apart from the removal of the RPMS. Any account, group
      or other resource created during the module configuration must be manually
@@ -1867,15 +1878,15 @@ style='font-size:1.0pt;font-family:ZWAdobeF'>H</span> .</p>
 <table class=MsoTableGrid border=1 cellspacing=0 cellpadding=0
  style='border-collapse:collapse;border:none'>
  <tr>
-  <td width=59 valign=top style='width:44.15pt;border:solid windowtext 1.0pt;
+  <td width=62 valign=top style='width:46.8pt;border:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal><b><span style='font-size:10.0pt'>Bug number</span></b></p>
   </td>
-  <td width=534 valign=top style='width:400.7pt;border:solid windowtext 1.0pt;
+  <td width=540 valign=top style='width:405.15pt;border:solid windowtext 1.0pt;
   border-left:none;padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal><b><span style='font-size:10.0pt'>Description</span></b></p>
   </td>
-  <td width=26 valign=top style='width:19.55pt;border:solid windowtext 1.0pt;
+  <td width=17 valign=top style='width:12.45pt;border:solid windowtext 1.0pt;
   border-left:none;padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal><b><span style='font-size:10.0pt'>&nbsp;</span></b></p>
   </td>
@@ -1883,111 +1894,293 @@ style='font-size:1.0pt;font-family:ZWAdobeF'>H</span> .</p>
  <tr>
   <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  10.0pt;color:#333333'><a
+  <p class=MsoNormal><span style='font-size:10.0pt'><a
   href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7324"><span
-  style='font-size:11.0pt;color:#333333;text-decoration:none'>&nbsp;#7324</span></a></span></p>
+  style='color:windowtext;text-decoration:none'>&nbsp;#7324</span></a></span></p>
   </td>
-  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
-  border-right:solid windowtext 1.0pt;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  10.0pt;color:#333333'><a
+  <td width=540 valign=top style='width:405.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'><a
   href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7324"><span
-  style='font-size:11.0pt;color:#333333;text-decoration:none'>lb-bkserver is
-  running with no pid</span></a>&nbsp;</span></p>
+  style='color:windowtext;text-decoration:none'>lb-bkserver is running with no
+  pid</span></a></span></p>
   </td>
-  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
-  border-right:solid windowtext 1.0pt;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  10.0pt;color:#333333'>&nbsp;</span></p>
+  <td width=17 valign=top style='width:12.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'>&nbsp;</span></p>
   </td>
  </tr>
  <tr>
   <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  10.0pt;color:#333333'><a
-  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=9148"><span
-  style='font-size:11.0pt;color:#333333;text-decoration:none'>&nbsp;#9148</span></a></span></p>
-  </td>
-  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
-  border-right:solid windowtext 1.0pt;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  10.0pt;color:#333333'><a
-  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=9148"><span
-  style='font-size:11.0pt;color:#333333;text-decoration:none'>Job stays
-  'Submitted' forever</span></a>&nbsp;</span></p>
-  </td>
-  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
-  border-right:solid windowtext 1.0pt;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  10.0pt;color:#333333'>&nbsp;</span></p>
-  </td>
- </tr>
- <tr>
-  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  10.0pt;color:#333333'><a
+  <p class=MsoNormal><span style='font-size:10.0pt'><a
   href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=9701"><span
-  style='font-size:11.0pt;color:#333333;text-decoration:none'>&nbsp;#9701</span></a></span></p>
+  style='color:windowtext;text-decoration:none'>&nbsp;#9701</span></a></span></p>
   </td>
-  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
-  border-right:solid windowtext 1.0pt;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  10.0pt;color:#333333'><a
+  <td width=540 valign=top style='width:405.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'><a
   href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=9701"><span
-  style='font-size:11.0pt;color:#333333;text-decoration:none'>erroneous rpath
-  in several shared objects</span></a>&nbsp;</span></p>
+  style='color:windowtext;text-decoration:none'>erroneous rpath in several
+  shared objects</span></a></span></p>
   </td>
-  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
-  border-right:solid windowtext 1.0pt;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  10.0pt;color:#333333'>&nbsp;</span></p>
+  <td width=17 valign=top style='width:12.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'>&nbsp;</span></p>
   </td>
  </tr>
  <tr>
   <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  10.0pt;color:#333333'><a
+  <p class=MsoNormal><span style='font-size:10.0pt'><a
   href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=9777"><span
-  style='font-size:11.0pt;color:#333333;text-decoration:none'>&nbsp;#9777</span></a></span></p>
+  style='color:windowtext;text-decoration:none'>&nbsp;#9777</span></a></span></p>
   </td>
-  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
-  border-right:solid windowtext 1.0pt;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  10.0pt;color:#333333'><a
+  <td width=540 valign=top style='width:405.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'><a
   href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=9777"><span
-  style='font-size:11.0pt;color:#333333;text-decoration:none'>unable to get
-  logging-info -2 info for 1000 jobs</span></a>&nbsp;</span></p>
+  style='color:windowtext;text-decoration:none'>unable to get logging-info -2
+  info for 1000 jobs</span></a></span></p>
   </td>
-  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
-  border-right:solid windowtext 1.0pt;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  10.0pt;color:#333333'>&nbsp;</span></p>
+  <td width=17 valign=top style='width:12.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'>&nbsp;</span></p>
   </td>
  </tr>
  <tr>
   <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
   padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  10.0pt;color:#333333'><a
+  <p class=MsoNormal><span style='font-size:10.0pt'><a
   href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=10781"><span
-  style='font-size:11.0pt;color:#333333;text-decoration:none'>&nbsp;#10781</span></a></span></p>
+  style='color:windowtext;text-decoration:none'>&nbsp;#10781</span></a></span></p>
   </td>
-  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
-  border-right:solid windowtext 1.0pt;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  10.0pt;color:#333333'><a
+  <td width=540 valign=top style='width:405.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'><a
   href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=10781"><span
-  style='font-size:11.0pt;color:#333333;text-decoration:none'>Missing the
-  timestamps of 'Scheduled' and 'Running' status</span></a>&nbsp;</span></p>
+  style='color:windowtext;text-decoration:none'>Missing the timestamps of
+  'Scheduled' and 'Running' status</span></a></span></p>
   </td>
-  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
-  border-right:solid windowtext 1.0pt;padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  10.0pt;color:#333333'>&nbsp;</span></p>
+  <td width=17 valign=top style='width:12.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'>&nbsp;</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=11535"><span
+  style='color:windowtext;text-decoration:none'>&nbsp;#11535</span></a></span></p>
+  </td>
+  <td width=540 valign=top style='width:405.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=11535"><span
+  style='color:windowtext;text-decoration:none'>Job submission extremely slow</span></a></span></p>
+  </td>
+  <td width=17 valign=top style='width:12.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'>&nbsp;</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=13418"><span
+  style='color:windowtext;text-decoration:none'>&nbsp;#13418</span></a></span></p>
+  </td>
+  <td width=540 valign=top style='width:405.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=13418"><span
+  style='color:windowtext;text-decoration:none'>problem in computing status (of
+  resubmitted jobs)</span></a></span></p>
+  </td>
+  <td width=17 valign=top style='width:12.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'>&nbsp;</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=13492"><span
+  style='color:windowtext;text-decoration:none'>&nbsp;#13492</span></a></span></p>
+  </td>
+  <td width=540 valign=top style='width:405.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=13492"><span
+  style='color:windowtext;text-decoration:none'>Job State Information Log File</span></a></span></p>
+  </td>
+  <td width=17 valign=top style='width:12.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'>&nbsp;</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=13832"><span
+  style='color:windowtext;text-decoration:none'>&nbsp;#13832</span></a></span></p>
+  </td>
+  <td width=540 valign=top style='width:405.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=13832"><span
+  style='color:windowtext;text-decoration:none'>Default mysql configuration
+  imposes unnecessary limits on LB server</span></a></span></p>
+  </td>
+  <td width=17 valign=top style='width:12.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'>&nbsp;</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=13879"><span
+  style='color:windowtext;text-decoration:none'>&nbsp;#13879</span></a></span></p>
+  </td>
+  <td width=540 valign=top style='width:405.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=13879"><span
+  style='color:windowtext;text-decoration:none'>Some data do not propagate from
+  lbproxy to bkserver...</span></a></span></p>
+  </td>
+  <td width=17 valign=top style='width:12.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'>&nbsp;</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=13929"><span
+  style='color:windowtext;text-decoration:none'>&nbsp;#13929</span></a></span></p>
+  </td>
+  <td width=540 valign=top style='width:405.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=13929"><span
+  style='color:windowtext;text-decoration:none'>The glite-lb-bkserverd has
+  wrong default for var directory</span></a></span></p>
+  </td>
+  <td width=17 valign=top style='width:12.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'>&nbsp;</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=13951"><span
+  style='color:windowtext;text-decoration:none'>&nbsp;#13951</span></a></span></p>
+  </td>
+  <td width=540 valign=top style='width:405.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=13951"><span
+  style='color:windowtext;text-decoration:none'>lb proxy sends garbage response
+  on error </span></a></span></p>
+  </td>
+  <td width=17 valign=top style='width:12.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'>&nbsp;</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=13988"><span
+  style='color:windowtext;text-decoration:none'>&nbsp;#13988</span></a></span></p>
+  </td>
+  <td width=540 valign=top style='width:405.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=13988"><span
+  style='color:windowtext;text-decoration:none'>Failed to start
+  glite-lb-locallogger on glite 1.4.1</span></a></span></p>
+  </td>
+  <td width=17 valign=top style='width:12.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'>&nbsp;</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=14247"><span
+  style='color:windowtext;text-decoration:none'>&nbsp;#14247</span></a></span></p>
+  </td>
+  <td width=540 valign=top style='width:405.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=14247"><span
+  style='color:windowtext;text-decoration:none'>No events are found querying LB
+  for events satisfying jobid and source instance</span></a></span></p>
+  </td>
+  <td width=17 valign=top style='width:12.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'>&nbsp;</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=14339"><span
+  style='color:windowtext;text-decoration:none'>&nbsp;#14339</span></a></span></p>
+  </td>
+  <td width=540 valign=top style='width:405.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=14339"><span
+  style='color:windowtext;text-decoration:none'>Wrong computing state when
+  proxy expires</span></a></span></p>
+  </td>
+  <td width=17 valign=top style='width:12.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal><span style='font-size:10.0pt'>&nbsp;</span></p>
   </td>
  </tr>
 </table>
@@ -2002,17 +2195,17 @@ tested:</p>
 <table class=MsoTableGrid border=1 cellspacing=0 cellpadding=0
  style='border-collapse:collapse;border:none'>
  <tr>
-  <td width=57 valign=top style='width:42.6pt;border:solid windowtext 1.0pt;
+  <td width=61 valign=top style='width:45.4pt;border:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal align=left style='text-align:left'><b><span
   style='font-size:10.0pt;color:#333333'>Bug number</span></b></p>
   </td>
-  <td width=536 valign=top style='width:402.25pt;border:solid windowtext 1.0pt;
+  <td width=542 valign=top style='width:406.55pt;border:solid windowtext 1.0pt;
   border-left:none;padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal align=left style='text-align:left'><b><span
   style='font-size:10.0pt;color:#333333'>Description</span></b></p>
   </td>
-  <td width=26 valign=top style='width:19.55pt;border:solid windowtext 1.0pt;
+  <td width=17 valign=top style='width:12.45pt;border:solid windowtext 1.0pt;
   border-left:none;padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal align=left style='text-align:left'><b><span
   style='font-size:10.0pt;color:#333333'>&nbsp;</span></b></p>
@@ -2023,43 +2216,19 @@ tested:</p>
   padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
   10.0pt;color:#333333'><a
-  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7053"><span
-  style='color:#333333;text-decoration:none'>&nbsp;#7053</span></a></span></p>
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7307"><span
+  style='color:#333333;text-decoration:none'>&nbsp;#7307</span></a></span></p>
   </td>
-  <td width=536 valign=top style='width:402.25pt;border-top:none;border-left:
+  <td width=542 valign=top style='width:406.55pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
   10.0pt;color:#333333'><a
-  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7053"><span
-  style='color:#333333;text-decoration:none'>LB configuration fails if the
-  mysql root pwd is set</span></a>&nbsp;</span></p>
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7307"><span
+  style='color:#333333;text-decoration:none'>lb config script does _not_ fail
+  if mysql root password is set</span></a></span></p>
   </td>
-  <td width=26 valign=top style='width:19.55pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  10.0pt;color:#333333'>&nbsp;</span></p>
-  </td>
- </tr>
- <tr>
-  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  10.0pt;color:#333333'><a
-  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7300"><span
-  style='color:#333333;text-decoration:none'>&nbsp;#7300</span></a></span></p>
-  </td>
-  <td width=536 valign=top style='width:402.25pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  10.0pt;color:#333333'><a
-  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7300"><span
-  style='color:#333333;text-decoration:none'>update of the lb instructions at
-  the end of the installer script </span></a>&nbsp;</span></p>
-  </td>
-  <td width=26 valign=top style='width:19.55pt;border-top:none;border-left:
+  <td width=17 valign=top style='width:12.45pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
@@ -2074,16 +2243,16 @@ tested:</p>
   href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7305"><span
   style='color:#333333;text-decoration:none'>&nbsp;#7305</span></a></span></p>
   </td>
-  <td width=536 valign=top style='width:402.25pt;border-top:none;border-left:
+  <td width=542 valign=top style='width:406.55pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
   10.0pt;color:#333333'><a
   href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7305"><span
   style='color:#333333;text-decoration:none'>lb.database.username paramenter in
-  config file</span></a>&nbsp;</span></p>
+  config file</span></a></span></p>
   </td>
-  <td width=26 valign=top style='width:19.55pt;border-top:none;border-left:
+  <td width=17 valign=top style='width:12.45pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
@@ -2095,43 +2264,19 @@ tested:</p>
   padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
   10.0pt;color:#333333'><a
-  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7307"><span
-  style='color:#333333;text-decoration:none'>&nbsp;#7307</span></a></span></p>
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7300"><span
+  style='color:#333333;text-decoration:none'>&nbsp;#7300</span></a></span></p>
   </td>
-  <td width=536 valign=top style='width:402.25pt;border-top:none;border-left:
+  <td width=542 valign=top style='width:406.55pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
   10.0pt;color:#333333'><a
-  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7307"><span
-  style='color:#333333;text-decoration:none'>lb config script does _not_ fail
-  if mysql root password is set</span></a>&nbsp;</span></p>
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7300"><span
+  style='color:#333333;text-decoration:none'>update of the lb instructions at
+  the end of the installer script </span></a></span></p>
   </td>
-  <td width=26 valign=top style='width:19.55pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  10.0pt;color:#333333'>&nbsp;</span></p>
-  </td>
- </tr>
- <tr>
-  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  10.0pt;color:#333333'><a
-  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7237"><span
-  style='color:#333333;text-decoration:none'>#7237</span></a></span></p>
-  </td>
-  <td width=536 valign=top style='width:402.25pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  10.0pt;color:#333333'><a
-  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7237"><span
-  style='color:#333333;text-decoration:none'>Intermittent errors with job
-  submission</span></a>&nbsp;</span></p>
-  </td>
-  <td width=26 valign=top style='width:19.55pt;border-top:none;border-left:
+  <td width=17 valign=top style='width:12.45pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
@@ -2143,41 +2288,19 @@ tested:</p>
   padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
   10.0pt;color:#333333'><a
-  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7910"><span
-  style='color:#333333;text-decoration:none'>&nbsp;#7910</span></a></span></p>
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7053"><span
+  style='color:#333333;text-decoration:none'>&nbsp;#7053</span></a></span></p>
   </td>
-  <td width=536 valign=top style='width:402.25pt;border-top:none;border-left:
+  <td width=542 valign=top style='width:406.55pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
   10.0pt;color:#333333'><a
-  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7910"><span
-  style='color:#333333;text-decoration:none'>Duplicate apostroph in MySQL calls</span></a>&nbsp;</span></p>
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7053"><span
+  style='color:#333333;text-decoration:none'>LB configuration fails if the
+  mysql root pwd is set</span></a></span></p>
   </td>
-  <td width=26 valign=top style='width:19.55pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  10.0pt;color:#333333'>&nbsp;</span></p>
-  </td>
- </tr>
- <tr>
-  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  10.0pt;color:#333333'><a
-  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=8630"><span
-  style='color:#333333;text-decoration:none'>&nbsp;#8630</span></a></span></p>
-  </td>
-  <td width=536 valign=top style='width:402.25pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
-  10.0pt;color:#333333'><a
-  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=8630"><span
-  style='color:#333333;text-decoration:none'>EDG_WL_* variables in LB library</span></a>&nbsp;</span></p>
-  </td>
-  <td width=26 valign=top style='width:19.55pt;border-top:none;border-left:
+  <td width=17 valign=top style='width:12.45pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
@@ -2189,19 +2312,114 @@ tested:</p>
   padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
   10.0pt;color:#333333'><a
-  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=9135"><span
-  style='color:#333333;text-decoration:none'>&nbsp;#9135</span></a></span></p>
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=13928"><span
+  style='color:#333333;text-decoration:none'>&nbsp;#13928</span></a></span></p>
   </td>
-  <td width=536 valign=top style='width:402.25pt;border-top:none;border-left:
+  <td width=542 valign=top style='width:406.55pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
   10.0pt;color:#333333'><a
-  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=9135"><span
-  style='color:#333333;text-decoration:none'>The interlogd has problem sending
-  event to the LB server</span></a>&nbsp;</span></p>
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=13928"><span
+  style='color:#333333;text-decoration:none'>org.glite.lb.server depends on
+  full VOMS package instead of individual APIs packages</span></a></span></p>
   </td>
-  <td width=26 valign=top style='width:19.55pt;border-top:none;border-left:
+  <td width=17 valign=top style='width:12.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  10.0pt;color:#333333'>&nbsp;</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  10.0pt;color:#333333'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=13048"><span
+  style='color:#333333;text-decoration:none'>&nbsp;#13048</span></a></span></p>
+  </td>
+  <td width=542 valign=top style='width:406.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  10.0pt;color:#333333'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=13048"><span
+  style='color:#333333;text-decoration:none'>interlogger does not handle errors
+  from bookkeeping server</span></a></span></p>
+  </td>
+  <td width=17 valign=top style='width:12.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  10.0pt;color:#333333'>&nbsp;</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  10.0pt;color:#333333'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=12648"><span
+  style='color:#333333;text-decoration:none'>&nbsp;#12648</span></a></span></p>
+  </td>
+  <td width=542 valign=top style='width:406.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  10.0pt;color:#333333'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=12648"><span
+  style='color:#333333;text-decoration:none'>The memory usage of one LB process
+  keeps growing</span></a></span></p>
+  </td>
+  <td width=17 valign=top style='width:12.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  10.0pt;color:#333333'>&nbsp;</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  10.0pt;color:#333333'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=11387"><span
+  style='color:#333333;text-decoration:none'>&nbsp;#11387</span></a></span></p>
+  </td>
+  <td width=542 valign=top style='width:406.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  10.0pt;color:#333333'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=11387"><span
+  style='color:#333333;text-decoration:none'>LBProxy SIGSEGV</span></a></span></p>
+  </td>
+  <td width=17 valign=top style='width:12.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  10.0pt;color:#333333'>&nbsp;</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  10.0pt;color:#333333'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=11050"><span
+  style='color:#333333;text-decoration:none'>&nbsp;#11050</span></a></span></p>
+  </td>
+  <td width=542 valign=top style='width:406.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  10.0pt;color:#333333'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=11050"><span
+  style='color:#333333;text-decoration:none'>Too heavy locallogger retry
+  strategy</span></a></span></p>
+  </td>
+  <td width=17 valign=top style='width:12.45pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
@@ -2216,16 +2434,134 @@ tested:</p>
   href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=9183"><span
   style='color:#333333;text-decoration:none'>&nbsp;#9183</span></a></span></p>
   </td>
-  <td width=536 valign=top style='width:402.25pt;border-top:none;border-left:
+  <td width=542 valign=top style='width:406.55pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
   10.0pt;color:#333333'><a
   href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=9183"><span
   style='color:#333333;text-decoration:none'>Broken connections in LB contect
-  connection pool</span></a>&nbsp;</span></p>
+  connection pool</span></a></span></p>
   </td>
-  <td width=26 valign=top style='width:19.55pt;border-top:none;border-left:
+  <td width=17 valign=top style='width:12.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  10.0pt;color:#333333'>&nbsp;</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  10.0pt;color:#333333'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=9135"><span
+  style='color:#333333;text-decoration:none'>&nbsp;#9135</span></a></span></p>
+  </td>
+  <td width=542 valign=top style='width:406.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  10.0pt;color:#333333'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=9135"><span
+  style='color:#333333;text-decoration:none'>The interlogd has problem sending
+  event to the LB server</span></a></span></p>
+  </td>
+  <td width=17 valign=top style='width:12.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  10.0pt;color:#333333'>&nbsp;</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  10.0pt;color:#333333'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=8630"><span
+  style='color:#333333;text-decoration:none'>&nbsp;#8630</span></a></span></p>
+  </td>
+  <td width=542 valign=top style='width:406.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  10.0pt;color:#333333'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=8630"><span
+  style='color:#333333;text-decoration:none'>EDG_WL_* variables in LB library</span></a></span></p>
+  </td>
+  <td width=17 valign=top style='width:12.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  10.0pt;color:#333333'>&nbsp;</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  10.0pt;color:#333333'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7910"><span
+  style='color:#333333;text-decoration:none'>&nbsp;#7910</span></a></span></p>
+  </td>
+  <td width=542 valign=top style='width:406.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  10.0pt;color:#333333'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7910"><span
+  style='color:#333333;text-decoration:none'>Duplicate apostroph in MySQL calls</span></a></span></p>
+  </td>
+  <td width=17 valign=top style='width:12.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  10.0pt;color:#333333'>&nbsp;</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  10.0pt;color:#333333'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=11509"><span
+  style='color:#333333;text-decoration:none'>&nbsp;#11509</span></a></span></p>
+  </td>
+  <td width=542 valign=top style='width:406.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  10.0pt;color:#333333'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=11509"><span
+  style='color:#333333;text-decoration:none'>glite-lb-config.py overwrites
+  HOSTNAME_org.glite.wms.workloadmanager.service with the wrong WMS version</span></a></span></p>
+  </td>
+  <td width=17 valign=top style='width:12.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  10.0pt;color:#333333'>&nbsp;</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  10.0pt;color:#333333'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=10686"><span
+  style='color:#333333;text-decoration:none'>&nbsp;#10686</span></a></span></p>
+  </td>
+  <td width=542 valign=top style='width:406.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0mm 5.4pt 0mm 5.4pt'>
+  <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
+  10.0pt;color:#333333'><a
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=10686"><span
+  style='color:#333333;text-decoration:none'>MySQL library fails on hostnames
+  containing dashes</span></a></span></p>
+  </td>
+  <td width=17 valign=top style='width:12.45pt;border-top:none;border-left:
   none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
   padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal align=left style='text-align:left'><span style='font-size:
@@ -2272,17 +2608,15 @@ style='font-size:1.0pt;font-family:ZWAdobeF'>H</span>  </p>
   href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=6722"><span
   style='color:windowtext;text-decoration:none'>&nbsp;#6722</span></a></span></p>
   </td>
-  <td width=529 valign=top style='width:397.05pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
+  border-right:solid windowtext 1.0pt;padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal><span style='font-size:10.0pt'><a
   href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=6722"><span
   style='color:windowtext;text-decoration:none'>glite-job-status -all doesn't
-  work</span></a>&nbsp;</span></p>
+  work</span></a></span></p>
   </td>
-  <td width=26 valign=top style='width:19.55pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
+  border-right:solid windowtext 1.0pt;padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal><span style='font-size:10.0pt'>&nbsp;</span></p>
   </td>
  </tr>
@@ -2290,20 +2624,18 @@ style='font-size:1.0pt;font-family:ZWAdobeF'>H</span>  </p>
   <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
   padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal><span style='font-size:10.0pt'><a
-  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7151"><span
-  style='color:windowtext;text-decoration:none'>&nbsp;#7151</span></a></span></p>
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7237"><span
+  style='color:windowtext;text-decoration:none'>&nbsp;#7237</span></a></span></p>
   </td>
-  <td width=529 valign=top style='width:397.05pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
+  border-right:solid windowtext 1.0pt;padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal><span style='font-size:10.0pt'><a
-  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7151"><span
-  style='color:windowtext;text-decoration:none'>There are conflicts when
-  installing WMS and LB on the same node</span></a>&nbsp;</span></p>
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7237"><span
+  style='color:windowtext;text-decoration:none'>Intermittent errors with job
+  submission</span></a></span></p>
   </td>
-  <td width=26 valign=top style='width:19.55pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
+  border-right:solid windowtext 1.0pt;padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal><span style='font-size:10.0pt'>&nbsp;</span></p>
   </td>
  </tr>
@@ -2311,19 +2643,17 @@ style='font-size:1.0pt;font-family:ZWAdobeF'>H</span>  </p>
   <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
   padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal><span style='font-size:10.0pt'><a
-  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7180"><span
-  style='color:windowtext;text-decoration:none'>&nbsp;#7180</span></a></span></p>
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=9148"><span
+  style='color:windowtext;text-decoration:none'>&nbsp;#9148</span></a></span></p>
   </td>
-  <td width=529 valign=top style='width:397.05pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
+  border-right:solid windowtext 1.0pt;padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal><span style='font-size:10.0pt'><a
-  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7180"><span
-  style='color:windowtext;text-decoration:none'>Logging &amp; Bookkeping UI </span></a>&nbsp;</span></p>
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=9148"><span
+  style='color:windowtext;text-decoration:none'>Job stays 'Submitted' forever</span></a></span></p>
   </td>
-  <td width=26 valign=top style='width:19.55pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
+  border-right:solid windowtext 1.0pt;padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal><span style='font-size:10.0pt'>&nbsp;</span></p>
   </td>
  </tr>
@@ -2331,62 +2661,17 @@ style='font-size:1.0pt;font-family:ZWAdobeF'>H</span>  </p>
   <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
   padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal><span style='font-size:10.0pt'><a
-  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7389"><span
-  style='color:windowtext;text-decoration:none'>&nbsp;#7389</span></a></span></p>
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=10730"><span
+  style='color:windowtext;text-decoration:none'>&nbsp;#10730</span></a></span></p>
   </td>
-  <td width=529 valign=top style='width:397.05pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
+  border-right:solid windowtext 1.0pt;padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal><span style='font-size:10.0pt'><a
-  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7389"><span
-  style='color:windowtext;text-decoration:none'>LB server and WMS local logger
-  related issues</span></a>&nbsp;</span></p>
+  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=10730"><span
+  style='color:windowtext;text-decoration:none'>Error on glite-job-submit</span></a></span></p>
   </td>
-  <td width=26 valign=top style='width:19.55pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:10.0pt'>&nbsp;</span></p>
-  </td>
- </tr>
- <tr>
-  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:10.0pt'><a
-  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7884"><span
-  style='color:windowtext;text-decoration:none'>&nbsp;#7884</span></a></span></p>
-  </td>
-  <td width=529 valign=top style='width:397.05pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:10.0pt'><a
-  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=7884"><span
-  style='color:windowtext;text-decoration:none'>local header files distributed
-  in RPMs. </span></a>&nbsp;</span></p>
-  </td>
-  <td width=26 valign=top style='width:19.55pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:10.0pt'>&nbsp;</span></p>
-  </td>
- </tr>
- <tr>
-  <td valign=top style='border:solid windowtext 1.0pt;border-top:none;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:10.0pt'><a
-  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=9861"><span
-  style='color:windowtext;text-decoration:none'>&nbsp;#9861</span></a></span></p>
-  </td>
-  <td width=529 valign=top style='width:397.05pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
-  <p class=MsoNormal><span style='font-size:10.0pt'><a
-  href="https://savannah.cern.ch/bugs/?func=detailitem&amp;item_id=9861"><span
-  style='color:windowtext;text-decoration:none'>@ext.gpt.rpm.platform@ strings
-  in glite-lb_installer.sh</span></a>&nbsp;</span></p>
-  </td>
-  <td width=26 valign=top style='width:19.55pt;border-top:none;border-left:
-  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
-  padding:0mm 5.4pt 0mm 5.4pt'>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;
+  border-right:solid windowtext 1.0pt;padding:0mm 5.4pt 0mm 5.4pt'>
   <p class=MsoNormal><span style='font-size:10.0pt'>&nbsp;</span></p>
   </td>
  </tr>
