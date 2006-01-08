@@ -87,6 +87,24 @@
                     build="@org.glite.jp.primary.info.build@"
                     arch="i386"/>
 
+				<component name="glite-jp-common"
+                    version="@org.glite.jp.common.info.version@"
+                    age="@org.glite.jp.common.info.age@"
+                    build="@org.glite.jp.common.info.build@"
+                    arch="i386"/>
+
+				<component name="glite-jp-server-common"
+                    version="@org.glite.jp.server-common.info.version@"
+                    age="@org.glite.jp.server-common.info.age@"
+                    build="@org.glite.jp.server-common.info.build@"
+                    arch="i386"/>
+
+				<component name="glite-jp-ws-interface"
+                    version="@org.glite.jp.ws-interface.info.version@"
+                    age="@org.glite.jp.ws-interface.info.age@"
+                    build="@org.glite.jp.ws-interface.info.build@"
+                    arch="i386"/>
+
                 <component name="gridsite"
                     version="@org.gridsite.core.info.version@"
                     age="@org.gridsite.core.info.age@"
