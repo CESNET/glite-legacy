@@ -488,6 +488,8 @@ if __name__ == '__main__':
             service.copyright()
             service.showVersion()
             glib.print_params(params)
+            print
+            rgmaServicetool.showServices()
             sys.exit(0)
 
         if o == "--configure":
