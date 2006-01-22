@@ -17,7 +17,7 @@ gsoap_prefix=/opt/gsoap
 
 CC=gcc
 
-gsoap_versions?=2.6.2 2.7.0
+gsoap_versions?=2.6.2 2.7.0 2.7.6b
 
 -include Makefile.inc
 -include ../Makefile.inc
@@ -53,6 +53,7 @@ default: all
 
 CFLAGS:= ${DEBUG} \
 	-DVERSION=\"${version}\" \
+	-DWITH_NONAMESPACES \
 	-I. -I${top_srcdir}/interface \
 	-I${stagedir}/include \
 	-I${globus_prefix}/include/${nothrflavour} \

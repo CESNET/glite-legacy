@@ -81,6 +81,30 @@
                     build="@org.glite.security.voms-api-c.info.build@"
                     arch="i386"/>
 
+				<component name="glite-jp-primary"
+                    version="@org.glite.jp.primary.info.version@"
+                    age="@org.glite.jp.primary.info.age@"
+                    build="@org.glite.jp.primary.info.build@"
+                    arch="i386"/>
+
+				<component name="glite-jp-common"
+                    version="@org.glite.jp.common.info.version@"
+                    age="@org.glite.jp.common.info.age@"
+                    build="@org.glite.jp.common.info.build@"
+                    arch="i386"/>
+
+				<component name="glite-jp-server-common"
+                    version="@org.glite.jp.server-common.info.version@"
+                    age="@org.glite.jp.server-common.info.age@"
+                    build="@org.glite.jp.server-common.info.build@"
+                    arch="i386"/>
+
+				<component name="glite-jp-ws-interface"
+                    version="@org.glite.jp.ws-interface.info.version@"
+                    age="@org.glite.jp.ws-interface.info.age@"
+                    build="@org.glite.jp.ws-interface.info.build@"
+                    arch="i386"/>
+
                 <component name="gridsite"
                     version="@org.gridsite.core.info.version@"
                     age="@org.gridsite.core.info.age@"
@@ -96,10 +120,10 @@
 					  version="@ext.mysql-client.version@"
 					  age="@ext.mysql-client.rpm.age@"
 					  arch="@ext.mysql-client.platform@"/>				  
-	  			<external name="@ext.ares.rpm.name@"
-					version="@ext.ares.version@"
-					age="@ext.ares.rpm.age@"
-					arch="@ext.ares.platform@"/>
+	  			<external name="@ext.c-ares.rpm.name@"
+					version="@ext.c-ares.version@"
+					age="@ext.c-ares.rpm.age@"
+					arch="@ext.c-ares.platform@"/>
 				<external name="@ext.globus-essentials.rpm.name@"
 					version="@ext.globus-essentials.rpm.version@"
 					age="@ext.globus-essentials.rpm.age@"
