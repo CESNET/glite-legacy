@@ -4,7 +4,7 @@
 #include <glite_gsplugin.h>
 
 #include "GSOAP_H.h"
-#include "wscalc.nsmap"
+#include "CalcService.nsmap"
 
 
 static struct option long_options[] = {
@@ -117,14 +117,14 @@ main(int argc, char **argv)
 	return 0;
 } 
 
-int wscalc__add(struct soap *soap, double a, double b, double *result)
+int wscalc__add(struct soap *soap, double a, double b, struct wscalc__addResponse *result)
 {
-	*result = a + b;
+	result->result = a + b;
 	return SOAP_OK;
 } 
 
-int wscalc__sub(struct soap *soap, double a, double b, double *result)
+int wscalc__sub(struct soap *soap, double a, double b, struct wscalc__subResponse *result)
 {
-	*result = a - b;
+	result->result = a - b;
 	return SOAP_OK;
 } 

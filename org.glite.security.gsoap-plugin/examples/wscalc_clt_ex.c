@@ -1,7 +1,7 @@
 #include <glite_gsplugin.h>
 
 #include "GSOAP_H.h"
-#include "wscalc.nsmap"
+#include "CalcService.nsmap"
 
 static const char *server = "http://localhost:9999/";
 
