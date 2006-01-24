@@ -53,6 +53,7 @@ main(int argc, char **argv)
 	}
 
 	soap_init(&soap);
+	soap_set_namespaces(&soap, namespaces);
 
 	if ( soap_register_plugin_arg(&soap, glite_gsplugin, ctx? : NULL) ) {
 		fprintf(stderr, "Can't register plugin\n");
