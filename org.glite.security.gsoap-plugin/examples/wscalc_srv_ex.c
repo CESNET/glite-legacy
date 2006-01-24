@@ -69,8 +69,8 @@ main(int argc, char **argv)
 		if ( soap_accept(&soap) < 0 ) {
 			fprintf(stderr, "soap_accept() failed!!!\n");
 			soap_print_fault(&soap, stderr);
-			fprintf(stderr, "plugin err: %s", glite_gsplugin_errdesc(&soap));
-			break;
+//			fprintf(stderr, "plugin err: %s", glite_gsplugin_errdesc(&soap));
+			continue;
 		}
 
 		printf("serving connection\n");

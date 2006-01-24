@@ -3,7 +3,7 @@
 #include "GSOAP_H.h"
 #include "CalcService.nsmap"
 
-static const char *server = "http://localhost:9999/";
+static const char *server = "http://localhost:19999/";
 
 int
 main(int argc, char **argv)

@@ -36,7 +36,7 @@ main(int argc, char **argv)
 	char				   *name, *msg;
 	char				   *subject = NULL;
 	int						opt,
-							port = 9999;
+							port = 19999;
 	int						sock;
 
 
