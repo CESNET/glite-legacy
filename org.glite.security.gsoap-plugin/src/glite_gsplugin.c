@@ -102,6 +102,25 @@ void glite_gsplugin_set_timeout(glite_gsplugin_Context ctx, struct timeval const
 	else ctx->timeout = NULL;
 }
 
+int
+glite_gsplugin_set_credential(glite_gsplugin_Context ctx,
+			      const char *cert,
+			      const char *key)
+{
+   edg_wll_GssStatus gss_code;
+   int ret;
+
+   ret = edg_wll_gss_acquire_cred_gsi(cert, key, &ctx->cred, NULL, &gss_code);
+   if (ret) {
+      /* XXX propagate error description */
+      return EINVAL;
+   }
+
+   ctx->cert_filename = cert;
+   ctx->key_filename = key;
+
+   return 0;
+}
 
 int
 glite_gsplugin(struct soap *soap, struct soap_plugin *p, void *arg)

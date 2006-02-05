@@ -48,8 +48,10 @@ main(int argc, char **argv)
 
 	if ( cert || key ) {
 		if ( glite_gsplugin_init_context(&ctx) ) { perror("init context"); exit(1); }
-		ctx->cert_filename = strdup(cert? : key);
-		ctx->key_filename = strdup(key? : cert);
+		if (glite_gsplugin_set_credential(ctx, cert, key)) {
+		   fprintf (stderr, "Failed to set credentials\n");
+		   exit(1);
+		}
 	}
 
 	soap_init(&soap);
@@ -70,7 +72,7 @@ main(int argc, char **argv)
 		if ( soap_accept(&soap) < 0 ) {
 			fprintf(stderr, "soap_accept() failed!!!\n");
 			soap_print_fault(&soap, stderr);
-//			fprintf(stderr, "plugin err: %s", glite_gsplugin_errdesc(&soap));
+			fprintf(stderr, "plugin err: %s\n", glite_gsplugin_errdesc(&soap));
 			continue;
 		}
 
