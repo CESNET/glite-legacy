@@ -76,6 +76,7 @@ static char		sock_store[PATH_MAX],
 			sock_serve[PATH_MAX];
 static int		slaves = 10,
 			semaphores = -1,
+			con_queue = CON_QUEUE,
 			semset;
 static char		host[300];
 static char *		port;
@@ -83,6 +84,7 @@ static char *		port;
 
 static struct option opts[] = {
 	{"port",		1, NULL,	'p'},
+	{"con-queue",		1, NULL,	'c'},
 	{"debug",		0, NULL,	'd'},
 	{"mysql",		1, NULL,	'm'},
 	{"slaves",		1, NULL,	's'},
@@ -93,12 +95,13 @@ static struct option opts[] = {
 	{NULL,0,NULL,0}
 };
 
-static const char *get_opt_string = "p:dm:s:l:i:X:Y:";
+static const char *get_opt_string = "p:c:dm:s:l:i:X:Y:";
 
 static void usage(char *me) 
 {
 	fprintf(stderr,"usage: %s [option]\n"
 		"\t-p, --sock\t path-name to the local socket\n"
+		"\t-c, --con-queue\t size of the connection queue (accept)\n"
 		"\t-m, --mysql\t database connect string\n"
 		"\t-d, --debug\t don't run as daemon, additional diagnostics\n"
 		"\t-s, --slaves\t number of slave servers to fork\n"
@@ -164,6 +167,7 @@ int main(int argc, char *argv[])
 
 	while ((opt = getopt_long(argc, argv, get_opt_string, opts, NULL)) != EOF) switch (opt) {
 		case 'p': strcpy(socket_path_prefix, optarg); break;
+		case 'c': con_queue = atoi(optarg); break;
 		case 'd': debug = 1; break;
 		case 'm': dbstring = optarg; break;
 		case 's': slaves = atoi(optarg); break;
@@ -240,7 +244,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	if ( listen(service_table[SRV_SERVE].conn, CON_QUEUE) ) { perror("listen()"); return 1; }
+	if ( listen(service_table[SRV_SERVE].conn, con_queue) ) { perror("listen()"); return 1; }
 
 	service_table[SRV_STORE].conn = socket(PF_UNIX, SOCK_STREAM, 0);
 	if ( service_table[SRV_STORE].conn < 0 ) { perror("socket()"); return 1; }
@@ -263,7 +267,7 @@ int main(int argc, char *argv[])
 		perror(buf);
 		return 1;
 	}
-	if ( listen(service_table[SRV_STORE].conn, CON_QUEUE) ) { perror("listen()"); return 1; }
+	if ( listen(service_table[SRV_STORE].conn, con_queue) ) { perror("listen()"); return 1; }
 
 	dprintf(("Listening at %s, %s ...\n", sock_store, sock_serve));
 

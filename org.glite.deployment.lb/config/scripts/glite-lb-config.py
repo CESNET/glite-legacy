@@ -6,7 +6,7 @@
 # For license conditions see the license file or http://eu-egee.org/license.html
 #
 ################################################################################
-# glite-lb-config v. 1.3.0
+# glite-lb-config v. 2.1.1
 #
 # Post-installation script for configuring the gLite Logging and Bookkeping Server
 # Robert Harakaly < robert.harakaly@cern.ch >
@@ -34,6 +34,8 @@ import sys, posix, getopt,time
 
 sys.path.append(".")
 from gLiteInstallerLib import gLib 
+from gLiteInstallerLib import ConfigParams
+from gliteRgmaServicetool import gliteRgmaServicetoolInstance
 from gliteRgmaServicetool import gliteRgmaServicetool
 import mysql as MySQL
 
@@ -46,10 +48,9 @@ class glite_lb:
     def __init__(self):
         self.mysql = MySQL.Mysql()
         self.verbose = 0
-        self.version = "2.1.0"
+        self.version = "2.1.1"
         self.name = "glite-lb"
         self.friendly_name = "gLite Logging and Bookkeeping"
-        params['module.version'] = self.version
         
     #-------------------------------------------------------------------------------
     # Banner 
@@ -143,34 +144,19 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         #-------------------------------------------------------------------
         # Start Servicetool
         #-------------------------------------------------------------------
-  	 
-        pid = glib.getPID('rgma-servicetool')
-        if (pid != 0):
-    		print 'The gLite R-GMA Servicetool service is already running. Restarting...'
-    		rgmaServicetool.stop()
-        else:
-            print "Starting the gLite R-GMA Servicetool service"
 
-        rgmaServicetool.start()
-
-  	 
-        # Check that the daemon is running
-	
-        pid = glib.getPID('rgma-servicetool')
-
-        if (pid != 0):
-            print "The gLite R-GMA Servicetool service has been started               ",
-            glib.printOkMessage()
-        else:
-            glib.printErrorMessage("Could not start the gLite R-GMA Servicetool service")
-            glib.printErrorMessage("Please verify and re-run the script                        "),
-            glib.printFailedMessage()
-            return 1
+        if params['rgma.servicetool.activate'] == "true":
+        
+            errorcode = rgmaServicetool.start()
+            if (errorcode != 0):
+                return 1
         
         return 0
         
     def stop(self):
 
+        error_level = 0
+        
         pid = glib.getPID('bkserverd')
         if (pid != 0):
             os.system('%s/etc/init.d/glite-lb-bkserverd stop' % os.environ['GLITE_LOCATION'])
@@ -179,6 +165,7 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         if (pid != 0):
             print 'Could not stop the LB Server service            ',
             glib.printFailedMessage()
+            error_level = 1
         else:
             print 'The LB Server service has been stopped            ',
             glib.printOkMessage()
@@ -190,22 +177,15 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         self.mysql.stop()
 
         #-------------------------------------------------------------------
-        # Stop the servicetool
+        # Servicetool
         #-------------------------------------------------------------------
 
-        pid = glib.getPID('rgma-servicetool')
-        if (pid != 0):
-            rgmaServicetool.stop()
-
-        pid = glib.getPID('rgma-servicetool')
-        if (pid != 0):
-            print 'Could not stop the R-GMA Servicetool service            ',
-            glib.printFailedMessage()
-        else:
-            print 'The R-GMA Servicetool service has been stopped            ',
-            glib.printOkMessage()
-        
-        return 0
+        if params['rgma.servicetool.activate'] == "true":
+            
+            if rgmaServicetool.stop():
+                error_level = 1
+    
+        return error_level
         
     def status(self):
 
@@ -215,6 +195,15 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         if retval != 0:
             error_level = 1
 
+        #-------------------------------------------------------------------
+        # Servicetool
+        #-------------------------------------------------------------------
+
+        if params['rgma.servicetool.activate'] == "true":
+            
+            if rgmaServicetool.status() != 0:
+                error_level = 1
+    
         return error_level
         
     def configure(self):
@@ -224,11 +213,11 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         #--------------------------------------------------------
         
         if os.system("python %s/glite-security-utils-config.py --subservice" % glib.getScriptPath()):
-            print "\nConfiguring gLite Security Utilities                   ",
+            print "\nConfiguring gLite Security Utilities                      ",
             glib.printFailedMessage()
         else:
-            print "\nConfiguring gLite Security Utilities                   ",
-        glib.printOkMessage()
+            print "\nConfiguring gLite Security Utilities                      ",
+            glib.printOkMessage()
         
         # Create the GLITE_USER if it doesn't exists
         print "\nCreating/Verifying the GLITE_USER account %s" % os.environ['GLITE_USER']
@@ -239,8 +228,8 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         glib.printOkMessage()
 
         # Create all directories needed
-        print "\nVerify CA certificates directory            ",
         glib.check_dir(os.environ['GLITE_CERT_DIR'])
+        print "\nVerify CA certificates directory                          ",
         glib.printOkMessage()
          
         # Copy certificates
@@ -256,11 +245,15 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         # Configure MySQL
         #--------------------------------------------------------
 
+        # Set mysql parameters
+        #self.mysql.setConfiguration('client','max_allowed_packet',params['mysql.max_allowed_packet'])
+        self.mysql.setConfiguration('mysqld','max_allowed_packet',params['mysql.max_allowed_packet'])
+        
         # start MySQL
         self.mysql.stop()
         time.sleep(5)
-        self.mysql.start()
-        
+        self.mysql.start()                
+
         if not os.path.exists('/tmp/mysql.sock'):
             os.symlink('/var/lib/mysql/mysql.sock', '/tmp/mysql.sock')
 
@@ -290,7 +283,7 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
 
             self.mysql.add_user(params['lb.database.name'],params['lb.database.username'],"",self.mysql_root_password)
             text = ['USE %s;\n' % params['lb.database.name'],
-                       '\. %s/etc/glite-lb-dbsetup.sql\n' % os.environ['GLITE_LOCATION']]
+                    '\. %s/etc/glite-lb-dbsetup.sql\n' % os.environ['GLITE_LOCATION']]
     
             file.writelines(text)
             file.close()
@@ -336,17 +329,32 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
         #-------------------------------------------------------------------
         # RGMA servicetool: configure servicetool
         #-------------------------------------------------------------------
-        
-        print "Configuring the R-GMA Servicetool..."
-    
-        if rgmaServicetool.configure(glib):
-            # error in configuring services
-            print "Configuring the R-GMA Servicetool...                ",
-            glib.printFailedMessage()
-            return 1
-    
-        print "Configuring the R-GMA Servicetool...                ",
-        glib.printOkMessage()
+
+        if params['rgma.servicetool.activate'] == "true":
+            
+            # Instantiate the rgma-servicetool class
+            rgmaServicetool = gliteRgmaServicetool()
+            rgmaServicetool.verbose = self.verbose
+            
+            # Create Local Logger instance
+            serviceId = "%s_%s" % (glib.fq_hostname, params['lbserver.serviceType'])
+            servicetoolInstance = gliteRgmaServicetoolInstance(glib, serviceId)
+            
+            # set params
+            servicetoolInstance.setServiceName(params['lbserver.serviceName'])
+            servicetoolInstance.setServiceType(params['lbserver.serviceType'])
+            servicetoolInstance.setServiceVersion(self.version)
+            servicetoolInstance.setStatusScript(params['lbserver.statusScript'])
+            servicetoolInstance.setEndpoint(params['lbserver.endpoint'])
+            
+            # add instance to the gLite configuration
+            if servicetoolInstance.add() == 1:
+                return 1
+            
+            # Configure servicetool
+            if rgmaServicetool.configure(glib):
+                # error in configuring servicetool
+                return 1
             
         return 0
         
@@ -360,7 +368,13 @@ def loadDefaults(params):
     params['mysql.root.password'] = ""
     params['lb.database.name'] = "lbserver20"
     params['lb.database.username'] = "lbserver"
-
+    params['mysql.max_allowed_packet'] = "17"
+    
+    params['lbserver.serviceName'] = 'LB Server service at %s' % glib.fq_hostname
+    params['lbserver.serviceType'] = 'org.glite.lb.server'
+    params['lbserver.statusScript'] = '%s/etc/init.d/glite-lb-bkserverd status' % params['GLITE_LOCATION']
+    params['lbserver.endpoint'] = 'not available'
+    
 def set_env():
 
     # gLite
@@ -411,11 +425,13 @@ if __name__ == '__main__':
         print '"\nThis script must be run as root\n'
         sys.exit(1)
         
+    # Get an instance of the ConfigParams class
+    params = ConfigParams()
+    
     # Get an instance of the library class
     glib = gLib()
     
     # Load parameters
-    params = {}
     loadDefaults(params)
     try:
         opts, args = glib.getopt(sys.argv[1:], '', ['siteconfig='])
@@ -425,7 +441,8 @@ if __name__ == '__main__':
                 break
     except getopt.GetoptError:
         pass
-    if glib.loadConfiguration("%s/../glite-lb.cfg.xml" % glib.getScriptPath(),params):
+    if glib.loadConfiguration(["%s/../glite-lb.cfg.xml" % glib.getScriptPath(), \
+            "%s/../glite-rgma-servicetool.cfg.xml" % glib.getScriptPath()],params):
         print "An error occurred while configuring the service"
         sys.exit(1)
     
@@ -458,41 +475,46 @@ if __name__ == '__main__':
     
     # Check cli options
     for o, a in opts:
+
         if o in ("-h", "--help"):
             service.usage()
             sys.exit(0)
+
         if o in ("-v", "--version"):
             service.showVersion()
             sys.exit(0)
+
         if o in ("-c", "--checkconf"):
             service.copyright()
             service.showVersion()
             glib.print_params(params)
+            print
+            rgmaServicetool.showServices()
             sys.exit(0)
-                
+
         if o == "--configure":
 
-    # Check certificates
-    if params.has_key('glite.installer.checkcerts'):
-        if params['glite.installer.checkcerts'] == "true":
-            if glib.check_certs(params) != 0:
-                print "An error occurred while configuring the %s service" \
-                    % service.friendly_name
-                sys.exit(1)
-    
-    # Print configuration parameters
-    if verbose:
-        glib.print_params(params)
-
-    service.copyright()
-    service.showVersion()
-    service.banner()
+            # Check certificates
+            if params.has_key('glite.installer.checkcerts'):
+                if params['glite.installer.checkcerts'] == "true":
+                    if glib.check_certs(params) != 0:
+                        print "An error occurred while configuring the %s service" \
+                            % service.friendly_name
+                        sys.exit(1)
+            
+            # Print configuration parameters
+            if verbose:
+                glib.print_params(params)
         
+            service.copyright()
+            service.showVersion()
+            service.banner()
+                
             # Stop all services
             glib.printInfoMessage("\n\nStopping all running LB services...")
             service.stop()
             
-    # Configure the service
+            # Configure the service
             return_result = service.configure()
 
             if return_result == 0:
@@ -503,7 +525,7 @@ if __name__ == '__main__':
                 
                 print "\n\nThe %s configuration was successfully completed\n" % service.friendly_name
                 print "You can now start the service using the --start option of this script\n\n"
-        glib.registerService()
+                glib.registerService()
 
                 sys.exit(0)
 
@@ -519,23 +541,23 @@ if __name__ == '__main__':
 
                 sys.exit(2)
 
-    else:
+            else:
                 print "\n\nAn unrecoverable error occurred while configuring the %s" \
                     % service.friendly_name
 
-        sys.exit(1)
-        
+                sys.exit(1)
+            
         if o in ("start", "--start"):
-    # Start the service
-    if service.start() == 0:
+            # Start the service
+            if service.start() == 0:
                 print "\n\nThe %s was successfully started           " % service.friendly_name,
-        glib.printOkMessage()
+                glib.printOkMessage()
                 sys.exit(0)
-    else:
+            else:
                 print "\n\nAn error occurred while starting the %s            " % service.friendly_name,
-        glib.printFailedMessage()
-        sys.exit(1)
-
+                glib.printFailedMessage()
+                sys.exit(1)
+            
         if o in ("stop", "--stop"): 
             # Stop the service
             if service.stop() == 0:
@@ -546,6 +568,7 @@ if __name__ == '__main__':
                 print "\n\nAn unrecoverable error occurred while stopping the %s " % service.friendly_name,
                 glib.printFailedMessage()
                 sys.exit(1)
+        
         if o == "--status":
             sys.exit(service.status())
                 
