@@ -582,6 +582,7 @@ edg_wll_gss_connect(gss_cred_id_t cred, char const *hostname, int port,
    char *servername = NULL;
 
    maj_stat = min_stat = min_stat2 = req_flags = 0;
+   memset(connection, 0, sizeof(*connection));
 
    /* GSI specific */
    req_flags = GSS_C_GLOBUS_SSL_COMPATIBLE;
@@ -653,7 +654,6 @@ edg_wll_gss_connect(gss_cred_id_t cred, char const *hostname, int port,
 
    /* XXX check ret_flags matches to what was requested */
 
-   memset(connection, 0, sizeof(*connection));
    connection->sock = sock;
    connection->context = context;
    servername = NULL;
@@ -687,6 +687,7 @@ edg_wll_gss_accept(gss_cred_id_t cred, int sock, struct timeval *timeout,
    int ret;
 
    maj_stat = min_stat = min_stat2 = 0;
+   memset(connection, 0, sizeof(*connection));
 
    /* GSI specific */
    ret_flags = GSS_C_GLOBUS_SSL_COMPATIBLE;
@@ -731,7 +732,6 @@ edg_wll_gss_accept(gss_cred_id_t cred, int sock, struct timeval *timeout,
       goto end;
    }
 
-   memset(connection, 0, sizeof(*connection));
    connection->sock = sock;
    connection->context = context;
    memset(&output_token, 0, sizeof(output_token.value));
