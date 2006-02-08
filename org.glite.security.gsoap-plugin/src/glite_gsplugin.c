@@ -53,7 +53,7 @@ glite_gsplugin_free_context(glite_gsplugin_Context ctx)
 {
 	OM_uint32	ms;
 	
-	if (ctx == NUL)
+	if (ctx == NULL)
 	   return 0;
 
 	if ( ctx->cred != GSS_C_NO_CREDENTIAL ) gss_release_cred(&ms, &ctx->cred);
