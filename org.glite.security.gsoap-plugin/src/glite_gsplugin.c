@@ -52,6 +52,9 @@ int
 glite_gsplugin_free_context(glite_gsplugin_Context ctx)
 {
 	OM_uint32	ms;
+	
+	if (ctx == NUL)
+	   return 0;
 
 	if ( ctx->cred != GSS_C_NO_CREDENTIAL ) gss_release_cred(&ms, &ctx->cred);
 	if ( ctx->connection ) {
@@ -59,9 +62,12 @@ glite_gsplugin_free_context(glite_gsplugin_Context ctx)
 			edg_wll_gss_close(ctx->connection, NULL);
 		free(ctx->connection);
 	}
-	free(ctx->error_msg);
-	free(ctx->key_filename);
-	free(ctx->cert_filename);
+	if (ctx->error_msg)
+	   free(ctx->error_msg);
+	if (ctx->key_filename)
+	   free(ctx->key_filename);
+	if (ctx->cert_filename)
+	   free(ctx->cert_filename);
 	free(ctx);
 
 	return 0;
@@ -116,8 +122,8 @@ glite_gsplugin_set_credential(glite_gsplugin_Context ctx,
       return EINVAL;
    }
 
-   ctx->cert_filename = cert;
-   ctx->key_filename = key;
+   ctx->cert_filename = strdup(cert);
+   ctx->key_filename = strdup(key);
 
    return 0;
 }
@@ -205,6 +211,7 @@ glite_gsplugin_delete(struct soap *soap, struct soap_plugin *p)
 		glite_gsplugin_close(soap);
 		if (d->ctx->cred != GSS_C_NO_CREDENTIAL) gss_release_cred(&ms, &d->ctx->cred);
 		free(d->ctx->error_msg);
+		d->ctx->error_msg = NULL;
 	}
 	free(d);
 }
