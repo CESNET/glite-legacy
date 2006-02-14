@@ -430,7 +430,7 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 			}
 		}
 
-		if ( !first_request && FD_ISSET(sock, &fds) && req_cnt < set_slave_reqs_max )
+		if ( (conn < 0 || !first_request) && FD_ISSET(sock, &fds) && req_cnt < set_slave_reqs_max )
 		{
 			if ( conn >= 0 ) usleep(100000 + 1000 * (random() % 200));
 			if ( do_recvmsg(sock, &newconn, &seq, &newsrv) ) switch ( errno )
