@@ -288,7 +288,7 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 		sockflags,
 		h_errno,
 		pid, i,
-		first_request = 0;
+		first_request = 0; /* 1 -> first request from connected client expected */
 
 
 
@@ -374,9 +374,8 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 		sigprocmask(SIG_BLOCK, &sset, NULL);
 
 		gettimeofday(&now,NULL);
-		if (conn >= 0 && check_timeout(set_idle_to, client_done, now)) kick_client = KICK_IDLE;
 
-		if ( conn >= 0 && !kick_client && FD_ISSET(conn, &fds) )
+		if ( conn >= 0 && FD_ISSET(conn, &fds) )
 		{
 			/*
 			 *	serve the request
@@ -428,11 +427,17 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 				if (!check_timeout(new_client_duration,client_start,now)) continue;
 
 			}
+		} else {
+			if (conn >= 0 && check_timeout(set_idle_to, client_done, now)) 
+				kick_client = KICK_IDLE;
 		}
 
 		if ( (conn < 0 || !first_request) && FD_ISSET(sock, &fds) && req_cnt < set_slave_reqs_max )
 		{
-			if ( conn >= 0 ) usleep(100000 + 1000 * (random() % 200));
+			/* Prefer slaves with no connection, then kick idle clients,
+			 * active ones last. Wait less if we have serviced a request in the meantime.
+			 * Tuned for HZ=100 timer. */
+			if ( conn >= 0 ) usleep( kick_client || FD_ISSET(conn, &fds) ? 11000 : 21000);
 			if ( do_recvmsg(sock, &newconn, &seq, &newsrv) ) switch ( errno )
 			{
 			case EINTR: /* XXX: signals are blocked */
