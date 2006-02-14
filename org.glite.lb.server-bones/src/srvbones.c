@@ -454,6 +454,7 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 			close(conn);
 			conn = -1;
 			srv = -1;
+			first_request = 0;
 			dprintf(("[%d] Connection closed, %s\n", getpid(), kicks[kick_client]));
 		}
 
