@@ -258,7 +258,8 @@ static int dispatchit(int sock_slave, int sock, int sidx)
 	else
 	{
 		services[sidx].on_reject_hnd(conn);
-		dprintf(("[master] Reject due to overload\n"));
+		dprintf(("[master] Rejected new connection due to overload\n"));
+		if ( !debug ) syslog(LOG_ERR, "Rejected new connection due to overload\n");
 	}
 
 	close(conn);
