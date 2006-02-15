@@ -41,16 +41,11 @@ extern char *lbproxy_ilog_file_prefix;
 
 #define DEFAULTCS			"lbserver/@localhost:lbproxy"
 
-#define CON_QUEUE			20	/* accept() */
+#define CON_QUEUE		20	/* accept() */
 #define SLAVE_OVERLOAD		10	/* queue items per slave */
-#define CLNT_TIMEOUT		10	/* keep idle connection that many seconds */
-#define TOTAL_CLNT_TIMEOUT	60	/* one client may ask one slave multiple times */
-					/* but only limited time to avoid DoS attacks */
-#define CLNT_REJECT_TIMEOUT	100000	/* time limit for client rejection in !usec! */
-#define DNS_TIMEOUT      	5	/* how long wait for DNS lookup */
+#define IDLE_TIMEOUT		10	/* keep idle connection that many seconds */
+#define REQUEST_TIMEOUT		60	/* one client may ask one slave multiple times */
 #define SLAVE_CONNS_MAX		500	/* commit suicide after that many connections */
-#define MASTER_TIMEOUT		30 	/* maximal time of one-round of master network communication */
-#define SLAVE_TIMEOUT		30 	/* maximal time of one-round of slave network communication */
 
 /* file to store pid and generate semaphores key
  */
@@ -220,7 +215,7 @@ int main(int argc, char *argv[])
 	gethostname(host, sizeof host);
 	host[sizeof host - 1] = 0;
 	asprintf(&port, "%d", GLITE_WMSC_JOBID_DEFAULT_PORT);
-	dprintf(("server address: %s:%d\n", host, port));
+	dprintf(("server address: %s:%s\n", host, port));
 
 	service_table[SRV_SERVE].conn = socket(PF_UNIX, SOCK_STREAM, 0);
 	if ( service_table[SRV_SERVE].conn < 0 ) { perror("socket()"); return 1; }
@@ -310,11 +305,9 @@ int main(int argc, char *argv[])
 	glite_srvbones_set_param(GLITE_SBPARAM_SLAVES_COUNT, slaves);
 	glite_srvbones_set_param(GLITE_SBPARAM_SLAVE_OVERLOAD, SLAVE_OVERLOAD);
 	glite_srvbones_set_param(GLITE_SBPARAM_SLAVE_CONNS_MAX, SLAVE_CONNS_MAX);
-	to = (struct timeval){CLNT_TIMEOUT, 0};
-	glite_srvbones_set_param(GLITE_SBPARAM_CONNECT_TIMEOUT, &to);
-	to = (struct timeval){CLNT_TIMEOUT, 0};
+	to = (struct timeval){REQUEST_TIMEOUT, 0};
 	glite_srvbones_set_param(GLITE_SBPARAM_REQUEST_TIMEOUT, &to);
-	to = (struct timeval){TOTAL_CLNT_TIMEOUT, 0};
+	to = (struct timeval){IDLE_TIMEOUT, 0};
 	glite_srvbones_set_param(GLITE_SBPARAM_IDLE_TIMEOUT, &to);
 
 	glite_srvbones_run(clnt_data_init, service_table, sizofa(service_table), debug);
@@ -357,8 +350,7 @@ int handle_conn(int conn, struct timeval *timeout, void *data)
 {
 	struct clnt_data_t *cdata = (struct clnt_data_t *)data;
 	edg_wll_Context		ctx;
-	struct timeval		total_to = { TOTAL_CLNT_TIMEOUT,0 },
-						conn_start, now;
+	struct timeval		conn_start, now;
 
 	if ( !(ctx = (edg_wll_Context) calloc(1, sizeof(*ctx))) ) {
 		fprintf(stderr, "Couldn't create context");
@@ -379,13 +371,6 @@ int handle_conn(int conn, struct timeval *timeout, void *data)
 	ctx->semset = semset;
 	ctx->semaphores = semaphores;
 
-	ctx->p_tmp_timeout.tv_sec = SLAVE_TIMEOUT;
-	ctx->p_tmp_timeout.tv_usec = 0;
-	if ( total_to.tv_sec < ctx->p_tmp_timeout.tv_sec ) {
-		ctx->p_tmp_timeout.tv_sec = total_to.tv_sec;
-		ctx->p_tmp_timeout.tv_usec = total_to.tv_usec;
-	}
-	
 	ctx->srvName = strdup(host);
 	ctx->srvPort = atoi(port);
 	
