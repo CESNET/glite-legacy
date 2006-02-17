@@ -44,7 +44,7 @@ extern char *lbproxy_ilog_file_prefix;
 #define CON_QUEUE		20	/* accept() */
 #define SLAVE_OVERLOAD		10	/* queue items per slave */
 #define IDLE_TIMEOUT		10	/* keep idle connection that many seconds */
-#define REQUEST_TIMEOUT		60	/* one client may ask one slave multiple times */
+#define REQUEST_TIMEOUT		120	/* one client may ask one slave multiple times */
 #define SLAVE_CONNS_MAX		500	/* commit suicide after that many connections */
 
 /* file to store pid and generate semaphores key
