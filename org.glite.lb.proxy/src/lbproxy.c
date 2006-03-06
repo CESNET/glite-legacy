@@ -413,7 +413,6 @@ int accept_store(int conn, struct timeval *timeout, void *cdata)
 	memcpy(&ctx->p_tmp_timeout, timeout, sizeof(ctx->p_tmp_timeout));
 	gettimeofday(&before, NULL);
 	errt = errd = NULL;
-#if 0
 	if ( edg_wll_StoreProtoProxy(ctx) ) {
 		switch ( (err = edg_wll_Error(ctx, &errt, &errd)) ) {
 		case ETIMEDOUT:
@@ -449,7 +448,6 @@ int accept_store(int conn, struct timeval *timeout, void *cdata)
 		free(errt); free(errd);
 		edg_wll_ResetError(ctx);
 	}
-#endif
 	gettimeofday(&after, NULL);
 	if ( decrement_timeout(timeout, before, after) ) {
 		if (debug) fprintf(stderr, "Serving store connection timed out");
