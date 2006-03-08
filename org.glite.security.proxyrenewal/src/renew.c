@@ -144,7 +144,6 @@ renew_proxy(proxy_record *record, char *basename, char **new_proxy)
       goto end;
 
    client_request->proxy_lifetime = 60 * 60 * DGPR_RETRIEVE_DEFAULT_HOURS;
-   client_request->authzcreds = repository_file;
 
    server = (record->myproxy_server) ? record->myproxy_server :
                                        socket_attrs->pshost;
@@ -165,7 +164,7 @@ renew_proxy(proxy_record *record, char *basename, char **new_proxy)
       socket_attrs->psport = MYPROXY_SERVER_PORT;
 
    verror_clear();
-   ret = myproxy_get_delegation(socket_attrs, client_request,
+   ret = myproxy_get_delegation(socket_attrs, client_request, repository_file,
 	                        server_response, tmp_proxy);
    if (ret == 1) {
       ret = EDG_WLPR_ERROR_MYPROXY;
