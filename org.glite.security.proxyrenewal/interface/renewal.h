@@ -86,6 +86,16 @@ edg_wlpr_RegisterProxyExt(
       char ** repository_filename
 );
 
+int
+edg_wlpr_RegisterProxyJobId(
+	const char * filename,
+	const char * server,
+	unsigned int port,
+	const char *jobid,
+	int flags,
+	char ** repository_filename
+);
+
 /**
  * Unregister proxy from the renewal daemon.
  * \param jobid IN: specification of job whose proxy shall be unregistered

@@ -330,10 +330,10 @@ edg_wlpr_RequestSend(edg_wlpr_Request *request, edg_wlpr_Response *response)
 }
 
 int
-edg_wlpr_RegisterProxyExt(const char *filename, const char * server,
-			  unsigned int port,
-                          edg_wlc_JobId jobid, int flags,
-			  char **repository_filename)
+edg_wlpr_RegisterProxyJobId(const char *filename, const char * server,
+                            unsigned int port,
+                            const char *jobid, int flags,
+                            char **repository_filename)
 {
    edg_wlpr_Request request;
    edg_wlpr_Response response;
@@ -342,12 +342,15 @@ edg_wlpr_RegisterProxyExt(const char *filename, const char * server,
    memset(&request, 0, sizeof(request));
    memset(&response, 0, sizeof(response));
 
+   if (jobid == NULL)
+      return EINVAL;
+
    request.command = EDG_WLPR_COMMAND_REG;
    request.myproxy_server = server;
    request.proxy_filename = filename;
-   request.jobid = edg_wlc_JobIdUnparse(jobid);
+   request.jobid = strdup(jobid);
    if (request.jobid == NULL)
-      return EINVAL; /* XXX */
+      return ENOMEM;
 
    ret = edg_wlpr_RequestSend(&request, &response);
    free(request.jobid);
@@ -360,6 +363,25 @@ edg_wlpr_RegisterProxyExt(const char *filename, const char * server,
 
    edg_wlpr_CleanResponse(&response);
    
+   return ret;
+}
+
+int
+edg_wlpr_RegisterProxyExt(const char *filename, const char * server,
+			  unsigned int port,
+                          edg_wlc_JobId jobid, int flags,
+			  char **repository_filename)
+{
+   char *ji;
+   int ret;
+
+   ji = edg_wlc_JobIdUnparse(jobid);
+   if (ji == NULL)
+      return EINVAL;
+
+   ret = edg_wlpr_RegisterProxyJobId(filename, server, port, ji, flags,
+		   		     repository_filename);
+   free(ji);
    return ret;
 }
 
