@@ -87,7 +87,7 @@ edg_wlpr_RegisterProxyExt(
 );
 
 int
-edg_wlpr_RegisterProxyJobId(
+glite_renewal_RegisterProxy(
 	const char * filename,
 	const char * server,
 	unsigned int port,
@@ -108,6 +108,12 @@ int
 edg_wlpr_UnregisterProxy(
       edg_wlc_JobId jobid,
       const char * repository_filename
+);
+
+int
+glite_renewal_UnregisterProxy(
+	const char * jobid,
+	const char * repository_filename
 );
 
 /**
@@ -148,6 +154,11 @@ edg_wlpr_GetStatus(const char *repository_filename, char **info);
  */
 int
 edg_wlpr_GetProxy(edg_wlc_JobId jobid, char **repository_filename);
+
+int
+glite_renewal_GetProxy(
+	const char * jobid,
+	char **repository_filename);
 
 #ifdef __cplusplus
 }

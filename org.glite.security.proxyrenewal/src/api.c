@@ -330,7 +330,7 @@ edg_wlpr_RequestSend(edg_wlpr_Request *request, edg_wlpr_Response *response)
 }
 
 int
-edg_wlpr_RegisterProxyJobId(const char *filename, const char * server,
+glite_renewal_RegisterProxy(const char *filename, const char * server,
                             unsigned int port,
                             const char *jobid, int flags,
                             char **repository_filename)
@@ -379,8 +379,8 @@ edg_wlpr_RegisterProxyExt(const char *filename, const char * server,
    if (ji == NULL)
       return EINVAL;
 
-   ret = edg_wlpr_RegisterProxyJobId(filename, server, port, ji, flags,
-		   		     repository_filename);
+   ret = glite_renewal_RegisterProxy(filename, server, port, ji, flags,
+		     		     repository_filename);
    free(ji);
    return ret;
 }
@@ -414,7 +414,7 @@ edg_wlpr_RegisterProxy(const char *filename, const char *jdl,
 }
 
 int
-edg_wlpr_UnregisterProxy(edg_wlc_JobId jobid, const char *repository_filename)
+glite_renewal_UnregisterProxy(const char *jobid, const char *repository_filename)
 {
    edg_wlpr_Request request;
    edg_wlpr_Response response;
@@ -423,11 +423,14 @@ edg_wlpr_UnregisterProxy(edg_wlc_JobId jobid, const char *repository_filename)
    memset(&request, 0, sizeof(request));
    memset(&response, 0, sizeof(response));
 
+   if (jobid == NULL)
+      return EINVAL;
+
    request.command = EDG_WLPR_COMMAND_UNREG;
    request.proxy_filename = repository_filename;
-   request.jobid = edg_wlc_JobIdUnparse(jobid);
+   request.jobid = strdup(jobid);
    if (request.jobid == NULL)
-      return EINVAL;
+      return ENOMEM;
 
    ret = edg_wlpr_RequestSend(&request, &response);
    free(request.jobid);
@@ -436,6 +439,20 @@ edg_wlpr_UnregisterProxy(edg_wlc_JobId jobid, const char *repository_filename)
       ret = response.response_code;
    edg_wlpr_CleanResponse(&response);
 
+   return ret;
+}
+
+int
+edg_wlpr_UnregisterProxy(edg_wlc_JobId jobid, const char *repository_filename)
+{
+   char *ji;
+   int ret;
+
+   ji = edg_wlc_JobIdUnparse(jobid);
+   if (ji == NULL)
+      return EINVAL;
+   ret = glite_renewal_UnregisterProxy(ji, repository_filename);
+   free(ji);
    return ret;
 }
 
@@ -478,7 +495,7 @@ edg_wlpr_GetErrorText(int code)
 }
 
 int
-edg_wlpr_GetProxy(edg_wlc_JobId jobid, char **repository_filename)
+glite_renewal_GetProxy(const char *jobid, char **repository_filename)
 {
    edg_wlpr_Request request;
    edg_wlpr_Response response;
@@ -487,10 +504,13 @@ edg_wlpr_GetProxy(edg_wlc_JobId jobid, char **repository_filename)
    memset(&request, 0, sizeof(request));
    memset(&response, 0, sizeof(response));
 
-   request.command = EDG_WLPR_COMMAND_GET;
-   request.jobid = edg_wlc_JobIdUnparse(jobid);
-   if (request.jobid == NULL)
+   if (jobid == NULL)
       return EINVAL;
+
+   request.command = EDG_WLPR_COMMAND_GET;
+   request.jobid = strdup(jobid);
+   if (request.jobid == NULL)
+      return ENOMEM;
 
    ret = edg_wlpr_RequestSend(&request, &response);
    free(request.jobid);
@@ -503,5 +523,20 @@ edg_wlpr_GetProxy(edg_wlc_JobId jobid, char **repository_filename)
       ret = response.response_code;
    edg_wlpr_CleanResponse(&response);
 
+   return ret;
+}
+
+int
+edg_wlpr_GetProxy(edg_wlc_JobId jobid, char **repository_filename)
+{
+   char *ji;
+   int ret;
+
+   ji = edg_wlc_JobIdUnparse(jobid);
+   if (ji == NULL)
+      return EINVAL;
+
+   ret = glite_renewal_GetProxy(ji, repository_filename);
+   free(ji);
    return ret;
 }
