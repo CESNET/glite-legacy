@@ -12,6 +12,9 @@
 	
 	Revision history:
 	$Log$
+	Revision 1.2.4.1  2005/11/27 16:16:17  dimeglio
+	Restrict config file to root
+	
 	Revision 1.2  2005/07/08 13:18:40  dimeglio
 	Merged from branch 1.2.2
 	
@@ -53,14 +56,15 @@
 		 Define extra properties here ...
 		 ====================================================== -->
 		 
+	<property name="build.package.name" value="glite-LB"/>
 	<property name="build.package.summary" value="gLite Logging and Bookkeeping node configuration files" />
 	<property name="build.package.description" value="gLite Logging and Bookkeeping node configuration files" />
 	<property name="build.package.files" value="
 %attr(755,root,root) %{prefix}/etc/config/scripts/glite-lb-config.py\n
 %attr(600,root,root) %{prefix}/etc/config/templates/glite-lb.cfg.xml\n
-%attr(644,root,root) %{prefix}/share/doc/glite-lb/release_notes/release_notes.doc\n
-%attr(644,root,root) %{prefix}/share/doc/glite-lb/release_notes/release_notes.pdf\n
-%attr(644,root,root) %{prefix}/share/doc/glite-lb/release_notes/release_notes.html\n"
-	/>
+%attr(644,root,root) %{prefix}/share/doc/glite-LB/release_notes/release_notes.doc\n
+%attr(644,root,root) %{prefix}/share/doc/glite-LB/release_notes/release_notes.pdf\n
+%attr(644,root,root) %{prefix}/share/doc/glite-LB/release_notes/release_notes.html\n"/>
+	<property name="build.package.obsolete" value="glite-lb-config"/>
 
 </project>
