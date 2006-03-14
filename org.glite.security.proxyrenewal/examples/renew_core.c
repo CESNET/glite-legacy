@@ -6,10 +6,11 @@
 static struct option const long_options[] = {
    { "server",   required_argument, 0, 's' },
    { "proxy",    required_argument, 0, 'p' },
+   { "help",     no_argument,       0, 'h' },
    { NULL, 0, NULL, 0}
 };
 
-static char short_options[] = "s:p:";
+static char short_options[] = "s:p:h";
 
 /* Two ugly hacks, will be removed once the context is introduced */
 char *vomsconf = NULL;
@@ -52,6 +53,8 @@ main(int argc, char *argv[])
       fprintf(stderr, "glite_renewal_core_renew() failed: %d\n", ret);
       exit(1);
    }
+
+   printf("%s\n", new_proxy);
 
    return 0;
 }
