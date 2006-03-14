@@ -14,7 +14,7 @@ char **listadd(char **, char *, int);
 extern char *vomsconf;
 
 static int
-generate_proxy(globus_gsi_cred_handle_t cur_proxy,
+generate_proxy(glite_renewal_core_context ctx, globus_gsi_cred_handle_t cur_proxy,
                X509_EXTENSION *voms_extension, const char *new_file)
 {
    globus_result_t result;
@@ -27,39 +27,39 @@ generate_proxy(globus_gsi_cred_handle_t cur_proxy,
 
    result = globus_gsi_proxy_handle_init(&proxy_handle, NULL);
    if (result) {
-      edg_wlpr_Log(LOG_ERR, "globus_gsi_proxy_handle_init() failed\n");
+      edg_wlpr_Log(ctx, LOG_ERR, "globus_gsi_proxy_handle_init() failed\n");
       goto end;
    }
 
    result = globus_gsi_cred_get_key(cur_proxy, &cur_proxy_priv_key);
    if (result) {
-      edg_wlpr_Log(LOG_ERR, "globus_gsi_cred_get_key() failed\n");
+      edg_wlpr_Log(ctx, LOG_ERR, "globus_gsi_cred_get_key() failed\n");
       goto end;
    }
 
    /* Create and sign a new proxy */
    result = globus_gsi_cred_get_cert_type(cur_proxy, &proxy_type);
    if (result) {
-      edg_wlpr_Log(LOG_ERR, "globus_gsi_cred_get_cert_type() failed\n");
+      edg_wlpr_Log(ctx, LOG_ERR, "globus_gsi_cred_get_cert_type() failed\n");
       goto end;
    }
 
    result = globus_gsi_proxy_handle_set_type(proxy_handle, proxy_type);
    if (result) {
-      edg_wlpr_Log(LOG_ERR, "globus_gsi_proxy_handle_set_type() failed\n");
+      edg_wlpr_Log(ctx, LOG_ERR, "globus_gsi_proxy_handle_set_type() failed\n");
       goto end;
    }
 
    result = globus_gsi_proxy_create_signed(proxy_handle, cur_proxy, &proxy);
    if (result) {
-      edg_wlpr_Log(LOG_ERR, "globus_gsi_proxy_handle_init() failed\n");
+      edg_wlpr_Log(ctx, LOG_ERR, "globus_gsi_proxy_handle_init() failed\n");
       goto end;
    }
 
    /* Get the new proxy */
    result = globus_gsi_cred_get_cert(proxy, &new_cert);
    if (result) {
-      edg_wlpr_Log(LOG_ERR, "globus_gsi_cred_get_cert() failed\n");
+      edg_wlpr_Log(ctx, LOG_ERR, "globus_gsi_cred_get_cert() failed\n");
       goto end;
    }
 
@@ -79,7 +79,7 @@ generate_proxy(globus_gsi_cred_handle_t cur_proxy,
    /* And put the cert back, older one is unallocated by the function */
    result = globus_gsi_cred_set_cert(proxy, voms_cert);
    if (result) {
-      edg_wlpr_Log(LOG_ERR, "globus_gsi_cred_set_cert() failed\n");
+      edg_wlpr_Log(ctx, LOG_ERR, "globus_gsi_cred_set_cert() failed\n");
       goto end;
    }
 
@@ -91,7 +91,7 @@ end:
 }
 
 static int
-my_VOMS_Export(void *buf, int buf_len, X509_EXTENSION **extension)
+my_VOMS_Export(glite_renewal_core_context ctx, void *buf, int buf_len, X509_EXTENSION **extension)
 {
    AC *ac = NULL;
    unsigned char *p, *pp;
@@ -100,7 +100,7 @@ my_VOMS_Export(void *buf, int buf_len, X509_EXTENSION **extension)
    p = pp = buf;
    ac = d2i_AC(NULL, &p, buf_len+1);
    if (ac == NULL) {
-      edg_wlpr_Log(LOG_ERR, "d2i_AC() failed\n");
+      edg_wlpr_Log(ctx, LOG_ERR, "d2i_AC() failed\n");
       return 1;
    }
 
@@ -112,7 +112,7 @@ my_VOMS_Export(void *buf, int buf_len, X509_EXTENSION **extension)
 }
 
 static int
-create_voms_command(struct vomsdata *vd, struct voms **voms_cert, char **command)
+create_voms_command(glite_renewal_core_context ctx, struct vomsdata *vd, struct voms **voms_cert, char **command)
 {
    int voms_error, ret;
    struct data **attribs;
@@ -122,14 +122,14 @@ create_voms_command(struct vomsdata *vd, struct voms **voms_cert, char **command
    for (i = 2; i < argc; i++) {
       ret = VOMS_Ordering(argv[i], vd, &voms_error);
       if (ret == 0) {
-	 edg_wlpr_Log(LOG_ERR, "VOMS_Ordering() failed\n"); 
+	 edg_wlpr_Log(ctx, LOG_ERR, "VOMS_Ordering() failed\n"); 
 	 return 1;
       }
    }
 #endif
 
    if (voms_cert == NULL || *voms_cert == NULL || (*voms_cert)->std == NULL) {
-      edg_wlpr_Log(LOG_ERR, "Invalid VOMS certificate\n");
+      edg_wlpr_Log(ctx, LOG_ERR, "Invalid VOMS certificate\n");
       return 1;
    }
 
@@ -146,7 +146,7 @@ end:
 }
 
 static int
-renew_voms_cert(struct vomsdata *vd, struct voms **voms_cert, 
+renew_voms_cert(glite_renewal_core_context ctx, struct vomsdata *vd, struct voms **voms_cert, 
                 char **buf, size_t *buf_len)
 {
    int voms_error = 0, i, ret, voms_version;
@@ -156,11 +156,11 @@ renew_voms_cert(struct vomsdata *vd, struct voms **voms_cert,
    voms_contacts = VOMS_FindByVO(vd, (*voms_cert)->voname, vomsconf, NULL, &voms_error);
 
    if (voms_contacts == NULL) {
-      edg_wlpr_Log(LOG_ERR, "VOMS_FindByVO() failed\n");
+      edg_wlpr_Log(ctx, LOG_ERR, "VOMS_FindByVO() failed\n");
       return 1;
    }
 
-   ret = create_voms_command(vd, voms_cert, &command);
+   ret = create_voms_command(ctx, vd, voms_cert, &command);
 
    /* XXX iterate over all servers on the list on errors */
    ret = VOMS_ContactRaw(voms_contacts[0]->host, voms_contacts[0]->port,
@@ -168,7 +168,7 @@ renew_voms_cert(struct vomsdata *vd, struct voms **voms_cert,
 			 (void**) buf, buf_len, &voms_version,
 			 vd, &voms_error);
    if (ret == 0) {
-      edg_wlpr_Log(LOG_ERR, "VOMS_Contact() failed\n");
+      edg_wlpr_Log(ctx, LOG_ERR, "VOMS_Contact() failed\n");
       return 1;
    }
 
@@ -181,7 +181,7 @@ renew_voms_cert(struct vomsdata *vd, struct voms **voms_cert,
 }
 
 static int
-renew_voms_certs(const char *cur_file, const char *renewed_file, const char *new_file)
+renew_voms_certs(glite_renewal_core_context ctx, const char *cur_file, const char *renewed_file, const char *new_file)
 {
    globus_gsi_cred_handle_t cur_proxy = NULL;
    globus_gsi_cred_handle_t new_proxy = NULL;
@@ -201,13 +201,13 @@ renew_voms_certs(const char *cur_file, const char *renewed_file, const char *new
    setenv("X509_USER_CERT", renewed_file, 1);
    setenv("X509_USER_KEY", renewed_file, 1);
 
-   ret = load_proxy(cur_file, &cert, NULL, &chain, &cur_proxy);
+   ret = load_proxy(ctx, cur_file, &cert, NULL, &chain, &cur_proxy);
    if (ret)
       goto end;
 
    vd = VOMS_Init(NULL, NULL);
    if (vd == NULL) {
-      edg_wlpr_Log(LOG_ERR, "VOMS_Init() failed\n");
+      edg_wlpr_Log(ctx, LOG_ERR, "VOMS_Init() failed\n");
       return 1;
    }
 
@@ -217,11 +217,11 @@ renew_voms_certs(const char *cur_file, const char *renewed_file, const char *new
 	 /* no VOMS cred, no problem; continue */
 	 /* XXX this part shouldn't be reachable, this call is only called
 	  * if the proxy does contain VOMS attributes */
-	 edg_wlpr_Log(LOG_ERR, "No VOMS attributes found in proxy %s\n", cur_file);
+	 edg_wlpr_Log(ctx, LOG_ERR, "No VOMS attributes found in proxy %s\n", cur_file);
 	 ret = 0;
 	 goto end;
       } else {
-	 edg_wlpr_Log(LOG_ERR, "Cannot get VOMS certificate(s) from proxy");
+	 edg_wlpr_Log(ctx, LOG_ERR, "Cannot get VOMS certificate(s) from proxy");
 	 ret = 1;
 	 goto end;
       }
@@ -233,7 +233,7 @@ renew_voms_certs(const char *cur_file, const char *renewed_file, const char *new
       char *tmp, *ptr;
       size_t tmp_len;
 
-      ret = renew_voms_cert(vd, voms_cert, &tmp, &tmp_len);
+      ret = renew_voms_cert(ctx, vd, voms_cert, &tmp, &tmp_len);
       if (ret)
 	 goto end;
       ptr = realloc(buf, buf_len + tmp_len);
@@ -252,15 +252,15 @@ renew_voms_certs(const char *cur_file, const char *renewed_file, const char *new
       goto end;
    }
 
-   ret = my_VOMS_Export(buf, buf_len, &extension);
+   ret = my_VOMS_Export(ctx, buf, buf_len, &extension);
    if (ret)
       goto end;
 
-   ret = load_proxy(renewed_file, NULL, NULL, NULL, &new_proxy);
+   ret = load_proxy(ctx, renewed_file, NULL, NULL, NULL, &new_proxy);
    if (ret)
       goto end;
 
-   ret = generate_proxy(new_proxy, extension, new_file);
+   ret = generate_proxy(ctx, new_proxy, extension, new_file);
 
 end:
    (old_env_proxy) ? setenv("X509_USER_PROXY", old_env_proxy, 1) :
@@ -287,9 +287,9 @@ end:
 }
 
 int
-renew_voms_creds(const char *cur_file, const char *renewed_file, const char *new_file)
+renew_voms_creds(glite_renewal_core_context ctx, const char *cur_file, const char *renewed_file, const char *new_file)
 {
-   return renew_voms_certs(cur_file, renewed_file, new_file);
+   return renew_voms_certs(ctx, cur_file, renewed_file, new_file);
 }
 
 #if 0
@@ -307,7 +307,7 @@ main(int argc, char *argv[])
 
    if (globus_module_activate(GLOBUS_GSI_PROXY_MODULE) != GLOBUS_SUCCESS ||
        globus_module_activate(GLOBUS_GSI_CERT_UTILS_MODULE) != GLOBUS_SUCCESS) {
-       edg_wlpr_Log(LOG_ERR, "[%d]: Unable to initialize Globus modules\n", getpid());
+       edg_wlpr_Log(ctx, LOG_ERR, "[%d]: Unable to initialize Globus modules\n", getpid());
        return 1;
    }
 

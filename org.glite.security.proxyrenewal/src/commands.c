@@ -16,59 +16,59 @@ extern char *vomsdir;
 extern int voms_enabled;
 
 static char *
-strmd5(const char *s, unsigned char *digest);
+strmd5(glite_renewal_core_context ctx, const char *s, unsigned char *digest);
 
 static int
-get_record_ext(FILE *fd, proxy_record *record, int *last_used_suffix);
+get_record_ext(glite_renewal_core_context ctx, FILE *fd, proxy_record *record, int *last_used_suffix);
 
 static int
-get_record(FILE *fd, proxy_record *record);
+get_record(glite_renewal_core_context ctx, FILE *fd, proxy_record *record);
 
 static int
-store_record(char *basename, proxy_record *record);
+store_record(glite_renewal_core_context ctx, char *basename, proxy_record *record);
 
 static int
-copy_file_content(FILE *in, FILE *out);
+copy_file_content(glite_renewal_core_context ctx, FILE *in, FILE *out);
 
 static int
-copy_file(char *src, char *dst);
+copy_file(glite_renewal_core_context ctx, char *src, char *dst);
 
 static int
-get_base_filename(char *proxy_file, char **basefilename);
+get_base_filename(glite_renewal_core_context ctx, char *proxy_file, char **basefilename);
 
 int
-decode_record(char *line, proxy_record *record);
+decode_record(glite_renewal_core_context ctx, char *line, proxy_record *record);
 
 int
-encode_record(proxy_record *record, char **line);
+encode_record(glite_renewal_core_context ctx, proxy_record *record, char **line);
 
 static int
-open_metafile(char *proxy_file, FILE **fd);
+open_metafile(glite_renewal_core_context ctx, char *proxy_file, FILE **fd);
 
 void
-free_record(proxy_record *record);
+free_record(glite_renewal_core_context ctx, proxy_record *record);
 
 static int
-realloc_prd_list(prd_list *list);
+realloc_prd_list(glite_renewal_core_context ctx, prd_list *list);
 
 /* make public: */
 static int
-edg_wlpr_GetTokenInt(const char *msg, const size_t msg_len,
+edg_wlpr_GetTokenInt(glite_renewal_core_context ctx, const char *msg, const size_t msg_len,
                      const char *key, const char *separators,
                      int req_index, int *value);
 
 static void
-record_to_response(int status_code, proxy_record *record,
+record_to_response(glite_renewal_core_context ctx, int status_code, proxy_record *record,
                    edg_wlpr_Response *response);
 
 static int
-filename_to_response(char *filename, edg_wlpr_Response *response);
+filename_to_response(glite_renewal_core_context ctx, char *filename, edg_wlpr_Response *response);
 
 
 
 
 static char *
-strmd5(const char *s, unsigned char *digest)
+strmd5(glite_renewal_core_context ctx, const char *s, unsigned char *digest)
 {
     MD5_CTX md5;
     unsigned char   d[16];
@@ -92,7 +92,7 @@ strmd5(const char *s, unsigned char *digest)
 }
 
 static int
-get_base_filename(char *proxy_file, char **basefilename)
+get_base_filename(glite_renewal_core_context ctx, char *proxy_file, char **basefilename)
 {
    char *subject = NULL;
    char file[FILENAME_MAX];
@@ -100,11 +100,11 @@ get_base_filename(char *proxy_file, char **basefilename)
 
    assert(basefilename != NULL);
 
-   ret = get_proxy_base_name(proxy_file, &subject);
+   ret = get_proxy_base_name(ctx, proxy_file, &subject);
    if (ret)
       goto end;
 
-   snprintf(file, sizeof(file), "%s/%s", repository, strmd5(subject, NULL));
+   snprintf(file, sizeof(file), "%s/%s", repository, strmd5(ctx, subject, NULL));
    *basefilename = strdup(file); /* XXX test ENOMEM */
    ret = 0;
    
@@ -115,7 +115,7 @@ end:
 }
 
 static int
-copy_file_content(FILE *in, FILE *out)
+copy_file_content(glite_renewal_core_context ctx, FILE *in, FILE *out)
 {
    char buf[1024];
    size_t num;
@@ -124,12 +124,12 @@ copy_file_content(FILE *in, FILE *out)
    while (1) {
       num = fread(buf, sizeof(*buf), sizeof(buf), in);
       if ((ret = ferror(in))) {
-	 edg_wlpr_Log(LOG_ERR, "Reading failed: %s", strerror(errno));
+	 edg_wlpr_Log(ctx, LOG_ERR, "Reading failed: %s", strerror(errno));
 	 return ret;
       }
       num = fwrite(buf, sizeof(*buf), num, out);
       if ((ret = ferror(in))) {
-	 edg_wlpr_Log(LOG_ERR, "Writing failed: %s", strerror(errno));
+	 edg_wlpr_Log(ctx, LOG_ERR, "Writing failed: %s", strerror(errno));
 	 return ret;
       }
       if (feof(in))
@@ -139,7 +139,7 @@ copy_file_content(FILE *in, FILE *out)
 
 /* return the time interval, after which the renewal should be started */
 static time_t
-get_delta(time_t current_time, time_t start_time, time_t end_time)
+get_delta(glite_renewal_core_context ctx, time_t current_time, time_t start_time, time_t end_time)
 {
    time_t remaining_life;
    time_t life_to_lose;
@@ -158,7 +158,7 @@ get_delta(time_t current_time, time_t start_time, time_t end_time)
      /* if the proxy is too short, renew it as soon as possible */
 
      if (current_time + condor_limit > end_time ) {
-       edg_wlpr_Log(LOG_ERR, "Remaining proxy lifetime fell below the value of the Condor limit!");
+       edg_wlpr_Log(ctx, LOG_ERR, "Remaining proxy lifetime fell below the value of the Condor limit!");
      }
 
      return 0;
@@ -196,7 +196,7 @@ get_delta(time_t current_time, time_t start_time, time_t end_time)
 }
 
 int
-get_times(char *proxy_file, proxy_record *record)
+get_times(glite_renewal_core_context ctx, char *proxy_file, proxy_record *record)
 {
    FILE *fd;
    X509 *cert = NULL;
@@ -209,14 +209,14 @@ get_times(char *proxy_file, proxy_record *record)
 
    fd = fopen(proxy_file, "r");
    if (fd == NULL) {
-      edg_wlpr_Log(LOG_ERR, "Opening proxy file %s failed: %s",
+      edg_wlpr_Log(ctx, LOG_ERR, "Opening proxy file %s failed: %s",
 	           proxy_file, strerror(errno));
       return errno;
    }
 
    cert = PEM_read_X509(fd, NULL, NULL, NULL);
    if (cert == NULL) {
-      edg_wlpr_Log(LOG_ERR, "Cannot read X.509 certificate from %s",
+      edg_wlpr_Log(ctx, LOG_ERR, "Cannot read X.509 certificate from %s",
 	           proxy_file);
       ret = -1; /* XXX SSL_ERROR */
       goto end;
@@ -230,7 +230,7 @@ get_times(char *proxy_file, proxy_record *record)
    ASN1_UTCTIME_free(asn1_time);
    /* if (end_time - RENEWAL_CLOCK_SKEW < current_time) { Too short proxy } */
    if (end_time + RENEWAL_CLOCK_SKEW < current_time) {
-      edg_wlpr_Log(LOG_ERR, "Expired proxy in %s", proxy_file);
+      edg_wlpr_Log(ctx, LOG_ERR, "Expired proxy in %s", proxy_file);
       ret = EDG_WLPR_PROXY_EXPIRED;
       goto end;
    }
@@ -249,14 +249,14 @@ get_times(char *proxy_file, proxy_record *record)
 	    ERR_clear_error();
 	    break;
 	 }
-	 edg_wlpr_Log(LOG_ERR, "Cannot read additional certificates from %s",
+	 edg_wlpr_Log(ctx, LOG_ERR, "Cannot read additional certificates from %s",
 		      proxy_file);
 	 ret = -1; /* XXX SSL_ERROR */
 	 goto end;
       }
       globus_gsi_cert_utils_make_time(X509_get_notAfter(cert), &tmp_end);
       if (tmp_end + RENEWAL_CLOCK_SKEW < current_time) {
-	 edg_wlpr_Log(LOG_ERR, "Expired proxy in %s", proxy_file);
+	 edg_wlpr_Log(ctx, LOG_ERR, "Expired proxy in %s", proxy_file);
 	 ret = EDG_WLPR_PROXY_EXPIRED;
 	 goto end;
       }
@@ -264,7 +264,7 @@ get_times(char *proxy_file, proxy_record *record)
       cert = NULL;
    }
 
-   record->next_renewal = current_time + get_delta(current_time, start_time,
+   record->next_renewal = current_time + get_delta(ctx, current_time, start_time,
 	 					   end_time);
    record->end_time = end_time;
    ret = 0;
@@ -278,7 +278,7 @@ end:
 }
 
 static int
-copy_file(char *src, char *dst)
+copy_file(glite_renewal_core_context ctx, char *src, char *dst)
 {
    FILE *from = NULL;
    FILE *tmp_to = NULL;
@@ -291,7 +291,7 @@ copy_file(char *src, char *dst)
 
    from = fopen(src, "r");
    if (from == NULL) {
-      edg_wlpr_Log(LOG_ERR, "Cannot open file %s for reading (%s)",
+      edg_wlpr_Log(ctx, LOG_ERR, "Cannot open file %s for reading (%s)",
 	           src, strerror(errno));
       return errno;
    }
@@ -299,7 +299,7 @@ copy_file(char *src, char *dst)
    snprintf(tmpfile, sizeof(tmpfile), "%s.XXXXXX", dst);
    tmp_fd = mkstemp(tmpfile);
    if (tmp_fd == -1) {
-      edg_wlpr_Log(LOG_ERR, "Cannot create temporary file (%s)",
+      edg_wlpr_Log(ctx, LOG_ERR, "Cannot create temporary file (%s)",
 	           strerror(errno));
       ret = errno;
       goto end;
@@ -308,14 +308,14 @@ copy_file(char *src, char *dst)
 
    tmp_to = fdopen(tmp_fd, "w");
    if (tmp_to == NULL) {
-      edg_wlpr_Log(LOG_ERR, "Cannot associate stream with temporary file (%s)",
+      edg_wlpr_Log(ctx, LOG_ERR, "Cannot associate stream with temporary file (%s)",
 	           strerror(errno));
       unlink(tmpfile);
       ret = errno;
       goto end;
    }
 
-   ret = copy_file_content(from, tmp_to);
+   ret = copy_file_content(ctx, from, tmp_to);
    fclose(tmp_to);
    if (ret) {
       goto end;
@@ -323,7 +323,7 @@ copy_file(char *src, char *dst)
 
    ret = rename(tmpfile, dst);
    if (ret) {
-      edg_wlpr_Log(LOG_ERR, "Cannot replace repository file %s with temporary file (%s)",
+      edg_wlpr_Log(ctx, LOG_ERR, "Cannot replace repository file %s with temporary file (%s)",
 	           strerror(errno));
       unlink(tmpfile);
       ret = errno;
@@ -340,7 +340,7 @@ end:
 }
 
 void
-free_record(proxy_record *record)
+free_record(glite_renewal_core_context ctx, proxy_record *record)
 {
    int i;
 
@@ -357,7 +357,7 @@ free_record(proxy_record *record)
 }
 
 static int
-realloc_prd_list(prd_list *list)
+realloc_prd_list(glite_renewal_core_context ctx, prd_list *list)
 {
    char **tmp;
 
@@ -370,7 +370,7 @@ realloc_prd_list(prd_list *list)
 }
 
 static int
-get_jobids(const char *msg, const size_t msg_len, proxy_record *record)
+get_jobids(glite_renewal_core_context ctx, const char *msg, const size_t msg_len, proxy_record *record)
 {
    int index = 0;
    int ret;
@@ -402,7 +402,7 @@ get_jobids(const char *msg, const size_t msg_len, proxy_record *record)
 }
 
 static int
-edg_wlpr_GetTokenInt(const char *msg, const size_t msg_len,
+edg_wlpr_GetTokenInt(glite_renewal_core_context ctx, const char *msg, const size_t msg_len,
                      const char *key, const char *separators,
 		     int req_index, int *value)
 {
@@ -419,7 +419,7 @@ edg_wlpr_GetTokenInt(const char *msg, const size_t msg_len,
 }
 
 int
-decode_record(char *line, proxy_record *record)
+decode_record(glite_renewal_core_context ctx, char *line, proxy_record *record)
 {
    /* line must be ended with '\0' */
    int ret;
@@ -432,24 +432,24 @@ decode_record(char *line, proxy_record *record)
 
    len = strlen(line) + 1;
 
-   ret = edg_wlpr_GetTokenInt(line, len, "suffix=", SEPARATORS, 0,
+   ret = edg_wlpr_GetTokenInt(ctx, line, len, "suffix=", SEPARATORS, 0,
 			      &record->suffix);
    if (ret)
       return ret;
 
 #if 0
-   ret = edg_wlpr_GetTokenInt(line, len, "counter=", SEPARATORS, 0, 
+   ret = edg_wlpr_GetTokenInt(ctx, line, len, "counter=", SEPARATORS, 0, 
 	                      &record->counter);
    if (ret)
       goto end;
 #endif
 
-   ret = edg_wlpr_GetTokenInt(line, len, "unique=", SEPARATORS, 0,
+   ret = edg_wlpr_GetTokenInt(ctx, line, len, "unique=", SEPARATORS, 0,
 			      &record->unique);
    if (ret)
       goto end;
 
-   ret = edg_wlpr_GetTokenInt(line, len, "voms_exts=", SEPARATORS, 0,
+   ret = edg_wlpr_GetTokenInt(ctx, line, len, "voms_exts=", SEPARATORS, 0,
 	 		      &record->voms_exts);
 
    ret = edg_wlpr_GetToken(line, len, "server=", SEPARATORS, 0,
@@ -457,29 +457,29 @@ decode_record(char *line, proxy_record *record)
    if (ret)
       goto end;
 
-   ret = edg_wlpr_GetTokenInt(line, len, "next_renewal=", SEPARATORS, 0,
+   ret = edg_wlpr_GetTokenInt(ctx, line, len, "next_renewal=", SEPARATORS, 0,
 	 		      (int *)&record->next_renewal);
    if (ret)
       goto end;
 
-   ret = edg_wlpr_GetTokenInt(line, len, "end_time=", SEPARATORS, 0,
+   ret = edg_wlpr_GetTokenInt(ctx, line, len, "end_time=", SEPARATORS, 0,
 	 		      (int *)&record->end_time);
    if (ret)
       goto end;
 
-   ret = get_jobids(line, len, record);
+   ret = get_jobids(ctx, line, len, record);
    if (ret)
       goto end;
 
 end:
    if (ret)
-      free_record(record);
+      free_record(ctx, record);
 
    return ret;
 }
 
 int
-encode_record(proxy_record *record, char **line)
+encode_record(glite_renewal_core_context ctx, proxy_record *record, char **line)
 {
    char tmp_line[1024];
    size_t jobids_len = 0;
@@ -511,7 +511,7 @@ encode_record(proxy_record *record, char **line)
 /* Get proxy record from the index file. If no suffix is defined return a free 
    record with the smallest index */
 static int
-get_record_ext(FILE *fd, proxy_record *record, int *last_used_suffix)
+get_record_ext(glite_renewal_core_context ctx, FILE *fd, proxy_record *record, int *last_used_suffix)
 {
    char line[1024];
    int last_suffix = -1;
@@ -527,13 +527,13 @@ get_record_ext(FILE *fd, proxy_record *record, int *last_used_suffix)
    current_time = time(NULL);
    while (fgets(line, sizeof(line), fd) != NULL) {
       line_num++;
-      free_record(&tmp_record);
+      free_record(ctx, &tmp_record);
       p = strchr(line, '\n');
       if (p)
 	 *p = '\0';
-      ret = decode_record(line, &tmp_record);
+      ret = decode_record(ctx, line, &tmp_record);
       if (ret) {
-	 edg_wlpr_Log(LOG_ERR, "Skipping invalid entry at line %d", line_num);
+	 edg_wlpr_Log(ctx, LOG_ERR, "Skipping invalid entry at line %d", line_num);
 	 continue;
       }
       if (record->suffix >= 0) {
@@ -566,7 +566,7 @@ get_record_ext(FILE *fd, proxy_record *record, int *last_used_suffix)
 	  * parameters (currently myproxy location) provided by user */
 	 record->suffix = tmp_record.suffix;
 	 record->next_renewal = record->end_time = 0;
-	 free_record(&tmp_record);
+	 free_record(ctx, &tmp_record);
 	 return 0;
       }
 
@@ -607,23 +607,23 @@ get_record_ext(FILE *fd, proxy_record *record, int *last_used_suffix)
       *last_used_suffix = last_suffix;
 
    if (record->suffix >= 0) {
-      edg_wlpr_Log(LOG_DEBUG, "Requested suffix %d not found in meta file",
+      edg_wlpr_Log(ctx, LOG_DEBUG, "Requested suffix %d not found in meta file",
 	           record->suffix);
    }
 
-   free_record(&tmp_record);
+   free_record(ctx, &tmp_record);
 
    return EDG_WLPR_ERROR_PROTO_PARSE_NOT_FOUND;
 }
 
 static int
-get_record(FILE *fd, proxy_record *record)
+get_record(glite_renewal_core_context ctx, FILE *fd, proxy_record *record)
 {
-   return get_record_ext(fd, record, NULL);
+   return get_record_ext(ctx, fd, record, NULL);
 }
 
 static int
-store_record(char *basename, proxy_record *record)
+store_record(glite_renewal_core_context ctx, char *basename, proxy_record *record)
 {
    int stored = 0;
    FILE *fd = NULL;
@@ -655,13 +655,13 @@ store_record(char *basename, proxy_record *record)
    }
    while (fgets(line, sizeof(line), fd) != NULL) {
       line_num++;
-      free_record(&tmp_record);
+      free_record(ctx, &tmp_record);
       p = strchr(line, '\n');
       if (p)
 	 *p = '\0';
-      ret = decode_record(line, &tmp_record);
+      ret = decode_record(ctx, line, &tmp_record);
       if (ret) {
-	 edg_wlpr_Log(LOG_ERR, "Removing invalid entry at line %d in %s", line_num, basename);
+	 edg_wlpr_Log(ctx, LOG_ERR, "Removing invalid entry at line %d in %s", line_num, basename);
 	 continue;
       }
       if (record->suffix == tmp_record.suffix &&
@@ -680,13 +680,13 @@ store_record(char *basename, proxy_record *record)
 	 tmp_record.jobids.len = 0;
 	 tmp_record.jobids.val = NULL;
 	 for (i = 0; i < record->jobids.len; i++) {
-	    realloc_prd_list(&tmp_record.jobids);
+	    realloc_prd_list(ctx, &tmp_record.jobids);
 	    tmp_record.jobids.val[tmp_record.jobids.len - 1] = 
 	       strdup(record->jobids.val[i]);
 	 }
 	 stored = 1;
       }
-      ret = encode_record(&tmp_record, &new_line);
+      ret = encode_record(ctx, &tmp_record, &new_line);
       if (ret)
 	 goto end;
       dprintf(temp, "%s\n", new_line);
@@ -694,7 +694,7 @@ store_record(char *basename, proxy_record *record)
       new_line = NULL;
    }
    if (! stored) {
-      ret = encode_record(record, &new_line);
+      ret = encode_record(ctx, record, &new_line);
       if (ret)
 	 goto end;
       ret = dprintf(temp, "%s\n", new_line);
@@ -709,7 +709,7 @@ store_record(char *basename, proxy_record *record)
       ret = errno;
 
 end:
-   free_record(&tmp_record);
+   free_record(ctx, &tmp_record);
    if (fd)
       fclose(fd);
    close(temp);
@@ -717,7 +717,7 @@ end:
 }
 
 static int
-open_metafile(char *basename, FILE **fd)
+open_metafile(glite_renewal_core_context ctx, char *basename, FILE **fd)
 {
    FILE *meta_fd;
    char meta_filename[FILENAME_MAX];
@@ -725,27 +725,27 @@ open_metafile(char *basename, FILE **fd)
    snprintf(meta_filename, sizeof(meta_filename), "%s.data", basename);
    meta_fd = fopen(meta_filename, "a+");
    if (meta_fd == NULL) {
-      edg_wlpr_Log(LOG_ERR, "Opening meta file %s failed (%s)",
+      edg_wlpr_Log(ctx, LOG_ERR, "Opening meta file %s failed (%s)",
 	           meta_filename, strerror(errno));
       return errno;
    }
    rewind(meta_fd);
    *fd = meta_fd;
-   edg_wlpr_Log(LOG_DEBUG, "Using meta file %s", meta_filename);
+   edg_wlpr_Log(ctx, LOG_DEBUG, "Using meta file %s", meta_filename);
    return 0;
 }
 
 static int
-filename_to_response(char *filename, edg_wlpr_Response *response)
+filename_to_response(glite_renewal_core_context ctx, char *filename, edg_wlpr_Response *response)
 {
    response->filenames = malloc(2 * sizeof(*response->filenames));
    if (response->filenames == NULL) {
-      edg_wlpr_Log(LOG_DEBUG, "Not enough memory");
+      edg_wlpr_Log(ctx, LOG_DEBUG, "Not enough memory");
       return errno;
    }
    response->filenames[0] = strdup(filename);
    if (response->filenames[0] == NULL) {
-      edg_wlpr_Log(LOG_DEBUG, "Not enough memory");
+      edg_wlpr_Log(ctx, LOG_DEBUG, "Not enough memory");
       free(response->filenames);
       return errno;
    }
@@ -754,7 +754,7 @@ filename_to_response(char *filename, edg_wlpr_Response *response)
 }
 
 static void
-record_to_response(int status_code, proxy_record *record,
+record_to_response(glite_renewal_core_context ctx, int status_code, proxy_record *record,
         	   edg_wlpr_Response *response)
 {
    /* XXX Neni struktrura proxy_record zbytecna? Mohla by se pouzivat primo
@@ -776,7 +776,7 @@ record_to_response(int status_code, proxy_record *record,
 }
 
 int
-check_proxyname(char *datafile, char *jobid, char **filename)
+check_proxyname(glite_renewal_core_context ctx, char *datafile, char *jobid, char **filename)
 {
    proxy_record record;
    FILE *meta_fd = NULL;
@@ -789,17 +789,17 @@ check_proxyname(char *datafile, char *jobid, char **filename)
 
    meta_fd = fopen(datafile, "r");
    if (meta_fd == NULL) {
-      edg_wlpr_Log(LOG_ERR, "Cannot open meta file %s (%s)",
+      edg_wlpr_Log(ctx, LOG_ERR, "Cannot open meta file %s (%s)",
 	           datafile, strerror(errno));
       return errno;
    }
 
    while (fgets(line, sizeof(line), meta_fd) != NULL) {
-      free_record(&record);
+      free_record(ctx, &record);
       p = strchr(line, '\n');
       if (p)
 	 *p = '\0';
-      ret = decode_record(line, &record);
+      ret = decode_record(ctx, line, &record);
       if (ret)
 	 continue; /* XXX exit? */
       for (i = 0; i < record.jobids.len; i++) {
@@ -808,19 +808,19 @@ check_proxyname(char *datafile, char *jobid, char **filename)
 	    p = strrchr(proxy, '.');
 	    sprintf(p, ".%d", record.suffix);
 	    *filename = strdup(proxy);
-            free_record(&record);
+            free_record(ctx, &record);
 	    fclose(meta_fd);
 	    return 0;
 	 }
       }
    }
-   free_record(&record);
+   free_record(ctx, &record);
    fclose(meta_fd);
    return EDG_WLPR_ERROR_PROTO_PARSE_NOT_FOUND;
 }
       
 int
-find_proxyname(char *jobid, char **filename)
+find_proxyname(glite_renewal_core_context ctx, char *jobid, char **filename)
 {
    DIR *dir = NULL;
    struct dirent *file;
@@ -830,7 +830,7 @@ find_proxyname(char *jobid, char **filename)
 
    dir = opendir(repository);
    if (dir == NULL) {
-      edg_wlpr_Log(LOG_ERR, "Cannot open repository directory %s (%s)",
+      edg_wlpr_Log(ctx, LOG_ERR, "Cannot open repository directory %s (%s)",
 	           repository, strerror(errno));
       return errno;
    }
@@ -841,20 +841,20 @@ find_proxyname(char *jobid, char **filename)
       if (file->d_name == NULL || strlen(file->d_name) != 37 ||
 	  strcmp(file->d_name + 32, ".data") != 0)
 	 continue;
-      ret = check_proxyname(file->d_name, jobid, filename);
+      ret = check_proxyname(ctx, file->d_name, jobid, filename);
       if (ret == 0) {
 	 closedir(dir);
 	 return 0;
       }
    }
    closedir(dir);
-   edg_wlpr_Log(LOG_ERR, "Requested proxy is not registered");
+   edg_wlpr_Log(ctx, LOG_ERR, "Requested proxy is not registered");
    return EDG_WLPR_PROXY_NOT_REGISTERED;
 }
 
 #ifdef NOVOMS
 int
-find_voms_cert(char *file, int *present)
+find_voms_cert(glite_renewal_core_context ctx, char *file, int *present)
 {
 	*present = 0;
 	return 0;
@@ -862,7 +862,7 @@ find_voms_cert(char *file, int *present)
 
 #else
 int
-find_voms_cert(char *file, int *present)
+find_voms_cert(glite_renewal_core_context ctx, char *file, int *present)
 {
    struct vomsdata *voms_info = NULL;
    STACK_OF(X509) *chain = NULL;
@@ -874,11 +874,11 @@ find_voms_cert(char *file, int *present)
 
    voms_info = VOMS_Init(vomsdir, cadir);
    if (voms_info == NULL) {
-      edg_wlpr_Log(LOG_ERR, "check_voms_cert(): Cannot initialize VOMS context (VOMS_Init() failed, probably voms dir was not specified)");
+      edg_wlpr_Log(ctx, LOG_ERR, "check_voms_cert(): Cannot initialize VOMS context (VOMS_Init() failed, probably voms dir was not specified)");
       return EDG_WLPR_ERROR_VOMS;
    }
 
-   ret = load_proxy(file, &cert, &privkey, &chain, NULL);
+   ret = load_proxy(ctx, file, &cert, &privkey, &chain, NULL);
    if (ret) {
       VOMS_Destroy(voms_info);
       return ret;
@@ -898,7 +898,7 @@ find_voms_cert(char *file, int *present)
 #endif
 
 void
-register_proxy(edg_wlpr_Request *request, edg_wlpr_Response *response)
+register_proxy(glite_renewal_core_context ctx, edg_wlpr_Request *request, edg_wlpr_Response *response)
 {
    proxy_record record;
    int ret;
@@ -912,30 +912,30 @@ register_proxy(edg_wlpr_Request *request, edg_wlpr_Response *response)
 
    memset(&record, 0, sizeof(record));
    memset(response, 0, sizeof(*response));
-   edg_wlpr_Log(LOG_DEBUG, "Registration request for %s", request->proxy_filename);
+   edg_wlpr_Log(ctx, LOG_DEBUG, "Registration request for %s", request->proxy_filename);
 
    if (request->proxy_filename == NULL || request->jobid == NULL) {
-      edg_wlpr_Log(LOG_ERR, "Registration request doesn't contain registration information");
+      edg_wlpr_Log(ctx, LOG_ERR, "Registration request doesn't contain registration information");
       return; /*  EINVAL; */
    }
    umask(0177);
 
-   ret = get_base_filename(request->proxy_filename, &basename);
+   ret = get_base_filename(ctx, request->proxy_filename, &basename);
    if (ret)
       goto end;
 
-   ret = open_metafile(basename, &meta_fd);
+   ret = open_metafile(ctx, basename, &meta_fd);
    if (ret)
       goto end;
 
    if (voms_enabled)
-     ret = find_voms_cert(request->proxy_filename, &record.voms_exts);
+     ret = find_voms_cert(ctx, request->proxy_filename, &record.voms_exts);
      /* ignore VOMS related error */
 
    /* Find first free record */
    record.suffix = -1;
    record.myproxy_server = strdup(request->myproxy_server);
-   ret = get_record_ext(meta_fd, &record, &last_suffix);
+   ret = get_record_ext(ctx, meta_fd, &record, &last_suffix);
    fclose(meta_fd); meta_fd = NULL;
    if (ret && ret != EDG_WLPR_ERROR_PROTO_PARSE_NOT_FOUND)
       goto end;
@@ -947,30 +947,30 @@ register_proxy(edg_wlpr_Request *request, edg_wlpr_Response *response)
       suffix = (record.jobids.len == 0 && record.suffix >= 0) ? 
 	         record.suffix : last_suffix + 1;
       snprintf(filename, sizeof(filename), "%s.%d", basename, suffix);
-      ret = copy_file(request->proxy_filename, filename);
+      ret = copy_file(ctx, request->proxy_filename, filename);
       if (ret)
 	 goto end;
-      ret = get_times(filename, &record);
+      ret = get_times(ctx, filename, &record);
       if (ret)
 	 goto end;
       record.suffix = suffix;
-      ret = realloc_prd_list(&record.jobids);
+      ret = realloc_prd_list(ctx, &record.jobids);
       if (ret)
 	 goto end;
       record.jobids.val[record.jobids.len - 1] = strdup(request->jobid);
       record.unique = request->unique;
-      edg_wlpr_Log(LOG_DEBUG, "Created a new proxy file in repository (%s)",
+      edg_wlpr_Log(ctx, LOG_DEBUG, "Created a new proxy file in repository (%s)",
 	           filename);
    } else {
-      ret = realloc_prd_list(&record.jobids);
+      ret = realloc_prd_list(ctx, &record.jobids);
       if (ret)
 	 goto end;
       record.jobids.val[record.jobids.len - 1] = strdup(request->jobid);
       snprintf(filename, sizeof(filename), "%s.%d", basename, record.suffix);
-      edg_wlpr_Log(LOG_DEBUG, "Inremented counter on %s", filename);
+      edg_wlpr_Log(ctx, LOG_DEBUG, "Inremented counter on %s", filename);
    }
 
-   ret = store_record(basename, &record);
+   ret = store_record(ctx, basename, &record);
 
 end:
    if (meta_fd) {
@@ -981,13 +981,13 @@ end:
       free(basename);
 
    if (ret == 0)
-      ret = filename_to_response(filename, response);
-   record_to_response(ret, &record, response);
-   free_record(&record);
+      ret = filename_to_response(ctx, filename, response);
+   record_to_response(ctx, ret, &record, response);
+   free_record(ctx, &record);
 }
 
 void
-unregister_proxy(edg_wlpr_Request *request, edg_wlpr_Response *response)
+unregister_proxy(glite_renewal_core_context ctx, edg_wlpr_Request *request, edg_wlpr_Response *response)
 {
    proxy_record record;
    int ret, i, index;
@@ -997,27 +997,27 @@ unregister_proxy(edg_wlpr_Request *request, edg_wlpr_Response *response)
    struct stat stat_buf;
 
    memset(&record, 0, sizeof(record));
-   edg_wlpr_Log(LOG_DEBUG, "Unregistration request for %s", request->jobid);
+   edg_wlpr_Log(ctx, LOG_DEBUG, "Unregistration request for %s", request->jobid);
 
    if (request->jobid == NULL) {
-      edg_wlpr_Log(LOG_ERR, "Unregistration request doesn't contain needed information");
+      edg_wlpr_Log(ctx, LOG_ERR, "Unregistration request doesn't contain needed information");
       ret = EINVAL;
       goto end;
    }
 
    if (request->proxy_filename == NULL) {
-      ret = find_proxyname(request->jobid, &request->proxy_filename);
+      ret = find_proxyname(ctx, request->jobid, &request->proxy_filename);
       if (ret)
 	 goto end;
    }
 
-   ret = get_base_filename(request->proxy_filename, &basename);
+   ret = get_base_filename(ctx, request->proxy_filename, &basename);
    if (ret) {
       goto end;
    }
 
    if (strncmp(request->proxy_filename, basename, strlen(basename) != 0)) {
-      edg_wlpr_Log(LOG_DEBUG, "Requested proxy %s is not from repository",
+      edg_wlpr_Log(ctx, LOG_DEBUG, "Requested proxy %s is not from repository",
 	           request->proxy_filename);
       ret = EDG_WLPR_PROXY_NOT_REGISTERED;
       goto end;
@@ -1025,7 +1025,7 @@ unregister_proxy(edg_wlpr_Request *request, edg_wlpr_Response *response)
 
    p = strrchr(request->proxy_filename, '.');
    if (p == NULL) {
-      edg_wlpr_Log(LOG_DEBUG, "Requested proxy %s is not from repository",
+      edg_wlpr_Log(ctx, LOG_DEBUG, "Requested proxy %s is not from repository",
 	           request->proxy_filename);
       ret = EDG_WLPR_PROXY_NOT_REGISTERED;
       goto end;
@@ -1033,19 +1033,19 @@ unregister_proxy(edg_wlpr_Request *request, edg_wlpr_Response *response)
 
    ret = edg_wlpr_DecodeInt(p+1, &record.suffix);
    if (ret) {
-      edg_wlpr_Log(LOG_DEBUG, "Requested proxy %s is not from repository",
+      edg_wlpr_Log(ctx, LOG_DEBUG, "Requested proxy %s is not from repository",
 	          request->proxy_filename);
       ret = EDG_WLPR_PROXY_NOT_REGISTERED;
       goto end;
    }
 
-   ret = open_metafile(basename, &meta_fd);
+   ret = open_metafile(ctx, basename, &meta_fd);
    if (ret) {
       /* fill in error response */
       return;
    }
 
-   ret = get_record(meta_fd, &record);
+   ret = get_record(ctx, meta_fd, &record);
    if (ret)
       goto end;
 
@@ -1056,7 +1056,7 @@ unregister_proxy(edg_wlpr_Request *request, edg_wlpr_Response *response)
 	 break;
       }
    if (ret) {
-      edg_wlpr_Log(LOG_DEBUG, "Requested proxy %s is not registered",
+      edg_wlpr_Log(ctx, LOG_DEBUG, "Requested proxy %s is not registered",
 	           request->proxy_filename);
       goto end;
    }
@@ -1077,13 +1077,13 @@ unregister_proxy(edg_wlpr_Request *request, edg_wlpr_Response *response)
 
    ret = stat(request->proxy_filename, &stat_buf);
    if (ret) {
-      edg_wlpr_Log(LOG_DEBUG, "Cannot stat file %s: (%s)",
+      edg_wlpr_Log(ctx, LOG_DEBUG, "Cannot stat file %s: (%s)",
 	           request->proxy_filename, strerror(errno));
       ret = errno;
       goto end;
    }
 
-   ret = store_record(basename, &record);
+   ret = store_record(ctx, basename, &record);
    if (ret)
       goto end;
 
@@ -1098,39 +1098,39 @@ end:
       free(basename);
 
    if (ret == 0)
-      ret = filename_to_response(request->proxy_filename, response);
-   record_to_response(ret, &record, response);
-   free_record(&record);
+      ret = filename_to_response(ctx, request->proxy_filename, response);
+   record_to_response(ctx, ret, &record, response);
+   free_record(ctx, &record);
 }
 
 void
-get_proxy(edg_wlpr_Request *request, edg_wlpr_Response *response)
+get_proxy(glite_renewal_core_context ctx, edg_wlpr_Request *request, edg_wlpr_Response *response)
 {
    char *filename = NULL;
    int ret;
 
    memset(response, 0, sizeof(*response));
 
-   edg_wlpr_Log(LOG_DEBUG, "GET request for %s", request->jobid);
+   edg_wlpr_Log(ctx, LOG_DEBUG, "GET request for %s", request->jobid);
    
    if (request->jobid == NULL) {
-      edg_wlpr_Log(LOG_ERR, "GET request doesn't contain jobid specification");
+      edg_wlpr_Log(ctx, LOG_ERR, "GET request doesn't contain jobid specification");
       ret = EINVAL;
       goto end;
    }
 
-   ret = find_proxyname(request->jobid, &filename);
+   ret = find_proxyname(ctx, request->jobid, &filename);
 
 end:
    if (ret == 0)
-      ret = filename_to_response(filename, response);
+      ret = filename_to_response(ctx, filename, response);
    if (filename)
       free(filename);
    response->response_code = ret;
 }
 
 void
-update_db(edg_wlpr_Request *request, edg_wlpr_Response *response)
+update_db(glite_renewal_core_context ctx, edg_wlpr_Request *request, edg_wlpr_Response *response)
 {
    FILE *fd = NULL;
    int tmp_fd = -1;
@@ -1149,7 +1149,7 @@ update_db(edg_wlpr_Request *request, edg_wlpr_Response *response)
 
    memset(&record, 0, sizeof(record));
 
-   edg_wlpr_Log(LOG_DEBUG, "UPDATE_DB request for %s", request->proxy_filename);
+   edg_wlpr_Log(ctx, LOG_DEBUG, "UPDATE_DB request for %s", request->proxy_filename);
 
    chdir(repository);
    basename = request->proxy_filename;
@@ -1157,7 +1157,7 @@ update_db(edg_wlpr_Request *request, edg_wlpr_Response *response)
    snprintf(datafile, sizeof(datafile), "%s.data", basename);
    fd = fopen(datafile, "r");
    if (fd == NULL) {
-      edg_wlpr_Log(LOG_ERR, "Cannot open meta file %s (%s)",
+      edg_wlpr_Log(ctx, LOG_ERR, "Cannot open meta file %s (%s)",
 	           datafile, strerror(errno));
       ret = errno;
       return;
@@ -1166,7 +1166,7 @@ update_db(edg_wlpr_Request *request, edg_wlpr_Response *response)
    snprintf(tmp_file, sizeof(tmp_file), "%s.XXXXXX", datafile);
    tmp_fd = mkstemp(tmp_file);
    if (tmp_fd < 0) {
-      edg_wlpr_Log(LOG_ERR, "Cannot create temporary file (%s)",
+      edg_wlpr_Log(ctx, LOG_ERR, "Cannot create temporary file (%s)",
 	           strerror(errno));
       ret = errno;
       goto end;
@@ -1183,11 +1183,11 @@ update_db(edg_wlpr_Request *request, edg_wlpr_Response *response)
    current_time = time(NULL);
 
    while (fgets(line, sizeof(line), fd) != NULL) { 
-      free_record(&record);
+      free_record(ctx, &record);
       p = strchr(line, '\n');
       if (p)
 	 *p = '\0';
-      ret = decode_record(line, &record);
+      ret = decode_record(ctx, line, &record);
       if (ret)
 	 goto end;
       
@@ -1215,19 +1215,19 @@ update_db(edg_wlpr_Request *request, edg_wlpr_Response *response)
 	       /* remove file with expired proxy and clean the record in db */
 	       unlink(cur_proxy);
 	       server = strdup(record.myproxy_server);
-	       free_record(&record);
+	       free_record(ctx, &record);
 	       record.suffix = suffix;
 	       record.myproxy_server = server;
-	       edg_wlpr_Log(LOG_WARNING, "Removed expired proxy %s", cur_proxy);
+	       edg_wlpr_Log(ctx, LOG_WARNING, "Removed expired proxy %s", cur_proxy);
 	    } else
-	       get_times(cur_proxy, &record);
+	       get_times(ctx, cur_proxy, &record);
 	 } else {
-	    ret = get_times(proxy, &record);
+	    ret = get_times(ctx, proxy, &record);
 	    (ret == 0) ? rename(proxy, cur_proxy) : unlink(proxy);
 	 }
       }
       
-      ret = encode_record(&record, &new_line);
+      ret = encode_record(ctx, &record, &new_line);
       if (ret)
 	 goto end;
 
@@ -1235,7 +1235,7 @@ update_db(edg_wlpr_Request *request, edg_wlpr_Response *response)
       free(new_line);
       new_line = NULL;
    }
-   free_record(&record);
+   free_record(ctx, &record);
 
    close(tmp_fd);
    fclose(fd);
@@ -1250,7 +1250,7 @@ end:
    unlink(tmp_file);
    if (tmp_fd > 0)
       close(tmp_fd);
-   free_record(&record);
+   free_record(ctx, &record);
 
    return;
 }

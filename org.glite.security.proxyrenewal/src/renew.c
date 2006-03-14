@@ -16,16 +16,18 @@ extern char *vomsconf;
 static int received_signal = -1, die = 0;
 
 static void
-check_renewal(char *datafile, int force_renew, int *num_renewed);
+check_renewal(glite_renewal_core_context ctx, char *datafile, int force_renew, int *num_renewed);
 
 static int
-renew_proxy(proxy_record *record, char *basename, char **new_proxy);
+renew_proxy(glite_renewal_core_context ctx, proxy_record *record, char *basename, char **new_proxy);
 
 static void
 register_signal(int signal);
 
+/* XXX remove once the renew_core libs is used */
+#if 1
 int
-load_proxy(const char *cur_file, X509 **cert, EVP_PKEY **priv_key,
+load_proxy(glite_renewal_core_context ctx, const char *cur_file, X509 **cert, EVP_PKEY **priv_key,
            STACK_OF(X509) **chain, globus_gsi_cred_handle_t *cur_proxy)
 {
    globus_result_t result;
@@ -83,6 +85,7 @@ end:
 
    return ret;
 }
+#endif
 
 static void
 register_signal(int signal)
@@ -100,7 +103,7 @@ register_signal(int signal)
 }
 
 static int
-renew_proxy(proxy_record *record, char *basename, char **new_proxy)
+renew_proxy(glite_renewal_core_context ctx, proxy_record *record, char *basename, char **new_proxy)
 {
    char tmp_proxy[FILENAME_MAX];
    int tmp_fd;
@@ -124,14 +127,14 @@ renew_proxy(proxy_record *record, char *basename, char **new_proxy)
 
    myproxy_set_delegation_defaults(socket_attrs, client_request);
 
-   edg_wlpr_Log(LOG_DEBUG, "Trying to renew proxy in %s.%d",
+   edg_wlpr_Log(ctx, LOG_DEBUG, "Trying to renew proxy in %s.%d",
 	        basename, record->suffix);
 
    snprintf(tmp_proxy, sizeof(tmp_proxy), "%s.%d.myproxy.XXXXXX", 
 	    basename, record->suffix);
    tmp_fd = mkstemp(tmp_proxy);
    if (tmp_fd == -1) {
-      edg_wlpr_Log(LOG_ERR, "Cannot create temporary file (%s)",
+      edg_wlpr_Log(ctx, LOG_ERR, "Cannot create temporary file (%s)",
                    strerror(errno));
       return errno;
    }
@@ -139,7 +142,7 @@ renew_proxy(proxy_record *record, char *basename, char **new_proxy)
    snprintf(repository_file, sizeof(repository_file),"%s.%d",
 	    basename, record->suffix);
 
-   ret = get_proxy_base_name(repository_file, &client_request->username);
+   ret = get_proxy_base_name(ctx, repository_file, &client_request->username);
    if (ret)
       goto end;
 
@@ -148,7 +151,7 @@ renew_proxy(proxy_record *record, char *basename, char **new_proxy)
    server = (record->myproxy_server) ? record->myproxy_server :
                                        socket_attrs->pshost;
    if (server == NULL) {
-      edg_wlpr_Log(LOG_ERR, "No myproxy server specified");
+      edg_wlpr_Log(ctx, LOG_ERR, "No myproxy server specified");
       ret = EINVAL;
       goto end;
    }
@@ -168,7 +171,7 @@ renew_proxy(proxy_record *record, char *basename, char **new_proxy)
 	                        server_response, tmp_proxy);
    if (ret == 1) {
       ret = EDG_WLPR_ERROR_MYPROXY;
-      edg_wlpr_Log(LOG_ERR, "Error contacting MyProxy server for proxy %s: %s",
+      edg_wlpr_Log(ctx, LOG_ERR, "Error contacting MyProxy server for proxy %s: %s",
 	           repository_file, verror_get_string());
       verror_clear();
       goto end;
@@ -184,13 +187,13 @@ renew_proxy(proxy_record *record, char *basename, char **new_proxy)
 	       basename, record->suffix);
       tmp_voms_fd = mkstemp(tmp_voms_proxy);
       if (tmp_voms_fd == -1) {
-	 edg_wlpr_Log(LOG_ERR, "Cannot create temporary file (%s)",
+	 edg_wlpr_Log(ctx, LOG_ERR, "Cannot create temporary file (%s)",
 	              strerror(errno));
 	 ret = errno;
 	 goto end;
       }
 
-      ret = renew_voms_creds(repository_file, renewed_proxy, tmp_voms_proxy);
+      ret = renew_voms_creds(ctx, repository_file, renewed_proxy, tmp_voms_proxy);
       close(tmp_voms_fd);
       if (ret) {
 	 unlink(tmp_voms_proxy);
@@ -218,7 +221,7 @@ end:
 }
 
 static void
-check_renewal(char *datafile, int force_renew, int *num_renewed)
+check_renewal(glite_renewal_core_context ctx, char *datafile, int force_renew, int *num_renewed)
 {
    char line[1024];
    proxy_record record;
@@ -246,7 +249,7 @@ check_renewal(char *datafile, int force_renew, int *num_renewed)
    strncpy(basename, datafile, sizeof(basename) - 1);
    p = basename + strlen(basename) - strlen(".data");
    if (strcmp(p, ".data") != 0) {
-      edg_wlpr_Log(LOG_ERR, "Meta filename doesn't end with '.data'");
+      edg_wlpr_Log(ctx, LOG_ERR, "Meta filename doesn't end with '.data'");
       return;
    }
    *p = '\0';
@@ -256,20 +259,20 @@ check_renewal(char *datafile, int force_renew, int *num_renewed)
 
    meta_fd = fopen(datafile, "r");
    if (meta_fd == NULL) {
-      edg_wlpr_Log(LOG_ERR, "Cannot open meta file %s (%s)",
+      edg_wlpr_Log(ctx, LOG_ERR, "Cannot open meta file %s (%s)",
 	           datafile, strerror(errno));
       return;
    }
 
    current_time = time(NULL);
-   edg_wlpr_Log(LOG_DEBUG, "Reading metafile %s", datafile);
+   edg_wlpr_Log(ctx, LOG_DEBUG, "Reading metafile %s", datafile);
 
    while (fgets(line, sizeof(line), meta_fd) != NULL) {
-      free_record(&record);
+      free_record(ctx, &record);
       p = strchr(line, '\n');
       if (p)
 	 *p = '\0';
-      ret = decode_record(line, &record);
+      ret = decode_record(ctx, line, &record);
       if (ret)
 	 continue; /* XXX exit? */
       if (record.jobids.len == 0) /* no jobid registered for this proxy */
@@ -280,7 +283,7 @@ check_renewal(char *datafile, int force_renew, int *num_renewed)
 	 ret = EDG_WLPR_PROXY_EXPIRED;
 	 if ( record.end_time + RENEWAL_CLOCK_SKEW >= current_time) {
 	    /* only try renewal if the proxy hasn't already expired */
-	    ret = renew_proxy(&record, basename, &new_proxy);
+	    ret = renew_proxy(ctx, &record, basename, &new_proxy);
          }
 
 	 /* if the proxy wasn't renewed have the daemon planned another renewal */
@@ -291,7 +294,7 @@ check_renewal(char *datafile, int force_renew, int *num_renewed)
 
 	 tmp = realloc(request.entries, (num + 2) * sizeof(*tmp));
 	 if (tmp == NULL) {
-	    free_record(&record);
+	    free_record(ctx, &record);
 	    return;
 	 }
 	 request.entries = tmp;
@@ -300,15 +303,15 @@ check_renewal(char *datafile, int force_renew, int *num_renewed)
 	 num++;
       }
    }
-   free_record(&record);
+   free_record(ctx, &record);
 
    if (num > 0) {
       ret = edg_wlpr_RequestSend(&request, &response);
       if (ret != 0)
-	 edg_wlpr_Log(LOG_ERR,
+	 edg_wlpr_Log(ctx, LOG_ERR,
 	              "Failed to send update request to master (%d)", ret);
       else if (response.response_code != 0)
-	 edg_wlpr_Log(LOG_ERR,
+	 edg_wlpr_Log(ctx, LOG_ERR,
 	              "Master failed to update database (%d)", response.response_code);
 
       /* delete all tmp proxy files which may survive */
@@ -328,26 +331,26 @@ check_renewal(char *datafile, int force_renew, int *num_renewed)
    return;
 }
 
-int renewal(int force_renew, int *num_renewed)
+int renewal(glite_renewal_core_context ctx, int force_renew, int *num_renewed)
 {
    DIR *dir = NULL;
    struct dirent *file;
    FILE *fd;
    int num = 0;
 
-   edg_wlpr_Log(LOG_DEBUG, "Starting renewal process");
+   edg_wlpr_Log(ctx, LOG_DEBUG, "Starting renewal process");
 
    *num_renewed = 0;
 
    if (chdir(repository)) {
-      edg_wlpr_Log(LOG_ERR, "Cannot access repository directory %s (%s)",
+      edg_wlpr_Log(ctx, LOG_ERR, "Cannot access repository directory %s (%s)",
 	           repository, strerror(errno));
       return errno;
    }
 
    dir = opendir(repository);
    if (dir == NULL) {
-      edg_wlpr_Log(LOG_ERR, "Cannot open repository directory %s (%s)",
+      edg_wlpr_Log(ctx, LOG_ERR, "Cannot open repository directory %s (%s)",
 	           repository, strerror(errno));
       return errno;
    }
@@ -360,21 +363,21 @@ int renewal(int force_renew, int *num_renewed)
 	 continue;
       fd = fopen(file->d_name, "r");
       if (fd == NULL) {
-	 edg_wlpr_Log(LOG_ERR, "Cannot open meta file %s (%s)",
+	 edg_wlpr_Log(ctx, LOG_ERR, "Cannot open meta file %s (%s)",
 	              file->d_name, strerror(errno));
 	 continue;
       }
-      check_renewal(file->d_name, force_renew, &num);
+      check_renewal(ctx, file->d_name, force_renew, &num);
       *num_renewed += num;
       fclose(fd);
    }
    closedir(dir);
-   edg_wlpr_Log(LOG_DEBUG, "Finishing renewal process");
+   edg_wlpr_Log(ctx, LOG_DEBUG, "Finishing renewal process");
    return 0;
 }
 
 void
-watchdog_start(void)
+watchdog_start(glite_renewal_core_context ctx)
 {
    struct sigaction sa;
    int force_renewal;
@@ -395,9 +398,9 @@ watchdog_start(void)
        if (die)
 	  break;
        /* XXX uninstall signal handler ? */
-       renewal(force_renewal, &num);
+       renewal(ctx, force_renewal, &num);
        count += num;
    }
-   edg_wlpr_Log(LOG_DEBUG, "Terminating after %d renewal attempts", count);
+   edg_wlpr_Log(ctx, LOG_DEBUG, "Terminating after %d renewal attempts", count);
    exit(0);
 }

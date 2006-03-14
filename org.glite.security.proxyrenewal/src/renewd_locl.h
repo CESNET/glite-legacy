@@ -10,6 +10,7 @@
 #include <globus_gsi_cert_utils_constants.h>
 
 #include "renewal.h"
+#include "renewal_core.h"
 
 #ifdef HAVE_DMALLOC_H
 #include <dmalloc.h>
@@ -38,43 +39,43 @@ typedef struct {
 
 /* commands */
 void
-register_proxy(edg_wlpr_Request *request, edg_wlpr_Response *response);
+register_proxy(glite_renewal_core_context ctx, edg_wlpr_Request *request, edg_wlpr_Response *response);
 
 void
-unregister_proxy(edg_wlpr_Request *request, edg_wlpr_Response *response);
+unregister_proxy(glite_renewal_core_context ctx, edg_wlpr_Request *request, edg_wlpr_Response *response);
 
 void
-get_proxy(edg_wlpr_Request *request, edg_wlpr_Response *response);
+get_proxy(glite_renewal_core_context ctx, edg_wlpr_Request *request, edg_wlpr_Response *response);
 
 void
-update_db(edg_wlpr_Request *request, edg_wlpr_Response *response);
+update_db(glite_renewal_core_context ctx, edg_wlpr_Request *request, edg_wlpr_Response *response);
 
 int
-get_times(char *proxy_file, proxy_record *record);
+get_times(glite_renewal_core_context ctx, char *proxy_file, proxy_record *record);
 
 void
-watchdog_start(void);
+watchdog_start(glite_renewal_core_context ctx);
 
 void
-edg_wlpr_Log(int dbg_level, const char *format, ...);
+edg_wlpr_Log(glite_renewal_core_context ctx, int dbg_level, const char *format, ...);
 
 int
-decode_record(char *line, proxy_record *record);
+decode_record(glite_renewal_core_context ctx, char *line, proxy_record *record);
 
 int
-encode_record(proxy_record *record, char **line);
+encode_record(glite_renewal_core_context ctx, proxy_record *record, char **line);
 
 void
-free_record(proxy_record *record);
+free_record(glite_renewal_core_context ctx, proxy_record *record);
 
 int
-load_proxy(const char *filename, X509 **cert, EVP_PKEY **privkey,
+load_proxy(glite_renewal_core_context ctx, const char *filename, X509 **cert, EVP_PKEY **privkey,
            STACK_OF(X509) **chain, globus_gsi_cred_handle_t *proxy);
 
 int
-get_proxy_base_name(char *file, char **subject);
+get_proxy_base_name(glite_renewal_core_context ctx, char *file, char **subject);
 
 int
-renew_voms_creds(const char *cur_file, const char *renewed_file, const char *new_file);
+renew_voms_creds(glite_renewal_core_context ctx, const char *cur_file, const char *renewed_file, const char *new_file);
 
 #endif /* RENEWALD_LOCL_H */

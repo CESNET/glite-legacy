@@ -5,7 +5,7 @@
 static const char rcsid[] = "$Id$";
 
 int
-load_proxy(const char *cur_file, X509 **cert, EVP_PKEY **priv_key,
+load_proxy(glite_renewal_core_context ctx, const char *cur_file, X509 **cert, EVP_PKEY **priv_key,
            STACK_OF(X509) **chain, globus_gsi_cred_handle_t *cur_proxy)
 {
    globus_result_t result;
@@ -65,7 +65,7 @@ end:
 }
 
 int
-get_proxy_base_name(char *file, char **name)
+get_proxy_base_name(glite_renewal_core_context ctx, char *file, char **name)
 {
    X509 *cert = NULL;
    EVP_PKEY *key = NULL;
@@ -73,7 +73,7 @@ get_proxy_base_name(char *file, char **name)
    X509_NAME *subject = NULL;
    int ret;
 
-   ret = load_proxy(file, &cert, &key, &chain, NULL);
+   ret = load_proxy(ctx, file, &cert, &key, &chain, NULL);
    if (ret)
       return ret;
 
@@ -84,7 +84,7 @@ get_proxy_base_name(char *file, char **name)
 
    ret = globus_gsi_cert_utils_get_base_name(subject, chain);
    if (ret) {
-      edg_wlpr_Log(LOG_ERR, "Cannot get subject name from proxy %s", file);
+      edg_wlpr_Log(ctx, LOG_ERR, "Cannot get subject name from proxy %s", file);
       ret = EDG_WLPR_ERROR_SSL; /* XXX ??? */
       goto end;
    }
@@ -106,7 +106,7 @@ end:
 }
 
 int
-glite_renewal_core_renew(glite_renewal_core_context context,
+glite_renewal_core_renew(glite_renewal_core_context ctx,
                          const char * myproxy_server,
 			 unsigned int myproxy_port,
                          const char *current_proxy,
@@ -135,17 +135,17 @@ glite_renewal_core_renew(glite_renewal_core_context context,
 
    myproxy_set_delegation_defaults(socket_attrs, client_request);
 
-   edg_wlpr_Log(LOG_DEBUG, "Trying to renew proxy in %s", current_proxy);
+   edg_wlpr_Log(ctx, LOG_DEBUG, "Trying to renew proxy in %s", current_proxy);
 
    snprintf(tmp_proxy, sizeof(tmp_proxy), "%s.myproxy.XXXXXX", current_proxy);
    tmp_fd = mkstemp(tmp_proxy);
    if (tmp_fd == -1) {
-      edg_wlpr_Log(LOG_ERR, "Cannot create temporary file (%s)",
+      edg_wlpr_Log(ctx, LOG_ERR, "Cannot create temporary file (%s)",
                    strerror(errno));
       return errno;
    }
 
-   ret = get_proxy_base_name(current_proxy, &client_request->username);
+   ret = get_proxy_base_name(ctx, current_proxy, &client_request->username);
    if (ret)
       goto end;
 
@@ -153,7 +153,7 @@ glite_renewal_core_renew(glite_renewal_core_context context,
 
    server = (myproxy_server) ? myproxy_server : socket_attrs->pshost;
    if (server == NULL) {
-      edg_wlpr_Log(LOG_ERR, "No myproxy server specified");
+      edg_wlpr_Log(ctx, LOG_ERR, "No myproxy server specified");
       ret = EINVAL;
       goto end;
    }
@@ -166,7 +166,7 @@ glite_renewal_core_renew(glite_renewal_core_context context,
 	                        server_response, tmp_proxy);
    if (ret == 1) {
       ret = EDG_WLPR_ERROR_MYPROXY;
-      edg_wlpr_Log(LOG_ERR, "Error contacting MyProxy server for proxy %s: %s",
+      edg_wlpr_Log(ctx, LOG_ERR, "Error contacting MyProxy server for proxy %s: %s",
 	           current_proxy, verror_get_string());
       verror_clear();
       goto end;
@@ -174,7 +174,7 @@ glite_renewal_core_renew(glite_renewal_core_context context,
 
    renewed_proxy = tmp_proxy;
 
-   if (context->voms_enabled && voms_exts) {
+   if (ctx->voms_enabled && voms_exts) {
       char tmp_voms_proxy[FILENAME_MAX];
       int tmp_voms_fd;
       
@@ -182,13 +182,13 @@ glite_renewal_core_renew(glite_renewal_core_context context,
 	       current_proxy);
       tmp_voms_fd = mkstemp(tmp_voms_proxy);
       if (tmp_voms_fd == -1) {
-	 edg_wlpr_Log(LOG_ERR, "Cannot create temporary file (%s)",
+	 edg_wlpr_Log(ctx, LOG_ERR, "Cannot create temporary file (%s)",
 	              strerror(errno));
 	 ret = errno;
 	 goto end;
       }
 
-      ret = renew_voms_creds(current_proxy, renewed_proxy, tmp_voms_proxy);
+      ret = renew_voms_creds(ctx, current_proxy, renewed_proxy, tmp_voms_proxy);
       close(tmp_voms_fd);
       if (ret) {
 	 unlink(tmp_voms_proxy);
@@ -240,7 +240,7 @@ glite_renewal_core_destroy_ctx(glite_renewal_core_context context)
 /* XXX remove these ugly things: */
 
 void
-edg_wlpr_Log(int dbg_level, const char *format, ...)
+edg_wlpr_Log(glite_renewal_core_context context, int dbg_level, const char *format, ...)
 {
    return;
 }

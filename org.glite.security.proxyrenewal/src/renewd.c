@@ -37,7 +37,7 @@ static struct option opts[] = {
 
 typedef struct {
    edg_wlpr_Command code;
-   void (*handler) (edg_wlpr_Request *request, edg_wlpr_Response *response);
+   void (*handler) (glite_renewal_core_context ctx, edg_wlpr_Request *request, edg_wlpr_Response *response);
 } command_table;
 
 static command_table commands[] = {
@@ -54,28 +54,28 @@ static command_table commands[] = {
 
 /* static prototypes */
 static void
-usage(char *progname);
+usage(glite_renewal_core_context ctx, char *progname);
 
 static int
-do_listen(char *socket_name, int *sock);
+do_listen(glite_renewal_core_context ctx, char *socket_name, int *sock);
 
 static int
-encode_response(edg_wlpr_Response *response, char **msg);
+encode_response(glite_renewal_core_context ctx, edg_wlpr_Response *response, char **msg);
 
 static command_table *
-find_command(edg_wlpr_Command code);
+find_command(glite_renewal_core_context ctx, edg_wlpr_Command code);
 
 static int
-proto(int sock);
+proto(glite_renewal_core_context ctx, int sock);
 
 static int
-doit(int sock);
+doit(glite_renewal_core_context ctx, int sock);
 
 static int
-decode_request(const char *msg, const size_t msg_len, edg_wlpr_Request *request);
+decode_request(glite_renewal_core_context ctx, const char *msg, const size_t msg_len, edg_wlpr_Request *request);
 
 int
-start_watchdog(pid_t *pid);
+start_watchdog(glite_renewal_core_context ctx, pid_t *pid);
 
 static void
 catchsig(int sig)
@@ -95,7 +95,7 @@ catchsig(int sig)
 }
 
 static command_table *
-find_command(edg_wlpr_Command code)
+find_command(glite_renewal_core_context ctx, edg_wlpr_Command code)
 {
    command_table *c;
 
@@ -107,7 +107,7 @@ find_command(edg_wlpr_Command code)
 }
 
 static int
-proto(int sock)
+proto(glite_renewal_core_context ctx, int sock)
 {
    char  *buf = NULL;
    size_t  buf_len;
@@ -125,40 +125,40 @@ proto(int sock)
 
    ret = edg_wlpr_Read(sock, &timeout, &buf, &buf_len);
    if (ret) {
-      edg_wlpr_Log(LOG_ERR, "Error reading from client: %s",
+      edg_wlpr_Log(ctx, LOG_ERR, "Error reading from client: %s",
                    edg_wlpr_GetErrorString(ret));
       return ret;
    }
 
-   ret = decode_request(buf, buf_len, &request);
+   ret = decode_request(ctx, buf, buf_len, &request);
    free(buf);
    if (ret)
       goto end;
 
    /* XXX check request (protocol version, ...) */
 
-   command = find_command(request.command);
+   command = find_command(ctx, request.command);
    if (command == NULL) {
       ret = EDG_WLPR_ERROR_UNKNOWN_COMMAND;
-      edg_wlpr_Log(LOG_ERR, "Received unknown command (%d)", request.command);
+      edg_wlpr_Log(ctx, LOG_ERR, "Received unknown command (%d)", request.command);
       goto end;
    }
 
-   edg_wlpr_Log(LOG_INFO, "Received command code %d for proxy %s and jobid %s",
+   edg_wlpr_Log(ctx, LOG_INFO, "Received command code %d for proxy %s and jobid %s",
                 request.command,
 		request.proxy_filename ? request.proxy_filename : "(unspecified)",
 		request.jobid ? request.jobid : "(unspecified)");
 
-   command->handler(&request, &response);
+   command->handler(ctx, &request, &response);
 
-   ret = encode_response(&response, &buf);
+   ret = encode_response(ctx, &response, &buf);
    if (ret)
       goto end;
 
    ret = edg_wlpr_Write(sock, &timeout, buf, strlen(buf) + 1);
    free(buf);
    if (ret) {
-      edg_wlpr_Log(LOG_ERR, "Error sending response to client: %s",
+      edg_wlpr_Log(ctx, LOG_ERR, "Error sending response to client: %s",
                    edg_wlpr_GetErrorString(ret));
       goto end;
    }
@@ -171,7 +171,7 @@ end:
 }
 
 static int
-doit(int sock)
+doit(glite_renewal_core_context ctx, int sock)
 {
    int newsock;
    struct sockaddr_un client_addr;
@@ -185,10 +185,10 @@ doit(int sock)
 
 	 while ((pid=waitpid(-1,NULL,WNOHANG))>0)
 	    ;
-	 ret = start_watchdog(&newpid);
+	 ret = start_watchdog(ctx, &newpid);
 	 if (ret)
 	    return ret;
-	 edg_wlpr_Log(LOG_DEBUG, "Renewal slave process re-started");
+	 edg_wlpr_Log(ctx, LOG_DEBUG, "Renewal slave process re-started");
 	 child_died = 0;
 	 continue;
       }
@@ -196,30 +196,30 @@ doit(int sock)
       newsock = accept(sock, (struct sockaddr *) &client_addr, &client_addr_len);
       if (newsock == -1) {
 	 if (errno != EINTR)
-	    edg_wlpr_Log(LOG_ERR, "accept() failed");
+	    edg_wlpr_Log(ctx, LOG_ERR, "accept() failed");
          continue;
       }
-      edg_wlpr_Log(LOG_DEBUG, "Got connection");
+      edg_wlpr_Log(ctx, LOG_DEBUG, "Got connection");
 
       flags = fcntl(newsock, F_GETFL, 0);
       if (fcntl(newsock, F_SETFL, flags | O_NONBLOCK) < 0) {
-	 edg_wlpr_Log(LOG_ERR, "Can't set O_NONBLOCK mode (%s), closing.\n",
+	 edg_wlpr_Log(ctx, LOG_ERR, "Can't set O_NONBLOCK mode (%s), closing.\n",
 	              strerror(errno));
 	 close(newsock);
 	 continue;
       }
 	 
-      proto(newsock);
+      proto(ctx, newsock);
 
-      edg_wlpr_Log(LOG_DEBUG, "Connection closed");
+      edg_wlpr_Log(ctx, LOG_DEBUG, "Connection closed");
       close(newsock);
    }
-   edg_wlpr_Log(LOG_DEBUG, "Terminating on signal %d\n",die);
+   edg_wlpr_Log(ctx, LOG_DEBUG, "Terminating on signal %d\n",die);
    return 0;
 }
 
 static int
-decode_request(const char *msg, const size_t msg_len, edg_wlpr_Request *request)
+decode_request(glite_renewal_core_context ctx, const char *msg, const size_t msg_len, edg_wlpr_Request *request)
 {
    char *value = NULL;
 #if 0
@@ -239,7 +239,7 @@ decode_request(const char *msg, const size_t msg_len, edg_wlpr_Request *request)
    ret = edg_wlpr_GetToken(msg, msg_len, EDG_WLPR_PROTO_VERSION, SEPARATORS,
 	 		   0, &request->version);
    if (ret) {
-      edg_wlpr_Log(LOG_ERR, "Protocol error reading protocol specification: %s",
+      edg_wlpr_Log(ctx, LOG_ERR, "Protocol error reading protocol specification: %s",
                    edg_wlpr_GetErrorString(ret));
       return ret;
    }
@@ -247,22 +247,22 @@ decode_request(const char *msg, const size_t msg_len, edg_wlpr_Request *request)
    ret = edg_wlpr_GetToken(msg, msg_len, EDG_WLPR_PROTO_COMMAND, SEPARATORS,
 	 		   0, &value);
    if (ret) {
-      edg_wlpr_Log(LOG_ERR, "Protocol error reading command specification: %s",
+      edg_wlpr_Log(ctx, LOG_ERR, "Protocol error reading command specification: %s",
                    edg_wlpr_GetErrorString(ret));
       goto err;
    }
 
    ret = edg_wlpr_DecodeInt(value, (int *)(&request->command));
    if (ret) {
-      edg_wlpr_Log(LOG_ERR, "Received non-numeric command specification (%s)",
+      edg_wlpr_Log(ctx, LOG_ERR, "Received non-numeric command specification (%s)",
                    value);
       free(value);
       goto err;
    }
    free(value);
 
-   if (find_command(request->command) == NULL) {
-      edg_wlpr_Log(LOG_ERR, "Received unknown command (%d)", request->command);
+   if (find_command(ctx, request->command) == NULL) {
+      edg_wlpr_Log(ctx, LOG_ERR, "Received unknown command (%d)", request->command);
       ret = EDG_WLPR_ERROR_UNKNOWN_COMMAND;
       goto err;
    }
@@ -270,7 +270,7 @@ decode_request(const char *msg, const size_t msg_len, edg_wlpr_Request *request)
    ret = edg_wlpr_GetToken(msg, msg_len, EDG_WLPR_PROTO_MYPROXY_SERVER,
 	 		   SEPARATORS, 0, &request->myproxy_server);
    if (ret && ret != EDG_WLPR_ERROR_PROTO_PARSE_NOT_FOUND) {
-      edg_wlpr_Log(LOG_ERR, "Protocol error reading myproxy server specification: %s",
+      edg_wlpr_Log(ctx, LOG_ERR, "Protocol error reading myproxy server specification: %s",
                    edg_wlpr_GetErrorString(ret));
       goto err;
    }
@@ -287,7 +287,7 @@ decode_request(const char *msg, const size_t msg_len, edg_wlpr_Request *request)
    ret = edg_wlpr_GetToken(msg, msg_len, EDG_WLPR_PROTO_PROXY, SEPARATORS, 
 	 		   0, &request->proxy_filename);
    if (ret && ret != EDG_WLPR_ERROR_PROTO_PARSE_NOT_FOUND) {
-      edg_wlpr_Log(LOG_ERR, "Protocol error reading proxy specification: %s",
+      edg_wlpr_Log(ctx, LOG_ERR, "Protocol error reading proxy specification: %s",
                    edg_wlpr_GetErrorString(ret));
       goto err;
    }
@@ -305,7 +305,7 @@ decode_request(const char *msg, const size_t msg_len, edg_wlpr_Request *request)
    ret = edg_wlpr_GetToken(msg, msg_len, EDG_WLPR_PROTO_JOBID, SEPARATORS,
 	 		   0, &request->jobid);
    if (ret && ret != EDG_WLPR_ERROR_PROTO_PARSE_NOT_FOUND) {
-      edg_wlpr_Log(LOG_ERR, "Protocol error reading JobId : %s",
+      edg_wlpr_Log(ctx, LOG_ERR, "Protocol error reading JobId : %s",
 	    	   edg_wlpr_GetErrorString(ret));
       goto err;
    }
@@ -337,7 +337,7 @@ err:
 }
 
 static int
-encode_response(edg_wlpr_Response *response, char **msg)
+encode_response(glite_renewal_core_context ctx, edg_wlpr_Response *response, char **msg)
 {
    char *buf;
    size_t buf_len;
@@ -420,7 +420,7 @@ err:
 
 
 static void
-usage(char *progname)
+usage(glite_renewal_core_context ctx, char *progname)
 {
    fprintf(stderr,"usage: %s [option]\n"
 	   "\t-h, --help           display this help and exit\n"
@@ -436,7 +436,7 @@ usage(char *progname)
 }
 
 static int
-do_listen(char *socket_name, int *sock)
+do_listen(glite_renewal_core_context ctx, char *socket_name, int *sock)
 {
    struct sockaddr_un my_addr;
    int s;
@@ -452,20 +452,20 @@ do_listen(char *socket_name, int *sock)
 
    s = socket(AF_UNIX, SOCK_STREAM, 0);
    if (s == -1) {
-      edg_wlpr_Log(LOG_ERR, "socket(): %s", strerror(errno));
+      edg_wlpr_Log(ctx, LOG_ERR, "socket(): %s", strerror(errno));
       return errno;
    }
 
    ret = bind(s, (struct sockaddr *)&my_addr, sizeof(my_addr));
    if (ret == -1) {
-      edg_wlpr_Log(LOG_ERR, "bind(): %s", strerror(errno));
+      edg_wlpr_Log(ctx, LOG_ERR, "bind(): %s", strerror(errno));
       close(s);
       return errno;
    }
 
    ret = listen(s, 50);
    if (ret == -1) {
-      edg_wlpr_Log(LOG_ERR, "listen(): %s", strerror(errno));
+      edg_wlpr_Log(ctx, LOG_ERR, "listen(): %s", strerror(errno));
       close(s);
       return errno;
    }
@@ -475,7 +475,7 @@ do_listen(char *socket_name, int *sock)
 }
 
 void
-edg_wlpr_Log(int dbg_level, const char *format, ...)
+edg_wlpr_Log(glite_renewal_core_context ctx, int dbg_level, const char *format, ...)
 {
    va_list ap;
    char    log_mess[1024];
@@ -493,17 +493,17 @@ edg_wlpr_Log(int dbg_level, const char *format, ...)
 }
 
 int
-start_watchdog(pid_t *pid)
+start_watchdog(glite_renewal_core_context ctx, pid_t *pid)
 {
    pid_t p;
 
    switch ((p = fork())) {
       case -1:
-	 edg_wlpr_Log(LOG_ERR, "fork() failed: %s",
+	 edg_wlpr_Log(ctx, LOG_ERR, "fork() failed: %s",
 	              strerror(errno));
 	 return errno;
       case 0:
-	 watchdog_start();
+	 watchdog_start(ctx);
 	 exit(0); 
 	 break;
       default:
@@ -525,6 +525,7 @@ int main(int argc, char *argv[])
    pid_t pid;
    struct sigaction	sa;
    const char *s = NULL;
+   glite_renewal_core_context ctx = NULL;
 
    progname = strrchr(argv[0],'/');
    if (progname) progname++; 
@@ -535,7 +536,7 @@ int main(int argc, char *argv[])
 
    while ((opt = getopt_long(argc, argv, "hvdr:c:C:V:AG:t:k:", opts, NULL)) != EOF)
       switch (opt) {
-	 case 'h': usage(progname); exit(0);
+	 case 'h': usage(ctx, progname); exit(0);
 	 case 'v': fprintf(stdout, "%s:\t%s\n", progname, rcsid); exit(0);
 	 case 'd': debug = 1; break;
          case 'r': repository = optarg; break;
@@ -546,16 +547,16 @@ int main(int argc, char *argv[])
 	 case 'G': vomsconf = optarg; break;
 	 case 't': cert = optarg; break;
 	 case 'k': key = optarg; break;
-	 case '?': usage(progname); return 1;
+	 case '?': usage(ctx, progname); return 1;
       }
 
    if (optind < argc) {
-      usage(progname);
+      usage(ctx, progname);
       exit(1);
    }
 
    if (chdir(repository)) {
-      edg_wlpr_Log(LOG_ERR, "Cannot access repository directory %s (%s)",
+      edg_wlpr_Log(ctx, LOG_ERR, "Cannot access repository directory %s (%s)",
 	           repository, strerror(errno));
       exit(1);
    }
@@ -595,7 +596,7 @@ int main(int argc, char *argv[])
    sigaction(SIGCHLD,&sa,NULL);
    sigaction(SIGPIPE,&sa,NULL);
 
-   ret = start_watchdog(&pid);
+   ret = start_watchdog(ctx, &pid);
    if (ret)
       return 1;
   
@@ -603,19 +604,21 @@ int main(int argc, char *argv[])
    snprintf(sockname, sizeof(sockname), "%s%d",
 	    DGPR_REG_SOCKET_NAME_ROOT, getuid());
    /* XXX check that the socket is not already active */
-   ret = do_listen(sockname, &sock);
+   ret = do_listen(ctx, sockname, &sock);
    if (ret)
       return 1;
-   edg_wlpr_Log(LOG_DEBUG, "Listening at %s", sockname);
+   edg_wlpr_Log(ctx, LOG_DEBUG, "Listening at %s", sockname);
 
-   ret = doit(sock);
+   ret = doit(ctx, sock);
 
    close(sock);
    return ret;
 }
 
+/* XXX remove once the renew_core libs is used */
+#if 1
 int
-get_proxy_base_name(char *file, char **name)
+get_proxy_base_name(glite_renewal_core_context ctx, char *file, char **name)
 {
    X509 *cert = NULL;
    EVP_PKEY *key = NULL;
@@ -623,7 +626,7 @@ get_proxy_base_name(char *file, char **name)
    X509_NAME *subject = NULL;
    int ret;
 
-   ret = load_proxy(file, &cert, &key, &chain, NULL);
+   ret = load_proxy(ctx, file, &cert, &key, &chain, NULL);
    if (ret)
       return ret;
 
@@ -634,7 +637,7 @@ get_proxy_base_name(char *file, char **name)
 
    ret = globus_gsi_cert_utils_get_base_name(subject, chain);
    if (ret) {
-      edg_wlpr_Log(LOG_ERR, "Cannot get subject name from proxy %s", file);
+      edg_wlpr_Log(ctx, LOG_ERR, "Cannot get subject name from proxy %s", file);
       ret = EDG_WLPR_ERROR_SSL; /* XXX ??? */
       goto end;
    }
@@ -654,3 +657,4 @@ end:
 
    return ret;
 }
+#endif
