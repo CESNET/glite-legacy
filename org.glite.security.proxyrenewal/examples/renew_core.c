@@ -1,0 +1,63 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <getopt.h>
+#include <glite/security/proxyrenewal/renewal_core.h>
+
+static struct option const long_options[] = {
+   { "server",   required_argument, 0, 's' },
+   { "proxy",    required_argument, 0, 'p' },
+   { NULL, 0, NULL, 0}
+};
+
+static char short_options[] = "s:p:";
+
+/* Two ugly hacks, will be removed once the context is introduced */
+char *vomsconf = NULL;
+
+void
+edg_wlpr_Log(int dbg_level, const char *format, ...);
+
+int
+main(int argc, char *argv[])
+{
+   char *server = NULL;
+   char *proxy = NULL;
+   char *new_proxy = NULL;
+   extern int optind;
+   char arg;
+   glite_renewal_core_context_data ctx;
+   int ret;
+
+   memset(&ctx, 0, sizeof(ctx));
+
+   while ((arg = getopt_long(argc, argv, short_options, long_options, NULL)) != EOF) {
+      switch(arg) {
+	case 's':
+	   server = optarg; break;
+	case 'p':
+	   proxy = optarg; break;
+	case 'h':
+	   fprintf(stdout, "Usage: %s --server <myproxy server> --proxy <filename>\n", argv[0]);
+	   exit(1);
+      }
+   }
+
+   if (server == NULL || proxy == NULL) {
+      fprintf(stderr, "both server and proxy parameters must be given\n");
+      exit(1);
+   }
+
+   ret = glite_renewal_core_renew(&ctx, server, 0, proxy, &new_proxy);
+   if (ret) {
+      fprintf(stderr, "glite_renewal_core_renew() failed: %d\n", ret);
+      exit(1);
+   }
+
+   return 0;
+}
+
+void
+edg_wlpr_Log(int dbg_level, const char *format, ...)
+{
+   return;
+}
