@@ -164,6 +164,6 @@ install:
 
 
 clean:
-	$(RM) $(LIB) ${THRLIB} ${LIB_CORE_NOTHR} ${LIB_CORE_THR} $(DAEMON) $(CLIENT) *.o core 
+	$(RM) $(LIB) ${THRLIB} ${LIB_CORE_NOTHR} ${LIB_CORE_THR} $(DAEMON) $(CLIENT) $(EXAMPLES) *.o *.lo core 
 
 .PHONY: default all compile examples check stage dist distsrc distbin install clean
