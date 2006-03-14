@@ -214,3 +214,35 @@ end:
 
    return ret;
 }
+
+int
+glite_renewal_core_init_ctx(glite_renewal_core_context *context)
+{
+   glite_renewal_core_context p = NULL;
+
+   *context = NULL;
+
+   p = calloc(1, sizeof(*p));
+   if (p == NULL)
+      return ENOMEM;
+
+   *context = p;
+   return 0;
+}
+
+int
+glite_renewal_core_destroy_ctx(glite_renewal_core_context context)
+{
+   free(context);
+   return 0;
+}
+
+/* XXX remove these ugly things: */
+
+void
+edg_wlpr_Log(int dbg_level, const char *format, ...)
+{
+   return;
+}
+
+char *vomsconf = NULL;

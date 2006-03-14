@@ -9,13 +9,22 @@ extern "C" {
 
 typedef struct glite_renewal_core_context_data {
   int dbg_level;
-  char *cert;
-  char *key;
-  char *cadir;
   int voms_enabled;
 } glite_renewal_core_context_data;
 
 typedef struct glite_renewal_core_context_data *glite_renewal_core_context;
+
+/**
+ * This cal initializes the context and sets default values
+ */
+int
+glite_renewal_core_init_ctx(glite_renewal_core_context *context);
+
+/**
+ * This call frees the context and all memory used by the context
+ */
+int
+glite_renewal_core_destroy_ctx(glite_renewal_core_context context);
 
 /**
  * This call tries to renew the proxy certificate using the MyProxy

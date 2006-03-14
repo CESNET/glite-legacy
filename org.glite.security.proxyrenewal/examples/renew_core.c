@@ -12,12 +12,6 @@ static struct option const long_options[] = {
 
 static char short_options[] = "s:p:h";
 
-/* Two ugly hacks, will be removed once the context is introduced */
-char *vomsconf = NULL;
-
-void
-edg_wlpr_Log(int dbg_level, const char *format, ...);
-
 int
 main(int argc, char *argv[])
 {
@@ -28,8 +22,6 @@ main(int argc, char *argv[])
    char arg;
    glite_renewal_core_context_data ctx;
    int ret;
-
-   memset(&ctx, 0, sizeof(ctx));
 
    while ((arg = getopt_long(argc, argv, short_options, long_options, NULL)) != EOF) {
       switch(arg) {
@@ -48,19 +40,21 @@ main(int argc, char *argv[])
       exit(1);
    }
 
+   ret = glite_renewal_core_init_ctx(&ctx);
+   if (ret) {
+      fprintf(stderr, "glite_renewal_core_init_ctx() failed\n");
+      exit(1);
+   }
+
    ret = glite_renewal_core_renew(&ctx, server, 0, proxy, &new_proxy);
    if (ret) {
       fprintf(stderr, "glite_renewal_core_renew() failed: %d\n", ret);
       exit(1);
    }
 
+   ret = glite_renewal_core_destroy_ctx(ctx);
+
    printf("%s\n", new_proxy);
 
    return 0;
-}
-
-void
-edg_wlpr_Log(int dbg_level, const char *format, ...)
-{
-   return;
 }
