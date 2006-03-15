@@ -56,7 +56,7 @@ CFLAGS:= ${DEBUG} \
 	-DWITH_NONAMESPACES \
 	-I. -I${top_srcdir}/interface \
 	-I${stagedir}/include \
-	-I${ares_prefix}/include \
+	-I${cares_prefix}/include \
 	${COVERAGE_FLAGS} -D_GNU_SOURCE -DDATAGRID_EXTENSION
 
 LDFLAGS:=${COVERAGE_FLAGS}
@@ -79,7 +79,7 @@ GLOBUS_THR_LIBS:= -L${globus_prefix}/lib \
 	-lglobus_gssapi_gsi_${thrflavour}
 
 GSOAP_LIBS:= -L${gsoap_prefix}/lib -lgsoap
-ARES_LIBS:=-L${ares_prefix}/lib -lares
+ARES_LIBS:=-L${cares_prefix}/lib -lcares
 
 EX_LIBS:= ${GLOBUS_LIBS} ${ARES_LIBS}
 EX_THRLIBS := ${GLOBUS_THR_LIBS} ${ARES_LIBS}
