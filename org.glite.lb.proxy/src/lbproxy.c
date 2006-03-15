@@ -21,7 +21,6 @@
 #include <arpa/inet.h>
 #include <arpa/nameser.h>
 #include <resolv.h>
-#include <ares.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
 
