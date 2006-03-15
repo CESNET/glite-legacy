@@ -21,6 +21,7 @@ static struct option opts[] = {
 	{ "debug",	no_argument,            NULL, 'd'},
 	{ "msg",	required_argument,      NULL, 'm'},
 	{ "port",	required_argument,      NULL, 'p'},
+	{ "repeat",	required_argument,      NULL, 'r'},
 };
 
 int debug  = 0;
@@ -49,11 +50,11 @@ int main(int argc, char **argv)
 	int					opt,
 						sock,
 						n;
-
+	int	repeat = 1;
 
 	me = strrchr(argv[0], '/');
 	if ( me ) me++; else me = argv[0];
-	while ( (opt = getopt_long(argc, argv,"p:m:hd", opts, NULL)) != EOF )
+	while ( (opt = getopt_long(argc, argv,"p:m:hdr:", opts, NULL)) != EOF )
 	{
 		switch ( opt )
 		{
@@ -64,6 +65,7 @@ int main(int argc, char **argv)
 			port = atoi(optarg);
 			break;
 		case 'd': debug = 1; break;
+		case 'r': repeat = atoi(optarg); break;
 		case 'h': usage(me); return 0;
 		case '?': usage(me); return 1;
 		}
@@ -84,19 +86,21 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 	n = strlen(msg? msg: DEF_MSG);
-	if ( writen(sock, msg? msg: DEF_MSG, n) != n )
-	{
-		dprintf(("error writing message\n"));
-		exit(1);
+	for (;repeat; repeat--) {
+		if ( writen(sock, msg? msg: DEF_MSG, n) != n )
+		{
+			dprintf(("error writing message\n"));
+			exit(1);
+		}
+		printf("reply: "); fflush(stdout);
+		n = readln(sock, buff);
+		if ( n < 0 )
+		{
+			perror("read() reply error");
+			return 1;
+		}
+		writen(0, buff, n);
 	}
-	printf("reply: "); fflush(stdout);
-	n = readln(sock, buff);
-	if ( n < 0 )
-	{
-		perror("read() reply error");
-		return 1;
-	}
-	writen(0, buff, n);
 	close(sock);
 
 	return 0;
