@@ -71,7 +71,7 @@ load_proxy(glite_renewal_core_context ctx, const char *filename, X509 **cert, EV
            STACK_OF(X509) **chain, globus_gsi_cred_handle_t *proxy);
 
 int
-get_proxy_base_name(glite_renewal_core_context ctx, char *file, char **subject);
+get_proxy_base_name(glite_renewal_core_context ctx, const char *file, char **subject);
 
 int
 renew_voms_creds(glite_renewal_core_context ctx, const char *cur_file, const char *renewed_file, const char *new_file);

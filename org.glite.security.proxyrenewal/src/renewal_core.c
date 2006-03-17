@@ -21,7 +21,7 @@ load_proxy(glite_renewal_core_context ctx, const char *cur_file, X509 **cert, EV
       goto end;
    }
 
-   result = globus_gsi_cred_read_proxy(proxy, cur_file);
+   result = globus_gsi_cred_read_proxy(proxy, (char *) cur_file);
    if (result) {
       fprintf(stderr, "globus_gsi_cred_read_proxy() failed\n");
       goto end;
@@ -68,13 +68,14 @@ end:
 }
 
 int
-get_proxy_base_name(glite_renewal_core_context ctx, char *file, char **name)
+get_proxy_base_name(glite_renewal_core_context ctx, const char *file, char **name)
 {
    X509 *cert = NULL;
    EVP_PKEY *key = NULL;
    STACK_OF(X509) *chain = NULL;
    X509_NAME *subject = NULL;
    int ret;
+   globus_result_t result;
 
    ret = load_proxy(ctx, file, &cert, &key, &chain, NULL);
    if (ret)
@@ -85,8 +86,8 @@ get_proxy_base_name(glite_renewal_core_context ctx, char *file, char **name)
    sk_X509_insert(chain, cert, 0);
    cert = NULL;
 
-   ret = globus_gsi_cert_utils_get_base_name(subject, chain);
-   if (ret) {
+   result = globus_gsi_cert_utils_get_base_name(subject, chain);
+   if (result) {
       edg_wlpr_Log(ctx, LOG_ERR, "Cannot get subject name from proxy %s", file);
       ret = EDG_WLPR_ERROR_SSL; /* XXX ??? */
       goto end;
@@ -119,7 +120,7 @@ glite_renewal_core_renew(glite_renewal_core_context ctx,
    int tmp_fd;
    int ret = -1;
    char *p;
-   char *server = NULL;
+   const char *server = NULL;
    myproxy_socket_attrs_t *socket_attrs;
    myproxy_request_t      *client_request;
    myproxy_response_t     *server_response;
@@ -165,7 +166,7 @@ glite_renewal_core_renew(glite_renewal_core_context ctx,
    socket_attrs->psport = (myproxy_port) ? myproxy_port : MYPROXY_SERVER_PORT;
 
    verror_clear();
-   ret = myproxy_get_delegation(socket_attrs, client_request, current_proxy,
+   ret = myproxy_get_delegation(socket_attrs, client_request, (char *) current_proxy,
 	                        server_response, tmp_proxy);
    if (ret == 1) {
       ret = EDG_WLPR_ERROR_MYPROXY;

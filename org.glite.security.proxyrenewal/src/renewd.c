@@ -546,6 +546,7 @@ int main(int argc, char *argv[])
       ctx->log_level = LOG_DEBUG;
       ctx->log_dst = GLITE_RENEWAL_LOG_STDOUT;
    }
+   ctx->voms_conf = vomsconf;
 
    if (chdir(repository)) {
       edg_wlpr_Log(ctx, LOG_ERR, "Cannot access repository directory %s (%s)",
