@@ -7,9 +7,18 @@
 extern "C" {
 #endif
 
+typedef enum {
+	GLITE_RENEWAL_LOG_NONE,
+	GLITE_RENEWAL_LOG_STDOUT,
+	GLITE_RENEWAL_LOG_SYSLOG,
+} glite_renewal_log_dst;
+
 typedef struct glite_renewal_core_context_data {
-  int dbg_level;
+  int log_level;
+  glite_renewal_log_dst log_dst;
+  char *err_message;
   int voms_enabled;
+  char *voms_conf;
 } glite_renewal_core_context_data;
 
 typedef struct glite_renewal_core_context_data *glite_renewal_core_context;

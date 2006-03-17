@@ -242,7 +242,32 @@ glite_renewal_core_destroy_ctx(glite_renewal_core_context context)
 void
 edg_wlpr_Log(glite_renewal_core_context context, int dbg_level, const char *format, ...)
 {
+   va_list ap;
+
+   if (context->err_message) {
+      free(context->err_message);
+      context->err_message = NULL;
+   }
+   
+   /* cannot handle the %m format argument specific for syslog() */
+   va_start(ap, format);
+   vasprintf(&context->err_message, format, ap);
+   va_end(ap);
+
+   if (dbg_level > context->log_level)
+      return;
+
+   switch (context->log_dst) {
+      case GLITE_RENEWAL_LOG_STDOUT:
+	 printf("[%d] %s\n", getpid(), context->err_message);
+	 break;
+      case GLITE_RENEWAL_LOG_SYSLOG:
+	 syslog(dbg_level, "%s", context->err_message);
+	 break;
+      case GLITE_RENEWAL_LOG_NONE:
+      default:
+	 break;
+   }
+
    return;
 }
-
-char *vomsconf = NULL;
