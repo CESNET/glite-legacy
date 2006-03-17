@@ -22,69 +22,6 @@ renew_proxy(glite_renewal_core_context ctx, proxy_record *record, char *basename
 static void
 register_signal(int signal);
 
-/* XXX remove once the renew_core libs is used */
-#if 1
-int
-load_proxy(glite_renewal_core_context ctx, const char *cur_file, X509 **cert, EVP_PKEY **priv_key,
-           STACK_OF(X509) **chain, globus_gsi_cred_handle_t *cur_proxy)
-{
-   globus_result_t result;
-   globus_gsi_cred_handle_t proxy = NULL;
-   int ret;
-
-   result = globus_gsi_cred_handle_init(&proxy, NULL);
-   if (result) {
-      fprintf(stderr, "globus_gsi_cred_handle_init() failed\n");
-      goto end;
-   }
-
-   result = globus_gsi_cred_read_proxy(proxy, cur_file);
-   if (result) {
-      fprintf(stderr, "globus_gsi_cred_read_proxy() failed\n");
-      goto end;
-   }
-
-   if (cert) {
-      result = globus_gsi_cred_get_cert(proxy, cert);
-      if (result) {
-	 fprintf(stderr, "globus_gsi_cred_get_cert() failed\n");
-	 goto end;
-      }
-   }
-
-   if (priv_key) {
-      result = globus_gsi_cred_get_key(proxy, priv_key);
-      if (result) {
-	 fprintf(stderr, "globus_gsi_cred_get_key() failed\n");
-	 goto end;
-      }
-   }
-
-   if (chain) {
-      result = globus_gsi_cred_get_cert_chain(proxy, chain);
-      if (result) {
-	 fprintf(stderr, "globus_gsi_cred_get_cert_chain() failed\n");
-	 goto end;
-      }
-   }
-
-   if (cur_proxy) {
-      *cur_proxy = proxy;
-      proxy = NULL;
-   }
-
-   ret = 0;
-   
-end:
-   if (proxy)
-      globus_gsi_cred_handle_destroy(proxy);
-   if (result)
-      ret = EDG_WLPR_ERROR_GENERIC;
-
-   return ret;
-}
-#endif
-
 static void
 register_signal(int signal)
 {
@@ -103,117 +40,32 @@ register_signal(int signal)
 static int
 renew_proxy(glite_renewal_core_context ctx, proxy_record *record, char *basename, char **new_proxy)
 {
-   char tmp_proxy[FILENAME_MAX];
-   int tmp_fd;
    char repository_file[FILENAME_MAX];
    int ret = -1;
-   char *p;
+   char *p = NULL;
    char *server = NULL;
-   myproxy_socket_attrs_t *socket_attrs;
-   myproxy_request_t      *client_request;
-   myproxy_response_t     *server_response;
-   char *renewed_proxy;
-
-   socket_attrs = malloc(sizeof(*socket_attrs));
-   memset(socket_attrs, 0, sizeof(*socket_attrs));
-
-   client_request = malloc(sizeof(*client_request));
-   memset(client_request, 0, sizeof(*client_request));
-
-   server_response = malloc(sizeof(*server_response));
-   memset(server_response, 0, sizeof(*server_response));
-
-   myproxy_set_delegation_defaults(socket_attrs, client_request);
-
-   edg_wlpr_Log(ctx, LOG_DEBUG, "Trying to renew proxy in %s.%d",
-	        basename, record->suffix);
-
-   snprintf(tmp_proxy, sizeof(tmp_proxy), "%s.%d.myproxy.XXXXXX", 
-	    basename, record->suffix);
-   tmp_fd = mkstemp(tmp_proxy);
-   if (tmp_fd == -1) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Cannot create temporary file (%s)",
-                   strerror(errno));
-      return errno;
-   }
+   unsigned int port = 0;
 
    snprintf(repository_file, sizeof(repository_file),"%s.%d",
 	    basename, record->suffix);
 
-   ret = get_proxy_base_name(ctx, repository_file, &client_request->username);
+   if (record->myproxy_server)
+      server = strdup(record->myproxy_server);
+
+   if (server && (p = strchr(server, ':'))) {
+      *p++ = '\0';
+      ret = edg_wlpr_DecodeInt(p, &port);
+   }
+
+   ret = glite_renewal_core_renew(ctx, server, port, repository_file, new_proxy);
    if (ret)
       goto end;
-
-   client_request->proxy_lifetime = 60 * 60 * DGPR_RETRIEVE_DEFAULT_HOURS;
-
-   server = (record->myproxy_server) ? record->myproxy_server :
-                                       socket_attrs->pshost;
-   if (server == NULL) {
-      edg_wlpr_Log(ctx, LOG_ERR, "No myproxy server specified");
-      ret = EINVAL;
-      goto end;
-   }
-   socket_attrs->pshost = strdup(server);
-
-   p = strchr(socket_attrs->pshost, ':');
-   if (p) {
-      *p++ = '\0';
-      ret = edg_wlpr_DecodeInt(p, &socket_attrs->psport);
-      if (ret)
-	 goto end;
-   } else
-      socket_attrs->psport = MYPROXY_SERVER_PORT;
-
-   verror_clear();
-   ret = myproxy_get_delegation(socket_attrs, client_request, repository_file,
-	                        server_response, tmp_proxy);
-   if (ret == 1) {
-      ret = EDG_WLPR_ERROR_MYPROXY;
-      edg_wlpr_Log(ctx, LOG_ERR, "Error contacting MyProxy server for proxy %s: %s",
-	           repository_file, verror_get_string());
-      verror_clear();
-      goto end;
-   }
-
-   renewed_proxy = tmp_proxy;
-
-   if (voms_enabled && record->voms_exts) {
-      char tmp_voms_proxy[FILENAME_MAX];
-      int tmp_voms_fd;
-      
-      snprintf(tmp_voms_proxy, sizeof(tmp_voms_proxy), "%s.%d.voms.XXXXXX",
-	       basename, record->suffix);
-      tmp_voms_fd = mkstemp(tmp_voms_proxy);
-      if (tmp_voms_fd == -1) {
-	 edg_wlpr_Log(ctx, LOG_ERR, "Cannot create temporary file (%s)",
-	              strerror(errno));
-	 ret = errno;
-	 goto end;
-      }
-
-      ret = renew_voms_creds(ctx, repository_file, renewed_proxy, tmp_voms_proxy);
-      close(tmp_voms_fd);
-      if (ret) {
-	 unlink(tmp_voms_proxy);
-	 goto end;
-      }
-
-      renewed_proxy = tmp_voms_proxy;
-      unlink(tmp_proxy);
-   }
-
-   if (new_proxy)
-      *new_proxy = strdup(renewed_proxy);
 
    ret = 0;
 
 end:
-   if (socket_attrs->socket_fd)
-      close(socket_attrs->socket_fd);
-   close(tmp_fd);
-   if (ret)
-      unlink(tmp_proxy);
-   myproxy_free(socket_attrs, client_request, server_response);
+   if (server)
+      free(server);
 
    return ret;
 }

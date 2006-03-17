@@ -3,8 +3,6 @@
 
 #ident "$Header$"
 
-#include <myproxy.h>
-#include <myproxy_delegation.h>
 #include <globus_gsi_credential.h>
 #include <globus_gsi_proxy.h>
 #include <globus_gsi_cert_utils_constants.h>

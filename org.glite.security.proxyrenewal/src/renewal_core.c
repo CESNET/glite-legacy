@@ -1,3 +1,6 @@
+#include <myproxy.h>
+#include <myproxy_delegation.h>
+
 #include "renewal_core.h"
 #include "renewal_locl.h"
 #include "renewd_locl.h"
@@ -236,6 +239,10 @@ glite_renewal_core_init_ctx(glite_renewal_core_context *context)
 int
 glite_renewal_core_destroy_ctx(glite_renewal_core_context context)
 {
+   if (context == NULL)
+      return 0;
+   if (context->err_message);
+      free(context->err_message);
    free(context);
    return 0;
 }

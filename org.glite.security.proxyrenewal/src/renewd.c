@@ -474,24 +474,6 @@ do_listen(glite_renewal_core_context ctx, char *socket_name, int *sock)
    return 0;
 }
 
-void
-edg_wlpr_Log(glite_renewal_core_context ctx, int dbg_level, const char *format, ...)
-{
-   va_list ap;
-   char    log_mess[1024];
-
-   /* cannot handle the %m format argument specific for syslog() */
-   va_start(ap, format);
-   vsnprintf(log_mess, sizeof(log_mess), format, ap);
-   va_end(ap);
-   
-   if (debug)
-      printf("[%d] %s\n", getpid(), log_mess);
-   else
-      if (dbg_level < LOG_DEBUG) /* XXX make configurable */
-         syslog(dbg_level, "%s", log_mess);
-}
-
 int
 start_watchdog(glite_renewal_core_context ctx, pid_t *pid)
 {
@@ -555,6 +537,16 @@ int main(int argc, char *argv[])
       exit(1);
    }
 
+   ret = glite_renewal_core_init_ctx(&ctx);
+   if (ret) {
+      fprintf(stderr, "Cannot initialize context\n");
+      exit(1);
+   }
+   if (debug) {
+      ctx->log_level = LOG_DEBUG;
+      ctx->log_dst = GLITE_RENEWAL_LOG_STDOUT;
+   }
+
    if (chdir(repository)) {
       edg_wlpr_Log(ctx, LOG_ERR, "Cannot access repository directory %s (%s)",
 	           repository, strerror(errno));
@@ -614,47 +606,3 @@ int main(int argc, char *argv[])
    close(sock);
    return ret;
 }
-
-/* XXX remove once the renew_core libs is used */
-#if 1
-int
-get_proxy_base_name(glite_renewal_core_context ctx, char *file, char **name)
-{
-   X509 *cert = NULL;
-   EVP_PKEY *key = NULL;
-   STACK_OF(X509) *chain = NULL;
-   X509_NAME *subject = NULL;
-   int ret;
-
-   ret = load_proxy(ctx, file, &cert, &key, &chain, NULL);
-   if (ret)
-      return ret;
-
-   subject = X509_NAME_dup(X509_get_subject_name(cert));
-
-   sk_X509_insert(chain, cert, 0);
-   cert = NULL;
-
-   ret = globus_gsi_cert_utils_get_base_name(subject, chain);
-   if (ret) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Cannot get subject name from proxy %s", file);
-      ret = EDG_WLPR_ERROR_SSL; /* XXX ??? */
-      goto end;
-   }
-
-   *name = X509_NAME_oneline(subject, NULL, 0);
-   ret = 0;
-
-end:
-   if (cert)
-      X509_free(cert);
-   if (key)
-      EVP_PKEY_free(key);
-   if (chain)
-      sk_X509_pop_free(chain, X509_free);
-   if (subject)
-      X509_NAME_free(subject);
-
-   return ret;
-}
-#endif

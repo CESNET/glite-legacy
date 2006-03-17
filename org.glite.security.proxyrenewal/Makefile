@@ -117,8 +117,8 @@ ${LIB_CORE_NOTHR}: ${LIB_CORE_NOTHR_OBJS}
 ${LIB_CORE_THR}: ${LIB_CORE_THR_OBJS}
 	${LINK} ${version_info} -o $@ ${LIB_CORE_THR_LOBJS} -rpath ${glite_location}/lib ${MYPROXY_LIB_THR} ${VOMS_LIB_THR}
 
-${DAEMON}: ${DAEMONOBJ}
-	${LINK} -o $@ ${DAEMONOBJ} ${JOBIDLIB} ${MYPROXY_LIB_NOTHR} -lvomsc -lglobus_gss_assist_${nothrflavour} ${GLOBUS_LIBS} 
+${DAEMON}: ${DAEMONOBJ} ${LIB_CORE_NOTHR}
+	${LINK} -o $@ ${DAEMONOBJ} ${JOBIDLIB} ${LIB_CORE_NOTHR} 
 
 ${CLIENT}: ${CLIENTOBJ} ${LIB}
 	${LINK} -o $@ ${CLIENTOBJ} ${LIB} ${GLOBUS_LIBS}
