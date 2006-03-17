@@ -11,8 +11,6 @@ extern char *repository;
 extern char *cadir;
 extern char *vomsdir;
 extern int voms_enabled;
-extern char *vomsconf;
-
 static int received_signal = -1, die = 0;
 
 static void

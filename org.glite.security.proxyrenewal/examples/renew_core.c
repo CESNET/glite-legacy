@@ -20,7 +20,7 @@ main(int argc, char *argv[])
    char *new_proxy = NULL;
    extern int optind;
    char arg;
-   glite_renewal_core_context_data ctx;
+   glite_renewal_core_context ctx = NULL;
    int ret;
 
    while ((arg = getopt_long(argc, argv, short_options, long_options, NULL)) != EOF) {
@@ -46,7 +46,7 @@ main(int argc, char *argv[])
       exit(1);
    }
 
-   ret = glite_renewal_core_renew(&ctx, server, 0, proxy, &new_proxy);
+   ret = glite_renewal_core_renew(ctx, server, 0, proxy, &new_proxy);
    if (ret) {
       fprintf(stderr, "glite_renewal_core_renew() failed: %d\n", ret);
       exit(1);
