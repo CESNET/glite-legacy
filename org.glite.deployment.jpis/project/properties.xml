@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Copyright (c) Members of the EGEE Collaboration. 2004 
+	See http://eu-egee.org/partners/ for details on the copyright holders
+	For license conditions see the license file or http://eu-egee.org/license.html
+
+	Common build properties file for the gLite JP Index Server Node Deployment Unit
+	
+	Author: Alberto Di Meglio <alberto.di.meglio@cern.ch>
+	Version info: $Id$
+	Release: $Name$	
+	
+	Revision history:
+	$Log$
+	Revision 1.2  2005/07/08 13:18:40  dimeglio
+	Merged from branch 1.2.2
+	
+	Revision 1.1  2004/10/06 09:19:24  dimeglio
+	First version of this file
+	
+-->
+
+<project name="gLite JP Index Server Deployment Unit common properties">
+
+	<!-- Include build properties to allow overwriting 
+	     of properties for subsystem                    -->
+	<property file="project/build.properties" />	
+
+	<!-- ======================================================
+          Define corresponding subsystem properties
+		 ====================================================== -->
+
+	<!-- Subsystem name -->
+	<property name="subsystem.name" value="${deployment.subsystem.name}"/>
+		
+	<!-- Subsystem prefix -->
+	<property name="subsystem.prefix" value="${deployment.subsystem.prefix}"/>
+
+	<!-- ======================================================
+          Define component properties
+		 ====================================================== -->
+		 		
+	<!-- Component name prefix -->
+	<property name="component.prefix" value="jpis" />
+			
+	<!-- ======================================================
+          Define general component properties
+		 ====================================================== -->
+	
+	<import file="${component.general.properties.file}" />
+						
+	<!-- ======================================================
+		 Define extra properties here ...
+		 ====================================================== -->
+		 
+	<property name="build.package.summary" value="gLite Job Provenance Index Server node configuration files" />
+	<property name="build.package.description" value="gLite Job Provenance Index Server node configuration files" />
+	<property name="build.package.files" value="
+%attr(755,root,root) %{prefix}/etc/config/scripts/glite-jpis-config.py\n
+%attr(644,root,root) %{prefix}/etc/config/templates/glite-jpis.cfg.xml\n
+%attr(644,root,root) %{prefix}/share/doc/glite-jpis/release_notes/release_notes.doc\n
+%attr(644,root,root) %{prefix}/share/doc/glite-jpis/release_notes/release_notes.pdf\n
+%attr(644,root,root) %{prefix}/share/doc/glite-jpis/release_notes/release_notes.html\n"
+	/>
+
+</project>
