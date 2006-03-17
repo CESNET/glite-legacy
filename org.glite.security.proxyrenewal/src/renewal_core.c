@@ -174,7 +174,7 @@ glite_renewal_core_renew(glite_renewal_core_context ctx,
 
    renewed_proxy = tmp_proxy;
 
-   if (ctx->voms_enabled && voms_exts) {
+   if (voms_exts) {
       char tmp_voms_proxy[FILENAME_MAX];
       int tmp_voms_fd;
       
@@ -226,6 +226,9 @@ glite_renewal_core_init_ctx(glite_renewal_core_context *context)
    if (p == NULL)
       return ENOMEM;
 
+   p->log_level = LOG_ERR;
+   p->log_dst = GLITE_RENEWAL_LOG_SYSLOG;
+
    *context = p;
    return 0;
 }
@@ -236,8 +239,6 @@ glite_renewal_core_destroy_ctx(glite_renewal_core_context context)
    free(context);
    return 0;
 }
-
-/* XXX remove these ugly things: */
 
 void
 edg_wlpr_Log(glite_renewal_core_context context, int dbg_level, const char *format, ...)

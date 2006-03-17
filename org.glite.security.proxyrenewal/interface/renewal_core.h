@@ -17,7 +17,6 @@ typedef struct glite_renewal_core_context_data {
   int log_level;
   glite_renewal_log_dst log_dst;
   char *err_message;
-  int voms_enabled;
   char *voms_conf;
 } glite_renewal_core_context_data;
 
