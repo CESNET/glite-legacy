@@ -337,8 +337,6 @@ def set_env():
         os.mkdir(os.environ['GLITE_JP_PRIMARY_INTERNAL'],0755)
     import socket
     glib.export('GLITE_JP_PRIMARY_EXTERNAL',"gsiftp://%s:%s%s" % (socket.getfqdn(socket.gethostname()), params['jpps.ftp.port'], params['jpps.internal']) )    
-    if not os.path.exists(params['jpps.external']):
-        os.mkdir(params['jpps.external'],0755)
     #glite_setenv.sh does not like variables with spaces, 
     #and su don't like variables with "  
     #glib.export('GLITE_JP_DEBUG',params['jpps.debug'])    
