@@ -57,10 +57,7 @@
 	<property name="build.package.description" value="gLite Job Provenance Primary Storage node configuration files" />
 	<property name="build.package.files" value="
 %attr(755,root,root) %{prefix}/etc/config/scripts/glite-jpps-config.py\n
-%attr(644,root,root) %{prefix}/etc/config/templates/glite-jpps.cfg.xml\n
-%attr(644,root,root) %{prefix}/share/doc/glite-jpps/release_notes/release_notes.doc\n
-%attr(644,root,root) %{prefix}/share/doc/glite-jpps/release_notes/release_notes.pdf\n
-%attr(644,root,root) %{prefix}/share/doc/glite-jpps/release_notes/release_notes.html\n"
+%attr(644,root,root) %{prefix}/etc/config/templates/glite-jpps.cfg.xml\n"
 	/>
 
 </project>
