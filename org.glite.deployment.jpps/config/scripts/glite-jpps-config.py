@@ -285,8 +285,6 @@ def loadDefaults(params):
 
     params['GLITE_LOCATION'] = "/opt/glite"
     params['mysql.root.password'] = ""
-    params['jpps.database.name'] = "jpps"
-    params['jpps.database.username'] = "jpps"
     params['mysql.max_allowed_packet'] = "17"
     params['jpps.serviceName'] = 'JP PS Server service at %s' % glib.fq_hostname
     params['jpps.serviceType'] = 'org.glite.jp.primary'
@@ -337,14 +335,14 @@ def set_env():
         os.mkdir(os.environ['GLITE_JP_PRIMARY_INTERNAL'],0755)
     import socket
     glib.export('GLITE_JP_PRIMARY_EXTERNAL',"gsiftp://%s:%s%s" % (socket.getfqdn(socket.gethostname()), params['jpps.ftp.port'], params['jpps.internal']) )    
-    if not os.path.exists(params['jpps.external']):
-        os.mkdir(params['jpps.external'],0755)
+    if not os.path.exists(params['jpps.internal']):
+        os.mkdir(params['jpps.internal'],0755)
     #glite_setenv.sh does not like variables with spaces, 
     #and su don't like variables with "  
     #glib.export('GLITE_JP_DEBUG',params['jpps.debug'])    
     os.environ['GLITE_JP_DEBUG']='%s' % params['jpps.debug']
     glib.export('GLITE_JP_PRIMARY_PORT',params['jpps.port'])    
-    glib.export('GLITE_JP_PRIMARY_DBCS',params['jpps.dbcs'])    
+    glib.export('GLITE_JP_PRIMARY_DBCS',"%s/@localhost:%s" % (params['jpps.database.username'], params['jpps.database.name']) )    
     glib.export('GLITE_JP_PRIMARY_PIDFILE',params['jpps.pid.file'])    
 
     # Set environment

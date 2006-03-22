@@ -66,10 +66,15 @@
 			description="non-default JP PS port"
 			value=""/>
 
-		<jpps.dbcs
-			description="non-default JP PS DB contact string
-			default: jpps/@localhost:jpps"
-			value=""/>
+		<jpps.database.username
+			description="JP PS database user
+			default: jpps"
+			value="jpps"/>
+
+		<jpps.database.name
+			description="JP PS database name
+			default: jpps"
+			value="jpps"/>
 
 		<jpps.pid.file
 			description="non-default JP PS pidfile ($GLITE_LOCATION_VAR/glite-jp-primarystoraged.pid)"
