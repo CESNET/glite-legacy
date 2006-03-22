@@ -285,8 +285,6 @@ def loadDefaults(params):
 
     params['GLITE_LOCATION'] = "/opt/glite"
     params['mysql.root.password'] = ""
-    params['jpis.database.name'] = "jpis"
-    params['jpis.database.username'] = "jpis"
     params['mysql.max_allowed_packet'] = "17"
     params['jpis.serviceName'] = 'JP IS Server service at %s' % glib.fq_hostname
     params['jpis.serviceType'] = 'org.glite.jp.index'
@@ -334,7 +332,7 @@ def set_env():
     glib.export('GLITE_JPIS_DEBUG',params['jpis.debug'])    
     glib.export('GLITE_JPIS_QT',params['jpis.qt'])    
     glib.export('GLITE_JPIS_AUTH',params['jpis.auth'])    
-    glib.export('GLITE_JPIS_DB',params['jpis.db'])    
+    glib.export('GLITE_JPIS_DB',"%s/@localhost:%s" % (params['jpis.database.username'], params['jpis.database.name']) )
     glib.export('GLITE_JPIS_PORT',params['jpis.port'])    
     glib.export('GLITE_JPIS_PIDFILE',params['jpis.pid.file'])    
     glib.export('GLITE_JPIS_LOGFILE',params['jpis.log.file'])

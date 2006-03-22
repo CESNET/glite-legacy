@@ -61,9 +61,13 @@
 			description="setting to '-n' switches off authorization"
 			value=""/>
 
-		<jpis.db
-			description="non-default JP IS DB contact string"
-			value=""/>
+		<jpis.database.name
+			description="JP IS DB name"
+			value="jpis"/>
+
+		<jpis.database.username
+			description="JP IS DB user"
+			value="jpis"/>
 
 		<jpis.port
 			description="non-default JP IS port"
