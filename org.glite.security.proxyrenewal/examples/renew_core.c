@@ -46,9 +46,12 @@ main(int argc, char *argv[])
       exit(1);
    }
 
+   ctx->log_dst = GLITE_RENEWAL_LOG_NONE;
+
    ret = glite_renewal_core_renew(ctx, server, 0, proxy, &new_proxy);
    if (ret) {
-      fprintf(stderr, "glite_renewal_core_renew() failed: %d\n", ret);
+      fprintf(stderr, "%s: glite_renewal_core_renew() failed: %s",
+              argv[0], ctx->err_message);
       exit(1);
    }
 
