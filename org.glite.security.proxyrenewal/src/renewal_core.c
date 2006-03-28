@@ -268,7 +268,7 @@ edg_wlpr_Log(glite_renewal_core_context context, int dbg_level, const char *form
 
    switch (context->log_dst) {
       case GLITE_RENEWAL_LOG_STDOUT:
-	 printf("[%d] %s\n", getpid(), context->err_message);
+	 printf("%s\n", context->err_message);
 	 break;
       case GLITE_RENEWAL_LOG_SYSLOG:
 	 syslog(dbg_level, "%s", context->err_message);
