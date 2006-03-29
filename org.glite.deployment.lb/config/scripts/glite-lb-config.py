@@ -6,7 +6,7 @@
 # For license conditions see the license file or http://eu-egee.org/license.html
 #
 ################################################################################
-# glite-lb-config v. 2.2.0
+# glite-lb-config v. 2.2.1
 #
 # Post-installation script for configuring the gLite Logging and Bookkeping Server
 # Robert Harakaly < robert.harakaly@cern.ch >
@@ -48,7 +48,7 @@ class glite_lb:
     def __init__(self):
         self.mysql = MySQL.Mysql()
         self.verbose = 0
-        self.version = "2.2.0"
+        self.version = "2.2.1"
         self.name = "glite-lb"
         self.friendly_name = "gLite Logging and Bookkeeping"
         
@@ -115,8 +115,15 @@ python %s-config [OPTION...]""" % (self.name, os.environ['GLITE_LOCATION'], \
 
     def start(self):
 
-        self.mysql.start()
+        print "Starting MySQL daemon                                     ",
+        errorcode = os.system("/usr/bin/mysqld_safe --datadir=/var/lib/mysql --pid=/var/lib/mysql/%s.pid --max_allowed_packet=%s  &" \
+                               % (glib.fq_hostname,params['mysql.max_allowed_packet']))
         time.sleep(5)
+        if errorcode:
+            glib.printFailedMessage()
+            return errorcode
+        else:
+            glib.printOkMessage()
 
         if not os.path.exists('/tmp/mysql.sock'):
             os.symlink('/var/lib/mysql/mysql.sock', '/tmp/mysql.sock')
