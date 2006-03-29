@@ -375,7 +375,7 @@ def loadDefaults(params):
     params['mysql.root.password'] = ""
     params['lb.database.name'] = "lbserver20"
     params['lb.database.username'] = "lbserver"
-    params['mysql.max_allowed_packet'] = "17"
+    params['mysql.max_allowed_packet'] = "17M"
     
     params['lbserver.serviceName'] = 'LB Server service at %s' % glib.fq_hostname
     params['lbserver.serviceType'] = 'org.glite.lb.server'
