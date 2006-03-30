@@ -76,6 +76,7 @@ edg_wlpr_RegisterProxy(
  * The same function as edg_wlpr_RegisterProxy() but information about the
  * myproxy server and jobid are passed as parameters instead of in JDL.
  */
+#ifdef RENEWAL_HAVE_JOBID
 int
 edg_wlpr_RegisterProxyExt(
       const char * filename,
@@ -85,6 +86,7 @@ edg_wlpr_RegisterProxyExt(
       int flags,
       char ** repository_filename
 );
+#endif
 
 int
 glite_renewal_RegisterProxy(
@@ -104,11 +106,13 @@ glite_renewal_RegisterProxy(
  * \retval nonzero on error. Human readable form of the error can be get via
  * edg_wlpr_GetErrorText().
  */
+#ifdef RENEWAL_HAVE_JOBID
 int
 edg_wlpr_UnregisterProxy(
       edg_wlc_JobId jobid,
       const char * repository_filename
 );
+#endif
 
 int
 glite_renewal_UnregisterProxy(
@@ -152,8 +156,10 @@ edg_wlpr_GetStatus(const char *repository_filename, char **info);
  * \retval nonzero on error. Human readable form of the error can be get via
  * edg_wlpr_GetErrorText().
  */
+#ifdef RENEWAL_HAVE_JOBID
 int
 edg_wlpr_GetProxy(edg_wlc_JobId jobid, char **repository_filename);
+#endif
 
 int
 glite_renewal_GetProxy(

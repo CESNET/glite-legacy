@@ -66,8 +66,6 @@ GLOBUS_LIBS:=-L${globus_prefix}/lib \
 MYPROXY_LIB_NOTHR :=-L${myproxy_prefix}/lib -lmyproxy_${nothrflavour}
 MYPROXY_LIB_THR:=-L${myproxy_prefix}/lib -lmyproxy_${thrflavour}
 
-JOBIDLIB:=-L${glite_location}/lib -lglite_wmsutils_cjobid
-
 offset=1
 version_info:=-version-info ${shell \
 	perl -e '$$,=":"; @F=split "\\.","${version}"; print $$F[0]+$$F[1]+${offset},$$F[2],$$F[1]' }
@@ -106,7 +104,7 @@ default: all
 compile all: ${LIB} ${THRLIB} ${LIB_CORE_NOTHR} ${DAEMON} ${CLIENT} 
 
 ${LIB}: ${LIBOBJ}
-	${LINK} ${version_info} -o $@ ${LIBLOBJ} -rpath ${glite_location}/lib ${JOBIDLIB}
+	${LINK} ${version_info} -o $@ ${LIBLOBJ} -rpath ${glite_location}/lib
 
 ${THRLIB}: ${THRLIBOBJ}
 	${LINK} ${version_info} -o $@ ${THRLIBLOBJ} -rpath ${glite_location}/lib
@@ -118,7 +116,7 @@ ${LIB_CORE_THR}: ${LIB_CORE_THR_OBJS}
 	${LINK} ${version_info} -o $@ ${LIB_CORE_THR_LOBJS} -rpath ${glite_location}/lib ${MYPROXY_LIB_THR} ${VOMS_LIB_THR}
 
 ${DAEMON}: ${DAEMONOBJ} ${LIB_CORE_NOTHR}
-	${LINK} -o $@ ${DAEMONOBJ} ${JOBIDLIB} ${LIB_CORE_NOTHR} 
+	${LINK} -o $@ ${DAEMONOBJ} ${LIB_CORE_NOTHR} 
 
 ${CLIENT}: ${CLIENTOBJ} ${LIB}
 	${LINK} -o $@ ${CLIENTOBJ} ${LIB} ${GLOBUS_LIBS}

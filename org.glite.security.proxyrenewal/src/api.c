@@ -366,6 +366,7 @@ glite_renewal_RegisterProxy(const char *filename, const char * server,
    return ret;
 }
 
+#ifdef RENEWAL_HAVE_JOBID
 int
 edg_wlpr_RegisterProxyExt(const char *filename, const char * server,
 			  unsigned int port,
@@ -384,7 +385,9 @@ edg_wlpr_RegisterProxyExt(const char *filename, const char * server,
    free(ji);
    return ret;
 }
+#endif /* RENEWAL_HAVE_JOBID */
 
+#if 0
 int
 edg_wlpr_RegisterProxy(const char *filename, const char *jdl,
                        int flags, char **repository_filename)
@@ -412,6 +415,7 @@ edg_wlpr_RegisterProxy(const char *filename, const char *jdl,
    return (edg_wlpr_RegisterProxyExt(filename, server, port, NULL, flags, 
 	                             repository_filename));
 }
+#endif
 
 int
 glite_renewal_UnregisterProxy(const char *jobid, const char *repository_filename)
@@ -442,6 +446,7 @@ glite_renewal_UnregisterProxy(const char *jobid, const char *repository_filename
    return ret;
 }
 
+#ifdef RENEWAL_HAVE_JOBID
 int
 edg_wlpr_UnregisterProxy(edg_wlc_JobId jobid, const char *repository_filename)
 {
@@ -455,6 +460,7 @@ edg_wlpr_UnregisterProxy(edg_wlc_JobId jobid, const char *repository_filename)
    free(ji);
    return ret;
 }
+#endif /* RENEWAL_HAVE_JOBID */
 
 int
 edg_wlpr_GetList(int *count, char **list)
@@ -526,6 +532,7 @@ glite_renewal_GetProxy(const char *jobid, char **repository_filename)
    return ret;
 }
 
+#ifdef RENEWAL_HAVE_JOBID
 int
 edg_wlpr_GetProxy(edg_wlc_JobId jobid, char **repository_filename)
 {
@@ -540,3 +547,4 @@ edg_wlpr_GetProxy(edg_wlc_JobId jobid, char **repository_filename)
    free(ji);
    return ret;
 }
+#endif /* RENEWAL_HAVE_JOBID */

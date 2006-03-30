@@ -41,7 +41,6 @@ main(int argc, char *argv[])
    int port = 0;
    char *proxyfile = NULL;
    char *jobid_str = NULL;
-   edg_wlc_JobId jobid = NULL;
    char *repository_filename = NULL;
    int ret;
    int arg;
@@ -69,16 +68,11 @@ main(int argc, char *argv[])
    if (optind >= argc)
       usage(1);
 
-   if (jobid_str && edg_wlc_JobIdParse(jobid_str, &jobid)) {
-      fprintf(stderr, "Cannot parse jobid\n");
-      exit(1);
-   }
-
    if (strcmp(argv[optind], "start") == 0) {
-      if (proxyfile == NULL || server == NULL || jobid == NULL)
+      if (proxyfile == NULL || server == NULL || jobid_str == NULL)
 	 usage(1);
-      ret = edg_wlpr_RegisterProxyExt(proxyfile, server, port, jobid, 0,
-	 			      &repository_filename);
+      ret = glite_renewal_RegisterProxy(proxyfile, server, port, jobid_str, 0,
+	 			        &repository_filename);
       if (ret) {
 	 fprintf(stderr, "Registering proxy failed: %s\n",
 	         edg_wlpr_GetErrorText(ret));
@@ -89,9 +83,9 @@ main(int argc, char *argv[])
       exit(0);
    }
    else if (strcmp(argv[optind], "stop") == 0) {
-      if (jobid == NULL)
+      if (jobid_str == NULL)
 	 usage(1);
-      ret = edg_wlpr_UnregisterProxy(jobid, proxyfile);
+      ret = glite_renewal_UnregisterProxy(jobid_str, proxyfile);
       if (ret) {
 	 fprintf(stderr, "Unregistering proxy failed: %s\n",
 	         edg_wlpr_GetErrorText(ret));
@@ -99,9 +93,9 @@ main(int argc, char *argv[])
       }
    }
    else if (strcmp(argv[optind], "get") == 0) {
-      if (jobid == NULL)
+      if (jobid_str == NULL)
 	 usage(1);
-      ret = edg_wlpr_GetProxy(jobid, &proxyfile);
+      ret = glite_renewal_GetProxy(jobid_str, &proxyfile);
       if (ret) {
 	 fprintf(stderr, "GET request failed: %s\n",
 	         edg_wlpr_GetErrorText(ret));
