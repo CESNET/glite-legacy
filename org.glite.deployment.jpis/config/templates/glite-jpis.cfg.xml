@@ -70,8 +70,8 @@
 			value="jpis"/>
 
 		<jpis.port
-			description="non-default JP IS port"
-			value=""/>
+			description="default JP IS port"
+			value="8902"/>
 
 		<jpis.pid.file
 			description="path to non-default pidfile"
