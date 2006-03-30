@@ -26,10 +26,6 @@
 			description="file with list (one per line) of X509 certificate subjects of 'trusted peers', i.e. LB servers which may upload data to this JPPS"
 			value="changeme"/>
 
-		<jpps.ftp.port
-			description="port for the ftp JPPS interface (bulk file transfers)"
-			value="changeme"/>
-
 		<jpps.internal
 			description="directory where the JPPS files are stored (local path)"
 			value="changeme"/>
@@ -63,8 +59,13 @@
 			value=""/>
 
 		<jpps.port
-			description="non-default JP PS port"
-			value=""/>
+			description="default JP PS port"
+			value="8901"/>
+		
+		<jpps.ftp.port
+			description="default port for the ftp JPPS interface (bulk file transfers)"
+			value="8950"/>
+
 
 		<jpps.database.username
 			description="JP PS database user
