@@ -63,7 +63,9 @@
 			value="8901"/>
 		
 		<jpps.ftp.port
-			description="default port for the ftp JPPS interface (bulk file transfers)"
+			description="default port for the ftp JPPS interface (bulk file transfers)
+			WARNING: changing this value will cause that files previously uploaded
+				to PS will be unaccessable!"
 			value="8950"/>
 
 
