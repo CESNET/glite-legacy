@@ -125,8 +125,7 @@ glite_renewal_core_renew(glite_renewal_core_context ctx,
    myproxy_request_t      *client_request;
    myproxy_response_t     *server_response;
    char *renewed_proxy;
-   /* XXX */
-   int voms_exts = 1;
+   int voms_exts;
 
    socket_attrs = malloc(sizeof(*socket_attrs));
    memset(socket_attrs, 0, sizeof(*socket_attrs));
@@ -152,6 +151,8 @@ glite_renewal_core_renew(glite_renewal_core_context ctx,
    ret = get_proxy_base_name(ctx, current_proxy, &client_request->username);
    if (ret)
       goto end;
+
+   voms_exts = check_voms_attrs(ctx, current_proxy);
 
    client_request->proxy_lifetime = 60 * 60 * DGPR_RETRIEVE_DEFAULT_HOURS;
 

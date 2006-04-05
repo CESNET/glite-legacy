@@ -76,4 +76,7 @@ get_proxy_base_name(glite_renewal_core_context ctx, const char *file, char **sub
 int
 renew_voms_creds(glite_renewal_core_context ctx, const char *cur_file, const char *renewed_file, const char *new_file);
 
+int
+check_voms_attrs(glite_renewal_core_context ctx, const char *proxy);
+
 #endif /* RENEWALD_LOCL_H */

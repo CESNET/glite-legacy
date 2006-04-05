@@ -160,6 +160,9 @@ renew_voms_cert(glite_renewal_core_context ctx, struct vomsdata *vd, struct voms
 
    ret = create_voms_command(ctx, vd, voms_cert, &command);
 
+   /* XXX the lifetime should be taken from the older proxy */
+   ret = VOMS_SetLifetime(60*60*12, vd, &voms_error);
+
    /* XXX iterate over all servers on the list on errors */
    ret = VOMS_ContactRaw(voms_contacts[0]->host, voms_contacts[0]->port,
 	                 voms_contacts[0]->contact, command, 
@@ -288,6 +291,43 @@ int
 renew_voms_creds(glite_renewal_core_context ctx, const char *cur_file, const char *renewed_file, const char *new_file)
 {
    return renew_voms_certs(ctx, cur_file, renewed_file, new_file);
+}
+
+int
+check_voms_attrs(glite_renewal_core_context ctx, const char *proxy)
+{
+   int ret, voms_err, present;
+   X509 *cert = NULL;
+   STACK_OF(X509) *chain = NULL;
+   struct vomsdata *vd = NULL;
+
+   ret = load_proxy(ctx, proxy, &cert, NULL, &chain, NULL);
+   if (ret)
+      return 0;
+
+   vd = VOMS_Init(NULL, NULL);
+   if (vd == NULL) {
+      present = 0;
+      goto end;
+   }
+
+   ret = VOMS_Retrieve(cert, chain, RECURSE_CHAIN, vd, &voms_err);
+   if (ret == 0) {
+      present = 0;
+      goto end;
+   }
+
+   present = 1;
+
+end:
+   if (cert)
+      X509_free(cert);
+   if (chain)
+      sk_X509_pop_free(chain, X509_free);
+   if (vd)
+      VOMS_Destroy(vd);
+
+   return present;
 }
 
 #if 0
