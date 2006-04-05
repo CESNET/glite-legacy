@@ -162,6 +162,9 @@ renew_voms_cert(struct vomsdata *vd, struct voms **voms_cert,
 
    ret = create_voms_command(vd, voms_cert, &command);
 
+   /* XXX the lifetime should be taken from the older proxy */
+   ret = VOMS_SetLifetime(60*60*12, vd, &voms_error);
+
    /* XXX iterate over all servers on the list on errors */
    ret = VOMS_ContactRaw(voms_contacts[0]->host, voms_contacts[0]->port,
 	                 voms_contacts[0]->contact, command, 
