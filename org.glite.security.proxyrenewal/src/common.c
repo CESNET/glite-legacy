@@ -164,7 +164,7 @@ edg_wlpr_Write(int sock, struct timeval *timeout, char *buf, size_t buf_len)
    length[3] = (buf_len >> 0)  & 0xFF;
 
    if ((ret = nwrite(sock, timeout, length, 4)) != 0 ||
-       (ret = nwrite(sock, timeout, buf, buf_len)) != 0) {
+       (ret = nwrite(sock, timeout, buf, buf_len)) != 0) 
        return ret;
    
    return 0;
