@@ -6,7 +6,7 @@
 static int
 nread(int sock, struct timeval *to, char *buf, size_t buf_len, size_t *read_len)
 {
-   size_t count;
+   int count;
    size_t remain = buf_len;
    char *cbuf = buf;
    fd_set fds;
@@ -62,11 +62,11 @@ end:
    return ret;
 }
 
-static size_t
+static int
 nwrite(int sock, struct timeval *to, const char *buf, size_t buf_len)
 {
    const char *cbuf = buf;
-   size_t count;
+   int count;
    size_t remain = buf_len;
    fd_set fds;
    struct timeval timeout,before,after;
@@ -99,7 +99,7 @@ nwrite(int sock, struct timeval *to, const char *buf, size_t buf_len)
       cbuf += count;
       remain -= count;
    }
-   ret = buf_len;
+   ret = 0;
 
 end:
    if (to) {
@@ -156,15 +156,16 @@ int
 edg_wlpr_Write(int sock, struct timeval *timeout, char *buf, size_t buf_len)
 {
    unsigned char length[4];
+   int ret;
 
    length[0] = (buf_len >> 24) & 0xFF;
    length[1] = (buf_len >> 16) & 0xFF;
    length[2] = (buf_len >> 8)  & 0xFF;
    length[3] = (buf_len >> 0)  & 0xFF;
 
-   if (nwrite(sock, timeout, length, 4) != 4 ||
-       nwrite(sock, timeout, buf, buf_len) != buf_len)
-       return errno;
+   if ((ret = nwrite(sock, timeout, length, 4)) != 0 ||
+       (ret = nwrite(sock, timeout, buf, buf_len)) != 0) {
+       return ret;
    
    return 0;
 }
