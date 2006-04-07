@@ -20,6 +20,9 @@ ares_prefix=/opt/ares
 CC=gcc
 
 -include Makefile.inc
+-include ../project/version.properties
+
+version=${module.version}
 
 VPATH=${top_srcdir}/src:${top_srcdir}/examples
 

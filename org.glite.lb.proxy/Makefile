@@ -18,7 +18,9 @@ expat_prefix=/opt/expat
 gsoap_prefix=/opt/gsoap
 
 -include Makefile.inc
--include ../Makefile.inc
+-include ../project/version.properties
+
+version=${module.version}
 
 CC=gcc
 YACC=bison -y
