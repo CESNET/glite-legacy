@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # XXX: add path to the stage area
-PATH=/home/michal/shared/egee/jra1-head/stage/bin:/home/michal/shared/egee/jra1-head/stage/examples:$PATH
+PATH=/home/michal/shared/egee/jra1/stage/bin:/home/michal/shared/egee/jra1/stage/examples:$PATH
 
 #set -x
 
@@ -46,6 +46,7 @@ show_help()
 	echo  " -h | --help                   Show this help message."
 	echo  " -x | --proxy-sockpath-pref    LBProxy socket path prefix."
 	echo  " -j | --jobs-count             Count of test(ed) jobs."
+	echo  " -n | --subjobs                Number of subjobs."
 	echo  " -s | --states                 List of states in which could tested jobs fall."
 	echo  " -p | --proxy-purge-states     List of states in which LBProxy purges the job."
 	echo  " -l | --large-stress 'size'    Do a large stress logging ('size' random data added to the messages."
@@ -53,6 +54,15 @@ show_help()
 	echo  ""
 	echo  "For proper operation check your grid-proxy-info"
 	grid-proxy-info
+}
+
+get_time()
+{
+    sec=`date +%s`
+    nsec=`date +%N`
+    time=`echo "1000000000*$sec + $nsec"|bc`
+#    time=$sec
+    return 0
 }
 
 check_exec()
@@ -76,7 +86,7 @@ check_utils()
 
 log_ev()
 {
-#	$LOGEV -j $EDG_JOBID -s NetworkServer -e UserTag --name color --value red
+#	$LOGEV -j $EDG_JOBID -s NetworkServer -n $1 -e UserTag --name color --value red
 	[ $DEBUG -gt 2 ] && echo "$LOGEV -j \"$EDG_JOBID\" -s UserInterface -c \"$EDG_WL_SEQUENCE\" $@"
 	EDG_WL_SEQUENCE=`$LOGEV $LARGE_STRESS -j $EDG_JOBID -s UserInterface -c $EDG_WL_SEQUENCE "$@"`
 	test $? -ne 0 -o -z "$EDG_WL_SEQUENCE" && echo "missing EDG_WL_SEQUENCE from $LOGEV"
@@ -84,9 +94,9 @@ log_ev()
 
 log_ev_proxy()
 {
-#	$LOGEV -x -j $EDG_JOBID -s NetworkServer -e UserTag --name color --value red
+#	$LOGEV -x -j $EDG_JOBID -s NetworkServer -n $1 -e UserTag --name color --value red
 
-	[ $DEBUG -gt 2 ] && echo "$LOGEV -x -j \"$EDG_JOBID\" -s UserInterface -c \"$EDG_WL_SEQUENCE\" $@"
+	[ $DEBUG -gt 2 ] && echo "$LOGEV -x -j \"$EDG_JOBID\"  -s UserInterface -c \"$EDG_WL_SEQUENCE\" $@"
 	EDG_WL_SEQUENCE=`$LOGEV -x $LARGE_STRESS -j $EDG_JOBID -s UserInterface -c $EDG_WL_SEQUENCE "$@"`
 	test $? -ne 0 -o -z "$EDG_WL_SEQUENCE" && echo "missing EDG_WL_SEQUENCE from $LOGEV"
 }
@@ -130,38 +140,68 @@ test_gen_sample_jobs()
 	job=0
 	while [ $job -lt $JOBS_ARRAY_SIZE ] ; do
 #		eval `$JOBREG -x -m $BKSERVER_HOST -s UserInterface 2>&1 | tail -n 2`
-		TMP=`$JOBREG -x -m $BKSERVER_HOST -s UserInterface 2>&1`
+	        get_time
+		start=$time
 		[ $? -ne 0 ] && echo -e "ERROR\n\t$JOBREG error!"
-		eval `echo "$TMP" | tail -n 2`
-		test -z "$EDG_JOBID" && echo "test_gen_sample_jobs: $JOBREG failed" && exit 2
-		SAMPLE_JOBS_ARRAY[$job]=$EDG_JOBID
-
-		state=`$JOBSTAT $EDG_JOBID 2>&1 | grep "state :" | cut -d " " -f 3 | tr A-Z a-z`
-		proxy_state=`$JOBSTAT -x $TEST_LBPROXY_SERVE_SOCK $EDG_JOBID 2>&1 | grep "state :" | cut -d " " -f 3 | tr A-Z a-z`
-		if test "$state" != "submitted" ; then
-			echo -e "ERROR\n\tjob ${SAMPLE_JOBS_ARRAY[$job]} not submitted succesfully!"
-		  	exit 1;
+		if [[ -z $SUBJOBS ]] ; then
+		    TMP=`$JOBREG -x -m $BKSERVER_HOST -s UserInterface 2>&1`
+		    get_time
+		    eval `echo "$TMP" | tail -n 2`
+		else
+		    TMP=`$JOBREG -x -m $BKSERVER_HOST -s UserInterface -n $SUBJOBS 2>&1`
+		    get_time
+		    eval `echo "$TMP" | grep DAG_JOBID`
+		    EDG_JOBID=$EDG_WL_DAG_JOBID
+                fi
+		if test -z "$EDG_JOBID" ; then 
+		    echo "test_gen_sample_jobs: $JOBREG failed" 
+		else
+		    SAMPLE_JOBS_ARRAY[$job]=$EDG_JOBID
+		    response=`echo "scale=9; ($time - $start)/1000000000"|bc`
+		    SAMPLE_JOBS_RESPONSES[$job]=$response
 		fi
-		if test "$state" != "$proxy_state" ; then
-			echo -e "ERROR\n\tjob $job (${SAMPLE_JOBS_ARRAY[$job]}) records on lbproxy and bkserver differs!"
-#		  	exit 1;
-		fi
-		SAMPLE_JOBS_STATES[$job]=$state
 
+#		state=`$JOBSTAT $EDG_JOBID 2>&1 | grep "state :" | cut -d " " -f 3 | tr A-Z a-z`
+#		proxy_state=`$JOBSTAT -x $TEST_LBPROXY_SERVE_SOCK $EDG_JOBID 2>&1 | grep "state :" | cut -d " " -f 3 | tr A-Z a-z`
+#		if test "$state" != "submitted" ; then
+#			echo -e "ERROR\n\tjob ${SAMPLE_JOBS_ARRAY[$job]} not submitted succesfully!"
+#		fi
+#		if test "$state" != "$proxy_state" ; then
+#			echo -e "ERROR\n\tjob (${SAMPLE_JOBS_ARRAY[$job]}) records on lbproxy and bkserver differs!"
+#		fi
+#		SAMPLE_JOBS_STATES[$job]=$state
+		echo -n "."
 		job=$(($job + 1))
 	done
 	[ $DEBUG -gt 0 ] && echo "OK"
 	[ $DEBUG -gt 1 ] && {
 		job=0
+		total=0
+#		echo "Registration took for individual jobs the following time"
 		while [ $job -lt $JOBS_ARRAY_SIZE ] ; do
-			echo ${SAMPLE_JOBS_ARRAY[$job]}
+			total=`echo "scale=9; $total + ${SAMPLE_JOBS_RESPONSES[$job]}" |bc`
+#			echo -e "${SAMPLE_JOBS_ARRAY[$job]} \t${SAMPLE_JOBS_RESPONSES[$job]} seconds"
 			job=$(($job + 1))
 		done
+		echo "Registration results:"
+		echo -e "Total time for $JOBS_ARRAY_SIZE jobs with $SUBJOBS subjobs: \t$total"
+		echo -e -n "Average time for registration: \t" 
+		echo "scale=9; $total / $JOBS_ARRAY_SIZE / $SUBJOBS"|bc
+		echo -e -n "Registration throughput (jobs/sec): \t"
+		echo "scale=9; $SUBJOBS * $JOBS_ARRAY_SIZE / $total"|bc
+
 	}
+#	[ $DEBUG -gt 1 ] && {
+#		job=0
+#		while [ $job -lt $JOBS_ARRAY_SIZE ] ; do
+#			echo ${SAMPLE_JOBS_ARRAY[$job]}
+#			job=$(($job + 1))
+#		done
+#	}
 }
 
 # Test that logs random set of events (for registered jobs) to lbproxy
-# and chcecks the state in lbproxy
+# and checks the state in lbproxy
 # and measures the time it takes the state to propagate to bkserver
 #
 test_logging_events()
@@ -170,53 +210,72 @@ test_logging_events()
 	st_count=`echo $STATES | wc -w`
 	job=0
 	while [ $job -lt $JOBS_ARRAY_SIZE ] ; do
-		tmp=`echo $RANDOM % $st_count + 1 | bc`
-		state=`echo $STATES | cut -d " " -f $tmp | tr A-Z a-z`
-
-		source glite-lb-$state.sh $LARGE_STRESS -X $TEST_LBPROXY_STORE_SOCK -m $BKSERVER_HOST -j ${SAMPLE_JOBS_ARRAY[$job]} 2>&1 1>/dev/null
-		[ $? -ne 0 ] && echo -e "ERROR\n\tglite-lb-$state.sh ${SAMPLE_JOBS_ARRAY[$job]} error!"
-		proxy_state=`$JOBSTAT -x $TEST_LBPROXY_SERVE_SOCK ${SAMPLE_JOBS_ARRAY[$job]} 2>&1 | grep "state :" | cut -d " " -f 3 | tr A-Z a-z`
-		purged=`echo $LBPROXY_PURGE_STATES | grep $state`
-		bkserver_state=`$JOBSTAT ${SAMPLE_JOBS_ARRAY[$job]} 2>&1 | grep "state :" | cut -d " " -f 3 | tr A-Z a-z`
-
-		if test -n "$purged" ; then
-			echo $proxy_state | grep "No such file or directory"
-			if test $? -eq 0 ; then
-				echo -e "ERROR\n\tJob ${SAMPLE_JOBS_ARRAY[$job]} was not purged out from LBProxy!"
-		  		exit 1;
-			fi
+	        echo -n "."
+		if test -z "${SAMPLE_JOBS_ARRAY[$job]}" ; then
+		    job=$(($job + 1))
+		    continue
 		fi
-		if test -z "$purged" ; then
-			if test "$state" != "$proxy_state" ; then
-				echo -e "ERROR\n\tevents for job ${SAMPLE_JOBS_ARRAY[$job]} were not logged succesfully!"
-			  	exit 1;
-			fi
-		fi
+#		tmp=`echo $RANDOM % $st_count + 1 | bc`
+#		state=`echo $STATES | cut -d " " -f $tmp | tr A-Z a-z`
+		get_time
+		start=$time
+
+#		source glite-lb-$state.sh $LARGE_STRESS -X $TEST_LBPROXY_STORE_SOCK -m $BKSERVER_HOST -j ${SAMPLE_JOBS_ARRAY[$job]} 2>&1 1>/dev/null
+#		[ $? -ne 0 ] && echo -e "ERROR\n\tglite-lb-$state.sh ${SAMPLE_JOBS_ARRAY[$job]} error!"
+		log_ev_proxy -n 100 -e UserTag --tag=color --value=red
+
+#		proxy_state=`$JOBSTAT -x $TEST_LBPROXY_SERVE_SOCK ${SAMPLE_JOBS_ARRAY[$job]} 2>&1 | grep "state :" | cut -d " " -f 3 | tr A-Z a-z`
+#		purged=`echo $LBPROXY_PURGE_STATES | grep $state`
+#		bkserver_state=`$JOBSTAT ${SAMPLE_JOBS_ARRAY[$job]} 2>&1 | grep "state :" | cut -d " " -f 3 | tr A-Z a-z`
+#
+#		if test -n "$purged" ; then
+#			echo $proxy_state | grep "No such file or directory"
+#			if test $? -eq 0 ; then
+#				echo -e "ERROR\n\tJob ${SAMPLE_JOBS_ARRAY[$job]} was not purged out from LBProxy!"
+#		  		exit 1;
+#			fi
+#		fi
+#		if test -z "$purged" ; then
+#			if test "$state" != "$proxy_state" ; then
+#				echo -e "ERROR\n\tevents for job ${SAMPLE_JOBS_ARRAY[$job]} were not logged succesfully!"
+#			  	exit 1;
+#			fi
+#		fi
 		
-		response=0
-		while [ "$state" != "$bkserver_state" ] ; do
-			bkserver_state=`$JOBSTAT ${SAMPLE_JOBS_ARRAY[$job]} 2>&1 | grep "state :" | cut -d " " -f 3 | tr A-Z a-z`
-			[ $DEBUG -gt 0 ] && echo -n "."
-			sleep $timeout
-			response=$(($response + $timeout ))
-			if test $response -gt $maxtimeout ; then
-				echo -e "ERROR\n\tstatus of job ${SAMPLE_JOBS_ARRAY[$job]} as queried from bkserver ($bkserver_state) has not become $state for more than $response seconds!"
-			  	exit 1;
-			fi
-		done
-
-		SAMPLE_JOBS_STATES[$job]=$state
-		SAMPLE_JOBS_RESPONSES[$job]=$response
+#		response=0
+#		while [ "$state" != "$bkserver_state" ] ; do
+#			bkserver_state=`$JOBSTAT ${SAMPLE_JOBS_ARRAY[$job]} 2>&1 | grep "state :" | cut -d " " -f 3 | tr A-Z a-z`
+#			[ $DEBUG -gt 0 ] && echo -n "."
+#			sleep $timeout
+#			response=$(($response + $timeout ))
+#			if test $response -gt $maxtimeout ; then
+#				echo -e "ERROR\n\tstatus of job ${SAMPLE_JOBS_ARRAY[$job]} as queried from bkserver ($bkserver_state) has not become $state for more than $response seconds!"
+#			  	exit 1;
+#			fi
+#		done
+#
+#		SAMPLE_JOBS_STATES[$job]=$state
+		get_time
+		response=`echo "scale=9; ($time - $start)/1000000000"|bc`
+	        SAMPLE_JOBS_RESPONSES[$job]=$response
 		job=$(($job + 1))
 	done
 	[ $DEBUG -gt 0 ] && echo "OK"
 	[ $DEBUG -gt 1 ] && {
 		job=0
-		echo "Polling the bkserver took for individual jobs the following time"
+		total=0
+#		echo "Sending events took for individual jobs the following time"
 		while [ $job -lt $JOBS_ARRAY_SIZE ] ; do
-			echo -e "${SAMPLE_JOBS_ARRAY[$job]} (${SAMPLE_JOBS_STATES[$job]})\t${SAMPLE_JOBS_RESPONSES[$job]} seconds"
+			total=`echo "scale=9; $total + ${SAMPLE_JOBS_RESPONSES[$job]}" |bc`
+#			echo -e "${SAMPLE_JOBS_ARRAY[$job]} \t${SAMPLE_JOBS_RESPONSES[$job]} seconds"
 			job=$(($job + 1))
 		done
+		echo -e "Total time for $JOBS_ARRAY_SIZE jobs: \t$total"
+		echo -e -n "Average time for job: \t" 
+		echo "scale=9; $total / $JOBS_ARRAY_SIZE"|bc
+		echo -e -n "Job throughput (jobs/sec): \t"
+		echo "scale=9; $JOBS_ARRAY_SIZE / $total"|bc
+
 	}
 }
 
@@ -238,6 +297,7 @@ do
 		;;
 	"-m" | "--bkserver") shift ; BKSERVER_HOST=$1 ;;
 	"-j" | "--jobs-count") shift; JOBS_ARRAY_SIZE=$1 ;;
+	"-n" | "--subjobs") shift; SUBJOBS="$1" ;;
 	"-s" | "--states") shift; STATES="$1" ;;
 	"-p" | "--proxy-purge-states") shift; LBPROXY_PURGE_STATES="$1" ;;
 	"-l" | "--large-stress") shift ; LARGE_STRESS="-l $1" ;;
@@ -261,6 +321,6 @@ echo "LBPROXY_PURGE_STATES = $LBPROXY_PURGE_STATES"
 check_utils
 
 test_gen_sample_jobs
-test_logging_events
+#test_logging_events
 
 db_clear_jobs
