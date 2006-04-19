@@ -6,7 +6,9 @@
  * \brief L&B API common context (publicly visible) and related definitions
  */
 
+#ifndef LB_STANDALONE
 #include "glite/wmsutils/exception/exception_codes.h"
+#endif
 #include "glite/wmsutils/jobid/cjobid.h"
 
 #ident "$Header$"
@@ -158,6 +160,10 @@ int edg_wll_GetParam(
  */
 
 /* XXX: cleanup required */
+
+#ifndef GLITE_WMS_LOGGING_ERROR_BASE
+#define GLITE_WMS_LOGGING_ERROR_BASE 1400
+#endif
 
 typedef enum _edg_wll_ErrorCode {
 /** Base for L&B specific code. Use the constant from common/ */
