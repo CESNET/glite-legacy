@@ -42,14 +42,14 @@ PREFIX=${install.dir}
 version=${module.version}
 glite_location=${with.glite.location}
 globus_prefix=${with.globus.prefix}
-thrflavour=${with.globus.thr.flavor}
-nothrflavour=${with.globus.nothr.flavor}
 expat_prefix=${with.expat.prefix}
 mysql_prefix=${with.mysql.prefix}
 mysql_version=${ext.mysql.version}
-cppunit=${with.cppunit.prefix}
 gridsite_prefix=${with.gridsite.prefix}
 gsoap_prefix=${with.gsoap.prefix}
+cppunit_prefix=${with.cppunit.prefix}
+thrflavour=${with.globus.thr.flavor}
+nothrflavour=${with.globus.nothr.flavor}
 			</echo>
 	    </target>
 	</project>

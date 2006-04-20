@@ -28,12 +28,16 @@ YACC=bison -y
 VPATH=${top_srcdir}/src:${top_srcdir}/test:${top_srcdir}/examples:${top_srcdir}/project
 AT3=perl -I${top_srcdir}/project ${top_srcdir}/project/at3
 
-TEST_LIBS:=-L${cppunit}/lib -lcppunit
-TEST_INC:=-I${cppunit}/include
+TEST_LIBS:=-L${cppunit_prefix}/lib -lcppunit
+TEST_INC:=-I${cppunit_prefix}/include
 
 SUFFIXES = .T 
 
 DEBUG:=-g -O0 -Wall
+
+ifdef LB_STANDALONE
+	LB_STANDALONE_FLAGS:=-DLB_STANDALONE
+endif
 
 CFLAGS:= ${DEBUG} \
 	-DVERSION=\"${version}\" \
@@ -44,7 +48,7 @@ CFLAGS:= ${DEBUG} \
 	-I${mysql_prefix}/include -I${mysql_prefix}/include/mysql \
 	-I${globus_prefix}/include/${nothrflavour} \
 	-I${gridsite_prefix}/include -I${globus_prefix}/include/${nothrflavour}/openssl \
-	-D_GNU_SOURCE
+	-D_GNU_SOURCE ${LB_STANDALONE_FLAGS}
 
 
 LINK:=libtool --mode=link ${CC} ${LDFLAGS} 
