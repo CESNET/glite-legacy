@@ -76,7 +76,7 @@ install: generate
 	cd ${top_srcdir}/interface && install -m 644 ${STATIC_H} ${PREFIX}/${STAGETO}
 ifdef LB_STANDALONE
 	cd ${top_srcdir}/doc && cp -r C CPP ${PREFIX}/share/doc/${package}-${version}
-else
+endif
 	if [ x${DOSTAGE} = xyes ]; then \
 		cd ${top_srcdir}/interface && install -m 644 ${FAKE_H} ${PREFIX}/${STAGETO} ; \
 	fi
