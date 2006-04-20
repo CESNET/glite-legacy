@@ -42,10 +42,12 @@ check:
 
 interface_version.h: ${top_srcdir}/project/version.properties
 	echo "#define GLITE_LB_CLIENT_INTERFACE \"${version}\"" >$@ 
-stage: generate
+
 ifdef LB_STANDALONE
+stage: generate
 	$(MAKE) install PREFIX=${stagedir} DOSTAGE=yes
 else
+stage: generate doc
 	$(MAKE) install PREFIX=${top_srcdir}/${stagedir} DOSTAGE=yes
 endif
 
@@ -66,13 +68,15 @@ doc: generate
 	doxygen C.dox
 	doxygen CPP.dox
 
-install: generate doc
+install: generate 
 	-mkdir -p ${PREFIX}/${STAGETO}
 	-mkdir -p ${PREFIX}/share/doc/${package}-${version}
 	install -m 644 ${GEN_H} ${PREFIX}/${STAGETO}
 	install -m 644 ${top_srcdir}/LICENSE ${PREFIX}/share/doc/${package}-${version}
 	cd ${top_srcdir}/interface && install -m 644 ${STATIC_H} ${PREFIX}/${STAGETO}
+ifdef LB_STANDALONE
 	cd ${top_srcdir}/doc && cp -r C CPP ${PREFIX}/share/doc/${package}-${version}
+else
 	if [ x${DOSTAGE} = xyes ]; then \
 		cd ${top_srcdir}/interface && install -m 644 ${FAKE_H} ${PREFIX}/${STAGETO} ; \
 	fi
