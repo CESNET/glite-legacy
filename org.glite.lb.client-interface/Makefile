@@ -62,11 +62,11 @@ distbin:
 	cd ${top_srcdir}/tmpbuilddir && tar -czf ${top_srcdir}/${distdir}/${package}-${version}_bin.tar.gz *
 	rm -rf ${top_srcdir}/tmpbuilddir
 	
-doc: generate doc
+doc: generate 
 	doxygen C.dox
 	doxygen CPP.dox
 
-install: generate 
+install: generate doc
 	-mkdir -p ${PREFIX}/${STAGETO}
 	-mkdir -p ${PREFIX}/share/doc/${package}-${version}
 	install -m 644 ${GEN_H} ${PREFIX}/${STAGETO}
