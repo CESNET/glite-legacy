@@ -42,9 +42,12 @@ check:
 
 interface_version.h: ${top_srcdir}/project/version.properties
 	echo "#define GLITE_LB_CLIENT_INTERFACE \"${version}\"" >$@ 
-
 stage: generate
+ifdef LB_STANDALONE
 	$(MAKE) install PREFIX=${stagedir} DOSTAGE=yes
+else
+	$(MAKE) install PREFIX=${top_srcdir}/${stagedir} DOSTAGE=yes
+endif
 
 dist: distsrc distbin
 
@@ -59,11 +62,11 @@ distbin:
 	cd ${top_srcdir}/tmpbuilddir && tar -czf ${top_srcdir}/${distdir}/${package}-${version}_bin.tar.gz *
 	rm -rf ${top_srcdir}/tmpbuilddir
 	
-doc: generate
+doc: generate doc
 	doxygen C.dox
 	doxygen CPP.dox
 
-install: generate doc
+install: generate 
 	-mkdir -p ${PREFIX}/${STAGETO}
 	-mkdir -p ${PREFIX}/share/doc/${package}-${version}
 	install -m 644 ${GEN_H} ${PREFIX}/${STAGETO}
