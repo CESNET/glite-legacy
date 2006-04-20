@@ -199,6 +199,12 @@ link-gsoap:
 		ln -sf ${repository}/${gsoap_name}/${gsoap_version}/src/stdsoap2.[ch] .; \
 	elif [ -f ${repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}/stdsoap2.c ]; then \
 		ln -sf ${repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}/stdsoap2.[ch] .; \
+	elif [ -f ${gsoap_prefix}/stdsoap2.c ]; then \
+		ln -sf ${gsoap_prefix}/stdsoap2.[ch] .; \
+	elif [ -f ${gsoap_prefix}/src/stdsoap2.c ]; then \
+		ln -sf ${gsoap_prefix}/src/stdsoap2.[ch] .; \
+	elif [ -f ${gsoap_prefix}/devel/stdsoap2.c ]; then \
+		ln -sf ${gsoap_prefix}/devel/stdsoap2.[ch] .; \
 	else false ; \
 	fi
 
