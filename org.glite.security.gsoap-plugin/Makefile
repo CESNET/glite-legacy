@@ -228,7 +228,7 @@ wscalc_srv_ex2: ${WSCALC_SRV2_OBJS} ${LTLIB_S}
 	${LINK} -o $@ ${WSCALC_SRV2_OBJS} ${LTLIB_S}
 
 
-gsoap_prefix:=${repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}
+gsoap_prefix?=${repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}
 soapcpp:=${shell if [ -x ${gsoap_prefix}/bin/soapcpp2 ]; then \
 	echo ${gsoap_prefix}/bin/soapcpp2; \
 	else echo ${gsoap_prefix}/soapcpp2; \
