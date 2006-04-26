@@ -87,11 +87,12 @@ ifeq (${nothrflavour},gcc32dbg)
         vomsflavour :=
 endif
 
+VOMS_LIBS:=-L${voms_prefix}/lib -lvomsc${vomsflavour}
 EXT_LIBS:= \
 	${mysqlib} -lmysqlclient -lz\
 	${expatlib} -lexpat \
 	${GRIDSITE_LIBS} \
-	-lvomsc${vomsflavour} \
+	${VOMS_LIBS} \
 	${GLOBUS_LIBS}
 
 
