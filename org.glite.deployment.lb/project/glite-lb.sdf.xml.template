@@ -140,6 +140,7 @@
 					version="@ext.perl-expect-pm.version@"
 					age="@ext.perl-expect-pm.rpm.age@"
 					arch="@ext.perl-expect-pm.platform@"/>
+				<external name="j2sdk"/>
 			</dependencies>
 		</service>
 
