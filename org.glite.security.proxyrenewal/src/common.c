@@ -9,19 +9,18 @@ nread(int sock, struct timeval *to, char *buf, size_t buf_len, size_t *read_len)
    int count;
    size_t remain = buf_len;
    char *cbuf = buf;
-   fd_set fds;
-   struct timeval timeout,before,after;
+   struct pollfd pollfds[1];
+   struct timeval before,after;
    int ret;
 
    if (to) {
-      memcpy(&timeout,to,sizeof(timeout));
       gettimeofday(&before,NULL);
    }
 
    while (remain > 0) {
-      FD_ZERO(&fds);
-      FD_SET(sock,&fds);
-      switch (select(sock+1, &fds, NULL, NULL, to ? &timeout : NULL)) {
+      pollfds[0].fd = sock;
+      pollfds[0].events = POLLIN;
+      switch (poll(pollfds, 1, to ? (to->tv_sec*1000+to->tv_usec/1000) : INFTIM)) {
 	 case 0:
 	    ret = EDG_WLPR_ERROR_TIMEOUT;
 	    goto end;
@@ -68,19 +67,18 @@ nwrite(int sock, struct timeval *to, const char *buf, size_t buf_len)
    const char *cbuf = buf;
    int count;
    size_t remain = buf_len;
-   fd_set fds;
-   struct timeval timeout,before,after;
+   struct pollfd pollfds[1];
+   struct timeval before,after;
    int ret;
 
    if (to) {
-      memcpy(&timeout,to,sizeof(timeout));
       gettimeofday(&before,NULL);
    }
 
    while (remain > 0) {
-      FD_ZERO(&fds);
-      FD_SET(sock,&fds);
-      switch (select(sock+1, NULL, &fds, NULL, to ? &timeout : NULL)) {
+      pollfds[0].fd = sock;
+      pollfds[0].events = POLLOUT;
+      switch (poll(pollfds, 1, to ? (to->tv_sec*1000+to->tv_usec/1000) : INFTIM)) {
 	 case 0: ret = EDG_WLPR_ERROR_TIMEOUT;
 		 goto end;
 	 case -1: ret = EDG_WLPR_ERROR_ERRNO;
