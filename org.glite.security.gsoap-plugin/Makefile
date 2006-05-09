@@ -17,7 +17,7 @@ gsoap_prefix=/opt/gsoap
 
 CC=gcc
 
-gsoap_versions?=2.6.2 2.7.0
+gsoap_versions?=2.6.2 2.7.0 2.7.6b
 
 -include Makefile.inc
 -include ../Makefile.inc
@@ -53,10 +53,9 @@ default: all
 
 CFLAGS:= ${DEBUG} \
 	-DVERSION=\"${version}\" \
+	-DWITH_NONAMESPACES \
 	-I. -I${top_srcdir}/interface \
 	-I${stagedir}/include \
-	-I${globus_prefix}/include/${nothrflavour} \
-	-I${globus_prefix}/include/${nothrflavour}/openssl \
 	-I${ares_prefix}/include \
 	${COVERAGE_FLAGS} -D_GNU_SOURCE -DDATAGRID_EXTENSION
 
@@ -69,13 +68,21 @@ INSTALL:=libtool --mode=install install
 LINKXX:=libtool --mode=link  ${CXX} -rpath ${stagedir}/lib ${LDFLAGS}
 
 GLOBUS_INC:= -I${globus_prefix}/include/${nothrflavour}
+GLOBUS_THR_INC:= -I${globus_prefix}/include/${thrflavour}
+
 GLOBUS_LIBS:= -L${globus_prefix}/lib \
 	-lglobus_common_${nothrflavour} \
 	-lglobus_gssapi_gsi_${nothrflavour} \
 
-GSOAP_LIBS:= -L${gsoap_prefix}/lib -lgsoap
+GLOBUS_THR_LIBS:= -L${globus_prefix}/lib \
+	-lglobus_common_${thrflavour} \
+	-lglobus_gssapi_gsi_${thrflavour}
 
-EX_LIBS:= ${GLOBUS_LIBS} -L${ares_prefix}/lib -lares
+GSOAP_LIBS:= -L${gsoap_prefix}/lib -lgsoap
+ARES_LIBS:=-L${ares_prefix}/lib -lares
+
+EX_LIBS:= ${GLOBUS_LIBS} ${ARES_LIBS}
+EX_THRLIBS := ${GLOBUS_THR_LIBS} ${ARES_LIBS}
 
 HDRS:=glite_gss.h glite_gsplugin.h
 
@@ -106,7 +113,7 @@ ${GSS_LTLIB}: ${GSS_OBJS}
 	${LINK} ${version_info} -o $@ ${GSS_LOBJS} ${EX_LIBS}
 
 ${GSS_THRLTLIB}: ${GSS_THROBJS}
-	${LINK} ${version_info} -o $@ ${GSS_THRLOBJS} ${EX_LIBS}
+	${LINK} ${version_info} -o $@ ${GSS_THRLOBJS} ${EX_THRLIBS}
 
 
 OBJS:=${GSS_OBJS} glite_gsplugin.o
@@ -137,7 +144,7 @@ ${LTLIB}: ${OBJS}
 	${LINK} ${version_info} -o $@ ${LOBJS} ${EX_LIBS}
 
 ${THRLTLIB}: ${THROBJS}
-	${LINK} ${version_info} -o $@ ${THRLOBJS} ${EX_LIBS}
+	${LINK} ${version_info} -o $@ ${THRLOBJS} ${EX_THRLIBS}
 
 ${STATICLIB_S}: ${OBJS_S}
 	ar crv $@ ${OBJS_S}
@@ -151,7 +158,7 @@ ${LTLIB_S}: ${OBJS_S}
 	${LINK} ${version_info} -o $@ ${LOBJS_S} ${EX_LIBS}
 
 ${THRLTLIB_S}: ${THROBJS_S}
-	${LINK} ${version_info} -o $@ ${THRLOBJS_S} ${EX_LIBS}
+	${LINK} ${version_info} -o $@ ${THRLOBJS_S} ${EX_THRLIBS}
 
 all compile: \
 	${GSS_STATICLIB} ${GSS_LTLIB} ${GSS_THRSTATICLIB} ${GSS_THRLTLIB} \
@@ -271,9 +278,9 @@ clean:
 	${COMPILE} ${GLOBUS_THR_INC} -o $@ -c $<
 
 test_gss.o: %.o: %.cpp
-	${CXX} -c ${CFLAGS} ${GLOBUSINC} ${TEST_INC} $<
+	${CXX} -c ${CFLAGS} ${GLOBUS_INC} ${TEST_INC} $<
 
-glite_gsplugin.o: soap_version.h
+glite_gsplugin.o, glite_gsplugin.thr.o: soap_version.h
 
 soap_version.h: stdsoap2.h
 	head stdsoap2.h | \

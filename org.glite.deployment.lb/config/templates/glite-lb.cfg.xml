@@ -1,4 +1,4 @@
-<!--  Parameters for  configuring the org.glite.data.io-daemon service -->
+<!--  Parameters for  configuring the LB Server service -->
 <config>
 	<parameters>
 
@@ -34,13 +34,26 @@
 			description="Enable check of host certificates"
 			value="true"/>
 
+		<rgma.servicetool.activate
+			description="Turn on/off servicetool for the node.
+				[Example: true ] [Type: 'boolean']"
+			value="true"/>			
+
 		<!-- mysql configuration -->
 		<set.mysql.root.password
 			description="If this parameter is true, then the root password of the mysql database
-			is set to the value specified in mysql.root.password if it not yet set. This parameter has
-			no effect if the database root password is already set. It can be used to ease automated
-			installation and configuration of the service, if mysql is not managed in some other way"
+				is set to the value specified in mysql.root.password if it not yet set. This parameter has
+				no effect if the database root password is already set. It can be used to ease automated
+				installation and configuration of the service, if mysql is not managed in some other way.
+				[Example: false] [Type: boolean]"
 			value="false"/>
+
+		<mysql.max_allowed_packet
+			description="This parameter allows to set the max_allowed_packet parameter in the mysql
+				configuration file /etc/my.cnf. The default recommended value for the LB server is 17MB
+				It must be a number followed by a unit symbol, like M for megabytes or G for gigabytes.
+				[Example: 17M][Type: Integer][Unit: MB]"
+			value="17M"/>
 
 		<!-- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx -->
 		<!-- System parameters - You should leave these alone -->
@@ -57,74 +70,4 @@
 			
 	</parameters>
 
-	<!--RGMA service publishing: log server -->
-	<instance name="lb.rgma" service="rgma-servicetool">
-		<parameters>
-		
-			<rgma.servicetool.enable
-				description="Publish log server via RGMA servicetool. If this variable is set to 'false': the other
-				values of this instance are not taken into account.[Example: 'true'] [Type: 'boolean']"
-				
-				value="true"/>
-				
-			<rgma.servicetool.service_type
-				description="The service type. This should be uniquely defined for each service type. 
-					The recommended format is the service namespace in
-					reversed domain name format [Type: 'string']"
-				value="org.glite.lb.lbserver"/>
-
-			<rgma.servicetool.name
-				description="Name of the service. This should be globally unique.							 
-					[Example: 'HOSTANME_LB_LocalLogger'] [Type: 'String']"
-				value="${HOSTNAME}_${rgma.servicetool.service_type}"/>
-
-			<rgma.servicetool.url_endpoint
-				description="URL to contact the service at. 
-					This should be unique for each service. Use example and adapt host. 
-					Example: http://your.host.name/LB/LBServer
-					[Type: 'string']"
-				value="not available"/>
-
-			<rgma.servicetool.service_version
-				description="Service version in the form 'major.minor.patch'
-					Example: 1.2.3
-					[Type: 'string']"
-				value="${module.version}"/>
-
-			<rgma.servicetool.publish_interval
-				description="How often to check and publish service information.
-					Example: 3600 [Type: 'string'] [Unit: 'seconds']"
-				value="3600"/>
-
-			<rgma.servicetool.status_script
-				description="Script to run when determining the service status. 
-					This script should return an exit code of 0 to indicate the service is OK, other values
-					should indicate an error. The first line of the standard output should be a brief message 
-					describing the service status (e.g. 'Accepting connections')
-					Example: ${GLITE_LOCATION}/etc/init.d/glite-lb-bkserverd status
-					[Type: 'string']"
-				value="${GLITE_LOCATION}/etc/init.d/glite-lb-bkserverd status"/>
-
-			<rgma.servicetool.status_interval
-				description="How often to check and publish service status.
-					Example: 60 [Type: 'string'] [Unit: 'seconds']"
-				value="30"/>
-
-			<rgma.servicetool.url_wsdl
-				description="URL of a WSDL document for the service (leave blank if the 
-					service has no WSDL).
-					Example: http://example.rl.ac.uk/service?WSDL
-					[Type: 'string']"
-				value="not available"/>
-
-			<rgma.servicetool.url_semantics
-				description="URL of a document containing a detailed description of the service
-					and how it should be used.
-					Example: http://example.rl.ac.uk/service/semantics.html
-					[Type: 'string']"
-				value="not available"/>
-
-		</parameters>
-	</instance>
-						
 </config>
