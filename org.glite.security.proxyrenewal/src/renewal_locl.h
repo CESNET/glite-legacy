@@ -22,6 +22,11 @@
 #include <sys/stat.h>
 #include <sys/file.h>
 #include <sys/wait.h>
+#include <poll.h>
+#ifndef INFTIM
+#define INFTIM (-1)
+#endif
+
 #include <openssl/md5.h>
 #include <openssl/x509.h>
 #include <openssl/pem.h>
