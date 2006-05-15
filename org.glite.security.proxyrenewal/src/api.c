@@ -210,7 +210,7 @@ do_connect(char *socket_name, struct timeval *timeout, int *sock)
    struct sockaddr_un my_addr;
    int s;
    int ret;
-   struct timeval before,after,to;
+   struct timeval before,after;
    int sock_err;
    socklen_t err_len;
 
@@ -234,13 +234,13 @@ do_connect(char *socket_name, struct timeval *timeout, int *sock)
    ret = connect(s, (struct sockaddr *) &my_addr, sizeof(my_addr));
    if (ret == -1) {
       if (errno == EINPROGRESS) {
-	 fd_set fds;
+	 struct pollfd pollfds[1];
 
-	 FD_ZERO(&fds);
-	 FD_SET(s, &fds);
-	 memcpy(&to, timeout, sizeof(to));
+	 pollfds[0].fd = s;
+	 pollfds[0].events = POLLOUT;
+	 
 	 gettimeofday(&before,NULL);
-	 switch (select(s+1, NULL, &fds, NULL, &to)) {
+	 switch (poll(pollfds, 1, timeout->tv_sec*1000+timeout->tv_usec/1000)) {
 	    case -1: close(s);
 		     return errno;
 	    case 0: close(s);
