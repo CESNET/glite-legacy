@@ -352,7 +352,7 @@ int handle_conn(int conn, struct timeval *timeout, void *data)
 	edg_wll_Context		ctx;
 	struct timeval		conn_start, now;
 
-	if ( !(ctx = (edg_wll_Context) calloc(1, sizeof(*ctx))) ) {
+        if ( edg_wll_InitContext(&ctx) ) {
 		fprintf(stderr, "Couldn't create context");
 		return -1;
 	}
