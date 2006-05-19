@@ -27,6 +27,9 @@
 #include "glite/lb/srvbones.h"
 #include "glite/lb/context.h"
 #include "glite/lb/context-int.h"
+#ifdef LB_PERF
+#include "glite/lb/lb_perftest.h"
+#endif
 
 extern int edg_wll_DBCheckVersion(edg_wll_Context);
 extern edg_wll_ErrorCode edg_wll_Open(edg_wll_Context ctx, char *cs);
@@ -339,6 +342,10 @@ int clnt_data_init(void **data)
 	wait_for_open(ctx, dbstring);
 	cdata->mysql = ctx->mysql;
 	edg_wll_FreeContext(ctx);
+
+#ifdef LB_PERF
+	glite_wll_perftest_init(NULL, NULL, NULL, NULL, 0);
+#endif
 
 	*data = cdata;
 	return 0;

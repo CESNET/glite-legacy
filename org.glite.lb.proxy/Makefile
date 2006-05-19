@@ -31,6 +31,13 @@ AT3=perl -I${top_srcdir}/project ${top_srcdir}/project/at3
 TEST_LIBS:=-L${cppunit_prefix}/lib -lcppunit
 TEST_INC:=-I${cppunit_prefix}/include
 
+ifdef LB_PERF
+        STATIC_LIB_BK:=${stagedir}/lib/libglite_lb_bkserver_perf.a
+        LB_PERF_FLAGS:=-DLB_PERF
+else
+        STATIC_LIB_BK:=${stagedir}/lib/libglite_lb_bkserver.a
+endif
+
 SUFFIXES = .T 
 
 DEBUG:=-g -O0 -Wall
@@ -48,7 +55,7 @@ CFLAGS:= ${DEBUG} \
 	-I${mysql_prefix}/include -I${mysql_prefix}/include/mysql \
 	-I${globus_prefix}/include/${nothrflavour} \
 	-I${gridsite_prefix}/include -I${globus_prefix}/include/${nothrflavour}/openssl \
-	-D_GNU_SOURCE ${LB_STANDALONE_FLAGS}
+	-D_GNU_SOURCE ${LB_STANDALONE_FLAGS} ${LB_PERF_FLAGS}
 
 
 LINK:=libtool --mode=link ${CC} ${LDFLAGS} 
@@ -74,9 +81,6 @@ endif
 
 
 SRVBONES_LIB:= -L${stagedir}/lib -lglite_lb_server_bones
-LB_SERVER_SHARE_LIB:=${stagedir}/lib/libglite_lb_bkserver.a
-LB_PROXY_COMMON_LIB:= -L${stagedir}/lib -lglite_lb_common_${nothrflavour}
-COMMON_LIBS:= -L${stagedir}/lib -lglite_lb_common_${nothrflavour} -lglite_security_gss_${nothrflavour}
 GRIDSITE_LIBS = -lgridsite_globus `xml2-config --libs`
 
 vomsflavour := _${nothrflavour}
@@ -98,7 +102,7 @@ EXT_LIBS:= \
 
 
 LB_PROXY_LIBS:= \
-	${LB_SERVER_SHARE_LIB} \
+	${STATIC_LIB_BK} \
 	${SRVBONES_LIB} \
 	-lglite_lb_common_${nothrflavour} \
 	-lglite_security_gss_${nothrflavour} \
@@ -106,7 +110,7 @@ LB_PROXY_LIBS:= \
 
 
 
-glite_lb_proxy: lbproxy.o fake_write2rgma.o ${LB_SERVER_SHARE_LIB}
+glite_lb_proxy: lbproxy.o fake_write2rgma.o ${STATIC_LIB_BK}
 	@echo DEBUG: mysql_version=${mysql_version} mysql_prefix=${mysql_prefix}
 	@echo DEBUG: shell: x$(shell echo ${mysql_version} | cut -d. -f1,2)x
 	${LINK} -o $@ lbproxy.o fake_write2rgma.o ${LB_PROXY_LIBS}
