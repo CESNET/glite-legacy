@@ -83,6 +83,7 @@ static struct option opts[] = {
 	{"port",		1, NULL,	'p'},
 	{"con-queue",		1, NULL,	'c'},
 	{"debug",		0, NULL,	'd'},
+	{"silent",		0, NULL,	'z'},
 	{"mysql",		1, NULL,	'm'},
 	{"slaves",		1, NULL,	's'},
 	{"semaphores",		1, NULL,	'l'},
@@ -92,7 +93,7 @@ static struct option opts[] = {
 	{NULL,0,NULL,0}
 };
 
-static const char *get_opt_string = "p:c:dm:s:l:i:X:Y:";
+static const char *get_opt_string = "p:c:dm:s:l:i:X:Y:z";
 
 static void usage(char *me) 
 {
@@ -106,6 +107,7 @@ static void usage(char *me)
 		"\t-i, --pidfile\t file to store master pid\n"
 		"\t--proxy-il-sock\t socket to send events to\n"
 		"\t--proxy-il-fprefix\t file prefix for events\n"
+		"\t--silent\t don't print diagnostic, even if -d is on\n"
 	,me);
 }
 
@@ -154,6 +156,7 @@ int main(int argc, char *argv[])
 	key_t				semkey;
 	edg_wll_Context		ctx;
 	struct timeval		to;
+	int	silent = 0;
 
 
 
@@ -166,6 +169,7 @@ int main(int argc, char *argv[])
 		case 'p': strcpy(socket_path_prefix, optarg); break;
 		case 'c': con_queue = atoi(optarg); break;
 		case 'd': debug = 1; break;
+		case 'z': silent = 1; break;
 		case 'm': dbstring = optarg; break;
 		case 's': slaves = atoi(optarg); break;
 		case 'l': semaphores = atoi(optarg); break;
@@ -303,6 +307,7 @@ int main(int argc, char *argv[])
 		openlog(name, LOG_PID, LOG_DAEMON);
 	} else { setpgid(0, getpid()); }
 
+	if (silent) debug = 0;
 
 	glite_srvbones_set_param(GLITE_SBPARAM_SLAVES_COUNT, slaves);
 	glite_srvbones_set_param(GLITE_SBPARAM_SLAVE_OVERLOAD, SLAVE_OVERLOAD);
@@ -359,7 +364,7 @@ int handle_conn(int conn, struct timeval *timeout, void *data)
 	struct timeval		conn_start, now;
 
 	if ( !(ctx = (edg_wll_Context) calloc(1, sizeof(*ctx))) ) {
-		fprintf(stderr, "Couldn't create context");
+		dprintf(("Couldn't create context"));
 		return -1;
 	}
 	cdata->ctx = ctx;
