@@ -115,6 +115,9 @@ glite_lb_proxy: lbproxy.o fake_write2rgma.o ${STATIC_LIB_BK}
 	@echo DEBUG: shell: x$(shell echo ${mysql_version} | cut -d. -f1,2)x
 	${LINK} -o $@ lbproxy.o fake_write2rgma.o ${LB_PROXY_LIBS}
 
+glite_lb_proxy_perf: lbproxy.o fake_write2rgma.o ${STATIC_LIB_BK}
+	${LINK} -o $@ lbproxy.o fake_write2rgma.o ${LB_PROXY_LIBS}
+
 default all: compile
 
 compile: glite_lb_proxy

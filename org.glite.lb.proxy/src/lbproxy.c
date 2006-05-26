@@ -29,6 +29,9 @@
 #include "glite/lb/context-int.h"
 #ifdef LB_PERF
 #include "glite/lb/lb_perftest.h"
+#include "glite/lb/srv_perf.h"
+
+enum lb_srv_perf_sink sink_mode;
 #endif
 
 extern int edg_wll_DBCheckVersion(edg_wll_Context);
@@ -90,10 +93,17 @@ static struct option opts[] = {
 	{"pidfile",		1, NULL,	'i'},
 	{"proxy-il-sock",	1, NULL,	'X'},
 	{"proxy-il-fprefix",	1, NULL,	'Y'},
+#ifdef LB_PERF
+	{"perf-sink",		1, NULL,	'K'},
+#endif
 	{NULL,0,NULL,0}
 };
 
-static const char *get_opt_string = "p:c:dm:s:l:i:X:Y:z";
+static const char *get_opt_string = "p:c:dm:s:l:i:X:Y:z"
+#ifdef LB_PERF
+	"K:"
+#endif
+;
 
 static void usage(char *me) 
 {
@@ -108,6 +118,9 @@ static void usage(char *me)
 		"\t--proxy-il-sock\t socket to send events to\n"
 		"\t--proxy-il-fprefix\t file prefix for events\n"
 		"\t--silent\t don't print diagnostic, even if -d is on\n"
+#ifdef LB_PERF
+		"\t--perf-sink\t where to sink events\n"
+#endif
 	,me);
 }
 
@@ -176,6 +189,9 @@ int main(int argc, char *argv[])
 		case 'X': lbproxy_ilog_socket_path = strdup(optarg); break;
 		case 'Y': lbproxy_ilog_file_prefix = strdup(optarg); break;
 		case 'i': strcpy(pidfile, optarg); break;
+#ifdef LB_PERF
+		case 'K': sink_mode = atoi(optarg); break;
+#endif
 		case '?': usage(name); return 1;
 	}
 
