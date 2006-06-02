@@ -372,6 +372,23 @@ extern int edg_wll_RegisterJobProxy(
 	edg_wlc_JobId **	subjobs
 );
 
+#ifdef LB_PERF
+/* register only to LBProxy 		*/
+/* useful for performance measurements	*/
+
+extern int edg_wll_RegisterJobProxyOnly(
+	edg_wll_Context		context,
+	const edg_wlc_JobId	job,
+	enum edg_wll_RegJobJobtype	type,
+	const char *		jdl,
+	const char *		ns,
+	int			num_subjobs,
+	const char *		seed,
+	edg_wlc_JobId **	subjobs
+);
+#endif
+
+
 
 /**
  * Register subjobs in a batch.
