@@ -382,7 +382,7 @@ recv_token(int sock, void **token, size_t *token_length, struct timeval *to)
 	 expect = ssl_token_length(t, tl);
       }
 
-   } while ((count == 0) || (tl < expect));
+   } while (count != 0 && tl < expect);
 
 end:
    if (to) {
