@@ -33,6 +33,9 @@
 #define dprintf(x)			{ if (debug) printf x; }
 #endif
 
+#ifdef LB_PROF
+extern void _start (void), etext (void);
+#endif
 
 static int		running = 0;
 static int		debug = 0;
@@ -294,6 +297,10 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 
 
 	if ( (pid = fork()) ) return pid;
+
+#ifdef LB_PROF
+	monstartup((u_long)&_start, (u_long)&etext);
+#endif
 
 	srandom(getpid()+time(NULL));
 

@@ -28,6 +28,12 @@ VPATH=${top_srcdir}/src:${top_srcdir}/examples
 
 DEBUG:=-g -O0 -Wall
 CFLAGS:= ${DEBUG} -I${top_srcdir}/interface
+LDFLAGS:=
+
+ifdef LB_PROF
+	CFLAGS:= ${CFLAGS} -pg -g
+	LDFLAGS:= ${LDFLAGS} -pg
+endif
 
 COMPILE:=libtool --mode=compile ${CC} ${CFLAGS}
 LINK:=libtool --mode=link ${CC} -rpath ${stagedir}/lib ${LDFLAGS} 
