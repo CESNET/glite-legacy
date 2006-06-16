@@ -438,6 +438,12 @@ create_proxy(char *cert_file, char *key_file, char **proxy_file)
       goto end;
    }
 
+   len = write(out, "\n", 1);
+   if (len != 1) {
+      ret = EDG_WLL_GSS_ERROR_ERRNO;
+      goto end;
+   }
+
    in = open(key_file, O_RDONLY);
    if (in < 0) {
       ret = EDG_WLL_GSS_ERROR_ERRNO;
