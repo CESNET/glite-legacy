@@ -27,6 +27,7 @@ static int glite_gsplugin_send(struct soap *, const char *, size_t);
 static int glite_gsplugin_connect(struct soap *, const char *, const char *, int);
 static int glite_gsplugin_close(struct soap *);
 static int glite_gsplugin_accept(struct soap *, int, struct sockaddr *, int *);
+static int glite_gsplugin_posthdr(struct soap *soap, const char *key, const char *val);
 
 
 int
@@ -172,7 +173,7 @@ glite_gsplugin(struct soap *soap, struct soap_plugin *p, void *arg)
 	soap->faccept		= glite_gsplugin_accept;
 	soap->fsend			= glite_gsplugin_send;
 	soap->frecv			= glite_gsplugin_recv;
-
+	soap->fposthdr		= glite_gsplugin_posthdr;
 
 	return SOAP_OK;
 }
@@ -264,6 +265,7 @@ glite_gsplugin_connect(
 		goto err;
 	}
 
+	return 0;
 
 err:
 	pdprintf(("GSLITE_GSPLUGIN: glite_gsplugin_connect() error!\n"));
@@ -439,3 +441,34 @@ glite_gsplugin_send(struct soap *soap, const char *buf, size_t bufsz)
 	return SOAP_OK;
 }
 
+
+static int http_send_header(struct soap *soap, const char *s) {
+	const char *t;
+
+	do {
+		t = strchr(s, '\n'); /* disallow \n in HTTP headers */
+		if (!t) t = s + strlen(s);
+		if (soap_send_raw(soap, s, t - s)) return soap->error;
+		s = t + 1;
+	} while (*t);
+
+	return SOAP_OK;
+}
+
+
+static int glite_gsplugin_posthdr(struct soap *soap, const char *key, const char *val) {
+	if (key) {
+		if (strcmp(key, "Status") == 0) {
+			snprintf(soap->tmpbuf, sizeof(soap->tmpbuf), "HTTP/%s", soap->http_version);
+			if (http_send_header(soap, soap->tmpbuf)) return soap->error;
+			if (val && (soap_send_raw(soap, " ", 1) || http_send_header(soap, val)))
+				return soap->error;
+		} else {
+			if (http_send_header(soap, key)) return soap->error;
+			if (val && (soap_send_raw(soap, ": ", 2) || http_send_header(soap, val)))
+				return soap->error;
+		}
+	}
+
+	return soap_send_raw(soap, "\r\n", 2);
+}
