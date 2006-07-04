@@ -34,7 +34,7 @@
 enum lb_srv_perf_sink sink_mode;
 #endif
 
-extern int edg_wll_DBCheckVersion(edg_wll_Context);
+extern int edg_wll_DBCheckVersion(edg_wll_Context, const char *);
 extern edg_wll_ErrorCode edg_wll_Open(edg_wll_Context ctx, char *cs);
 extern edg_wll_ErrorCode edg_wll_Close(edg_wll_Context);
 extern int edg_wll_StoreProtoProxy(edg_wll_Context ctx);
@@ -303,7 +303,7 @@ int main(int argc, char *argv[])
 	memset(ctx, 0, sizeof(*ctx));
 	*/
 	wait_for_open(ctx, dbstring);
-	if (edg_wll_DBCheckVersion(ctx)) {
+	if (edg_wll_DBCheckVersion(ctx, dbstring)) {
 		char	*et,*ed;
 		edg_wll_Error(ctx,&et,&ed);
 
