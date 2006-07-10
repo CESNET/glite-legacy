@@ -39,7 +39,7 @@ echo "3) after storing into db, before computing state"
 echo "4) after computing state, before sending to IL"
 echo "5) by IL"
 echo ""
-echo -e "\tsmall_job \t big_job \t small_dag \t big_dag"
+echo -e "\tavg_job \t big_job \t avg_dag \t big_dag"
 
 
 LOGJOBS_ARGS="-s /tmp/proxy.perf"
