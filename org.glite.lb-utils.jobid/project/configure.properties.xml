@@ -20,6 +20,9 @@
 
         Revision history:
         $Log$
+        Revision 1.2  2006/07/18 14:24:30  akrenek
+        "ant stage" works, "dist" is broken - I don't care yet
+
         Revision 1.1.1.1  2006/07/14 06:59:06  akrenek
         module created
 
