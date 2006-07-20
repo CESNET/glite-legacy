@@ -20,6 +20,9 @@
 
 	Revision history:
 	$Log$
+	Revision 1.1.1.1  2006/07/14 06:59:03  akrenek
+	module created
+
 	Revision 1.7  2006/04/26 11:39:55  flammer
 	Corrected wrong template syntax.
 
@@ -95,7 +98,7 @@
 		 Load common targets
 	     ========================================= -->
 	<!-- Put your language target (java/c++-ant/c++-autotool/perl) here -->
-	<!-- <import file="${global.targets-xxx.file}" /> -->
+	<import file="${global.targets-simple_make.file}" />
 		
 	<!-- =========================================
 		 Load version file 
@@ -109,6 +112,7 @@
 	
 	<target name="localinit"
 		description="Module specific initialization tasks">
+		<antcall target="lbmakefiles" />
 	</target>
 	
 	<target name="localcompile"

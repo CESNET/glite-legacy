@@ -104,7 +104,7 @@ install:
 	-mkdir -p ${PREFIX}/include/${globalprefix}/${lbutilsprefix}
 #	${INSTALL} -m 644 ${top_srcdir}/LICENSE ${PREFIX}/share/doc/${package}-${version}
 	${INSTALL} -m 755 "libglite_lbutils_db.la" "${PREFIX}/lib/glite-lbutils-db.la"; \
-	${INSTALL} -m 644 ${HDRS} ${PREFIX}/include/${globalprefix}/${lbutilsprefix}
+	${INSTALL} -m 644 ${top_srcdir}/interface/${HDRS} ${PREFIX}/include/${globalprefix}/${lbutilsprefix}
 
 clean:
 
