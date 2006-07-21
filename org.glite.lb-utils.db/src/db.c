@@ -22,7 +22,9 @@
 #define GLITE_LBU_MYSQL_INDEX_VERSION 40001
 #define GLITE_LBU_MYSQL_PREPARED_VERSION 40102
 #define BUF_INSERT_ROW_ALLOC_BLOCK	1000
-#define GLITE_LBU_DEFAULT_RESULT_BUFFER_LENGTH 1024
+#ifndef GLITE_LBU_DEFAULT_RESULT_BUFFER_LENGTH
+#define GLITE_LBU_DEFAULT_RESULT_BUFFER_LENGTH 256
+#endif
 
 
 #define CLR_ERR(CTX) lbu_clrerr((CTX))
@@ -357,13 +359,12 @@ int glite_lbu_PrepareStmt(glite_lbu_DBContext ctx, const char *sql, glite_lbu_St
 	} while (ret == 0);
 	if (ret == -1) goto failed;
 
-	// number of fields
-	if ((meta = mysql_stmt_result_metadata((*stmt)->stmt)) == NULL) {
-		MY_ERRSTMT(*stmt);
-		goto failed;
-	}
-	(*stmt)->nrfields = mysql_num_fields(meta);
-	mysql_free_result(meta);
+	// number of fields (0 for no results)
+	if ((meta = mysql_stmt_result_metadata((*stmt)->stmt)) != NULL) {
+		(*stmt)->nrfields = mysql_num_fields(meta);
+		mysql_free_result(meta);
+	} else
+		(*stmt)->nrfields = 0;
 
 	return CLR_ERR(ctx);
 
@@ -794,7 +795,12 @@ static int FetchRowSimple(glite_lbu_DBContext ctx, MYSQL_RES *result, unsigned l
 	len = mysql_fetch_lengths(result);
 	for (i=0; i<nr; i++) {
 		if (lengths) lengths[i] = len[i];
-		results[i] = len[i] ? strdup(row[i]) : strdup("");
+		if (len[i]) {
+			results[i] = malloc(len[i] + 1);
+			memcpy(results[i], row[i], len[i]);
+			results[i][len[i]] = '\000';
+		} else
+			results[i] = strdup("");
 	}
 
 	return nr;
@@ -807,60 +813,88 @@ static int FetchRowSimple(glite_lbu_DBContext ctx, MYSQL_RES *result, unsigned l
 static int FetchRowPrepared(glite_lbu_DBContext ctx, glite_lbu_Statement stmt, unsigned int n, unsigned long *lengths, char **results) {
 	int ret, retry, i;
 	MYSQL_BIND *binds = NULL;
+	unsigned long *lens = NULL;
 
 	if (n != stmt->nrfields) {
 		ERR(ctx, EINVAL, "bad number of result fields");
 		return -1;
 	}
 
-	// bind results
+	// space for results
 	if (n) binds = calloc(n, sizeof(MYSQL_BIND));
+	if (!lengths) {
+		lens = calloc(n, sizeof(unsigned long));
+		lengths = lens;
+	}
 	for (i = 0; i < n; i++) {
 		binds[i].buffer_type = MYSQL_TYPE_VAR_STRING;
-		binds[i].buffer_length = GLITE_LBU_DEFAULT_RESULT_BUFFER_LENGTH;
-		if (lengths) binds[i].length = &lengths[i];
-		binds[i].buffer = results[i] = calloc(1, binds[i].buffer_length);
+		binds[i].buffer_length = GLITE_LBU_DEFAULT_RESULT_BUFFER_LENGTH - 1;
+		binds[i].length = &lengths[i];
+		binds[i].buffer = results[i] = calloc(1, GLITE_LBU_DEFAULT_RESULT_BUFFER_LENGTH);
 	}
 	if (mysql_stmt_bind_result(stmt->stmt, binds) != 0) goto failedstmt;
 
-	// fetch data
+	// fetch data, all can be truncated
 	retry = 1;
 	do {
 		switch(mysql_stmt_fetch(stmt->stmt)) {
-			case 0: ret = 1; break;
-			case 1: ret = MY_ISOKSTMT(stmt, &retry); break;
 #ifdef MYSQL_DATA_TRUNCATED
-			case MYSQL_DATA_TRUNCATED: goto failedstmt;
+			case MYSQL_DATA_TRUNCATED:
 #endif
-			case MYSQL_NO_DATA: goto failed; /* it's OK */
+			case 0:
+				ret = 1; break;
+			case 1: ret = MY_ISOKSTMT(stmt, &retry); break;
+			case MYSQL_NO_DATA: ret = 0; goto quit; /* it's OK */
 			default: ERR(ctx, EIO, "other fetch error"); goto failed;
 		}
 	} while (ret == 0);
-	if (ret == -1) {
-		free(binds);
-		return STATUS(ctx);
+	if (ret == -1) goto failed;
+
+	// check if all fileds had enough buffer space
+	for (i = 0; i < n; i++) {
+		// fetch the rest if needed
+		if (lengths[i] > binds[i].buffer_length) {
+			unsigned int fetched;
+
+			fetched = binds[i].buffer_length;
+			if ((results[i] = realloc(results[i], lengths[i] + 1)) == NULL) {
+				ERR(ctx, ENOMEM, "insufficient memory for field data");
+				goto failed;
+			}
+			results[i][lengths[i]] = '\000';
+			binds[i].buffer = results[i] + fetched;
+			binds[i].buffer_length = lengths[i] - fetched;
+
+			retry = 1;
+			do {
+				switch (mysql_stmt_fetch_column(stmt->stmt, binds + i, i, fetched)) {
+					case 0: ret = 1; break;
+					case 1: ret = MY_ISOKSTMT(stmt, &retry); break;
+					case MYSQL_NO_DATA: ret = 0; goto quit; /* it's OK */
+					default: ERR(ctx, EIO, "other fetch error"); goto failed;
+				}
+			} while (ret == 0);
+			if (ret == -1) goto failed;
+		}
 	}
 
 	CLR_ERR(ctx);
 	free(binds);
-
-#warning FIXME: check for lenght > buffer_length, implement using fetch_column, check it
-/*
-You can check for data truncation by comparing the length and buffer_length members of each MYSQL_BIND structure after a fetch. If the data is truncated (length > buffer_length), you can resize the buffer and call mysql_stmt_fetch_column() for the corresponding column.
-Do not forget to recall mysql_stmt_bind_result() if you are going to use the new buffers for another fetch, since mysql makes a copy of your BIND structures and therefore does not see the updated buffer.
-*/
-
+	free(lens);
 	return n;
 
 failedstmt:
 	MY_ERRSTMT(stmt);
 failed:
+	ret = -1;
+quit:
 	free(binds);
+	free(lens);
 	for (i = 0; i < n; i++) {
 		free(results[i]);
 		results[i] = NULL;
 	}
-	return -1;
+	return ret;
 }
 
 

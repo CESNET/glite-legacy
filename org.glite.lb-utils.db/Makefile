@@ -8,6 +8,7 @@ lbutilsprefix=lb-utils
 package=glite-lb-utils-db
 version=0.2.0
 PREFIX=/opt/glite
+flavour=gcc32thr
 
 glite_location=/opt/glite
 mysql_prefix=/opt/mysql
@@ -43,6 +44,8 @@ endif
 TEST_LIBS:=-L${cppunit_prefix}/lib -lcppunit
 TEST_INC:=-I${cppunit_prefix}/include
 
+LDFLAGS:=-L${stagedir}/lib ${COVERAGE_FLAGS}
+
 COMPILE:=libtool --mode=compile ${CC} ${CFLAGS}
 LINK:=libtool --mode=link ${CC} -rpath ${stagedir}/lib ${LDFLAGS} 
 INSTALL:=libtool --mode=install install
@@ -55,16 +58,24 @@ ifneq (${mysql_prefix},/usr)
 	endif
 endif
 
-EXT_LIBS:=${mysqlib} -lmysqlclient
+EXT_LIBS:=${mysqlib} -lmysqlclient -lglite_lb_common_${flavour}
 OBJS:=db.o
+TESTOBJS:=dbtest.o
 HDRS:=db.h
 LOBJS:=${OBJS:.o=.lo}
+LTESTOBJS:=${TESTOBJS:.o=.lo}
 
 libglite_lbutils_db.la: ${LOBJS}
 	${LINK} -o $@ $< ${EXT_LIBS}
 
-db_test: db_test.lo
-	${LINK} -o $@ $< -lglite_lbutils_db
+libglite_lbutils_dbtest.la: ${LTESTOBJS}
+	${LINK} -o $@ $< ${EXT_LIBS}
+
+dbtest.lo dbtest.o: db.c db.h
+	${COMPILE} -DGLITE_LBU_DEFAULT_RESULT_BUFFER_LENGTH=10 -c $< -o $@
+
+db_test: db_test.lo libglite_lbutils_dbtest.la
+	${LINK} -o $@ $+ ${EXT_LIBS}
 
 default all: compile
 
@@ -111,7 +122,7 @@ clean:
 %.o %.lo: %.c
 	${COMPILE} -c $<
 
-db.o db.lo: db.c db.h
-db_test: libglite_lbutils_db.la db.h db_test.c
+db.lo: db.c db.h
+db_test.lo: libglite_lbutils_dbtest.la db.h db_test.c
 
 .PHONY: default all compile check examples doc stage dist distsrc distbin install clean test_coverage

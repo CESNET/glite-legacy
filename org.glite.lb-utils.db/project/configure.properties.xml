@@ -20,6 +20,9 @@
 
         Revision history:
         $Log$
+        Revision 1.2  2006/07/20 13:42:51  valtri
+        Join properly with build system (it uses lb.common yet), it compiles here now.
+
         Revision 1.1.1.1  2006/07/14 06:59:03  akrenek
         module created
 
@@ -49,8 +52,8 @@ distdir=${dist.dir}
 globalprefix=${global.prefix}
 lbutilsprefix=${subsystem.prefix}
 package=${module.package.name}
-version=${module.version}
 PREFIX=${install.dir}
+flavour=${with.globus.thr.flavor}
 
 glite_location=${with.glite.location}
 mysql_prefix=${with.mysql.prefix}
