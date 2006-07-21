@@ -20,6 +20,9 @@
 
         Revision history:
         $Log$
+        Revision 1.3  2006/07/18 14:26:17  akrenek
+        oops, no double-dash
+
         Revision 1.2  2006/07/18 14:24:30  akrenek
         "ant stage" works, "dist" is broken - I don't care yet
 
@@ -49,6 +52,11 @@
 top_srcdir=..
 builddir=build
 stagedir=${stage.abs.dir}
+distdir=${dist.dir}
+globalprefix=${global.prefix}
+lbuprefix=${subsystem.prefix}
+package=${module.package.name}
+PREFIX=${install.dir}
 </echo>
 	</target>
 

@@ -10,8 +10,6 @@ version=0.0.0
 PREFIX=/opt/glite
 lbuprefix=lbu
 
-glite_location=/opt/glite
-
 -include Makefile.inc
 -include ../project/version.properties
 
