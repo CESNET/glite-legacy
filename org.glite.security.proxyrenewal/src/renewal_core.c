@@ -8,7 +8,7 @@
 static const char rcsid[] = "$Id$";
 
 int
-load_proxy(glite_renewal_core_context ctx, const char *cur_file, X509 **cert, EVP_PKEY **priv_key,
+glite_renewal_load_proxy(glite_renewal_core_context ctx, const char *cur_file, X509 **cert, EVP_PKEY **priv_key,
            STACK_OF(X509) **chain, globus_gsi_cred_handle_t *cur_proxy)
 {
    globus_result_t result;
@@ -68,7 +68,7 @@ end:
 }
 
 int
-get_proxy_base_name(glite_renewal_core_context ctx, const char *file, char **name)
+glite_renewal_get_proxy_base_name(glite_renewal_core_context ctx, const char *file, char **name)
 {
    X509 *cert = NULL;
    EVP_PKEY *key = NULL;
@@ -77,7 +77,7 @@ get_proxy_base_name(glite_renewal_core_context ctx, const char *file, char **nam
    int ret;
    globus_result_t result;
 
-   ret = load_proxy(ctx, file, &cert, &key, &chain, NULL);
+   ret = glite_renewal_load_proxy(ctx, file, &cert, &key, &chain, NULL);
    if (ret)
       return ret;
 
@@ -88,7 +88,7 @@ get_proxy_base_name(glite_renewal_core_context ctx, const char *file, char **nam
 
    result = globus_gsi_cert_utils_get_base_name(subject, chain);
    if (result) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Cannot get subject name from proxy %s", file);
+      glite_renewal_log(ctx, LOG_ERR, "Cannot get subject name from proxy %s", file);
       ret = EDG_WLPR_ERROR_SSL; /* XXX ??? */
       goto end;
    }
@@ -138,27 +138,27 @@ glite_renewal_core_renew(glite_renewal_core_context ctx,
 
    myproxy_set_delegation_defaults(socket_attrs, client_request);
 
-   edg_wlpr_Log(ctx, LOG_DEBUG, "Trying to renew proxy in %s", current_proxy);
+   glite_renewal_log(ctx, LOG_DEBUG, "Trying to renew proxy in %s", current_proxy);
 
    snprintf(tmp_proxy, sizeof(tmp_proxy), "%s.myproxy.XXXXXX", current_proxy);
    tmp_fd = mkstemp(tmp_proxy);
    if (tmp_fd == -1) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Cannot create temporary file (%s)",
+      glite_renewal_log(ctx, LOG_ERR, "Cannot create temporary file (%s)",
                    strerror(errno));
       return errno;
    }
 
-   ret = get_proxy_base_name(ctx, current_proxy, &client_request->username);
+   ret = glite_renewal_get_proxy_base_name(ctx, current_proxy, &client_request->username);
    if (ret)
       goto end;
 
-   voms_exts = check_voms_attrs(ctx, current_proxy);
+   voms_exts = glite_renewal_check_voms_attrs(ctx, current_proxy);
 
    client_request->proxy_lifetime = 60 * 60 * DGPR_RETRIEVE_DEFAULT_HOURS;
 
    server = (myproxy_server) ? myproxy_server : socket_attrs->pshost;
    if (server == NULL) {
-      edg_wlpr_Log(ctx, LOG_ERR, "No myproxy server specified");
+      glite_renewal_log(ctx, LOG_ERR, "No myproxy server specified");
       ret = EINVAL;
       goto end;
    }
@@ -171,7 +171,7 @@ glite_renewal_core_renew(glite_renewal_core_context ctx,
 	                        server_response, tmp_proxy);
    if (ret == 1) {
       ret = EDG_WLPR_ERROR_MYPROXY;
-      edg_wlpr_Log(ctx, LOG_ERR, "Error contacting MyProxy server for proxy %s: %s",
+      glite_renewal_log(ctx, LOG_ERR, "Error contacting MyProxy server for proxy %s: %s",
 	           current_proxy, verror_get_string());
       verror_clear();
       goto end;
@@ -187,13 +187,13 @@ glite_renewal_core_renew(glite_renewal_core_context ctx,
 	       current_proxy);
       tmp_voms_fd = mkstemp(tmp_voms_proxy);
       if (tmp_voms_fd == -1) {
-	 edg_wlpr_Log(ctx, LOG_ERR, "Cannot create temporary file (%s)",
+	 glite_renewal_log(ctx, LOG_ERR, "Cannot create temporary file (%s)",
 	              strerror(errno));
 	 ret = errno;
 	 goto end;
       }
 
-      ret = renew_voms_creds(ctx, current_proxy, renewed_proxy, tmp_voms_proxy);
+      ret = glite_renewal_renew_voms_creds(ctx, current_proxy, renewed_proxy, tmp_voms_proxy);
       close(tmp_voms_fd);
       if (ret) {
 	 unlink(tmp_voms_proxy);
@@ -250,7 +250,7 @@ glite_renewal_core_destroy_ctx(glite_renewal_core_context context)
 }
 
 void
-edg_wlpr_Log(glite_renewal_core_context context, int dbg_level, const char *format, ...)
+glite_renewal_log(glite_renewal_core_context context, int dbg_level, const char *format, ...)
 {
    va_list ap;
 

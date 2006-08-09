@@ -99,7 +99,7 @@ check_renewal(glite_renewal_core_context ctx, char *datafile, int force_renew, i
    strncpy(basename, datafile, sizeof(basename) - 1);
    p = basename + strlen(basename) - strlen(".data");
    if (strcmp(p, ".data") != 0) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Meta filename doesn't end with '.data'");
+      glite_renewal_log(ctx, LOG_ERR, "Meta filename doesn't end with '.data'");
       return;
    }
    *p = '\0';
@@ -109,13 +109,13 @@ check_renewal(glite_renewal_core_context ctx, char *datafile, int force_renew, i
 
    meta_fd = fopen(datafile, "r");
    if (meta_fd == NULL) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Cannot open meta file %s (%s)",
+      glite_renewal_log(ctx, LOG_ERR, "Cannot open meta file %s (%s)",
 	           datafile, strerror(errno));
       return;
    }
 
    current_time = time(NULL);
-   edg_wlpr_Log(ctx, LOG_DEBUG, "Reading metafile %s", datafile);
+   glite_renewal_log(ctx, LOG_DEBUG, "Reading metafile %s", datafile);
 
    while (fgets(line, sizeof(line), meta_fd) != NULL) {
       free_record(ctx, &record);
@@ -158,10 +158,10 @@ check_renewal(glite_renewal_core_context ctx, char *datafile, int force_renew, i
    if (num > 0) {
       ret = edg_wlpr_RequestSend(&request, &response);
       if (ret != 0)
-	 edg_wlpr_Log(ctx, LOG_ERR,
+	 glite_renewal_log(ctx, LOG_ERR,
 	              "Failed to send update request to master (%d)", ret);
       else if (response.response_code != 0)
-	 edg_wlpr_Log(ctx, LOG_ERR,
+	 glite_renewal_log(ctx, LOG_ERR,
 	              "Master failed to update database (%d)", response.response_code);
 
       /* delete all tmp proxy files which may survive */
@@ -188,19 +188,19 @@ int renewal(glite_renewal_core_context ctx, int force_renew, int *num_renewed)
    FILE *fd;
    int num = 0;
 
-   edg_wlpr_Log(ctx, LOG_DEBUG, "Starting renewal process");
+   glite_renewal_log(ctx, LOG_DEBUG, "Starting renewal process");
 
    *num_renewed = 0;
 
    if (chdir(repository)) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Cannot access repository directory %s (%s)",
+      glite_renewal_log(ctx, LOG_ERR, "Cannot access repository directory %s (%s)",
 	           repository, strerror(errno));
       return errno;
    }
 
    dir = opendir(repository);
    if (dir == NULL) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Cannot open repository directory %s (%s)",
+      glite_renewal_log(ctx, LOG_ERR, "Cannot open repository directory %s (%s)",
 	           repository, strerror(errno));
       return errno;
    }
@@ -213,7 +213,7 @@ int renewal(glite_renewal_core_context ctx, int force_renew, int *num_renewed)
 	 continue;
       fd = fopen(file->d_name, "r");
       if (fd == NULL) {
-	 edg_wlpr_Log(ctx, LOG_ERR, "Cannot open meta file %s (%s)",
+	 glite_renewal_log(ctx, LOG_ERR, "Cannot open meta file %s (%s)",
 	              file->d_name, strerror(errno));
 	 continue;
       }
@@ -222,7 +222,7 @@ int renewal(glite_renewal_core_context ctx, int force_renew, int *num_renewed)
       fclose(fd);
    }
    closedir(dir);
-   edg_wlpr_Log(ctx, LOG_DEBUG, "Finishing renewal process");
+   glite_renewal_log(ctx, LOG_DEBUG, "Finishing renewal process");
    return 0;
 }
 
@@ -251,6 +251,6 @@ watchdog_start(glite_renewal_core_context ctx)
        renewal(ctx, force_renewal, &num);
        count += num;
    }
-   edg_wlpr_Log(ctx, LOG_DEBUG, "Terminating after %d renewal attempts", count);
+   glite_renewal_log(ctx, LOG_DEBUG, "Terminating after %d renewal attempts", count);
    exit(0);
 }

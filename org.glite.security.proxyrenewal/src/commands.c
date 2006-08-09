@@ -100,7 +100,7 @@ get_base_filename(glite_renewal_core_context ctx, char *proxy_file, char **basef
 
    assert(basefilename != NULL);
 
-   ret = get_proxy_base_name(ctx, proxy_file, &subject);
+   ret = glite_renewal_get_proxy_base_name(ctx, proxy_file, &subject);
    if (ret)
       goto end;
 
@@ -124,12 +124,12 @@ copy_file_content(glite_renewal_core_context ctx, FILE *in, FILE *out)
    while (1) {
       num = fread(buf, sizeof(*buf), sizeof(buf), in);
       if ((ret = ferror(in))) {
-	 edg_wlpr_Log(ctx, LOG_ERR, "Reading failed: %s", strerror(errno));
+	 glite_renewal_log(ctx, LOG_ERR, "Reading failed: %s", strerror(errno));
 	 return ret;
       }
       num = fwrite(buf, sizeof(*buf), num, out);
       if ((ret = ferror(in))) {
-	 edg_wlpr_Log(ctx, LOG_ERR, "Writing failed: %s", strerror(errno));
+	 glite_renewal_log(ctx, LOG_ERR, "Writing failed: %s", strerror(errno));
 	 return ret;
       }
       if (feof(in))
@@ -158,7 +158,7 @@ get_delta(glite_renewal_core_context ctx, time_t current_time, time_t start_time
      /* if the proxy is too short, renew it as soon as possible */
 
      if (current_time + condor_limit > end_time ) {
-       edg_wlpr_Log(ctx, LOG_ERR, "Remaining proxy lifetime fell below the value of the Condor limit!");
+       glite_renewal_log(ctx, LOG_ERR, "Remaining proxy lifetime fell below the value of the Condor limit!");
      }
 
      return 0;
@@ -209,14 +209,14 @@ get_times(glite_renewal_core_context ctx, char *proxy_file, proxy_record *record
 
    fd = fopen(proxy_file, "r");
    if (fd == NULL) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Opening proxy file %s failed: %s",
+      glite_renewal_log(ctx, LOG_ERR, "Opening proxy file %s failed: %s",
 	           proxy_file, strerror(errno));
       return errno;
    }
 
    cert = PEM_read_X509(fd, NULL, NULL, NULL);
    if (cert == NULL) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Cannot read X.509 certificate from %s",
+      glite_renewal_log(ctx, LOG_ERR, "Cannot read X.509 certificate from %s",
 	           proxy_file);
       ret = -1; /* XXX SSL_ERROR */
       goto end;
@@ -230,7 +230,7 @@ get_times(glite_renewal_core_context ctx, char *proxy_file, proxy_record *record
    ASN1_UTCTIME_free(asn1_time);
    /* if (end_time - RENEWAL_CLOCK_SKEW < current_time) { Too short proxy } */
    if (end_time + RENEWAL_CLOCK_SKEW < current_time) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Expired proxy in %s", proxy_file);
+      glite_renewal_log(ctx, LOG_ERR, "Expired proxy in %s", proxy_file);
       ret = EDG_WLPR_PROXY_EXPIRED;
       goto end;
    }
@@ -249,14 +249,14 @@ get_times(glite_renewal_core_context ctx, char *proxy_file, proxy_record *record
 	    ERR_clear_error();
 	    break;
 	 }
-	 edg_wlpr_Log(ctx, LOG_ERR, "Cannot read additional certificates from %s",
+	 glite_renewal_log(ctx, LOG_ERR, "Cannot read additional certificates from %s",
 		      proxy_file);
 	 ret = -1; /* XXX SSL_ERROR */
 	 goto end;
       }
       globus_gsi_cert_utils_make_time(X509_get_notAfter(cert), &tmp_end);
       if (tmp_end + RENEWAL_CLOCK_SKEW < current_time) {
-	 edg_wlpr_Log(ctx, LOG_ERR, "Expired proxy in %s", proxy_file);
+	 glite_renewal_log(ctx, LOG_ERR, "Expired proxy in %s", proxy_file);
 	 ret = EDG_WLPR_PROXY_EXPIRED;
 	 goto end;
       }
@@ -291,7 +291,7 @@ copy_file(glite_renewal_core_context ctx, char *src, char *dst)
 
    from = fopen(src, "r");
    if (from == NULL) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Cannot open file %s for reading (%s)",
+      glite_renewal_log(ctx, LOG_ERR, "Cannot open file %s for reading (%s)",
 	           src, strerror(errno));
       return errno;
    }
@@ -299,7 +299,7 @@ copy_file(glite_renewal_core_context ctx, char *src, char *dst)
    snprintf(tmpfile, sizeof(tmpfile), "%s.XXXXXX", dst);
    tmp_fd = mkstemp(tmpfile);
    if (tmp_fd == -1) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Cannot create temporary file (%s)",
+      glite_renewal_log(ctx, LOG_ERR, "Cannot create temporary file (%s)",
 	           strerror(errno));
       ret = errno;
       goto end;
@@ -308,7 +308,7 @@ copy_file(glite_renewal_core_context ctx, char *src, char *dst)
 
    tmp_to = fdopen(tmp_fd, "w");
    if (tmp_to == NULL) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Cannot associate stream with temporary file (%s)",
+      glite_renewal_log(ctx, LOG_ERR, "Cannot associate stream with temporary file (%s)",
 	           strerror(errno));
       unlink(tmpfile);
       ret = errno;
@@ -323,7 +323,7 @@ copy_file(glite_renewal_core_context ctx, char *src, char *dst)
 
    ret = rename(tmpfile, dst);
    if (ret) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Cannot replace repository file %s with temporary file (%s)",
+      glite_renewal_log(ctx, LOG_ERR, "Cannot replace repository file %s with temporary file (%s)",
 	           strerror(errno));
       unlink(tmpfile);
       ret = errno;
@@ -533,7 +533,7 @@ get_record_ext(glite_renewal_core_context ctx, FILE *fd, proxy_record *record, i
 	 *p = '\0';
       ret = decode_record(ctx, line, &tmp_record);
       if (ret) {
-	 edg_wlpr_Log(ctx, LOG_ERR, "Skipping invalid entry at line %d", line_num);
+	 glite_renewal_log(ctx, LOG_ERR, "Skipping invalid entry at line %d", line_num);
 	 continue;
       }
       if (record->suffix >= 0) {
@@ -607,7 +607,7 @@ get_record_ext(glite_renewal_core_context ctx, FILE *fd, proxy_record *record, i
       *last_used_suffix = last_suffix;
 
    if (record->suffix >= 0) {
-      edg_wlpr_Log(ctx, LOG_DEBUG, "Requested suffix %d not found in meta file",
+      glite_renewal_log(ctx, LOG_DEBUG, "Requested suffix %d not found in meta file",
 	           record->suffix);
    }
 
@@ -661,7 +661,7 @@ store_record(glite_renewal_core_context ctx, char *basename, proxy_record *recor
 	 *p = '\0';
       ret = decode_record(ctx, line, &tmp_record);
       if (ret) {
-	 edg_wlpr_Log(ctx, LOG_ERR, "Removing invalid entry at line %d in %s", line_num, basename);
+	 glite_renewal_log(ctx, LOG_ERR, "Removing invalid entry at line %d in %s", line_num, basename);
 	 continue;
       }
       if (record->suffix == tmp_record.suffix &&
@@ -725,13 +725,13 @@ open_metafile(glite_renewal_core_context ctx, char *basename, FILE **fd)
    snprintf(meta_filename, sizeof(meta_filename), "%s.data", basename);
    meta_fd = fopen(meta_filename, "a+");
    if (meta_fd == NULL) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Opening meta file %s failed (%s)",
+      glite_renewal_log(ctx, LOG_ERR, "Opening meta file %s failed (%s)",
 	           meta_filename, strerror(errno));
       return errno;
    }
    rewind(meta_fd);
    *fd = meta_fd;
-   edg_wlpr_Log(ctx, LOG_DEBUG, "Using meta file %s", meta_filename);
+   glite_renewal_log(ctx, LOG_DEBUG, "Using meta file %s", meta_filename);
    return 0;
 }
 
@@ -740,12 +740,12 @@ filename_to_response(glite_renewal_core_context ctx, char *filename, edg_wlpr_Re
 {
    response->filenames = malloc(2 * sizeof(*response->filenames));
    if (response->filenames == NULL) {
-      edg_wlpr_Log(ctx, LOG_DEBUG, "Not enough memory");
+      glite_renewal_log(ctx, LOG_DEBUG, "Not enough memory");
       return errno;
    }
    response->filenames[0] = strdup(filename);
    if (response->filenames[0] == NULL) {
-      edg_wlpr_Log(ctx, LOG_DEBUG, "Not enough memory");
+      glite_renewal_log(ctx, LOG_DEBUG, "Not enough memory");
       free(response->filenames);
       return errno;
    }
@@ -789,7 +789,7 @@ check_proxyname(glite_renewal_core_context ctx, char *datafile, char *jobid, cha
 
    meta_fd = fopen(datafile, "r");
    if (meta_fd == NULL) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Cannot open meta file %s (%s)",
+      glite_renewal_log(ctx, LOG_ERR, "Cannot open meta file %s (%s)",
 	           datafile, strerror(errno));
       return errno;
    }
@@ -830,7 +830,7 @@ find_proxyname(glite_renewal_core_context ctx, char *jobid, char **filename)
 
    dir = opendir(repository);
    if (dir == NULL) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Cannot open repository directory %s (%s)",
+      glite_renewal_log(ctx, LOG_ERR, "Cannot open repository directory %s (%s)",
 	           repository, strerror(errno));
       return errno;
    }
@@ -848,7 +848,7 @@ find_proxyname(glite_renewal_core_context ctx, char *jobid, char **filename)
       }
    }
    closedir(dir);
-   edg_wlpr_Log(ctx, LOG_ERR, "Requested proxy is not registered");
+   glite_renewal_log(ctx, LOG_ERR, "Requested proxy is not registered");
    return EDG_WLPR_PROXY_NOT_REGISTERED;
 }
 
@@ -874,11 +874,11 @@ find_voms_cert(glite_renewal_core_context ctx, char *file, int *present)
 
    voms_info = VOMS_Init(vomsdir, cadir);
    if (voms_info == NULL) {
-      edg_wlpr_Log(ctx, LOG_ERR, "check_voms_cert(): Cannot initialize VOMS context (VOMS_Init() failed, probably voms dir was not specified)");
+      glite_renewal_log(ctx, LOG_ERR, "check_voms_cert(): Cannot initialize VOMS context (VOMS_Init() failed, probably voms dir was not specified)");
       return EDG_WLPR_ERROR_VOMS;
    }
 
-   ret = load_proxy(ctx, file, &cert, &privkey, &chain, NULL);
+   ret = glite_renewal_load_proxy(ctx, file, &cert, &privkey, &chain, NULL);
    if (ret) {
       VOMS_Destroy(voms_info);
       return ret;
@@ -912,10 +912,10 @@ register_proxy(glite_renewal_core_context ctx, edg_wlpr_Request *request, edg_wl
 
    memset(&record, 0, sizeof(record));
    memset(response, 0, sizeof(*response));
-   edg_wlpr_Log(ctx, LOG_DEBUG, "Registration request for %s", request->proxy_filename);
+   glite_renewal_log(ctx, LOG_DEBUG, "Registration request for %s", request->proxy_filename);
 
    if (request->proxy_filename == NULL || request->jobid == NULL) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Registration request doesn't contain registration information");
+      glite_renewal_log(ctx, LOG_ERR, "Registration request doesn't contain registration information");
       return; /*  EINVAL; */
    }
    umask(0177);
@@ -959,7 +959,7 @@ register_proxy(glite_renewal_core_context ctx, edg_wlpr_Request *request, edg_wl
 	 goto end;
       record.jobids.val[record.jobids.len - 1] = strdup(request->jobid);
       record.unique = request->unique;
-      edg_wlpr_Log(ctx, LOG_DEBUG, "Created a new proxy file in repository (%s)",
+      glite_renewal_log(ctx, LOG_DEBUG, "Created a new proxy file in repository (%s)",
 	           filename);
    } else {
       ret = realloc_prd_list(ctx, &record.jobids);
@@ -967,7 +967,7 @@ register_proxy(glite_renewal_core_context ctx, edg_wlpr_Request *request, edg_wl
 	 goto end;
       record.jobids.val[record.jobids.len - 1] = strdup(request->jobid);
       snprintf(filename, sizeof(filename), "%s.%d", basename, record.suffix);
-      edg_wlpr_Log(ctx, LOG_DEBUG, "Inremented counter on %s", filename);
+      glite_renewal_log(ctx, LOG_DEBUG, "Inremented counter on %s", filename);
    }
 
    ret = store_record(ctx, basename, &record);
@@ -997,10 +997,10 @@ unregister_proxy(glite_renewal_core_context ctx, edg_wlpr_Request *request, edg_
    struct stat stat_buf;
 
    memset(&record, 0, sizeof(record));
-   edg_wlpr_Log(ctx, LOG_DEBUG, "Unregistration request for %s", request->jobid);
+   glite_renewal_log(ctx, LOG_DEBUG, "Unregistration request for %s", request->jobid);
 
    if (request->jobid == NULL) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Unregistration request doesn't contain needed information");
+      glite_renewal_log(ctx, LOG_ERR, "Unregistration request doesn't contain needed information");
       ret = EINVAL;
       goto end;
    }
@@ -1017,7 +1017,7 @@ unregister_proxy(glite_renewal_core_context ctx, edg_wlpr_Request *request, edg_
    }
 
    if (strncmp(request->proxy_filename, basename, strlen(basename) != 0)) {
-      edg_wlpr_Log(ctx, LOG_DEBUG, "Requested proxy %s is not from repository",
+      glite_renewal_log(ctx, LOG_DEBUG, "Requested proxy %s is not from repository",
 	           request->proxy_filename);
       ret = EDG_WLPR_PROXY_NOT_REGISTERED;
       goto end;
@@ -1025,7 +1025,7 @@ unregister_proxy(glite_renewal_core_context ctx, edg_wlpr_Request *request, edg_
 
    p = strrchr(request->proxy_filename, '.');
    if (p == NULL) {
-      edg_wlpr_Log(ctx, LOG_DEBUG, "Requested proxy %s is not from repository",
+      glite_renewal_log(ctx, LOG_DEBUG, "Requested proxy %s is not from repository",
 	           request->proxy_filename);
       ret = EDG_WLPR_PROXY_NOT_REGISTERED;
       goto end;
@@ -1033,7 +1033,7 @@ unregister_proxy(glite_renewal_core_context ctx, edg_wlpr_Request *request, edg_
 
    ret = edg_wlpr_DecodeInt(p+1, &record.suffix);
    if (ret) {
-      edg_wlpr_Log(ctx, LOG_DEBUG, "Requested proxy %s is not from repository",
+      glite_renewal_log(ctx, LOG_DEBUG, "Requested proxy %s is not from repository",
 	          request->proxy_filename);
       ret = EDG_WLPR_PROXY_NOT_REGISTERED;
       goto end;
@@ -1056,7 +1056,7 @@ unregister_proxy(glite_renewal_core_context ctx, edg_wlpr_Request *request, edg_
 	 break;
       }
    if (ret) {
-      edg_wlpr_Log(ctx, LOG_DEBUG, "Requested proxy %s is not registered",
+      glite_renewal_log(ctx, LOG_DEBUG, "Requested proxy %s is not registered",
 	           request->proxy_filename);
       goto end;
    }
@@ -1077,7 +1077,7 @@ unregister_proxy(glite_renewal_core_context ctx, edg_wlpr_Request *request, edg_
 
    ret = stat(request->proxy_filename, &stat_buf);
    if (ret) {
-      edg_wlpr_Log(ctx, LOG_DEBUG, "Cannot stat file %s: (%s)",
+      glite_renewal_log(ctx, LOG_DEBUG, "Cannot stat file %s: (%s)",
 	           request->proxy_filename, strerror(errno));
       ret = errno;
       goto end;
@@ -1111,10 +1111,10 @@ get_proxy(glite_renewal_core_context ctx, edg_wlpr_Request *request, edg_wlpr_Re
 
    memset(response, 0, sizeof(*response));
 
-   edg_wlpr_Log(ctx, LOG_DEBUG, "GET request for %s", request->jobid);
+   glite_renewal_log(ctx, LOG_DEBUG, "GET request for %s", request->jobid);
    
    if (request->jobid == NULL) {
-      edg_wlpr_Log(ctx, LOG_ERR, "GET request doesn't contain jobid specification");
+      glite_renewal_log(ctx, LOG_ERR, "GET request doesn't contain jobid specification");
       ret = EINVAL;
       goto end;
    }
@@ -1149,7 +1149,7 @@ update_db(glite_renewal_core_context ctx, edg_wlpr_Request *request, edg_wlpr_Re
 
    memset(&record, 0, sizeof(record));
 
-   edg_wlpr_Log(ctx, LOG_DEBUG, "UPDATE_DB request for %s", request->proxy_filename);
+   glite_renewal_log(ctx, LOG_DEBUG, "UPDATE_DB request for %s", request->proxy_filename);
 
    chdir(repository);
    basename = request->proxy_filename;
@@ -1157,7 +1157,7 @@ update_db(glite_renewal_core_context ctx, edg_wlpr_Request *request, edg_wlpr_Re
    snprintf(datafile, sizeof(datafile), "%s.data", basename);
    fd = fopen(datafile, "r");
    if (fd == NULL) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Cannot open meta file %s (%s)",
+      glite_renewal_log(ctx, LOG_ERR, "Cannot open meta file %s (%s)",
 	           datafile, strerror(errno));
       ret = errno;
       return;
@@ -1166,7 +1166,7 @@ update_db(glite_renewal_core_context ctx, edg_wlpr_Request *request, edg_wlpr_Re
    snprintf(tmp_file, sizeof(tmp_file), "%s.XXXXXX", datafile);
    tmp_fd = mkstemp(tmp_file);
    if (tmp_fd < 0) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Cannot create temporary file (%s)",
+      glite_renewal_log(ctx, LOG_ERR, "Cannot create temporary file (%s)",
 	           strerror(errno));
       ret = errno;
       goto end;
@@ -1218,7 +1218,7 @@ update_db(glite_renewal_core_context ctx, edg_wlpr_Request *request, edg_wlpr_Re
 	       free_record(ctx, &record);
 	       record.suffix = suffix;
 	       record.myproxy_server = server;
-	       edg_wlpr_Log(ctx, LOG_WARNING, "Removed expired proxy %s", cur_proxy);
+	       glite_renewal_log(ctx, LOG_WARNING, "Removed expired proxy %s", cur_proxy);
 	    } else
 	       get_times(ctx, cur_proxy, &record);
 	 } else {

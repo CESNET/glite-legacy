@@ -125,7 +125,7 @@ proto(glite_renewal_core_context ctx, int sock)
 
    ret = edg_wlpr_Read(sock, &timeout, &buf, &buf_len);
    if (ret) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Error reading from client: %s",
+      glite_renewal_log(ctx, LOG_ERR, "Error reading from client: %s",
                    edg_wlpr_GetErrorString(ret));
       return ret;
    }
@@ -140,11 +140,11 @@ proto(glite_renewal_core_context ctx, int sock)
    command = find_command(ctx, request.command);
    if (command == NULL) {
       ret = EDG_WLPR_ERROR_UNKNOWN_COMMAND;
-      edg_wlpr_Log(ctx, LOG_ERR, "Received unknown command (%d)", request.command);
+      glite_renewal_log(ctx, LOG_ERR, "Received unknown command (%d)", request.command);
       goto end;
    }
 
-   edg_wlpr_Log(ctx, LOG_INFO, "Received command code %d for proxy %s and jobid %s",
+   glite_renewal_log(ctx, LOG_INFO, "Received command code %d for proxy %s and jobid %s",
                 request.command,
 		request.proxy_filename ? request.proxy_filename : "(unspecified)",
 		request.jobid ? request.jobid : "(unspecified)");
@@ -158,7 +158,7 @@ proto(glite_renewal_core_context ctx, int sock)
    ret = edg_wlpr_Write(sock, &timeout, buf, strlen(buf) + 1);
    free(buf);
    if (ret) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Error sending response to client: %s",
+      glite_renewal_log(ctx, LOG_ERR, "Error sending response to client: %s",
                    edg_wlpr_GetErrorString(ret));
       goto end;
    }
@@ -188,7 +188,7 @@ doit(glite_renewal_core_context ctx, int sock)
 	 ret = start_watchdog(ctx, &newpid);
 	 if (ret)
 	    return ret;
-	 edg_wlpr_Log(ctx, LOG_DEBUG, "Renewal slave process re-started");
+	 glite_renewal_log(ctx, LOG_DEBUG, "Renewal slave process re-started");
 	 child_died = 0;
 	 continue;
       }
@@ -196,14 +196,14 @@ doit(glite_renewal_core_context ctx, int sock)
       newsock = accept(sock, (struct sockaddr *) &client_addr, &client_addr_len);
       if (newsock == -1) {
 	 if (errno != EINTR)
-	    edg_wlpr_Log(ctx, LOG_ERR, "accept() failed");
+	    glite_renewal_log(ctx, LOG_ERR, "accept() failed");
          continue;
       }
-      edg_wlpr_Log(ctx, LOG_DEBUG, "Got connection");
+      glite_renewal_log(ctx, LOG_DEBUG, "Got connection");
 
       flags = fcntl(newsock, F_GETFL, 0);
       if (fcntl(newsock, F_SETFL, flags | O_NONBLOCK) < 0) {
-	 edg_wlpr_Log(ctx, LOG_ERR, "Can't set O_NONBLOCK mode (%s), closing.\n",
+	 glite_renewal_log(ctx, LOG_ERR, "Can't set O_NONBLOCK mode (%s), closing.\n",
 	              strerror(errno));
 	 close(newsock);
 	 continue;
@@ -211,10 +211,10 @@ doit(glite_renewal_core_context ctx, int sock)
 	 
       proto(ctx, newsock);
 
-      edg_wlpr_Log(ctx, LOG_DEBUG, "Connection closed");
+      glite_renewal_log(ctx, LOG_DEBUG, "Connection closed");
       close(newsock);
    }
-   edg_wlpr_Log(ctx, LOG_DEBUG, "Terminating on signal %d\n",die);
+   glite_renewal_log(ctx, LOG_DEBUG, "Terminating on signal %d\n",die);
    return 0;
 }
 
@@ -239,7 +239,7 @@ decode_request(glite_renewal_core_context ctx, const char *msg, const size_t msg
    ret = edg_wlpr_GetToken(msg, msg_len, EDG_WLPR_PROTO_VERSION, SEPARATORS,
 	 		   0, &request->version);
    if (ret) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Protocol error reading protocol specification: %s",
+      glite_renewal_log(ctx, LOG_ERR, "Protocol error reading protocol specification: %s",
                    edg_wlpr_GetErrorString(ret));
       return ret;
    }
@@ -247,14 +247,14 @@ decode_request(glite_renewal_core_context ctx, const char *msg, const size_t msg
    ret = edg_wlpr_GetToken(msg, msg_len, EDG_WLPR_PROTO_COMMAND, SEPARATORS,
 	 		   0, &value);
    if (ret) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Protocol error reading command specification: %s",
+      glite_renewal_log(ctx, LOG_ERR, "Protocol error reading command specification: %s",
                    edg_wlpr_GetErrorString(ret));
       goto err;
    }
 
    ret = edg_wlpr_DecodeInt(value, (int *)(&request->command));
    if (ret) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Received non-numeric command specification (%s)",
+      glite_renewal_log(ctx, LOG_ERR, "Received non-numeric command specification (%s)",
                    value);
       free(value);
       goto err;
@@ -262,7 +262,7 @@ decode_request(glite_renewal_core_context ctx, const char *msg, const size_t msg
    free(value);
 
    if (find_command(ctx, request->command) == NULL) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Received unknown command (%d)", request->command);
+      glite_renewal_log(ctx, LOG_ERR, "Received unknown command (%d)", request->command);
       ret = EDG_WLPR_ERROR_UNKNOWN_COMMAND;
       goto err;
    }
@@ -270,7 +270,7 @@ decode_request(glite_renewal_core_context ctx, const char *msg, const size_t msg
    ret = edg_wlpr_GetToken(msg, msg_len, EDG_WLPR_PROTO_MYPROXY_SERVER,
 	 		   SEPARATORS, 0, &request->myproxy_server);
    if (ret && ret != EDG_WLPR_ERROR_PROTO_PARSE_NOT_FOUND) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Protocol error reading myproxy server specification: %s",
+      glite_renewal_log(ctx, LOG_ERR, "Protocol error reading myproxy server specification: %s",
                    edg_wlpr_GetErrorString(ret));
       goto err;
    }
@@ -287,7 +287,7 @@ decode_request(glite_renewal_core_context ctx, const char *msg, const size_t msg
    ret = edg_wlpr_GetToken(msg, msg_len, EDG_WLPR_PROTO_PROXY, SEPARATORS, 
 	 		   0, &request->proxy_filename);
    if (ret && ret != EDG_WLPR_ERROR_PROTO_PARSE_NOT_FOUND) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Protocol error reading proxy specification: %s",
+      glite_renewal_log(ctx, LOG_ERR, "Protocol error reading proxy specification: %s",
                    edg_wlpr_GetErrorString(ret));
       goto err;
    }
@@ -305,7 +305,7 @@ decode_request(glite_renewal_core_context ctx, const char *msg, const size_t msg
    ret = edg_wlpr_GetToken(msg, msg_len, EDG_WLPR_PROTO_JOBID, SEPARATORS,
 	 		   0, &request->jobid);
    if (ret && ret != EDG_WLPR_ERROR_PROTO_PARSE_NOT_FOUND) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Protocol error reading JobId : %s",
+      glite_renewal_log(ctx, LOG_ERR, "Protocol error reading JobId : %s",
 	    	   edg_wlpr_GetErrorString(ret));
       goto err;
    }
@@ -452,20 +452,20 @@ do_listen(glite_renewal_core_context ctx, char *socket_name, int *sock)
 
    s = socket(AF_UNIX, SOCK_STREAM, 0);
    if (s == -1) {
-      edg_wlpr_Log(ctx, LOG_ERR, "socket(): %s", strerror(errno));
+      glite_renewal_log(ctx, LOG_ERR, "socket(): %s", strerror(errno));
       return errno;
    }
 
    ret = bind(s, (struct sockaddr *)&my_addr, sizeof(my_addr));
    if (ret == -1) {
-      edg_wlpr_Log(ctx, LOG_ERR, "bind(): %s", strerror(errno));
+      glite_renewal_log(ctx, LOG_ERR, "bind(): %s", strerror(errno));
       close(s);
       return errno;
    }
 
    ret = listen(s, 50);
    if (ret == -1) {
-      edg_wlpr_Log(ctx, LOG_ERR, "listen(): %s", strerror(errno));
+      glite_renewal_log(ctx, LOG_ERR, "listen(): %s", strerror(errno));
       close(s);
       return errno;
    }
@@ -481,7 +481,7 @@ start_watchdog(glite_renewal_core_context ctx, pid_t *pid)
 
    switch ((p = fork())) {
       case -1:
-	 edg_wlpr_Log(ctx, LOG_ERR, "fork() failed: %s",
+	 glite_renewal_log(ctx, LOG_ERR, "fork() failed: %s",
 	              strerror(errno));
 	 return errno;
       case 0:
@@ -549,7 +549,7 @@ int main(int argc, char *argv[])
    ctx->voms_conf = vomsconf;
 
    if (chdir(repository)) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Cannot access repository directory %s (%s)",
+      glite_renewal_log(ctx, LOG_ERR, "Cannot access repository directory %s (%s)",
 	           repository, strerror(errno));
       exit(1);
    }
@@ -600,7 +600,7 @@ int main(int argc, char *argv[])
    ret = do_listen(ctx, sockname, &sock);
    if (ret)
       return 1;
-   edg_wlpr_Log(ctx, LOG_DEBUG, "Listening at %s", sockname);
+   glite_renewal_log(ctx, LOG_DEBUG, "Listening at %s", sockname);
 
    ret = doit(ctx, sock);
 

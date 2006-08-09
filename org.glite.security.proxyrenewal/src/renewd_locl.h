@@ -55,7 +55,7 @@ void
 watchdog_start(glite_renewal_core_context ctx);
 
 void
-edg_wlpr_Log(glite_renewal_core_context ctx, int dbg_level, const char *format, ...);
+glite_renewal_log(glite_renewal_core_context ctx, int dbg_level, const char *format, ...);
 
 int
 decode_record(glite_renewal_core_context ctx, char *line, proxy_record *record);
@@ -67,16 +67,16 @@ void
 free_record(glite_renewal_core_context ctx, proxy_record *record);
 
 int
-load_proxy(glite_renewal_core_context ctx, const char *filename, X509 **cert, EVP_PKEY **privkey,
+glite_renewal_load_proxy(glite_renewal_core_context ctx, const char *filename, X509 **cert, EVP_PKEY **privkey,
            STACK_OF(X509) **chain, globus_gsi_cred_handle_t *proxy);
 
 int
-get_proxy_base_name(glite_renewal_core_context ctx, const char *file, char **subject);
+glite_renewal_get_proxy_base_name(glite_renewal_core_context ctx, const char *file, char **subject);
 
 int
-renew_voms_creds(glite_renewal_core_context ctx, const char *cur_file, const char *renewed_file, const char *new_file);
+glite_renewal_renew_voms_creds(glite_renewal_core_context ctx, const char *cur_file, const char *renewed_file, const char *new_file);
 
 int
-check_voms_attrs(glite_renewal_core_context ctx, const char *proxy);
+glite_renewal_check_voms_attrs(glite_renewal_core_context ctx, const char *proxy);
 
 #endif /* RENEWALD_LOCL_H */
