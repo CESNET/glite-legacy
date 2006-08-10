@@ -3,6 +3,10 @@
 
 #ident "$Header$"
 
+
+#include <time.h>
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -60,7 +64,7 @@ typedef struct glite_lbu_Statement_s *glite_lbu_Statement;
 /**
  * Structure holds date for multi-rows insert.
  */
-typedef struct glite_lbu_bufInsert_s glite_lbu_bufInsert;
+typedef struct glite_lbu_bufInsert_s *glite_lbu_bufInsert;
 
 
 
@@ -88,6 +92,16 @@ typedef enum {
 	GLITE_LBU_DB_TYPE_LAST = 17
 } glite_lbu_DBType;
 
+
+
+/**
+ * Get error state from DB context.
+ *
+ * \param[in]  ctx   context to work with
+ * \param[out] text  error name
+ * \param[out] desc  error description
+ */
+int glite_lbu_DBError(glite_lbu_DBContext ctx, char **text, char **desc);
 
 
 /**
@@ -167,9 +181,11 @@ int glite_lbu_FetchRow(glite_lbu_Statement stmt, unsigned int n, unsigned long *
 /**
  * Free the statement structure and destroy its parameters.
  *
+ * Statement will be set to NULL and multiple calls are allowed.
+ *
  * \param[in,out] stmt  statement
  */
-void glite_lbu_FreeStmt(glite_lbu_Statement stmt);
+void glite_lbu_FreeStmt(glite_lbu_Statement *stmt);
 
 
 /**
@@ -201,15 +217,14 @@ int glite_lbu_QueryColumns(glite_lbu_Statement stmt, char **cols);
 /**
  * Retrieve column names of a query simple SQL statement.
  *
- * Not implemented for now.
- *
- * \param[in,out] ctx     context to work with
- * \param[in] table       table name
- * \param[out] names      result set column names. Expects allocated array.
+ * \param[in,out] ctx        context to work with
+ * \param[in] table          table name
+ * \param[out] key_names     one-dimensional index names array
+ * \param[out] column_names  two-dimensional column names array
  *
  * \return                0 if OK, nonzero on error
  */
-int glite_lbu_QueryIndices(glite_lbu_DBContext ctx, const char *table, char ***names);
+int glite_lbu_QueryIndices(glite_lbu_DBContext ctx, const char *table, char ***key_names, char ****column_names);
 
 
 /** 
@@ -249,13 +264,13 @@ int glite_lbu_bufferedInsertInit(glite_lbu_DBContext ctx, glite_lbu_bufInsert *b
  * if num. of rows or size of data oversteps the limits, real
  * multi-row insert is done
  */
-int glite_lbu_bufferedInsert(glite_lbu_bufInsert *bi, const char *row);
+int glite_lbu_bufferedInsert(glite_lbu_bufInsert bi, const char *row);
 
 
 /**
  * Flush buffered data and free bi structure.
  */
-int glite_lbu_bufferedInsertClose(glite_lbu_bufInsert *bi);
+int glite_lbu_bufferedInsertClose(glite_lbu_bufInsert bi);
 
 
 /**
@@ -306,6 +321,4 @@ int glite_lbu_ExecStmt(glite_lbu_Statement stmt, int n, ...);
 }
 #endif
 
-#else
-#error Already included
 #endif

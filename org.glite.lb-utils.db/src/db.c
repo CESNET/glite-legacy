@@ -29,7 +29,7 @@
 
 #define CLR_ERR(CTX) lbu_clrerr((CTX))
 #define ERR(CTX, CODE, DESC) lbu_err((CTX), (CODE), (DESC), __FUNCTION__, __LINE__)
-#define STATUS(CTX) ((CTX)->code)
+#define STATUS(CTX) ((CTX)->err.code)
 #define MY_ERR(CTX) myerr((CTX), __FUNCTION__, __LINE__)
 #define MY_ERRSTMT(STMT) myerrstmt((STMT), __FUNCTION__, __LINE__)
 #define MY_ISOKSTMT(STMT, RETRY) myisokstmt((STMT), __FUNCTION__, __LINE__, (RETRY))
@@ -41,9 +41,12 @@
 struct glite_lbu_DBContext_s {
 	MYSQL *mysql;
 	const char *cs;
+	int have_caps;
 	int caps;
-	int code;
-	char *text;
+	struct {
+		int code;
+		char *desc;
+	} err;
 };
 
 
@@ -99,7 +102,7 @@ int glite_type_to_mysql[] = {
 
 
 static int lbu_clrerr(glite_lbu_DBContext ctx);
-static int lbu_err(glite_lbu_DBContext ctx, int code, const char *text, const char *func, int line);
+static int lbu_err(glite_lbu_DBContext ctx, int code, const char *desc, const char *func, int line);
 static int myerr(glite_lbu_DBContext ctx, const char *source, int line);
 static int myerrstmt(glite_lbu_Statement stmt, const char *source, int line);
 static int myisokstmt(glite_lbu_Statement stmt, const char *source, int line, int *retry);
@@ -113,6 +116,17 @@ time_t get_time(const MYSQL_TIME *mtime);
 
 
 /* ---- common ---- */
+
+
+int glite_lbu_DBError(glite_lbu_DBContext ctx, char **text, char **desc) {
+	if (text) *text = strdup(strerror(ctx->err.code));
+	if (desc) {
+		if (ctx->err.desc) *desc = strdup(ctx->err.desc);
+		else *desc = NULL;
+	}
+
+	return ctx->err.code;
+}
 
 
 int glite_lbu_DBConnect(glite_lbu_DBContext *ctx, const char *cs, int caps) {
@@ -131,7 +145,7 @@ int glite_lbu_DBConnect(glite_lbu_DBContext *ctx, const char *cs, int caps) {
 
 void glite_lbu_DBClose(glite_lbu_DBContext ctx) {
 	db_close(ctx->mysql);
-	free(ctx->text);
+	free(ctx->err.desc);
 	free(ctx);
 }
 
@@ -141,6 +155,8 @@ int glite_lbu_DBQueryCaps(glite_lbu_DBContext ctx) {
 	MYSQL	*m2;
 	int	major,minor,sub,version,caps,have_transactions=0;
 	const char *ver_s;
+
+	if (ctx->have_caps) return ctx->caps;
 
 	caps = 0;
 
@@ -160,8 +176,10 @@ int glite_lbu_DBQueryCaps(glite_lbu_DBContext ctx) {
 	}
 	if (have_transactions) caps |= GLITE_LBU_DB_CAP_TRANSACTIONS;
 
-	if (STATUS(ctx) == 0) return caps;
-	else return -1;
+	if (STATUS(ctx) == 0) {
+		ctx->have_caps = 1;
+		return caps;
+	} else return -1;
 }
 
 
@@ -201,24 +219,110 @@ err:
 
 
 int glite_lbu_FetchRow(glite_lbu_Statement stmt, unsigned int n, unsigned long *lengths, char **results) {
+	memset(results, 0, n * sizeof(*results));
 	if (stmt->result) return FetchRowSimple(stmt->ctx, stmt->result, lengths, results);
 	else return FetchRowPrepared(stmt->ctx, stmt, n, lengths, results);
 }
 
 
-void glite_lbu_FreeStmt(glite_lbu_Statement stmt) {
-	if (stmt) {
-		if (stmt->result) mysql_free_result(stmt->result);
-		if (stmt->stmt) mysql_stmt_close(stmt->stmt);
-		free(stmt);
+void glite_lbu_FreeStmt(glite_lbu_Statement *stmt) {
+	if (*stmt) {
+		if ((*stmt)->result) mysql_free_result((*stmt)->result);
+		if ((*stmt)->stmt) mysql_stmt_close((*stmt)->stmt);
+		free(*stmt);
+		*stmt = NULL;
 	}
 }
 
 
-#warning TODO: glite_lbu_QueryIndices not implemented
-/*int glite_lbu_QueryIndices(glite_lbu_DBContext ctx, const char *table, char **names) {
-	return 0;
-}*/
+int glite_lbu_QueryIndices(glite_lbu_DBContext ctx, const char *table, char ***key_names, char ****column_names) {
+	glite_lbu_Statement       stmt = NULL;
+
+	int	i,j,ret;
+
+/* XXX: "show index from" columns. Matches at least MySQL 4.0.11 */
+	char	*showcol[12];
+	int	Key_name,Seq_in_index,Column_name,Sub_part;
+
+	char	**keys = NULL;
+	int	*cols = NULL;
+	char	**col_names = NULL;
+
+	int	nkeys = 0;
+
+	char	***idx = NULL;
+
+	Key_name = Seq_in_index = Column_name = Sub_part = -1;
+
+	if (glite_lbu_ExecSQL(ctx,"show index from states",&stmt)<0) 
+		return STATUS(ctx);
+
+	while ((ret = glite_lbu_FetchRow(stmt,sizeof(showcol)/sizeof(showcol[0]),NULL,showcol)) > 0) {
+		assert(ret <= sizeof showcol/sizeof showcol[0]);
+
+		if (!col_names) {
+			col_names = malloc(ret * sizeof col_names[0]);
+			glite_lbu_QueryColumns(stmt,col_names);
+			for (i=0; i<ret; i++) 
+				if (!strcasecmp(col_names[i],"Key_name")) Key_name = i;
+				else if (!strcasecmp(col_names[i],"Seq_in_index")) Seq_in_index = i;
+				else if (!strcasecmp(col_names[i],"Column_name")) Column_name = i;
+				else if (!strcasecmp(col_names[i],"Sub_part")) Sub_part = i;
+
+			assert(Key_name >= 0 && Seq_in_index >= 0 && 
+					Column_name >= 0 && Sub_part >= 0);
+
+		}
+
+		for (i=0; i<nkeys && strcasecmp(showcol[Key_name],keys[i]); i++);
+
+		if (i == nkeys) {
+			keys = realloc(keys,(i+2) * sizeof keys[0]);
+			keys[i] = showcol[Key_name];
+//printf("** KEY [%d] %s\n", i, keys[i]);
+			keys[i+1] = NULL;
+			cols = realloc(cols,(i+1) * sizeof cols[0]); 
+			cols[i] = 0;
+			idx = realloc(idx,(i+2) * sizeof idx[0]);
+			idx[i] = idx[i+1] = NULL;
+			showcol[Key_name] = NULL;
+			nkeys++;
+		}
+
+		j = atoi(showcol[Seq_in_index])-1;
+		if (cols[i] <= j) {
+			cols[i] = j+1;
+			idx[i] = realloc(idx[i],(j+2)*sizeof idx[i][0]);
+			memset(&idx[i][j+1],0,sizeof idx[i][0]);
+		}
+		idx[i][j] = strdup(showcol[Column_name]);
+//printf("****** [%d, %d] %s\n", i, j, idx[i][j]);
+//FIXME: needed?idx[i][j].value.i = atoi(showcol[Sub_part]);
+		for (i = 0; showcol[i]; i++) free(showcol[i]);
+	}
+
+	glite_lbu_FreeStmt(&stmt);
+	free(cols);
+	free(col_names);
+
+	if (ret == 0) CLR_ERR(ctx);
+	else {
+		free(keys);
+		keys = NULL;
+		for (i = 0; idx[i]; i++) {
+			for (j = 0; idx[i][j]; j++) free(idx[i][j]);
+			free(idx[i]);
+		}
+		free(idx);
+		idx = NULL;
+	}
+
+	if (key_names) *key_names = keys;
+	else free(keys);
+	*column_names = idx;
+
+	return STATUS(ctx);
+}
 
 
 /* ---- simple ---- */
@@ -280,6 +384,7 @@ int glite_lbu_ExecSQL(glite_lbu_DBContext ctx, const char *cmd, glite_lbu_Statem
 		if (!(**stmt).result) {
 			if (mysql_errno(ctx->mysql)) {
 				MY_ERR(ctx);
+				*stmt = NULL;
 				return -1;
 			}
 		}
@@ -309,7 +414,7 @@ int glite_lbu_QueryColumns(glite_lbu_Statement stmt, char **cols)
 	int	i = 0;
 	MYSQL_FIELD 	*f;
 
-	if (!stmt->result) return ERR(stmt->ctx, EINVAL, "QueryColums work only in simple API");
+	if (!stmt->result) return ERR(stmt->ctx, EINVAL, "QueryColumns implemented only for simple API");
 	while ((f = mysql_fetch_field(stmt->result))) cols[i++] = f->name;
 	return i == 0;
 }
@@ -369,7 +474,7 @@ int glite_lbu_PrepareStmt(glite_lbu_DBContext ctx, const char *sql, glite_lbu_St
 	return CLR_ERR(ctx);
 
 failed:
-	glite_lbu_FreeStmt(*stmt);
+	glite_lbu_FreeStmt(stmt);
 	return STATUS(ctx);
 }
 
@@ -488,20 +593,21 @@ failed:
 
 int glite_lbu_bufferedInsertInit(glite_lbu_DBContext ctx, glite_lbu_bufInsert *bi, void *mysql, const char *table_name, long size_limit, long record_limit, const char *columns)
 {
-        bi->ctx = ctx;
-        bi->table_name = strdup(table_name);
-        bi->columns = strdup(columns);
-        bi->rec_num = 0;
-        bi->rec_size = 0;
-        bi->rows = calloc(record_limit, sizeof(*(bi->rows)) );
-        bi->size_limit = size_limit;
-        bi->record_limit = record_limit;
+	*bi = calloc(1, sizeof(*bi));
+	(*bi)->ctx = ctx;
+	(*bi)->table_name = strdup(table_name);
+	(*bi)->columns = strdup(columns);
+	(*bi)->rec_num = 0;
+	(*bi)->rec_size = 0;
+	(*bi)->rows = calloc(record_limit, sizeof(*((*bi)->rows)) );
+	(*bi)->size_limit = size_limit;
+	(*bi)->record_limit = record_limit;
 
-        return STATUS(bi->ctx);
+        return CLR_ERR(ctx);
 }
 
 
-static int flush_bufferd_insert(glite_lbu_bufInsert *bi)
+static int flush_bufferd_insert(glite_lbu_bufInsert bi)
 {
 	char *stmt, *vals, *temp;
 	long i;
@@ -538,7 +644,7 @@ static int flush_bufferd_insert(glite_lbu_bufInsert *bi)
 }
 
 
-int glite_lbu_bufferedInsert(glite_lbu_bufInsert *bi, const char *row)
+int glite_lbu_bufferedInsert(glite_lbu_bufInsert bi, const char *row)
 {
 	bi->rows[bi->rec_num++] = strdup(row);
 	bi->rec_size += strlen(row);
@@ -554,7 +660,7 @@ int glite_lbu_bufferedInsert(glite_lbu_bufInsert *bi, const char *row)
 }
 
 
-static void free_buffered_insert(glite_lbu_bufInsert *bi) {
+static void free_buffered_insert(glite_lbu_bufInsert bi) {
 	long i;
 
 	free(bi->table_name);
@@ -566,7 +672,7 @@ static void free_buffered_insert(glite_lbu_bufInsert *bi) {
 }
 
 
-int glite_lbu_bufferedInsertClose(glite_lbu_bufInsert *bi)
+int glite_lbu_bufferedInsertClose(glite_lbu_bufInsert bi)
 {
 	if (flush_bufferd_insert(bi))
 		return STATUS(bi->ctx);
@@ -580,10 +686,10 @@ int glite_lbu_bufferedInsertClose(glite_lbu_bufInsert *bi)
  * helping compatibility function: clear error from the context
  */
 static int lbu_clrerr(glite_lbu_DBContext ctx) {
-	ctx->code = 0;
-	if (ctx->text) {
-		free(ctx->text);
-		ctx->text = NULL;
+	ctx->err.code = 0;
+	if (ctx->err.desc) {
+		free(ctx->err.desc);
+		ctx->err.desc = NULL;
 	}
 	return 0;
 }
@@ -592,15 +698,15 @@ static int lbu_clrerr(glite_lbu_DBContext ctx) {
 /*
  * helping compatibility function: sets error on the context
  */
-static int lbu_err(glite_lbu_DBContext ctx, int code, const char *text, const char *func, int line) {
+static int lbu_err(glite_lbu_DBContext ctx, int code, const char *desc, const char *func, int line) {
 	if (code) {
-		ctx->code = code;
-		free(ctx->text);
-		ctx->text = text ? strdup(text) : NULL;
-		fprintf(stderr, "[db] %s:%d %s\n", func, line, text);
+		ctx->err.code = code;
+		free(ctx->err.desc);
+		ctx->err.desc = desc ? strdup(desc) : NULL;
+		fprintf(stderr, "[db] %s:%d %s\n", func, line, desc);
 		return code;
 	} else
-		return ctx->code;
+		return ctx->err.code;
 }
 
 
@@ -759,11 +865,11 @@ static int transaction_test(glite_lbu_DBContext ctx, MYSQL *m2, int *have_transa
 	*have_transactions = retval == 0;
 	goto ok;
 err2:
-	err = ctx->code;
-	desc = ctx->text;
+	err = ctx->err.code;
+	desc = ctx->err.desc;
 	glite_lbu_ExecSQL(ctx, cmd_drop, NULL);
-	ctx->code = err;
-	ctx->text = desc;
+	ctx->err.code = err;
+	ctx->err.desc = desc;
 err1:
 ok:
 	free(cmd_create);

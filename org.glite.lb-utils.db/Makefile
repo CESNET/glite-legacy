@@ -65,21 +65,21 @@ HDRS:=db.h
 LOBJS:=${OBJS:.o=.lo}
 LTESTOBJS:=${TESTOBJS:.o=.lo}
 
-libglite_lbutils_db.la: ${LOBJS}
+libglite_lbu_db.la: ${LOBJS}
 	${LINK} -o $@ $< ${EXT_LIBS}
 
-libglite_lbutils_dbtest.la: ${LTESTOBJS}
+libglite_lbu_dbtest.la: ${LTESTOBJS}
 	${LINK} -o $@ $< ${EXT_LIBS}
 
 dbtest.lo dbtest.o: db.c db.h
 	${COMPILE} -DGLITE_LBU_DEFAULT_RESULT_BUFFER_LENGTH=10 -c $< -o $@
 
-db_test: db_test.lo libglite_lbutils_dbtest.la
+db_test: db_test.lo libglite_lbu_dbtest.la
 	${LINK} -o $@ $+ ${EXT_LIBS}
 
 default all: compile
 
-compile: libglite_lbutils_db.la
+compile: libglite_lbu_db.la
 
 check:
 	-echo No checks here yet.
@@ -114,7 +114,7 @@ install:
 	-mkdir -p ${PREFIX}/lib
 	-mkdir -p ${PREFIX}/include/${globalprefix}/${lbutilsprefix}
 #	${INSTALL} -m 644 ${top_srcdir}/LICENSE ${PREFIX}/share/doc/${package}-${version}
-	${INSTALL} -m 755 "libglite_lbutils_db.la" "${PREFIX}/lib/glite-lbutils-db.la"; \
+	${INSTALL} -m 755 "libglite_lbu_db.la" "${PREFIX}/lib/libglite_lbu_db.la"; \
 	${INSTALL} -m 644 ${top_srcdir}/interface/${HDRS} ${PREFIX}/include/${globalprefix}/${lbutilsprefix}
 
 clean:
@@ -123,6 +123,6 @@ clean:
 	${COMPILE} -c $<
 
 db.lo: db.c db.h
-db_test.lo: libglite_lbutils_dbtest.la db.h db_test.c
+db_test.lo: libglite_lbu_dbtest.la db.h db_test.c
 
 .PHONY: default all compile check examples doc stage dist distsrc distbin install clean test_coverage
