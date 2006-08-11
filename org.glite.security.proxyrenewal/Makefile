@@ -73,20 +73,28 @@ INSTALL:=libtool --mode=install install
 
 DAEMONOBJ:=renewd.o renew.o common.o commands.o api.o voms.o
 LIBOBJ:=api.o common.o
+LIB_CORE_OBJS := renewal_core.o voms.o renewal_core_compat.o
 CLIENTOBJ:=client.o
 
 THRLIBOBJ:=${LIBOBJ:.o=.thr.o}
 LIBLOBJ:=${LIBOBJ:.o=.lo}
 THRLIBLOBJ:=${LIBOBJ:.o=.thr.lo}
 
+LIB_CORE_NOTHR_OBJS := ${LIB_CORE_OBJS}
+LIB_CORE_NOTHR_LOBJS := ${LIB_CORE_OBJS:.o=.lo}
+LIB_CORE_THR_OBJS := ${LIB_CORE_OBJS:.o=.thr.o}
+LIB_CORE_THR_LOBJS := ${LIB_CORE_OBJS:.o=.thr.lo}
+
 LIB:=libglite_security_proxyrenewal_${nothrflavour}.la
 THRLIB:=libglite_security_proxyrenewal_${thrflavour}.la
+LIB_CORE_NOTHR := libglite_security_proxyrenewal_core_${nothrflavour}.la
+LIB_CORE_THR := libglite_security_proxyrenewal_core_${thrflavour}.la
 
 DAEMON:=glite-proxy-renewd
 CLIENT:=glite-proxy-renew
 
 default: all
-compile all: ${LIB} ${THRLIB} ${DAEMON} ${CLIENT}
+compile all: ${LIB} ${THRLIB} ${LIB_CORE_NOTHR} ${DAEMON} ${CLIENT}
 
 ${LIB}: ${LIBOBJ}
 	${LINK} -o $@ ${LIBLOBJ} -rpath ${glite_location}/lib ${JOBIDLIB}
@@ -95,13 +103,16 @@ ${LIB}: ${LIBOBJ}
 ${THRLIB}: ${THRLIBOBJ}
 	${LINK} -o $@ ${THRLIBLOBJ} -rpath ${glite_location}/lib
 
+${LIB_CORE_NOTHR}: ${LIB_CORE_NOTHR_OBJS}
+	${LINK} -o $@ ${LIB_CORE_NOTHR_OBJS} -rpath ${glite_location}/lib ${MYPROXY_LIB} -L${glite_location}/lib -lvomsc_${nothrflavour}
+
 ${DAEMON}: ${DAEMONOBJ}
 	${LINK} -o $@ ${DAEMONOBJ} ${JOBIDLIB} ${MYPROXY_LIB} -lvomsc -lglobus_gss_assist_${nothrflavour} ${GLOBUS_LIBS} 
 
 ${CLIENT}: ${CLIENTOBJ} ${LIB}
 	${LINK} -o $@ ${CLIENTOBJ} ${LIB} ${GLOBUS_LIBS}
 
-${THRLIBOBJ}: %.thr.o: %.c
+${THRLIBOBJ} ${LIB_CORE_THR_OBJS}: %.thr.o: %.c
 	${COMPILE} ${GLOBUSTHRINC} -o $@ -c $<
 
 %.o: %.c
@@ -129,13 +140,13 @@ distbin:
 
 install:
 	-mkdir -p ${PREFIX}/bin ${PREFIX}/lib ${PREFIX}/include/glite/security/proxyrenewal ${PREFIX}/share/doc/${package}-${version} ${PREFIX}/etc/init.d
-	${INSTALL} -m 644 ${LIB} ${THRLIB} ${PREFIX}/lib
+	${INSTALL} -m 644 ${LIB} ${THRLIB} ${LIB_CORE_NOTHR} ${PREFIX}/lib
 	${INSTALL} -m 755 ${DAEMON} ${CLIENT} ${PREFIX}/bin
 	${INSTALL} -m 644 ${top_srcdir}/LICENSE ${PREFIX}/share/doc/${package}-${version}
-	cd ${top_srcdir}/interface && ${INSTALL} -m 644 renewal.h ${PREFIX}/include/glite/security/proxyrenewal
+	cd ${top_srcdir}/interface && ${INSTALL} -m 644 renewal.h renewal_core.h ${PREFIX}/include/glite/security/proxyrenewal
 
 	${INSTALL} -m 755 ${top_srcdir}/config/startup ${PREFIX}/etc/init.d/glite-proxy-renewald
 
 
 clean:
-	$(RM) $(LIB) $(DAEMON) $(CLIENT) *.o core 
+	$(RM) $(LIB) ${LIB_CORE_NOTHR} $(DAEMON) $(CLIENT) *.o core 
