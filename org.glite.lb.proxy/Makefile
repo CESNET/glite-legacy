@@ -70,7 +70,7 @@ endif
 
 
 SRVBONES_LIB:= -L${stagedir}/lib -lglite_lb_server_bones
-LB_SERVER_SHARE_LIB:= -L${stagedir}/lib -lglite_lb_bkserver
+LB_SERVER_SHARE_LIB:=${stagedir}/lib/libglite_lb_bkserver.a
 LB_PROXY_COMMON_LIB:= -L${stagedir}/lib -lglite_lb_common_${nothrflavour}
 COMMON_LIBS:= -L${stagedir}/lib -lglite_lb_common_${nothrflavour} -lglite_security_gss_${nothrflavour}
 GRIDSITE_LIBS = -lgridsite_globus `xml2-config --libs`
@@ -101,7 +101,7 @@ LB_PROXY_LIBS:= \
 
 
 
-glite_lb_proxy: lbproxy.o
+glite_lb_proxy: lbproxy.o ${LB_SERVER_SHARE_LIB}
 	@echo DEBUG: mysql_version=${mysql_version} mysql_prefix=${mysql_prefix}
 	@echo DEBUG: shell: x$(shell echo ${mysql_version} | cut -d. -f1,2)x
 	${LINK} -o $@ lbproxy.o ${LB_PROXY_LIBS}
@@ -140,9 +140,11 @@ install:
 	${INSTALL} -m 755 glite_lb_proxy ${PREFIX}/bin/glite-lb-proxy
 	${INSTALL} -m 644 ${top_srcdir}/config/glite-lb-dbsetup-proxy.sql ${PREFIX}/etc
 	${INSTALL} -m 755 ${top_srcdir}/config/startup ${PREFIX}/etc/init.d/glite-lb-proxy
-	if [ x${DOSTAGE} != xyes ]; then \
-		${INSTALL} -m 755 ${stagedir}/bin/glite-lb-interlogd ${PREFIX}/bin; \
-	fi
+
+# don't do it due to RPM conflict
+#	if [ x${DOSTAGE} != xyes ]; then \
+#		${INSTALL} -m 755 ${stagedir}/bin/glite-lb-interlogd ${PREFIX}/bin; \
+#	fi
 
 
 clean:
