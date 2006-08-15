@@ -326,7 +326,7 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 		 */
 		exit(1);
 
-	while ( !die && req_cnt < set_slave_reqs_max)
+	while ( !die && (req_cnt < set_slave_reqs_max || (conn >= 0 && first_request)))
 	{
 		fd_set				fds;
 		int					max = sock,
@@ -451,7 +451,7 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 			kick_client = KICK_LOAD;
 		}
 
-		if (req_cnt >= set_slave_reqs_max) kick_client = KICK_COUNT;
+		if (req_cnt >= set_slave_reqs_max && !first_request) kick_client = KICK_COUNT;
 
 		if ( kick_client && conn >= 0 )
 		{
@@ -468,8 +468,6 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 			conn = newconn;
 			srv = newsrv;
 			gettimeofday(&client_start, NULL);
-			client_done.tv_sec = client_start.tv_sec;
-			client_done.tv_usec = client_start.tv_usec;
 
 			switch ( send(sock, &seq, sizeof(seq), 0) )
 			{
@@ -509,6 +507,7 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 				conn = srv = -1;
 				continue;
 			}
+			gettimeofday(&client_done, NULL);
 			first_request = 1;
 		}
 	}
