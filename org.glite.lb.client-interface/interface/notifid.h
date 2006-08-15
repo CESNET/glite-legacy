@@ -77,6 +77,14 @@ char *edg_wll_NotifIdGetUnique(const edg_wll_NotifId notifid);
  */
 int edg_wll_NotifIdSetUnique(edg_wll_NotifId *notifid, const char *unique);
 
+/**
+ * Duplicate a NotifId
+ * \param[in] src	a notifid to duplicate
+ * \retval pointer to allocated memory containg the duplicated notifid
+ * \retval NULL if memory allocation fails or notifid is invalid
+ */
+edg_wll_NotifId *edg_wll_NotifIdDup(const edg_wll_NotifId src);
+
 /*
  *@} end of group
  */
