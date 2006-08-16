@@ -382,7 +382,7 @@ recv_token(int sock, void **token, size_t *token_length, struct timeval *to)
 	 expect = ssl_token_length(t, tl);
       }
 
-   } while ((count == 0) || (tl < expect));
+   } while (count != 0 && tl < expect);
 
 end:
    if (to) {
@@ -434,6 +434,12 @@ create_proxy(char *cert_file, char *key_file, char **proxy_file)
    }
    close(in);
    if (ret < 0) {
+      ret = EDG_WLL_GSS_ERROR_ERRNO;
+      goto end;
+   }
+
+   len = write(out, "\n", 1);
+   if (len != 1) {
       ret = EDG_WLL_GSS_ERROR_ERRNO;
       goto end;
    }
