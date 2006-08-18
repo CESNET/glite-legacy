@@ -30,7 +30,7 @@ INSTALL:=libtool --mode=install install
 OBJS:=cjobid.o strmd5.o
 LOBJS:=${OBJS:.o=.lo}
 
-HDRS:=cjobid.h
+HDRS:=cjobid.h strmd5.h
 
 STATICLIB:=libglite_lbu_jobid.a
 LTLIB:=libglite_lbu_jobid.la
