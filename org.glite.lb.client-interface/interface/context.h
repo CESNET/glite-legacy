@@ -6,10 +6,12 @@
  * \brief L&B API common context (publicly visible) and related definitions
  */
 
+/* FIXME: cistka
 #ifndef LB_STANDALONE
 #include "glite/wmsutils/exception/exception_codes.h"
 #endif
-#include "glite/wmsutils/jobid/cjobid.h"
+*/
+#include "glite/lb-utils/cjobid.h"
 
 #ident "$Header$"
 
@@ -248,7 +250,7 @@ char * edg_wll_GetSequenceCode(
  */
 int edg_wll_GetLoggingJob(
 	const edg_wll_Context	context,
-	edg_wlc_JobId	*jobid_out
+	glite_lbu_JobId	*jobid_out
 );
 
 /*

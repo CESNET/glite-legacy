@@ -3,7 +3,7 @@
 
 #ident "$Header$"
 
-#include "glite/wmsutils/jobid/cjobid.h"
+#include "glite/lb-utils/cjobid.h"
 #include "glite/lb/notifid.h"
 #include "glite/lb/context.h"
 #include "glite/lb/consumer.h"

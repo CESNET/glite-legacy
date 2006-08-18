@@ -271,7 +271,7 @@ extern int edg_wll_LogFlushAll(
  */
 extern int edg_wll_SetLoggingJob(
 	edg_wll_Context	context,
-	const edg_wlc_JobId	job,
+	const glite_lbu_JobId	job,
 	const char *		code,
 	int			flags
 );
@@ -287,7 +287,7 @@ extern int edg_wll_SetLoggingJob(
  */
 extern int edg_wll_SetLoggingJobProxy(
 	edg_wll_Context	context,
-	const edg_wlc_JobId	job,
+	const glite_lbu_JobId	job,
 	const char *		code,
 	const char *		user,
 	int			flags
@@ -318,13 +318,13 @@ extern int edg_wll_SetLoggingJobProxy(
  
 extern int edg_wll_RegisterJob(
 	edg_wll_Context		context,
-	const edg_wlc_JobId	job,
+	const glite_lbu_JobId	job,
 	enum edg_wll_RegJobJobtype	type,
 	const char *		jdl,
 	const char *		ns,
 	int			num_subjobs,
 	const char *		seed,
-	edg_wlc_JobId **	subjobs
+	glite_lbu_JobId **	subjobs
 );
 
 /** 
@@ -333,13 +333,13 @@ extern int edg_wll_RegisterJob(
 
 extern int edg_wll_RegisterJobSync(
 	edg_wll_Context		context,
-	const edg_wlc_JobId	job,
+	const glite_lbu_JobId	job,
 	enum edg_wll_RegJobJobtype	type,
 	const char *		jdl,
 	const char *		ns,
 	int			num_subjobs,
 	const char *		seed,
-	edg_wlc_JobId **	subjobs
+	glite_lbu_JobId **	subjobs
 );
 
 /**
@@ -363,13 +363,13 @@ extern int edg_wll_RegisterJobSync(
 
 extern int edg_wll_RegisterJobProxy(
 	edg_wll_Context		context,
-	const edg_wlc_JobId	job,
+	const glite_lbu_JobId	job,
 	enum edg_wll_RegJobJobtype	type,
 	const char *		jdl,
 	const char *		ns,
 	int			num_subjobs,
 	const char *		seed,
-	edg_wlc_JobId **	subjobs
+	glite_lbu_JobId **	subjobs
 );
 
 #ifdef LB_PERF
@@ -378,13 +378,13 @@ extern int edg_wll_RegisterJobProxy(
 
 extern int edg_wll_RegisterJobProxyOnly(
 	edg_wll_Context		context,
-	const edg_wlc_JobId	job,
+	const glite_lbu_JobId	job,
 	enum edg_wll_RegJobJobtype	type,
 	const char *		jdl,
 	const char *		ns,
 	int			num_subjobs,
 	const char *		seed,
-	edg_wlc_JobId **	subjobs
+	glite_lbu_JobId **	subjobs
 );
 #endif
 
@@ -400,10 +400,10 @@ extern int edg_wll_RegisterJobProxyOnly(
 
 extern int edg_wll_RegisterSubjobs(
 	edg_wll_Context		context,
-	const edg_wlc_JobId	parent,
+	const glite_lbu_JobId	parent,
 	char const * const *	jdls,
 	const char *		ns,
-	edg_wlc_JobId const *	subjobs
+	glite_lbu_JobId const *	subjobs
 );
 
 
@@ -417,10 +417,10 @@ extern int edg_wll_RegisterSubjobs(
 
 extern int edg_wll_RegisterSubjobsProxy(
 	edg_wll_Context		context,
-	const edg_wlc_JobId	parent,
+	const glite_lbu_JobId	parent,
 	char const * const *	jdls,
 	const char *		ns,
-	edg_wlc_JobId const *	subjobs
+	glite_lbu_JobId const *	subjobs
 );
 
 /**
@@ -431,10 +431,10 @@ extern int edg_wll_RegisterSubjobsProxy(
 
 extern int edg_wll_GenerateSubjobIds(
 	edg_wll_Context		context,
-	const edg_wlc_JobId	parent,
+	const glite_lbu_JobId	parent,
 	int			num_subjobs,
 	const char *		seed,
-	edg_wlc_JobId **	subjobs
+	glite_lbu_JobId **	subjobs
 );
 
 
@@ -474,7 +474,7 @@ enum edg_wll_UserIdType {
  
 extern int edg_wll_ChangeACL(
 	edg_wll_Context		context,
-	const edg_wlc_JobId	job,
+	const glite_lbu_JobId	job,
 	const char *		user_id,
 	enum edg_wll_UserIdType	user_id_type,
 	enum edg_wll_Permission		permission,
