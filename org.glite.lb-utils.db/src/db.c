@@ -14,8 +14,7 @@
 #include <mysqld_error.h>
 #include <errmsg.h>
 
-#warning FIXME: change to lb-utils
-#include "glite/lb/trio.h"
+#include "glite/lb-utils/trio.h"
 #include "db.h"
 
 

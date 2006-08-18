@@ -58,7 +58,7 @@ ifneq (${mysql_prefix},/usr)
 	endif
 endif
 
-EXT_LIBS:=${mysqlib} -lmysqlclient -lglite_lb_common_${flavour}
+EXT_LIBS:=${mysqlib} -lmysqlclient -lglite_lbu_trio
 OBJS:=db.o
 TESTOBJS:=dbtest.o
 HDRS:=db.h
