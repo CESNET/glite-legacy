@@ -24,6 +24,10 @@ LB Proxy install should follow several steps described bellow:
    Grant privileges to user: lbserver
    Database has the same structure as bkserver has (you can use
    sql script etc/glite-lb-dbsetup-proxy.sql to create propper tables).
+
+  For better performance it's recommended to use database backend with
+  transactions. It's set up by default, existing database can be migrated
+  with etc/glite-lb-dbsetup-migrate2transaction.sql (lb-server package).
  
 2) Start servers with scripts from distribution
    /opt/glite/etc/init.d/glite-lb-locallogger start

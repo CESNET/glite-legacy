@@ -80,6 +80,7 @@ static int		slaves = 10,
 			semset;
 static char		host[300];
 static char *		port;
+int			transactions = -1;
 
 
 static struct option opts[] = {
@@ -96,10 +97,11 @@ static struct option opts[] = {
 #ifdef LB_PERF
 	{"perf-sink",		1, NULL,	'K'},
 #endif
+	{"transactions",	1,	NULL,	'b'},
 	{NULL,0,NULL,0}
 };
 
-static const char *get_opt_string = "p:c:dm:s:l:i:X:Y:z"
+static const char *get_opt_string = "p:c:dm:s:l:i:X:Y:zb:"
 #ifdef LB_PERF
 	"K:"
 #endif
@@ -121,6 +123,7 @@ static void usage(char *me)
 #ifdef LB_PERF
 		"\t--perf-sink\t where to sink events\n"
 #endif
+		"\t-b, --transactions\t transactions force switch\n"
 	,me);
 }
 
@@ -180,6 +183,7 @@ int main(int argc, char *argv[])
 
 	while ((opt = getopt_long(argc, argv, get_opt_string, opts, NULL)) != EOF) switch (opt) {
 		case 'p': strcpy(socket_path_prefix, optarg); break;
+		case 'b': transactions = atoi(optarg); break;
 		case 'c': con_queue = atoi(optarg); break;
 		case 'd': debug = 1; break;
 		case 'z': silent = 1; break;
@@ -206,7 +210,7 @@ int main(int argc, char *argv[])
 
 		if ( fscanf(fpid,"%d",&opid) == 1 ) {
 			if ( !kill(opid,0) ) {
-				fprintf(stderr,"%s: another instance running, pid = %d\n",argv[0],opid);
+				fprintf(stderr,"%s: another instance running, pid = %d\n",name,opid);
 				return 1;
 			}
 			else if (errno != ESRCH) { perror("kill()"); return 1; }
@@ -307,8 +311,14 @@ int main(int argc, char *argv[])
 		char	*et,*ed;
 		edg_wll_Error(ctx,&et,&ed);
 
-		fprintf(stderr,"%s: open database: %s (%s)\n",argv[0],et,ed);
+		fprintf(stderr,"%s: open database: %s (%s)\n",name,et,ed);
 		return 1;
+	}
+	if (!ctx->use_transactions && transactions != 0) {
+		fprintf(stderr, "%s: transactions aren't supported!\n", name);
+	}
+	if (transactions >= 0) {
+		fprintf(stderr, "%s: transactions forced from %d to %d\n", name, ctx->use_transactions, transactions);
 	}
 	edg_wll_Close(ctx);
 	edg_wll_FreeContext(ctx);
@@ -598,6 +608,8 @@ static void wait_for_open(edg_wll_Context ctx, const char *dbstring)
 		dprintf(("[%d]: DB connection established\n",getpid()));
 		if (!debug) syslog(LOG_INFO,"DB connection established\n");
 	}
+
+	if (transactions >= 0) ctx->use_transactions = transactions;
 }
 
 static int decrement_timeout(struct timeval *timeout, struct timeval before, struct timeval after)
