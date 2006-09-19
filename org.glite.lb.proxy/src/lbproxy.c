@@ -220,8 +220,8 @@ int main(int argc, char *argv[])
 
 	fpid = fopen(pidfile, "w");
 	if ( !fpid ) { perror(pidfile); return 1; }
-	fprintf(fpid, "%d", getpid());
-	fclose(fpid);
+	if (fprintf(fpid, "%d", getpid()) <= 0) { perror(pidfile); return 1; }
+	if (fclose(fpid) != 0) { perror(pidfile); return 1; }
 
 	semkey = ftok(pidfile,0);
 
@@ -389,7 +389,7 @@ int handle_conn(int conn, struct timeval *timeout, void *data)
 	edg_wll_Context		ctx;
 	struct timeval		conn_start, now;
 
-	if ( !(ctx = (edg_wll_Context) calloc(1, sizeof(*ctx))) ) {
+        if ( edg_wll_InitContext(&ctx) ) {
 		dprintf(("Couldn't create context"));
 		return -1;
 	}
