@@ -105,7 +105,7 @@ static int lbu_err(glite_lbu_DBContext ctx, int code, const char *desc, const ch
 static int myerr(glite_lbu_DBContext ctx, const char *source, int line);
 static int myerrstmt(glite_lbu_Statement stmt, const char *source, int line);
 static int myisokstmt(glite_lbu_Statement stmt, const char *source, int line, int *retry);
-static int db_connect(glite_lbu_DBContext ctx, const char *cs, int caps, MYSQL **mysql);
+static int db_connect(glite_lbu_DBContext ctx, const char *cs, MYSQL **mysql);
 static void db_close(MYSQL *mysql);
 static int transaction_test(glite_lbu_DBContext ctx, MYSQL *m2, int *have_transactions);
 static int FetchRowSimple(glite_lbu_DBContext ctx, MYSQL_RES *result, unsigned long *lengths, char **results);
@@ -128,11 +128,11 @@ int glite_lbu_DBError(glite_lbu_DBContext ctx, char **text, char **desc) {
 }
 
 
-int glite_lbu_DBConnect(glite_lbu_DBContext *ctx, const char *cs, int caps) {
+int glite_lbu_DBConnect(glite_lbu_DBContext *ctx, const char *cs) {
 	int err;
 
 	*ctx = calloc(1, sizeof **ctx);
-	if (db_connect(*ctx, cs, caps, &(*ctx)->mysql) != 0) {
+	if (db_connect(*ctx, cs, &(*ctx)->mysql) != 0) {
 		err = STATUS(*ctx);
 		glite_lbu_DBClose(*ctx);
 		*ctx = NULL;
@@ -169,7 +169,7 @@ int glite_lbu_DBQueryCaps(glite_lbu_DBContext ctx) {
 
 	CLR_ERR(ctx);
 
-	if (db_connect(ctx, ctx->cs, 0, &m2) == 0) {
+	if (db_connect(ctx, ctx->cs, &m2) == 0) {
 		transaction_test(ctx, m2, &have_transactions);
 		db_close(m2);
 	}
@@ -759,7 +759,7 @@ static int myisokstmt(glite_lbu_Statement stmt, const char *source, int line, in
 /*
  * mysql connect
  */
-static int db_connect(glite_lbu_DBContext ctx, const char *cs, int caps, MYSQL **mysql) {
+static int db_connect(glite_lbu_DBContext ctx, const char *cs, MYSQL **mysql) {
 	char	*buf = NULL;
 	char	*host,*user,*pw,*db; 
 	char	*slash,*at,*colon;
@@ -806,7 +806,6 @@ static int db_connect(glite_lbu_DBContext ctx, const char *cs, int caps, MYSQL *
 	free(buf);
 
 	ctx->cs = cs;
-	ctx->caps = caps;
 	return 0;
 }
 

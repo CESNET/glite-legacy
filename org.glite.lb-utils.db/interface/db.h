@@ -109,12 +109,10 @@ int glite_lbu_DBError(glite_lbu_DBContext ctx, char **text, char **desc);
  *
  * \param[out] ctx     context to work with
  * \param[in] cs       connect string user/password\@host:database
- * \param[in] caps     capabilities to use, should be found out by QueryCaps(),
- *                     0 for initial connect
  *
  * \return             error code, 0 = OK
  */
-int glite_lbu_DBConnect(glite_lbu_DBContext *ctx, const char *cs, int caps);
+int glite_lbu_DBConnect(glite_lbu_DBContext *ctx, const char *cs);
 
 
 /**
