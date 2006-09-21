@@ -3,7 +3,7 @@
 
 #ident "$Header$"
 
-#include "glite/wmsutils/jobid/JobId.h"
+#include "glite/lb-utils/JobId.h"
 
 #include "glite/lb/Event.h"
 #include "glite/lb/JobStatus.h"
@@ -27,7 +27,7 @@ EWL_BEGIN_NAMESPACE
  * various parameters of the connection to the bookkeeping server.
  *
  * All query methods have their counterpart in C functions taking
- * taking edg_wll_Context and edg_wll_JobId as their first parameters
+ * taking edg_wll_Context and glite_lbu_JobId as their first parameters
  * (in fact, those functions are used to do the actual work).
  */
 class Job {
@@ -45,7 +45,7 @@ public:
 	 * represent.
 	 * \throws Exception Could not copy the job id.
 	 */
-	Job(const glite::wmsutils::jobid::JobId &jobid);
+	Job(const glite::lb_utils::jobid::JobId &jobid);
 
 
 	/** Destructor.
@@ -63,7 +63,7 @@ public:
 	 * \returns Reference to this object.
 	 * \throws Exception Could not copy the job id.
 	 */
-	Job & operator= (const glite::wmsutils::jobid::JobId &jobid);
+	Job & operator= (const glite::lb_utils::jobid::JobId &jobid);
 
 	/*
 	 * Status retrieval bitmasks. Used ORed as Job::status() argument,
@@ -183,7 +183,7 @@ public:
   
 private:
   ServerConnection	server;
-  glite::wmsutils::jobid::JobId			jobId;
+  glite::lb_utils::jobid::JobId			jobId;
 };
 
 EWL_END_NAMESPACE

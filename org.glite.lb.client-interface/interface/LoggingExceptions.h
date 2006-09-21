@@ -7,7 +7,7 @@
  *  @version $Revision$
  */
 
-#include "glite/wmsutils/exception/Exception.h"
+#include "glite/lb-utils/Exception.h"
 
 #include <pthread.h>
 
@@ -21,9 +21,9 @@ EWL_BEGIN_NAMESPACE
  * message is created by concatenating the error message of the
  * original exception and the new error message. All the other
  * functionality (printing error message, logging it, printing stack
- * trace) is inherited from the base class glite::wmsutils::exception::Exception.
+ * trace) is inherited from the base class glite::lb_utils::exception::Exception.
  */
-class Exception: public glite::wmsutils::exception::Exception {
+class Exception: public glite::lb_utils::exception::Exception {
 public:
 	
 	/** Constructor for mandatory fields.
@@ -40,7 +40,7 @@ public:
 		  const std::string& method,
 		  int   code,
 		  const std::string& exception) 
-		: glite::wmsutils::exception::Exception(source, 
+		: glite::lb_utils::exception::Exception(source, 
 							line_number, 
 							method, 
 							code, 
@@ -64,8 +64,8 @@ public:
 		  const std::string& method,
 		  int   code,
 		  const std::string& exception,
-		  const glite::wmsutils::exception::Exception &exc)
-		: glite::wmsutils::exception::Exception(source, 
+		  const glite::lb_utils::exception::Exception &exc)
+		: glite::lb_utils::exception::Exception(source, 
 							line_number, 
 							method, 
 							code, 
@@ -118,7 +118,7 @@ public:
 			 const std::string& method,
 			 int   code,
 			 const std::string& exception, 
-			 const glite::wmsutils::exception::Exception &exc)
+			 const glite::lb_utils::exception::Exception &exc)
 		: Exception(source, line_number, method, code, exception)
 		{};
 };
@@ -171,7 +171,7 @@ public:
 		    const std::string& method,
 		    int   code,
 		    const std::string& exception,
-		    const glite::wmsutils::exception::Exception &exc)
+		    const glite::lb_utils::exception::Exception &exc)
 		: Exception(source, 
 			    line_number, 
 			    method, 

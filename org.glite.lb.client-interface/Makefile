@@ -22,15 +22,12 @@ AT3=perl -I${top_srcdir}/project ${top_srcdir}/project/at3
 
 STAGETO=include/${globalprefix}/${lbprefix}
 STATIC_H=consumer.h context.h dump.h load.h notification.h notifid.h purge.h \
-	statistics.h
-# FIXME: cistka
-#	Notification.h CountRef.h Job.h LoggingExceptions.h ServerConnection.h \
+	statistics.h \
+	Notification.h CountRef.h Job.h LoggingExceptions.h ServerConnection.h \
 
 FAKE_H=consumer_fake.h producer_fake.h
 
-GEN_H=events.h jobstat.h producer.h interface_version.h
-# FIXME: cistka
-# Event.h JobStatus.h
+GEN_H=events.h jobstat.h producer.h interface_version.h Event.h JobStatus.h
 
 
 generate: ${GEN_H}
