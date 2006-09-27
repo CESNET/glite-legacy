@@ -38,9 +38,13 @@ extern "C" {
 			for (@{$f->{codes}}) {
 				my $uc = uc $_->{name};
 				gen qq{
-!	EDG_WLL_STAT_$uc,	/**< $_->{comment} */
+!	EDG_WLL_STAT_$uc,		/**< $_->{comment} */
 };
 			}
+			my $un = uc $n;
+			gen qq{
+!	EDG_WLL_NUMBER_OF_${un}S	/**< Number of ${n}s */
+};
 			gen qq{
 !\};
 };
