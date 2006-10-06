@@ -105,18 +105,32 @@ int glite_lbu_DBError(glite_lbu_DBContext ctx, char **text, char **desc);
 
 
 /**
- * Create the context and connect to the database.
+ * Initialize the database context.
+ *
+ * \param[out] ctx   result context
+ */
+int glite_lbu_InitDBContext(glite_lbu_DBContext *ctx);
+
+
+/**
+ * Free database context.
+ */
+void glite_lbu_FreeDBContext(glite_lbu_DBContext ctx);
+
+
+/**
+ * Connect to the given database.
  *
  * \param[out] ctx     context to work with
  * \param[in] cs       connect string user/password\@host:database
  *
  * \return             error code, 0 = OK
  */
-int glite_lbu_DBConnect(glite_lbu_DBContext *ctx, const char *cs);
+int glite_lbu_DBConnect(glite_lbu_DBContext ctx, const char *cs);
 
 
 /**
- * Close the connection and free the context.
+ * Close the connection.
  *
  * \param[in,out] ctx	context to work with
  */

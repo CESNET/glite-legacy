@@ -128,24 +128,30 @@ int glite_lbu_DBError(glite_lbu_DBContext ctx, char **text, char **desc) {
 }
 
 
-int glite_lbu_DBConnect(glite_lbu_DBContext *ctx, const char *cs) {
-	int err;
-
+int glite_lbu_InitDBContext(glite_lbu_DBContext *ctx) {
 	*ctx = calloc(1, sizeof **ctx);
-	if (db_connect(*ctx, cs, &(*ctx)->mysql) != 0) {
-		err = STATUS(*ctx);
-		glite_lbu_DBClose(*ctx);
-		*ctx = NULL;
-		return err;
+	return *ctx == NULL ? ENOMEM : 0;
+}
+
+
+void glite_lbu_FreeDBContext(glite_lbu_DBContext ctx) {
+	if (ctx) {
+		assert(ctx->mysql == NULL);
+		free(ctx->err.desc);
+		free(ctx);
 	}
+}
+
+
+int glite_lbu_DBConnect(glite_lbu_DBContext ctx, const char *cs) {
+	if (db_connect(ctx, cs, &ctx->mysql) != 0) return STATUS(ctx);
 	return 0;
 }
 
 
 void glite_lbu_DBClose(glite_lbu_DBContext ctx) {
 	db_close(ctx->mysql);
-	free(ctx->err.desc);
-	free(ctx);
+	ctx->mysql = NULL;
 }
 
 

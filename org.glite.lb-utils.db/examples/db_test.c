@@ -78,11 +78,12 @@ int main(int argn, char *argv[]) {
 
 	// init
 	dprintf(("connecting to %s...\n", cs));
-	if (glite_lbu_DBConnect(&ctx, cs, 0) != 0) goto fail;
-	if ((caps = glite_lbu_DBQueryCaps(ctx)) == -1) goto failctx;
+	if (glite_lbu_InitDBContext(&ctx) != 0) goto fail;
+	if (glite_lbu_DBConnect(ctx, cs) != 0) goto failctx;
+	if ((caps = glite_lbu_DBQueryCaps(ctx)) == -1) goto failcon;
 	if ((caps & GLITE_LBU_DB_CAP_PREPARED) == 0) {
 		dprintf(("can't do prepared commands, exiting."));
-		goto failctx;
+		goto failcon;
 	}
 	// caps
 	glite_lbu_DBSetCaps(ctx, caps);
@@ -90,15 +91,15 @@ int main(int argn, char *argv[]) {
 	// create all needed tables and data
 	dprintf(("creating tables...\n"));
 	glite_lbu_ExecSQL(ctx, DROP_CMD, NULL);
-	if (glite_lbu_ExecSQL(ctx, CREATE_CMD, NULL) == -1) goto failctx;
+	if (glite_lbu_ExecSQL(ctx, CREATE_CMD, NULL) == -1) goto failcon;
 	// trio-insert
 	dprintf(("trio-insert...\n"));
 	asprintf(&cmd, INSERT_TRIO_CMD, 1, "'hyperochus'", "NULL");
-	if (glite_lbu_ExecSQL(ctx, cmd, NULL) != 1) goto failctx;
+	if (glite_lbu_ExecSQL(ctx, cmd, NULL) != 1) goto failcon;
 	free(cmd); cmd = NULL;
 	// prepared-insert
 	dprintf(("prepare-insert...\n"));
-	if (glite_lbu_PrepareStmt(ctx, INSERT_CMD, &stmt) != 0) goto failctx;
+	if (glite_lbu_PrepareStmt(ctx, INSERT_CMD, &stmt) != 0) goto failcon;
 	dprintf(("execute 1. insert...\n"));
 	if (glite_lbu_ExecStmt(stmt, 3,
 	                       GLITE_LBU_DB_TYPE_INT, 2,
@@ -114,7 +115,7 @@ int main(int argn, char *argv[]) {
 	                       GLITE_LBU_DB_TYPE_INT, 4,
 	                       GLITE_LBU_DB_TYPE_VARCHAR, "harpia",
 	                       GLITE_LBU_DB_TYPE_BLOB, blob2, sizeof(blob2)) != 1) goto failstmt;
-	glite_lbu_FreeStmt(stmt);
+	glite_lbu_FreeStmt(&stmt);
 	dprintf(("\n"));
 
 	// trio-query
@@ -124,7 +125,7 @@ int main(int argn, char *argv[]) {
 	user = "harpia";
 	dprintf(("selecting '%s'...\n", user));
 	asprintf(&cmd, SELECT_TRIO_CMD, user);
-	if (glite_lbu_ExecSQL(ctx, cmd, &stmt) == -1) goto failctx;
+	if (glite_lbu_ExecSQL(ctx, cmd, &stmt) == -1) goto failcon;
 	free(cmd); cmd = NULL;
 	dprintf(("fetching '%s'...\n", user));
 	while ((nr = glite_lbu_FetchRow(stmt, 3, lens, res)) > 0) {
@@ -133,13 +134,13 @@ int main(int argn, char *argv[]) {
 	}
 	if (nr < 0) dprintf(("fetch '%s' failed\n", user));
 	dprintf(("closing stmt...\n"));
-	glite_lbu_FreeStmt(stmt);
+	glite_lbu_FreeStmt(&stmt);
 	dprintf(("\n"));
 
 	user = "nobody";
 	dprintf(("selecting '%s'...\n", user));
 	asprintf(&cmd, SELECT_TRIO_CMD, user);
-	if (glite_lbu_ExecSQL(ctx, cmd, &stmt) == -1) goto failctx;
+	if (glite_lbu_ExecSQL(ctx, cmd, &stmt) == -1) goto failcon;
 	free(cmd); cmd = NULL;
 	dprintf(("fetching '%s'...\n", user));
 	while ((nr = glite_lbu_FetchRow(stmt, 3, lens, res)) > 0) {
@@ -148,7 +149,7 @@ int main(int argn, char *argv[]) {
 	}
 	if (nr < 0) dprintf(("fetch '%s' failed\n", user));
 	dprintf(("closing stmt...\n"));
-	glite_lbu_FreeStmt(stmt);
+	glite_lbu_FreeStmt(&stmt);
 	dprintf(("\n"));
 }
 
@@ -156,8 +157,8 @@ int main(int argn, char *argv[]) {
 {
 	const char *user;
 
-	dprintf(("preparing...\n", user));
-	if ((glite_lbu_PrepareStmt(ctx, SELECT_CMD, &stmt)) != 0) goto failctx;
+	dprintf(("preparing '%s'...\n", user));
+	if ((glite_lbu_PrepareStmt(ctx, SELECT_CMD, &stmt)) != 0) goto failcon;
 
 	user = "cicomexocitl.civ";
 	dprintf(("executing '%s'...\n", user));
@@ -171,20 +172,23 @@ int main(int argn, char *argv[]) {
 	dprintf(("\n"));
 
 	dprintf(("closing stmt...\n"));
-	glite_lbu_FreeStmt(stmt);
+	glite_lbu_FreeStmt(&stmt);
 	dprintf(("\n"));
 }
 
 	dprintf(("closing...\n"));
 	glite_lbu_DBClose(ctx);
+	glite_lbu_FreeDBContext(ctx);
 	return 0;
 
 failstmt:
 	printf("closing stmt...\n");
-	glite_lbu_FreeStmt(stmt);
-failctx:
+	glite_lbu_FreeStmt(&stmt);
+failcon:
 	dprintf(("closing...\n"));
 	glite_lbu_DBClose(ctx);
+failctx:
+	glite_lbu_FreeDBContext(ctx);
 fail:
 	free(cmd);
 	dprintf(("failed\n"));
