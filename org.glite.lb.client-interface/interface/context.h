@@ -43,7 +43,7 @@ typedef enum _edg_wll_ContextParam {
 	EDG_WLL_PARAM_QUERY_JOBS_LIMIT,	/**< maximal query jobs result size */
 	EDG_WLL_PARAM_QUERY_EVENTS_LIMIT,/**< maximal query events result size */
 	EDG_WLL_PARAM_QUERY_RESULTS,	/**< maximal query result size */
-	EDG_WLL_PARAM_QUERY_CONNECTIONS,/**< maximal number of open connections in ctx->connPoll */
+	EDG_WLL_PARAM_CONNPOOL_SIZE,	/**< maximal number of open connections in connectionsHandle.poolSize */
 	EDG_WLL_PARAM_NOTIF_SERVER,	/**< default notification server name */
 	EDG_WLL_PARAM_NOTIF_SERVER_PORT,/**< default notification server port */
 	EDG_WLL_PARAM_NOTIF_TIMEOUT,	/**< notif timeout */
