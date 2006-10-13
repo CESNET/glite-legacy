@@ -105,12 +105,13 @@
                     build="@org.glite.jp.ws-interface.info.build@"
                     arch="i386"/>
 
-                <component name="gridsite"
+                <component name="gridsite-shared"
                     version="@org.gridsite.core.info.version@"
                     age="@org.gridsite.core.info.age@"
 					build="@org.gridsite.core.info.build@"
                     arch="i386"/>
 			</components>
+			
 			<dependencies>
 	  			<external name="@ext.mysql-server.rpm.name@"
 					  version="@ext.mysql-server.version@"
