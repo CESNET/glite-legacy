@@ -373,6 +373,18 @@ extern int edg_wll_RegisterJobProxy(
 );
 
 #ifdef LB_PERF
+/* original register to LBProxy 	*/
+extern int edg_wll_RegisterJobProxyOld(
+	edg_wll_Context		context,
+	const edg_wlc_JobId	job,
+	enum edg_wll_RegJobJobtype	type,
+	const char *		jdl,
+	const char *		ns,
+	int			num_subjobs,
+	const char *		seed,
+	edg_wlc_JobId **	subjobs
+);
+
 /* register only to LBProxy 		*/
 /* useful for performance measurements	*/
 
