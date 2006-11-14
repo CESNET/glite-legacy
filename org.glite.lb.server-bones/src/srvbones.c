@@ -396,7 +396,6 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 			{
 				kick_client = KICK_HANDLER;
 			} else {
-				req_cnt++;
 				first_request = 0;
 				to = set_request_to;
 				if ((rv = services[srv].on_request_hnd(conn,to.tv_sec>=0 ? &to : NULL,clnt_data)) == ENOTCONN) {
