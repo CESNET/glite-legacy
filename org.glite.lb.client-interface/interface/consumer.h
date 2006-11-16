@@ -241,6 +241,8 @@ int edg_wll_QueryJobsExtProxy(
 #define EDG_WLL_STAT_CLASSADS	1	/**< various job description fields */
 #define EDG_WLL_STAT_CHILDREN	2	/**< list of subjob JobId's */
 #define EDG_WLL_STAT_CHILDSTAT	4	/**< apply the flags recursively to subjobs */
+#define EDG_WLL_STAT_CHILDHIST_FAST 8		/**< partially complete histogram of child job states */
+#define EDG_WLL_STAT_CHILDHIST_THOROUGH 16	/**< full and up-to date histogram of child job states */
 /* starting from bit 10 private flags begins - do not add 1024 and more! */
 
 /** Return status of a single job.
