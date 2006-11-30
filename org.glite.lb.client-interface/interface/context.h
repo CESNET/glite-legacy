@@ -77,6 +77,7 @@ typedef enum _edg_wll_Source {
 	EDG_WLL_SOURCE_LOG_MONITOR,
 	EDG_WLL_SOURCE_LRMS,
 	EDG_WLL_SOURCE_APPLICATION,
+	EDG_WLL_SOURCE_LB_SERVER,
 	EDG_WLL_SOURCE__LAST		/* marker, for internal use only */
 } edg_wll_Source;
 
