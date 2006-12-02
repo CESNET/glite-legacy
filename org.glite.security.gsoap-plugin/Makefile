@@ -57,6 +57,7 @@ CFLAGS:= ${DEBUG} \
 	-I. -I${top_srcdir}/interface \
 	-I${stagedir}/include \
 	-I${cares_prefix}/include \
+	-I${gsoap_prefix}/include \
 	${COVERAGE_FLAGS} -D_GNU_SOURCE -DDATAGRID_EXTENSION
 
 LDFLAGS:=${COVERAGE_FLAGS}
