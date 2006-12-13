@@ -317,6 +317,12 @@ end:
    return ret;
 }
 
+#define SSL_TOKEN_HEADER_LENGTH 5
+static size_t ssl_token_length(char *t, int tl) {
+	unsigned char *b = t;
+	return (((size_t)(b[3]) << 8) | b[4]) + 5;
+}
+
 static int
 recv_token(int sock, void **token, size_t *token_length, struct timeval *to)
 {
@@ -325,6 +331,7 @@ recv_token(int sock, void **token, size_t *token_length, struct timeval *to)
    char *t = NULL;
    char *tmp;
    size_t tl = 0;
+   size_t expect = 0;
    fd_set fds;
    struct timeval timeout,before,after;
    int ret;
@@ -335,6 +342,7 @@ recv_token(int sock, void **token, size_t *token_length, struct timeval *to)
    }
 
    ret = 0;
+   expect = SSL_TOKEN_HEADER_LENGTH;
    do {
       FD_ZERO(&fds);
       FD_SET(sock,&fds);
@@ -349,7 +357,7 @@ recv_token(int sock, void **token, size_t *token_length, struct timeval *to)
 	    break;
       }
       
-      count = read(sock, buf, sizeof(buf));
+      count = read(sock, buf, MIN(expect - tl, sizeof(buf)));
       if (count < 0) {
 	 if (errno == EINTR)
 	    continue;
@@ -368,7 +376,13 @@ recv_token(int sock, void **token, size_t *token_length, struct timeval *to)
       t = tmp;
       memcpy(t + tl, buf, count);
       tl += count;
-   } while (count == sizeof(buf));
+
+      if ((expect == SSL_TOKEN_HEADER_LENGTH) && 
+		(tl >= SSL_TOKEN_HEADER_LENGTH)) {
+	 expect = ssl_token_length(t, tl);
+      }
+
+   } while (count != 0 && tl < expect);
 
 end:
    if (to) {
@@ -420,6 +434,12 @@ create_proxy(char *cert_file, char *key_file, char **proxy_file)
    }
    close(in);
    if (ret < 0) {
+      ret = EDG_WLL_GSS_ERROR_ERRNO;
+      goto end;
+   }
+
+   len = write(out, "\n", 1);
+   if (len != 1) {
       ret = EDG_WLL_GSS_ERROR_ERRNO;
       goto end;
    }
@@ -567,6 +587,17 @@ end:
    return ret;
 }
 
+/* XXX XXX This is black magic. "Sometimes" server refuses the client with SSL
+ *  * alert "certificate expired" even if it is not true. In this case the server
+ *   * slave terminates (which helps, usually), and we can reconnect transparently.
+ *    */
+
+/* This string appears in the error message in this case */
+#define _EXPIRED_ALERT_MESSAGE "function SSL3_READ_BYTES: sslv3 alert certificate expired"
+#define _EXPIRED_ALERT_RETRY_COUNT 10   /* default number of slaves, hope that not all
+					                                              are in the bad state */
+#define _EXPIRED_ALERT_RETRY_DELAY 10   /* ms */
+
 int 
 edg_wll_gss_connect(gss_cred_id_t cred, char const *hostname, int port,
 		    struct timeval *timeout, edg_wll_GssConnection *connection,
@@ -580,6 +611,7 @@ edg_wll_gss_connect(gss_cred_id_t cred, char const *hostname, int port,
    gss_name_t server = GSS_C_NO_NAME;
    gss_ctx_id_t context = GSS_C_NO_CONTEXT;
    char *servername = NULL;
+   int retry = _EXPIRED_ALERT_RETRY_COUNT;
 
    maj_stat = min_stat = min_stat2 = req_flags = 0;
 
@@ -611,6 +643,8 @@ edg_wll_gss_connect(gss_cred_id_t cred, char const *hostname, int port,
    memset(&input_token, 0, sizeof(input_token));
 
    /* XXX if cred == GSS_C_NO_CREDENTIAL set the ANONYMOUS flag */
+
+   do { /* XXX: the black magic above */
 
    /* XXX prepsat na do {} while (maj_stat == CONT) a osetrit chyby*/
    while (!context_established) {
@@ -652,6 +686,27 @@ edg_wll_gss_connect(gss_cred_id_t cred, char const *hostname, int port,
    }
 
    /* XXX check ret_flags matches to what was requested */
+
+   /* retry on false "certificate expired" */
+   if (ret == EDG_WLL_GSS_ERROR_GSS) {
+	   edg_wll_GssStatus	gss_stat;
+	   char	*msg = NULL;
+
+	   gss_stat.major_status = maj_stat;
+	   gss_stat.minor_status = min_stat;
+	   edg_wll_gss_get_error(&gss_stat,"",&msg);
+
+	   if (strstr(msg,_EXPIRED_ALERT_MESSAGE)) {
+		   usleep(_EXPIRED_ALERT_RETRY_DELAY);
+		   retry--;
+	   }
+	   else retry = 0;
+
+	   free(msg);
+   }
+   else retry = 0;
+
+   } while (retry);
 
    memset(connection, 0, sizeof(*connection));
    connection->sock = sock;
