@@ -433,6 +433,25 @@ extern int set_server_name_and_port(
  */
 #define EDG_WLL_QUERY_TIMEOUT_MAX       1800
 
+/** sets returned query results */
+typedef enum _edg_wll_QueryResults {
+	EDG_WLL_QUERYRES_UNDEF,		/* uninitialized value */
+	EDG_WLL_QUERYRES_NONE,
+	EDG_WLL_QUERYRES_ALL,
+	EDG_WLL_QUERYRES_LIMITED,
+	EDG_WLL_QUERYRES__LAST		/* marker, for internal use only */
+} edg_wll_QueryResults;
+
+/** Convert Query result code to printable string 
+ */
+char * edg_wll_QResultToString(edg_wll_QueryResults res);
+
+/** Convert name to Query result code
+ * \return Matching code or EDG_WLL_SOURCE_NONE
+ */
+edg_wll_QueryResults edg_wll_StringToQResult(const char *name);
+
+
 #ifdef __cplusplus
 }
 #endif

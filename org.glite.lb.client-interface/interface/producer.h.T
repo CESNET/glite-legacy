@@ -17,24 +17,6 @@ extern "C" {
 #endif
 
 #include "glite/lb/context.h"
-#include "glite/lb/events.h"
-
-/* Event sources: */
-
-#if 0 /* obsolete */
-#define EDG_WLL_SOURCE_UI           "UserInterface"
-#define EDG_WLL_SOURCE_RB           "ResourceBroker"
-#define EDG_WLL_SOURCE_JSS          "JobSubmissionService"  /* aka Condor-G */
-#define EDG_WLL_SOURCE_JOBMGR       "GlobusJobmanager"
-#define EDG_WLL_SOURCE_LRMS         "LocalResourceManager"
-#define EDG_WLL_SOURCE_APP          "Application"
-
-#define EDG_WLL_SOURCE_NS	"NetworkServer"
-#define EDG_WLL_SOURCE_WM	"WorkloadManager"
-#define EDG_WLL_SOURCE_BH	"BigHelper"
-#define EDG_WLL_SOURCE_LM	"LogMonitor"
-
-#endif
 
 /* Event formats: */
 
@@ -260,38 +242,6 @@ extern int edg_wll_LogFlush(
 extern int edg_wll_LogFlushAll(
 	edg_wll_Context context,
 	struct timeval *timeout);
-
-/**
- * Set a current job for given context.
- * \note Should be called before any logging call.
- * \param[in,out] context 	context to work with
- * \param[in] job 		further logging calls are related to this job
- * \param[in] code 		sequence code as obtained from previous component
- * \param[in] flags 		flags on code handling (\see API documentation)
- */
-extern int edg_wll_SetLoggingJob(
-	edg_wll_Context	context,
-	const glite_lbu_JobId	job,
-	const char *		code,
-	int			flags
-);
-
-/**
- * Set a current job for given context.
- * \note Should be called before any logging call.
- * \param[in,out] context 	context to work with
- * \param[in] job 		further logging calls are related to this job
- * \param[in] code 		sequence code as obtained from previous component
- * \param[in] user 		user credentials
- * \param[in] flags 		flags on code handling (\see API documentation)
- */
-extern int edg_wll_SetLoggingJobProxy(
-	edg_wll_Context	context,
-	const glite_lbu_JobId	job,
-	const char *		code,
-	const char *		user,
-	int			flags
-);
 
 /**
  * Register job with L&B service.
