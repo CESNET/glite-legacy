@@ -472,6 +472,8 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 
 		if ( newconn >= 0 )
 		{
+			int	ret;
+
 			conn = newconn;
 			srv = newsrv;
 			gettimeofday(&client_start, NULL);
@@ -506,12 +508,13 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 
 			to = set_connect_to;
 			if (   services[srv].on_new_conn_hnd
-				&& services[srv].on_new_conn_hnd(conn, to.tv_sec >= 0 ? &to : NULL, clnt_data) )
+				&& (ret = services[srv].on_new_conn_hnd(conn, to.tv_sec >= 0 ? &to : NULL, clnt_data)) )
 			{
-				dprintf(("[%d] Connection not estabilished.\n", getpid()));
-				if ( !debug ) syslog(LOG_ERR, "Connection not estabilished.\n");
+				dprintf(("[%d] Connection not estabilished, err = %d.\n", getpid(),ret));
+				if ( !debug ) syslog(LOG_ERR, "Connection not estabilished, err = %d.\n",ret);
 				close(conn);
 				conn = srv = -1;
+				if (ret < 0) exit(1);
 				continue;
 			}
 			gettimeofday(&client_done, NULL);

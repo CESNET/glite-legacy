@@ -17,7 +17,7 @@ gsoap_prefix=/opt/gsoap
 
 CC=gcc
 
-gsoap_versions?=2.6.2 2.7.0 2.7.6b
+gsoap_versions?=2.6.2 2.7.0f 2.7.6b
 
 -include Makefile.inc
 -include ../Makefile.inc
@@ -191,6 +191,8 @@ all-libs-with-soap:
 
 libs-with-soap: ${LTLIB_S} ${THRLTLIB_S} ${STATICLIB_S} ${THRSTATICLIB_S}
 
+gsoap_srcname=gsoap-`echo ${gsoap_version} | cut -d. -f1,2`
+
 link-gsoap:
 	if [ -f ${top_srcdir}/src/stdsoap2_${gsoap_version}.c ]; then \
 		ln -sf ${top_srcdir}/src/stdsoap2_${gsoap_version}.c stdsoap2.c; \
@@ -199,6 +201,8 @@ link-gsoap:
 		ln -sf ${repository}/${gsoap_name}/${gsoap_version}/src/stdsoap2.[ch] .; \
 	elif [ -f ${repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}/stdsoap2.c ]; then \
 		ln -sf ${repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}/stdsoap2.[ch] .; \
+	elif [ -f ${repository}/externals/${gsoap_name}/${gsoap_version}/src/${gsoap_srcname}/soapcpp2/stdsoap2.c ]; then \
+		ln -sf ${repository}/externals/${gsoap_name}/${gsoap_version}/src/${gsoap_srcname}/soapcpp2/stdsoap2.[ch] .; \
 	elif [ -f ${gsoap_prefix}/stdsoap2.c ]; then \
 		ln -sf ${gsoap_prefix}/stdsoap2.[ch] .; \
 	elif [ -f ${gsoap_prefix}/src/stdsoap2.c ]; then \
