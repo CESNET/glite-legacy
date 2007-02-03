@@ -20,6 +20,9 @@
 
 	Revision history:
 	$Log$
+	Revision 1.5  2005/08/03 09:30:10  akrenek
+	Merged the release 1.0 branch
+
 	Revision 1.4  2005/02/25 09:37:43  mmulac
 	generate doxygen doc for notification.h
 	
@@ -83,46 +86,19 @@ lbprefix=${subsystem.prefix}
 PREFIX=${install.dir}
 version=${module.version}
 			</echo>
-			<echo file="${module.build.dir}/C.dox">
-PROJECT_NAME          = "Glite LB Client: C - Interface"
+			<copy file="${component.dir}/doc/C.dox" 
+				tofile="${module.build.dir}/C.dox" 
+				preservelastmodified="true"
+				overwrite="true" />
+			<copy file="${component.dir}/doc/CPP.dox" 
+				tofile="${module.build.dir}/CPP.dox" 
+				preservelastmodified="true"
+				overwrite="true" />
+			<echo file="${module.build.dir}/C.dox" append="true" >
 PROJECT_NUMBER        = ${module.version}
-OUTPUT_DIRECTORY      = ${component.dir}/doc/C
-OPTIMIZE_OUTPUT_FOR_C = YES
-INPUT                 = ./events.h \
-                        ./jobstat.h \
-                        ./producer.h \
-                        ../interface/context.h \
-                        ../interface/notifid.h \
-                        ../interface/notification.h \
-                        ../interface/consumer.h 
-SHOW_DIRECTORIES       = NO
-FULL_PATH_NAMES        = NO
-EXTRACT_ALL            = YES
-PDF_HYPERLINKS         = YES
-USE_PDFLATEX           = YES
-MACRO_EXPANSION        = YES
-EXPAND_ONLY_PREDEF     = YES
-PREDEFINED             = _EDG_WLL_EVENT_COMMON 
-HAVE_DOT               = NO
 			</echo>
-			<echo file="${module.build.dir}/CPP.dox">
-PROJECT_NAME           = "Glite LB Client: CPP - Interface"
+			<echo file="${module.build.dir}/CPP.dox" append="true" >
 PROJECT_NUMBER         = ${module.version}
-OUTPUT_DIRECTORY       = ${component.dir}/doc/CPP
-INPUT                  = ../build/Event.h \
-                         ../build/JobStatus.h \
-                         ../interface/Job.h \
-                         ../interface/CountRef.h \
-                         ../interface/LoggingExceptions.h \
-                         ../interface/ServerConnection.h \
-                         ../interface/Notification.h
-SHOW_DIRECTORIES       = NO
-FULL_PATH_NAMES        = NO
-EXTRACT_ALL            = YES
-PDF_HYPERLINKS         = YES
-USE_PDFLATEX           = YES
-#HAVE_DOT               = YES
-#CALL_GRAPH             = YES
 			</echo>
 	    </target>
 	</project>
