@@ -17,7 +17,7 @@ gsoap_prefix=/opt/gsoap
 
 CC=gcc
 
-gsoap_versions?=2.6.2 2.7.0f 2.7.6b
+gsoap_versions?=2.6.2 2.7.0f 2.7.6b 2.7.9b
 
 -include Makefile.inc
 -include ../Makefile.inc
@@ -33,6 +33,7 @@ version_info:=-version-info ${shell \
 # version_info=-version-info `echo ${version} | cut -d. -f1,2 | tr . :`
 
 gsoap_version=${gsoap_default_version}
+gsoap_prefix=${repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}
 
 VPATH=${top_srcdir}/src:${top_srcdir}/test:${top_srcdir}/examples
 
@@ -232,7 +233,6 @@ wscalc_srv_ex2: ${WSCALC_SRV2_OBJS} ${LTLIB_S}
 	${LINK} -o $@ ${WSCALC_SRV2_OBJS} ${LTLIB_S}
 
 
-gsoap_prefix?=${repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}
 soapcpp:=${shell if [ -x ${gsoap_prefix}/bin/soapcpp2 ]; then \
 	echo ${gsoap_prefix}/bin/soapcpp2; \
 	else echo ${gsoap_prefix}/soapcpp2; \
