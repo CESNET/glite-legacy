@@ -32,8 +32,13 @@ version_info:=-version-info ${shell \
 
 # version_info=-version-info `echo ${version} | cut -d. -f1,2 | tr . :`
 
+ext_repository:=${shell if [ -d "${repository}/externals" ]; then \
+	echo "${repository}/externals"; \
+	else echo "${repository}"; \
+	fi}
+gsoap_platform:=${shell echo "${gsoap_prefix}" | sed -e 's,.*\(rhel30_gcc.*\|slc3_.*_gcc[0-9]*\|src\).*,\1,'}
 gsoap_version=${gsoap_default_version}
-gsoap_prefix=${repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}
+gsoap_prefix=${ext_repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}
 
 VPATH=${top_srcdir}/src:${top_srcdir}/test:${top_srcdir}/examples
 
@@ -198,12 +203,14 @@ link-gsoap:
 	if [ -f ${top_srcdir}/src/stdsoap2_${gsoap_version}.c ]; then \
 		ln -sf ${top_srcdir}/src/stdsoap2_${gsoap_version}.c stdsoap2.c; \
 		ln -sf ${top_srcdir}/src/stdsoap2_${gsoap_version}.h stdsoap2.h; \
-	elif [ -f ${repository}/${gsoap_name}/${gsoap_version}/src/stdsoap2.c ]; then \
-		ln -sf ${repository}/${gsoap_name}/${gsoap_version}/src/stdsoap2.[ch] .; \
-	elif [ -f ${repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}/stdsoap2.c ]; then \
-		ln -sf ${repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}/stdsoap2.[ch] .; \
-	elif [ -f ${repository}/externals/${gsoap_name}/${gsoap_version}/src/${gsoap_srcname}/soapcpp2/stdsoap2.c ]; then \
-		ln -sf ${repository}/externals/${gsoap_name}/${gsoap_version}/src/${gsoap_srcname}/soapcpp2/stdsoap2.[ch] .; \
+	elif [ -f ${ext_repository}/${gsoap_name}/${gsoap_version}/src/stdsoap2.c ]; then \
+		ln -sf ${ext_repository}/${gsoap_name}/${gsoap_version}/src/stdsoap2.[ch] .; \
+	elif [ -f ${ext_repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}/stdsoap2.c ]; then \
+		ln -sf ${ext_repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}/stdsoap2.[ch] .; \
+	elif [ -f ${ext_repository}/${gsoap_name}/${gsoap_version}/src/stdsoap2.c ]; then \
+		ln -sf ${ext_repository}/externals/${gsoap_name}/${gsoap_version}/src/stdsoap2.[ch] .; \
+	elif [ -f ${exit_repository}/${gsoap_name}/${gsoap_version}/src/${gsoap_srcname}/soapcpp2/stdsoap2.c ]; then \
+		ln -sf ${ext_repository}/externals/${gsoap_name}/${gsoap_version}/src/${gsoap_srcname}/soapcpp2/stdsoap2.[ch] .; \
 	elif [ -f ${gsoap_prefix}/stdsoap2.c ]; then \
 		ln -sf ${gsoap_prefix}/stdsoap2.[ch] .; \
 	elif [ -f ${gsoap_prefix}/src/stdsoap2.c ]; then \
