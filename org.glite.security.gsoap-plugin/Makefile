@@ -17,7 +17,9 @@ gsoap_prefix=/opt/gsoap
 
 CC=gcc
 
-gsoap_versions?=2.6.2 2.7.0f 2.7.6b 2.7.9b
+# we can have only one dependency in ETICS
+#gsoap_versions?=2.6.2 2.7.0f 2.7.6b
+gsoap_versions=${gsoap_default_version}
 
 -include Makefile.inc
 -include ../Makefile.inc
@@ -36,9 +38,12 @@ ext_repository:=${shell if [ -d "${repository}/externals" ]; then \
 	echo "${repository}/externals"; \
 	else echo "${repository}"; \
 	fi}
-gsoap_platform:=${shell echo "${gsoap_prefix}" | sed -e 's,.*\(rhel30_gcc.*\|slc3_.*_gcc[0-9]*\|src\).*,\1,'}
+
 gsoap_version=${gsoap_default_version}
-gsoap_prefix=${ext_repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}
+# would be used for building multiple plugins with various gsoap versions
+#gsoap_platform=${shell echo "${gsoap_prefix}" | sed -e 's,.*\(rhel30_gcc.*\|slc3_.*_gcc[0-9]*\|src\).*,\1,'}
+#gsoap_prefix=${ext_repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}
+gsoap_prefix?=${ext_repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}
 
 VPATH=${top_srcdir}/src:${top_srcdir}/test:${top_srcdir}/examples
 
@@ -208,9 +213,9 @@ link-gsoap:
 	elif [ -f ${ext_repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}/stdsoap2.c ]; then \
 		ln -sf ${ext_repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}/stdsoap2.[ch] .; \
 	elif [ -f ${ext_repository}/${gsoap_name}/${gsoap_version}/src/stdsoap2.c ]; then \
-		ln -sf ${ext_repository}/externals/${gsoap_name}/${gsoap_version}/src/stdsoap2.[ch] .; \
-	elif [ -f ${exit_repository}/${gsoap_name}/${gsoap_version}/src/${gsoap_srcname}/soapcpp2/stdsoap2.c ]; then \
-		ln -sf ${ext_repository}/externals/${gsoap_name}/${gsoap_version}/src/${gsoap_srcname}/soapcpp2/stdsoap2.[ch] .; \
+		ln -sf ${ext_repository}/${gsoap_name}/${gsoap_version}/src/stdsoap2.[ch] .; \
+	elif [ -f ${ext_repository}/${gsoap_name}/${gsoap_version}/src/${gsoap_srcname}/soapcpp2/stdsoap2.c ]; then \
+		ln -sf ${ext_repository}/${gsoap_name}/${gsoap_version}/src/${gsoap_srcname}/soapcpp2/stdsoap2.[ch] .; \
 	elif [ -f ${gsoap_prefix}/stdsoap2.c ]; then \
 		ln -sf ${gsoap_prefix}/stdsoap2.[ch] .; \
 	elif [ -f ${gsoap_prefix}/src/stdsoap2.c ]; then \
