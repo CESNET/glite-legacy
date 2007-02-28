@@ -95,7 +95,7 @@ ARES_LIBS:=-L${cares_prefix}/lib -lcares
 EX_LIBS:= ${GLOBUS_LIBS} ${ARES_LIBS}
 EX_THRLIBS := ${GLOBUS_THR_LIBS} ${ARES_LIBS}
 
-HDRS:=glite_gss.h glite_gsplugin.h
+HDRS:=glite_gss.h glite_gsplugin.h glite_gscompat.h
 
 GSS_OBJS:=glite_gss.o
 GSS_LOBJS:=${GSS_OBJS:.o=.lo}
