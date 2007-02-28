@@ -17,9 +17,8 @@ gsoap_prefix=/opt/gsoap
 
 CC=gcc
 
-# we can have only one dependency in ETICS
-#gsoap_versions?=2.6.2 2.7.0f 2.7.6b
-gsoap_versions=${gsoap_default_version}
+gsoap_versions?=2.6.2 2.7.0f 2.7.6b 2.7.9b
+gsoap_versions:=${shell if ! echo $gsoap_versions | grep "\<${gsoap_default_version}\>" >/dev/null; then echo "${gsoap_default_version} "; else echo ne; fi} ${gsoap_versions}
 
 -include Makefile.inc
 -include ../Makefile.inc
@@ -40,9 +39,6 @@ ext_repository:=${shell if [ -d "${repository}/externals" ]; then \
 	fi}
 
 gsoap_version=${gsoap_default_version}
-# would be used for building multiple plugins with various gsoap versions
-#gsoap_platform=${shell echo "${gsoap_prefix}" | sed -e 's,.*\(rhel30_gcc.*\|slc3_.*_gcc[0-9]*\|src\).*,\1,'}
-#gsoap_prefix=${ext_repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}
 gsoap_prefix?=${ext_repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}
 
 VPATH=${top_srcdir}/src:${top_srcdir}/test:${top_srcdir}/examples
@@ -174,7 +170,7 @@ ${THRLTLIB_S}: ${THROBJS_S}
 all compile: \
 	${GSS_STATICLIB} ${GSS_LTLIB} ${GSS_THRSTATICLIB} ${GSS_THRLTLIB} \
 	${STATICLIB} ${LTLIB} ${THRSTATICLIB} ${THRLTLIB} \
-	all-libs-with-soap
+	all-libs-with-soap examples
 
 check: compile check.gss
 
@@ -197,7 +193,7 @@ all-libs-with-soap:
 	for v in ${gsoap_versions}; do	\
 		dir=`echo $$v | tr -d .`; \
 		mkdir $$dir; \
-		( cd $$dir && ${MAKE} -f ../Makefile gsoap_version=$$v top_srcdir=../.. libs-with-soap examples) ; \
+		( cd $$dir && ${MAKE} -f ../Makefile gsoap_version=$$v top_srcdir=../.. libs-with-soap) ; \
 	done
 
 libs-with-soap: ${LTLIB_S} ${THRLTLIB_S} ${STATICLIB_S} ${THRSTATICLIB_S}
@@ -282,7 +278,7 @@ install:
 	${INSTALL} -m 644 ${top_srcdir}/LICENSE ${PREFIX}/share/doc/${package}-${version}
 	cd ${top_srcdir}/interface && ${INSTALL} -m 644 ${HDRS} ${PREFIX}/include/glite/security/
 	if [ x${DOSTAGE} = xyes ]; then \
-		install -m 644 ${GSS_STATICLIB} ${GSS_THRSTATICLIB} ${STATICLIB} ${THRSTATICLIB} ${PREFIX}/lib; \
+		install -m 644 ${GSS_STATICLIB} ${GSS_THRSTATICLIB} ${PREFIX}/lib; \
 	fi
 	for v in ${gsoap_versions}; do \
 		(cd `echo $$v | tr -d .` && ${MAKE} -f ../Makefile install-soaplib gsoap_version=$$v PREFIX=${PREFIX} ); \
