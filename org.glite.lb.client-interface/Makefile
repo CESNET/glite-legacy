@@ -71,7 +71,7 @@ doc: generate
 	doxygen C.dox
 	doxygen CPP.dox
 
-install: generate 
+install: generate doc
 	-mkdir -p ${PREFIX}/${STAGETO}
 	-mkdir -p ${PREFIX}/share/doc/${package}-${version}
 	install -m 644 ${GEN_H} ${PREFIX}/${STAGETO}
