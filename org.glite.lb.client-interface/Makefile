@@ -65,6 +65,9 @@ distbin:
 	rm -rf ${top_srcdir}/tmpbuilddir
 	
 doc: generate 
+	cp ${top_srcdir}/doc/*.dox .
+	echo "PROJECT_NUMBER = ${version}" >> C.dox
+	echo "PROJECT_NUMBER = ${version}" >> CPP.dox
 	doxygen C.dox
 	doxygen CPP.dox
 
@@ -75,12 +78,12 @@ install: generate
 	install -m 644 ${top_srcdir}/LICENSE ${PREFIX}/share/doc/${package}-${version}
 	cd ${top_srcdir}/interface && install -m 644 ${STATIC_H} ${PREFIX}/${STAGETO}
 ifndef LB_STANDALONE
-	cd ${top_srcdir}/doc && cp -r C CPP ${PREFIX}/share/doc/${package}-${version}
+	cp -r C CPP ${PREFIX}/share/doc/${package}-${version}
 endif
 	if [ x${DOSTAGE} = xyes ]; then \
 		cd ${top_srcdir}/interface && install -m 644 ${FAKE_H} ${PREFIX}/${STAGETO} ; \
 	fi
 
 clean:
-	rm -f *.h
+	rm -f *.h *.dox
 	
