@@ -110,6 +110,9 @@
                     age="@org.gridsite.core.info.age@"
 					build="@org.gridsite.core.info.build@"
                     arch="i386"/>
+			
+				<component name="glite-yaim"/>
+
 			</components>
 			<dependencies>
 	  			<external name="@ext.mysql-server.rpm.name@"
