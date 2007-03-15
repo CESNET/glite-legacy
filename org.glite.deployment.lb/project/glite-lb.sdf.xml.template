@@ -112,7 +112,6 @@
                     arch="i386"/>
 			
 				<component name="glite-yaim"/>
-				<component name="lcg-expiregridmapdir"/>
 
 			</components>
 			<dependencies>
