@@ -84,19 +84,24 @@
 	
 	<target name="localinit"
 		description="Module specific initialization tasks">
-		<property name="ext.gsoap.platform" value="src"/>
 		<antcall target="gsoap" inheritAll="false">
 			<param name="ext.gsoap.version" value="2.6.2"/>
 		</antcall>
 
 		<antcall target="gsoap" inheritAll="false">
-			<param name="ext.gsoap.version" value="2.7.0"/>
+			<param name="ext.gsoap.version" value="2.7.0f"/>
+			<param name="ext.gsoap.rep.file" value="gSOAP-2.7.0f.tar.gz"/>
 		</antcall>
 
 		<antcall target="gsoap" inheritAll="false">
 			<param name="ext.gsoap.version" value="2.7.6b"/>
-			<param name="ext.gsoap.platform" value="src"/>
 		</antcall>
+
+		<antcall target="gsoap" inheritAll="false">
+			<param name="ext.gsoap.version" value="2.7.9b"/>
+			<param name="ext.gsoap.rep.file" value="gSOAP-2.7.9b.tar.gz"/>
+		</antcall>
+
 
 		<antcall target="secmakefiles" />
 	</target>

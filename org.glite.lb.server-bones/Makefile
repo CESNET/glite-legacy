@@ -1,7 +1,5 @@
 # defaults
 top_srcdir=.
-builddir=build
-top_builddir=${top_srcdir}/${builddir}
 stagedir=.
 distdir=.
 globalprefix=glite
@@ -11,11 +9,6 @@ version=0.0.1
 PREFIX=/opt/glite
 
 glite_location=/opt/glite
-globus_prefix=/opt/globus
-nothrflavour=gcc32
-thrflavour=gcc32pthr
-expat_prefix=/opt/expat
-cares_prefix=/opt/c-ares
 
 CC=gcc
 

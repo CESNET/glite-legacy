@@ -17,7 +17,8 @@ gsoap_prefix=/opt/gsoap
 
 CC=gcc
 
-gsoap_versions?=2.6.2 2.7.0 2.7.6b
+gsoap_versions?=2.6.2 2.7.0f 2.7.6b 2.7.9b
+gsoap_versions:=${shell if ! echo $gsoap_versions | grep "\<${gsoap_default_version}\>" >/dev/null; then echo "${gsoap_default_version} "; else echo ne; fi} ${gsoap_versions}
 
 -include Makefile.inc
 -include ../Makefile.inc
@@ -32,7 +33,13 @@ version_info:=-version-info ${shell \
 
 # version_info=-version-info `echo ${version} | cut -d. -f1,2 | tr . :`
 
+ext_repository:=${shell if [ -d "${repository}/externals" ]; then \
+	echo "${repository}/externals"; \
+	else echo "${repository}"; \
+	fi}
+
 gsoap_version=${gsoap_default_version}
+gsoap_prefix?=${ext_repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}
 
 VPATH=${top_srcdir}/src:${top_srcdir}/test:${top_srcdir}/examples
 
@@ -84,7 +91,7 @@ ARES_LIBS:=-L${cares_prefix}/lib -lcares
 EX_LIBS:= ${GLOBUS_LIBS} ${ARES_LIBS}
 EX_THRLIBS := ${GLOBUS_THR_LIBS} ${ARES_LIBS}
 
-HDRS:=glite_gss.h glite_gsplugin.h
+HDRS:=glite_gss.h glite_gsplugin.h glite_gscompat.h
 
 GSS_OBJS:=glite_gss.o
 GSS_LOBJS:=${GSS_OBJS:.o=.lo}
@@ -163,7 +170,7 @@ ${THRLTLIB_S}: ${THROBJS_S}
 all compile: \
 	${GSS_STATICLIB} ${GSS_LTLIB} ${GSS_THRSTATICLIB} ${GSS_THRLTLIB} \
 	${STATICLIB} ${LTLIB} ${THRSTATICLIB} ${THRLTLIB} \
-	all-libs-with-soap
+	all-libs-with-soap examples
 
 check: compile check.gss
 
@@ -186,25 +193,25 @@ all-libs-with-soap:
 	for v in ${gsoap_versions}; do	\
 		dir=`echo $$v | tr -d .`; \
 		mkdir $$dir; \
-		( cd $$dir && ${MAKE} -f ../Makefile gsoap_version=$$v top_srcdir=../.. libs-with-soap examples) ; \
+		( cd $$dir && ${MAKE} -f ../Makefile gsoap_version=$$v top_srcdir=../.. libs-with-soap) ; \
 	done
 
 libs-with-soap: ${LTLIB_S} ${THRLTLIB_S} ${STATICLIB_S} ${THRSTATICLIB_S}
+
+gsoap_srcname=gsoap-`echo ${gsoap_version} | cut -d. -f1,2`
 
 link-gsoap:
 	if [ -f ${top_srcdir}/src/stdsoap2_${gsoap_version}.c ]; then \
 		ln -sf ${top_srcdir}/src/stdsoap2_${gsoap_version}.c stdsoap2.c; \
 		ln -sf ${top_srcdir}/src/stdsoap2_${gsoap_version}.h stdsoap2.h; \
-	elif [ -f ${repository}/${gsoap_name}/${gsoap_version}/src/stdsoap2.c ]; then \
-		ln -sf ${repository}/${gsoap_name}/${gsoap_version}/src/stdsoap2.[ch] .; \
-	elif [ -f ${repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}/stdsoap2.c ]; then \
-		ln -sf ${repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}/stdsoap2.[ch] .; \
-	elif [ -f ${gsoap_prefix}/stdsoap2.c ]; then \
-		ln -sf ${gsoap_prefix}/stdsoap2.[ch] .; \
-	elif [ -f ${gsoap_prefix}/src/stdsoap2.c ]; then \
-		ln -sf ${gsoap_prefix}/src/stdsoap2.[ch] .; \
-	elif [ -f ${gsoap_prefix}/devel/stdsoap2.c ]; then \
-		ln -sf ${gsoap_prefix}/devel/stdsoap2.[ch] .; \
+	elif [ -f ${ext_repository}/${gsoap_name}/${gsoap_version}/src/stdsoap2.c ]; then \
+		ln -sf ${ext_repository}/${gsoap_name}/${gsoap_version}/src/stdsoap2.[ch] .; \
+	elif [ -f ${ext_repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}/stdsoap2.c ]; then \
+		ln -sf ${ext_repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}/stdsoap2.[ch] .; \
+	elif [ -f ${ext_repository}/${gsoap_name}/${gsoap_version}/src/stdsoap2.c ]; then \
+		ln -sf ${ext_repository}/${gsoap_name}/${gsoap_version}/src/stdsoap2.[ch] .; \
+	elif [ -f ${ext_repository}/${gsoap_name}/${gsoap_version}/src/${gsoap_srcname}/soapcpp2/stdsoap2.c ]; then \
+		ln -sf ${ext_repository}/${gsoap_name}/${gsoap_version}/src/${gsoap_srcname}/soapcpp2/stdsoap2.[ch] .; \
 	else false ; \
 	fi
 
@@ -228,7 +235,6 @@ wscalc_srv_ex2: ${WSCALC_SRV2_OBJS} ${LTLIB_S}
 	${LINK} -o $@ ${WSCALC_SRV2_OBJS} ${LTLIB_S}
 
 
-gsoap_prefix?=${repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}
 soapcpp:=${shell if [ -x ${gsoap_prefix}/bin/soapcpp2 ]; then \
 	echo ${gsoap_prefix}/bin/soapcpp2; \
 	else echo ${gsoap_prefix}/soapcpp2; \
@@ -266,7 +272,7 @@ install:
 	${INSTALL} -m 644 ${top_srcdir}/LICENSE ${PREFIX}/share/doc/${package}-${version}
 	cd ${top_srcdir}/interface && ${INSTALL} -m 644 ${HDRS} ${PREFIX}/include/glite/security/
 	if [ x${DOSTAGE} = xyes ]; then \
-		install -m 644 ${GSS_STATICLIB} ${GSS_THRSTATICLIB} ${STATICLIB} ${THRSTATICLIB} ${PREFIX}/lib; \
+		install -m 644 ${GSS_STATICLIB} ${GSS_THRSTATICLIB} ${PREFIX}/lib; \
 	fi
 	for v in ${gsoap_versions}; do \
 		(cd `echo $$v | tr -d .` && ${MAKE} -f ../Makefile install-soaplib gsoap_version=$$v PREFIX=${PREFIX} ); \

@@ -168,7 +168,7 @@ glite_gsplugin(struct soap *soap, struct soap_plugin *p, void *arg)
 	soap->fconnect		= glite_gsplugin_connect;
 	soap->fclose		= glite_gsplugin_close;
 #if GSOAP_VERSION >= 20700
-	soap->fclosesocket	= glite_gsplugin_close;
+	soap->fclosesocket	= NULL;
 #endif
 	soap->faccept		= glite_gsplugin_accept;
 	soap->fsend			= glite_gsplugin_send;
@@ -236,6 +236,7 @@ glite_gsplugin_connect(
 		|| (GSOAP_VERSION == 20700
 			&& (strlen(GSOAP_MIN_VERSION) < 1 || GSOAP_MIN_VERSION[1] < 'e')) ) {
 		fprintf(stderr, "Client connect will work only with gSOAP v2.7.0e and later");
+		soap->errnum = ENOSYS;
 		return ENOSYS;
 	}
 #endif
@@ -265,17 +266,21 @@ glite_gsplugin_connect(
 		goto err;
 	}
 
+	soap->errnum = 0;
 	return 0;
 
 err:
 	pdprintf(("GSLITE_GSPLUGIN: glite_gsplugin_connect() error!\n"));
 	switch ( ret ) {
+	case EDG_WLL_GSS_ERROR_GSS: ret = SOAP_CLI_FAULT; break;
 	case EDG_WLL_GSS_ERROR_HERRNO: 
-	case EDG_WLL_GSS_ERROR_ERRNO: return errno;
-	case EDG_WLL_GSS_ERROR_EOF: return ECONNREFUSED;
-	case EDG_WLL_GSS_ERROR_TIMEOUT: return ETIMEDOUT;
+	case EDG_WLL_GSS_ERROR_ERRNO: ret = errno; break;
+	case EDG_WLL_GSS_ERROR_EOF: ret = ECONNREFUSED; break;
+	case EDG_WLL_GSS_ERROR_TIMEOUT: ret = ETIMEDOUT; break;
+	default: break;
 	}
 
+	soap->errnum = ret;
 	return ret;
 }
 
@@ -311,7 +316,7 @@ glite_gsplugin_accept(struct soap *soap, int s, struct sockaddr *a, int *n)
 	edg_wll_GssStatus		gss_code;
 	int						conn;
 
-
+	soap->errnum = 0;
 	pdprintf(("GSLITE_GSPLUGIN: glite_gsplugin_accept()\n"));
 	ctx = ((int_plugin_data_t *)soap_lookup_plugin(soap, plugin_id))->ctx;
 	if ( (conn = accept(s, (struct sockaddr *)&a, n)) < 0 ) return conn;
@@ -320,6 +325,7 @@ glite_gsplugin_accept(struct soap *soap, int s, struct sockaddr *a, int *n)
 	if ( edg_wll_gss_accept(ctx->cred, conn, ctx->timeout, ctx->connection, &gss_code)) {
 		pdprintf(("GSLITE_GSPLUGIN: Client authentication failed, closing.\n"));
 		edg_wll_gss_get_error(&gss_code, "Client authentication failed", &ctx->error_msg);
+		soap->errnum = SOAP_SVR_FAULT;
 		return -1;
 	}
 
