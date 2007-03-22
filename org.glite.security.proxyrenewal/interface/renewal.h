@@ -15,7 +15,9 @@
 
 #ident "$Header$"
 
+#ifdef RENEWAL_HAVE_JOBID
 #include "glite/wmsutils/jobid/cjobid.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
