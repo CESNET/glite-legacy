@@ -65,6 +65,9 @@ distbin:
 	rm -rf ${top_srcdir}/tmpbuilddir
 	
 doc: generate 
+	cp ${top_srcdir}/doc/*.dox .
+	echo "PROJECT_NUMBER = ${version}" >> C.dox
+	echo "PROJECT_NUMBER = ${version}" >> CPP.dox
 	doxygen C.dox
 	doxygen CPP.dox
 
@@ -83,5 +86,5 @@ endif
 	fi
 
 clean:
-	rm -f *.h
+	rm -f *.h *.dox
 	
