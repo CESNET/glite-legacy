@@ -1,7 +1,5 @@
 # defaults
 top_srcdir=.
-builddir=build
-top_builddir=${top_srcdir}/${builddir}
 stagedir=.
 distdir=.
 globalprefix=glite
@@ -15,7 +13,6 @@ globus_prefix=/opt/globus
 nothrflavour=gcc32
 thrflavour=gcc32pthr
 expat_prefix=/opt/expat
-gsoap_prefix=/opt/gsoap
 
 -include Makefile.inc
 -include ../project/version.properties
@@ -50,7 +47,6 @@ CFLAGS:= ${DEBUG} \
 	-DVERSION=\"${version}\" \
 	-I${stagedir}/include -I${top_srcdir}/src -I. \
 	-I${expat_prefix}/include \
-	-I${gsoap_prefix}/include \
 	${COVERAGE_FLAGS} \
 	-I${mysql_prefix}/include -I${mysql_prefix}/include/mysql \
 	-I${globus_prefix}/include/${nothrflavour} \
