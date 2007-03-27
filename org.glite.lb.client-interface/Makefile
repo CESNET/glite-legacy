@@ -86,5 +86,5 @@ endif
 	fi
 
 clean:
-	rm -rf *.h *.dox C/ CPP/
+	rm -f *.h *.dox
 	
