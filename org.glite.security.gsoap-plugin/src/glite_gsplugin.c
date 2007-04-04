@@ -158,6 +158,7 @@ glite_gsplugin(struct soap *soap, struct soap_plugin *p, void *arg)
 		}
 		pdprintf(("GSLITE_GSPLUGIN: server running with certificate: %s\n", subject));
 		free(subject);
+		pdata->def = 1;
 	}
 
 	p->id			= plugin_id;
@@ -210,9 +211,7 @@ glite_gsplugin_delete(struct soap *soap, struct soap_plugin *p)
 		OM_uint32	ms;
 
 		glite_gsplugin_close(soap);
-		if (d->ctx->cred != GSS_C_NO_CREDENTIAL) gss_release_cred(&ms, &d->ctx->cred);
-		free(d->ctx->error_msg);
-		d->ctx->error_msg = NULL;
+		glite_gsplugin_free_context(d->ctx);
 	}
 	free(d);
 }
