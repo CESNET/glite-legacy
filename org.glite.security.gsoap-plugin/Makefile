@@ -17,7 +17,7 @@ gsoap_prefix=/opt/gsoap
 
 CC=gcc
 
-gsoap_versions?=2.6.2 2.7.0f 2.7.6b 2.7.9b
+gsoap_versions?=2.6.2 2.7.0f 2.7.6b 2.7.9b 2.7.9d
 gsoap_versions:=${shell if ! echo $gsoap_versions | grep "\<${gsoap_default_version}\>" >/dev/null; then echo "${gsoap_default_version} "; else echo ne; fi} ${gsoap_versions}
 
 -include Makefile.inc

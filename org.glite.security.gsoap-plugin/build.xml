@@ -102,6 +102,10 @@
 			<param name="ext.gsoap.rep.file" value="gSOAP-2.7.9b.tar.gz"/>
 		</antcall>
 
+		<antcall target="gsoap" inheritAll="false">
+			<param name="ext.gsoap.version" value="2.7.9d"/>
+			<param name="ext.gsoap.rep.file" value="gSOAP-2.7.9d.tar.gz"/>
+		</antcall>
 
 		<antcall target="secmakefiles" />
 	</target>
