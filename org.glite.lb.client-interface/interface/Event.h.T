@@ -222,10 +222,10 @@ public:
 	 * Retrieves string representation of the attribute name.
 	 * \param[in] name Symbolic name of the attribute.
 	 * \returns String name of the attribute.
-	 * \throw Exception Invalid event type or attribute not
-	 * defined for this event.
+	 * \throw Exception Invalid attribute name.
+	 * 
 	 */
-	const std::string & getAttrName(Attr name) const;
+	static const std::string & getAttrName(Attr name);
 
 	/** List of attributes and types valid for this instance.
 	 *

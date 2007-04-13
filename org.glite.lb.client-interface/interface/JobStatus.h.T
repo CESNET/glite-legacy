@@ -210,7 +210,7 @@ public:
 	 * \returns Name of attribute.
 	 * \throws LoggingException Invalid attribute name.
 	 */
-	const std::string& getAttrName(Attr name) const;
+	static const std::string& getAttrName(Attr name);
   
 	/** List of attributes and their types valid for this
 	 * instance.
