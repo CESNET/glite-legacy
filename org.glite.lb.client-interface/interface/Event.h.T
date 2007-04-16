@@ -235,6 +235,16 @@ public:
 	 */
 	const std::vector<std::pair<Attr,AttrType> >  &	getAttrs(void) const;
 
+	/** Event name.
+	 *
+	 * Retrieves string representation of the event type.
+	 * \param[in] type Symbolic name of the event type.
+	 * \returns String name of the event.
+	 * \throw Exception Invalid event type.
+	 *
+	 */
+	static const std::string getEventName(Type type);
+
 private:
 	static void	destroyFlesh(void *);
 	CountRef<Event>	*flesh;
