@@ -1012,6 +1012,7 @@ void set_time(MYSQL_TIME *mtime, const time_t time) {
 	struct tm tm;
 
 	gmtime_r(&time, &tm);
+	memset(mtime, 0, sizeof *mtime);
 	mtime->year = tm.tm_year + 1900;
 	mtime->month = tm.tm_mon + 1;
 	mtime->day = tm.tm_mday;
