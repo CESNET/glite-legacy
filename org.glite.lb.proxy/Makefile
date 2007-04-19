@@ -63,11 +63,17 @@ GLOBUS_LIBS:= -L${globus_prefix}/lib \
 	-lglobus_common_${nothrflavour} \
 	-lglobus_gssapi_gsi_${nothrflavour} \
 
+archlib:=lib
+host_cpu:=${shell uname -m}
+ifeq (${host_cpu},x86_64)
+    archlib:=lib64
+endif
+
 ifneq (${mysql_prefix},/usr)
 	ifeq ($(shell echo ${mysql_version} | cut -d. -f1,2),4.1)
-		mysqlib := -L${mysql_prefix}/lib/mysql
+		mysqlib := -L${mysql_prefix}/${archlib}/mysql
 	else
-		mysqlib := -L${mysql_prefix}/lib
+		mysqlib := -L${mysql_prefix}/${archlib}
 	endif
 endif
 
