@@ -1,0 +1,24 @@
+config_proxy_server (){
+
+INSTALL_ROOT=${INSTALL_ROOT:-/opt}
+
+requires GRID_TRUSTED_BROKERS
+
+if [ -f ${INSTALL_ROOT}/edg/etc/edg-myproxy.conf ]; then
+    rm -f ${INSTALL_ROOT}/edg/etc/edg-myproxy.conf 
+fi
+
+split_quoted_variable $GRID_TRUSTED_BROKERS | while read x; do
+     echo "$x" >> ${INSTALL_ROOT}/edg/etc/edg-myproxy.conf
+done
+
+/sbin/chkconfig --add myproxy 
+
+yaimlog DEBUG "Stopping MyProxy server"
+/etc/init.d/myproxy stop < /dev/null
+yaimlog DEBUG "Waiting 3 second for a complete stop"
+sleep 3
+yaimlog DEBUG "Starting MyProxy server"
+/etc/init.d/myproxy start < /dev/null
+
+}
