@@ -1,0 +1,17 @@
+#	TODO:
+#		Patch 1027:
+#			(Optional) Add expected LB server "superusers" X509 subjects (one per line)
+#			into $GLITE_LOCATION/etc/LB-super-users 
+
+
+
+function config_glite_lb(){
+	#check if config_glite_init is loaded
+	source ${FUNCTIONS_DIR}/config_glite_init
+	config_glite_init
+	
+	#	Configure gLite LB
+	run_glite_command glite-lb-config.py --conf
+    #	Start gLite LB
+    run_glite_command glite-lb-config.py --start
+}
