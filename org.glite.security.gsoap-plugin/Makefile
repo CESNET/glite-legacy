@@ -54,6 +54,8 @@ default: all
 #	DEBUG:=-g -O0 -Wall
 #endif
 
+DEBUG:=-g -O0 -Wall
+
 #ifeq ($(GSPLUGIN_VERSION_CHECKING),yes)
 #	DEBUG:=${DEBUG} -DCHECK_GSOAP_VERSION
 #endif
