@@ -124,6 +124,8 @@ public:
 
 	/** Symbolic names for types of attribute values. */
 	enum AttrType { INT_T,           /**< Integer value. */
+			FLOAT_T,         /**< Float value.  */
+			DOUBLE_T,        /**< Double value.  */
 			STRING_T,        /**< String value.  */
 			TIMEVAL_T,       /**< Time value (ie. struct
 					    timeval). */
@@ -188,6 +190,26 @@ public:
 	 * defined for this event.
 	 */
 	int	getValInt(Attr name) const;
+
+	/** Retrieve float attribute.
+	 * 
+	 * Retrieves value for attributes of float type.
+	 * \param[in] name Name of the attribute to retrieve.
+	 * \returns Integer value of the attribute.
+	 * \throw Exception Invalid event type or attribute not
+	 * defined for this event.
+	 */
+	float	getValFloat(Attr name) const;
+
+	/** Retrieve double attribute.
+	 * 
+	 * Retrieves value for attributes of double type.
+	 * \param[in] name Name of the attribute to retrieve.
+	 * \returns Integer value of the attribute.
+	 * \throw Exception Invalid event type or attribute not
+	 * defined for this event.
+	 */
+	double	getValDouble(Attr name) const;
 
 	/** Retrieve string attribute.
 	 *
