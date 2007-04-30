@@ -1,8 +1,14 @@
-LB_FUNCTIONS="
+WMSLB_FUNCTIONS="
 config_crl
 config_host_certs
 config_edgusers
 config_users
 config_mkgridmap
 config_java
-config_glite_lb"
+config_rgma_client
+config_bdii
+config_gip_service
+config_globus
+config_glite_lb
+config_glite_locallogger
+config_add_pool_env"
