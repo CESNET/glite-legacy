@@ -124,8 +124,6 @@ public:
 
 	/** Symbolic names for types of attribute values. */
 	enum AttrType { INT_T,           /**< Integer value. */
-			FLOAT_T,         /**< Float value.  */
-			DOUBLE_T,        /**< Double value.  */
 			STRING_T,        /**< String value.  */
 			TIMEVAL_T,       /**< Time value (ie. struct
 					    timeval). */
@@ -133,7 +131,9 @@ public:
 			LOGSRC_T,        /**< Source of the event
 					    (integer). */
 			JOBID_T,         /**< JobId value. */
-			NOTIFID_T        /**< NotifId value. */
+			NOTIFID_T,        /**< NotifId value. */
+			FLOAT_T,         /**< Float value.  */
+			DOUBLE_T,        /**< Double value.  */
 	};
 
 	Type 	type; /**< Type of the event as defined by Type. */
