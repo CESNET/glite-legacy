@@ -1,4 +1,4 @@
-WMSLB_FUNCTIONS="
+LB_FUNCTIONS="
 config_crl
 config_host_certs
 config_edgusers
