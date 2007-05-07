@@ -4,7 +4,7 @@
  * Requires existing database with appropriate access:
  *
  *   mysqladmin -u root -p create test
- *   mysql -u root -p -e 'GRANT ALL on test.* to testuset@localhost'
+ *   mysql -u root -p -e 'GRANT ALL on test.* to testuser@localhost'
  *
  * Use CS environment variable when using different user/pwd@machine:dbname.
  */
@@ -155,7 +155,7 @@ int main(int argn, char *argv[]) {
 
 	// "param" queries
 {
-	const char *user;
+	const char *user = NULL;
 
 	dprintf(("preparing '%s'...\n", user));
 	if ((glite_lbu_PrepareStmt(ctx, SELECT_CMD, &stmt)) != 0) goto failcon;
