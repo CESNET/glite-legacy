@@ -238,7 +238,13 @@ edg_wll_QueryResults edg_wll_StringToQResult(const char *name);
 /**
  * initial sequence code for BigHelper
  */
-#define EDG_WLL_SEQ_BIGHELPER_INITIAL "UI=2:NS=0:WM=0:BH=1:JSS=0:LM=0:LRMS=0:APP=0"
+#define EDG_WLL_SEQ_BIGHELPER_INITIAL	"UI=000002:NS=0000000000:WM=000000:BH=0000000001:JSS=000000:LM=000000:LRMS=000000:APP=000000:LBS=000000"
+
+/**
+ * initial sequence code for Purger
+ */
+#define EDG_WLL_SEQ_PARSER_INITIAL	"UI=000009:NS=0000096669:WM=000000:BH=0000000000:JSS=000000:LM=000000:LRMS=000000:APP=000000:LBS=000000"
+
 
 /** Retrieve current sequence code from the context */
 char * edg_wll_GetSequenceCode(
