@@ -243,7 +243,7 @@ edg_wll_QueryResults edg_wll_StringToQResult(const char *name);
 /**
  * initial sequence code for Purger
  */
-#define EDG_WLL_SEQ_PARSER_INITIAL	"UI=000009:NS=0000096669:WM=000000:BH=0000000000:JSS=000000:LM=000000:LRMS=000000:APP=000000:LBS=000000"
+#define EDG_WLL_SEQ_PURGER_INITIAL	"UI=000009:NS=0000096669:WM=000000:BH=0000000000:JSS=000000:LM=000000:LRMS=000000:APP=000000:LBS=000000"
 
 
 /** Retrieve current sequence code from the context */
