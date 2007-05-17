@@ -112,17 +112,17 @@ LB_PROXY_LIBS:= \
 
 
 
-glite_lb_proxy: lbproxy.o fake_write2rgma.o ${STATIC_LIB_BK}
+glite-lb-proxy: lbproxy.o fake_write2rgma.o ${STATIC_LIB_BK}
 	@echo DEBUG: mysql_version=${mysql_version} mysql_prefix=${mysql_prefix}
 	@echo DEBUG: shell: x$(shell echo ${mysql_version} | cut -d. -f1,2)x
 	${LINK} -o $@ lbproxy.o fake_write2rgma.o ${LB_PROXY_LIBS}
 
-glite_lb_proxy_perf: lbproxy.o fake_write2rgma.o ${STATIC_LIB_BK}
+glite-lb-proxy-perf: lbproxy.o fake_write2rgma.o ${STATIC_LIB_BK}
 	${LINK} -o $@ lbproxy.o fake_write2rgma.o ${LB_PROXY_LIBS}
 
 default all: compile
 
-compile: glite_lb_proxy
+compile: glite-lb-proxy
 
 check: compile
 	-echo No test so far
@@ -152,7 +152,7 @@ install:
 	-mkdir -p ${PREFIX}/share/doc/${package}-${version}
 	${INSTALL} -m 644 ${top_srcdir}/LICENSE ${PREFIX}/share/doc/${package}-${version}
 	${INSTALL} -m 644 ${top_srcdir}/doc/README ${top_srcdir}/doc/README.deploy ${PREFIX}/share/doc/${package}-${version}
-	${INSTALL} -m 755 glite_lb_proxy ${PREFIX}/bin/glite-lb-proxy
+	${INSTALL} -m 755 glite-lb-proxy ${PREFIX}/bin/glite-lb-proxy
 	${INSTALL} -m 644 ${top_srcdir}/config/glite-lb-dbsetup-proxy.sql ${PREFIX}/etc
 	${INSTALL} -m 755 ${top_srcdir}/config/startup ${PREFIX}/etc/init.d/glite-lb-proxy
 
@@ -163,6 +163,7 @@ install:
 
 
 clean:
+	rm -rf *.o .libs glite-lb-proxy
 
 %.c: %.c.T
 	rm -f $@
