@@ -309,6 +309,7 @@ for my $t (sort { $event->{order}->{$a} <=> $event->{order}->{$b} }
 		$event->getTypes) {
 	my $tl = lcfirst $t;
 	if ($tl =~ m/^pBS/) { $tl = ucfirst $tl; }
+	if ($tl =~ m/^condor/) { $tl = ucfirst $tl; }
 	gen $indent."edg_wll_${t}Event\t${tl};\n";
 }
 @@@}
