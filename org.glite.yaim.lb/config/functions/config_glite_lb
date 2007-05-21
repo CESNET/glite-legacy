@@ -3,19 +3,22 @@ function config_glite_lb_check(){
 }
 
 function config_glite_lb_setenv(){
-  gridenv_set GLITE_LOCATION ${INSTALL_ROOT:-opt}/glite
-  gridenv_set GLITE_LOCATION_VAR /var/glite
-  gridenv_set GLITE_USER ${GLITE_USER:-glite}
-  gridenv_set GLITE_WMS_QUERY_TIMEOUT 300
-  gridenv_set GLITE_HOST_CERT /home/glite/.certs/hostcert.pem
-  gridenv_set GLITE_HOST_KEY /home/glite/.certs/hostkey.pem
-  gridenv_set X509_CERT_DIR /etc/grid-security/certificates
-  gridenv_set X509_VOMS_DIR /etc/grid-security/vomsdir
-  gridpath_append LD_LIBRARY_PATH /opt/c-ares/lib
+  yaimgridenv_set GLITE_LOCATION ${INSTALL_ROOT:-opt}/glite
+  yaimgridenv_set GLITE_LOCATION_VAR /var/glite
+  yaimgridenv_set GLITE_USER ${GLITE_USER:-glite}
+  yaimgridenv_set GLITE_WMS_QUERY_TIMEOUT 300
+  yaimgridenv_set GLITE_HOST_CERT /home/glite/.certs/hostcert.pem
+  yaimgridenv_set GLITE_HOST_KEY /home/glite/.certs/hostkey.pem
+  yaimgridenv_set X509_CERT_DIR /etc/grid-security/certificates
+  yaimgridenv_set X509_VOMS_DIR /etc/grid-security/vomsdir
+  
+  yaimgridpath_append LD_LIBRARY_PATH /opt/c-ares/lib
 }
 
 function config_glite_lb() {
 
+  #return 0
+  #echo "I am not here"
   #############################################
   #   Logging and Bookkeeping configuration   #
   #############################################
@@ -105,6 +108,7 @@ function config_glite_lb() {
 
   . /opt/glite/etc/profile.d/grid-env.sh
   ${GLITE_LOCATION}/etc/init.d/glite-lb-bkserverd restart
+
   rm -f /etc/profile.d/aaa.sh
 
   return 0
