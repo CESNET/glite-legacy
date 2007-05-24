@@ -45,11 +45,10 @@ interface_version.h: ${top_srcdir}/project/version.properties
 
 ifdef LB_STANDALONE
 stage: generate
-	$(MAKE) install PREFIX=${stagedir} DOSTAGE=yes
 else
 stage: generate doc
-	$(MAKE) install PREFIX=${top_srcdir}/${stagedir} DOSTAGE=yes
 endif
+	$(MAKE) install PREFIX=${stagedir} DOSTAGE=yes
 
 dist: distsrc distbin
 
@@ -71,7 +70,11 @@ doc: generate
 	doxygen C.dox
 	doxygen CPP.dox
 
+ifdef LB_STANDALONE
+install: generate
+else
 install: generate doc
+endif
 	-mkdir -p ${PREFIX}/${STAGETO}
 	-mkdir -p ${PREFIX}/share/doc/${package}-${version}
 	install -m 644 ${GEN_H} ${PREFIX}/${STAGETO}

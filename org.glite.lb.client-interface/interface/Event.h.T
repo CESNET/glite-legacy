@@ -131,7 +131,9 @@ public:
 			LOGSRC_T,        /**< Source of the event
 					    (integer). */
 			JOBID_T,         /**< JobId value. */
-			NOTIFID_T        /**< NotifId value. */
+			NOTIFID_T,        /**< NotifId value. */
+			FLOAT_T,         /**< Float value.  */
+			DOUBLE_T,        /**< Double value.  */
 	};
 
 	Type 	type; /**< Type of the event as defined by Type. */
@@ -189,6 +191,26 @@ public:
 	 */
 	int	getValInt(Attr name) const;
 
+	/** Retrieve float attribute.
+	 * 
+	 * Retrieves value for attributes of float type.
+	 * \param[in] name Name of the attribute to retrieve.
+	 * \returns Integer value of the attribute.
+	 * \throw Exception Invalid event type or attribute not
+	 * defined for this event.
+	 */
+	float	getValFloat(Attr name) const;
+
+	/** Retrieve double attribute.
+	 * 
+	 * Retrieves value for attributes of double type.
+	 * \param[in] name Name of the attribute to retrieve.
+	 * \returns Integer value of the attribute.
+	 * \throw Exception Invalid event type or attribute not
+	 * defined for this event.
+	 */
+	double	getValDouble(Attr name) const;
+
 	/** Retrieve string attribute.
 	 *
 	 * Retrieves value for attributes of string type.
@@ -222,10 +244,10 @@ public:
 	 * Retrieves string representation of the attribute name.
 	 * \param[in] name Symbolic name of the attribute.
 	 * \returns String name of the attribute.
-	 * \throw Exception Invalid event type or attribute not
-	 * defined for this event.
+	 * \throw Exception Invalid attribute name.
+	 * 
 	 */
-	const std::string & getAttrName(Attr name) const;
+	static const std::string & getAttrName(Attr name);
 
 	/** List of attributes and types valid for this instance.
 	 *
@@ -234,6 +256,16 @@ public:
 	 * \throw Exception Invalid event type.
 	 */
 	const std::vector<std::pair<Attr,AttrType> >  &	getAttrs(void) const;
+
+	/** Event name.
+	 *
+	 * Retrieves string representation of the event type.
+	 * \param[in] type Symbolic name of the event type.
+	 * \returns String name of the event.
+	 * \throw Exception Invalid event type.
+	 *
+	 */
+	static const std::string getEventName(Type type);
 
 private:
 	static void	destroyFlesh(void *);

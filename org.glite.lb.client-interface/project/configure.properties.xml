@@ -20,6 +20,12 @@
 
 	Revision history:
 	$Log$
+	Revision 1.6.2.1  2007/04/29 15:54:38  jpospi
+	cleanup: fix wrong staging, skip make doc in LB_STANDALONE
+
+	Revision 1.6  2007/02/03 19:27:15  jpospi
+	first step to remove the ant dependency
+
 	Revision 1.5  2005/08/03 09:30:10  akrenek
 	Merged the release 1.0 branch
 
@@ -78,27 +84,13 @@
 			<echo file="${module.build.dir}/Makefile.inc">
 top_srcdir=..
 builddir=build
-stagedir=${stage.dir}
+stagedir=${stage.abs.dir}
 distdir=${dist.dir}
 package=${module.package.name}
 globalprefix=${global.prefix}
 lbprefix=${subsystem.prefix}
 PREFIX=${install.dir}
 version=${module.version}
-			</echo>
-			<copy file="${component.dir}/doc/C.dox" 
-				tofile="${module.build.dir}/C.dox" 
-				preservelastmodified="true"
-				overwrite="true" />
-			<copy file="${component.dir}/doc/CPP.dox" 
-				tofile="${module.build.dir}/CPP.dox" 
-				preservelastmodified="true"
-				overwrite="true" />
-			<echo file="${module.build.dir}/C.dox" append="true" >
-PROJECT_NUMBER        = ${module.version}
-			</echo>
-			<echo file="${module.build.dir}/CPP.dox" append="true" >
-PROJECT_NUMBER         = ${module.version}
 			</echo>
 	    </target>
 	</project>

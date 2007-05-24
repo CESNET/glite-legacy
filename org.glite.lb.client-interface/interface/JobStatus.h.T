@@ -210,7 +210,7 @@ public:
 	 * \returns Name of attribute.
 	 * \throws LoggingException Invalid attribute name.
 	 */
-	const std::string& getAttrName(Attr name) const;
+	static const std::string& getAttrName(Attr name);
   
 	/** List of attributes and their types valid for this
 	 * instance.
@@ -220,6 +220,16 @@ public:
 	 * \returns List of attributes.
 	 */
 	const std::vector<std::pair<Attr,AttrType> >& getAttrs(void) const;
+
+	/** Get name of state.
+	 *
+	 * Retrieve string representation of symbolic job state.
+	 * \param[in] state Symbolic state name.
+	 * \returns String state name.
+	 * \throw Exception Invalid state.
+	 *
+	 */
+	static const std::string &getStateName(Code state);
   
 	/** Default constructor.
 	 *
