@@ -50,6 +50,14 @@ extern "C" {
 
 
 /**
+ * Print all errors.
+ *
+ * Not returned from detection of capabilities.
+ */
+#define GLITE_LBU_DB_CAP_ERRORS 8
+
+
+/**
  * Database connection context.
  */
 typedef struct glite_lbu_DBContext_s *glite_lbu_DBContext;

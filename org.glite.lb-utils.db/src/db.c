@@ -14,7 +14,7 @@
 #include <mysqld_error.h>
 #include <errmsg.h>
 
-#include "glite/lb-utils/trio.h"
+#include "glite/lbu/trio.h"
 #include "db.h"
 
 
@@ -35,6 +35,7 @@
 
 #define USE_TRANS(CTX) ((CTX->caps & GLITE_LBU_DB_CAP_TRANSACTIONS) != 0)
 
+#define dprintf(CTX, FMT...) if (CTX->caps & GLITE_LBU_DB_CAP_ERRORS) fprintf(stderr, ##FMT)
 
 
 struct glite_lbu_DBContext_s {
@@ -708,7 +709,7 @@ static int lbu_err(glite_lbu_DBContext ctx, int code, const char *desc, const ch
 		ctx->err.code = code;
 		free(ctx->err.desc);
 		ctx->err.desc = desc ? strdup(desc) : NULL;
-		fprintf(stderr, "[db] %s:%d %s\n", func, line, desc);
+		dprintf(ctx, "[db %d] %s:%d %s\n", getpid(), func, line, desc);
 		return code;
 	} else
 		return ctx->err.code;
@@ -844,13 +845,13 @@ static int transaction_test(glite_lbu_DBContext ctx, MYSQL *m2, int *have_transa
 	pid = getpid();
 	*have_transactions = 0;
 
-	asprintf(&cmd_create, "CREATE TABLE test%d (item INT)", pid);
+	asprintf(&cmd_create, "CREATE TABLE test%d (item INT) ENGINE='innodb'", pid);
 	asprintf(&cmd_insert, "INSERT INTO test%d (item) VALUES (1)", pid);
 	asprintf(&cmd_select, "SELECT item FROM test%d", pid);
 	asprintf(&cmd_drop, "DROP TABLE test%d", pid);
 
 	m1 = ctx->mysql;
-	glite_lbu_ExecSQL(ctx, cmd_drop, NULL);
+	//glite_lbu_ExecSQL(ctx, cmd_drop, NULL);
 	if (glite_lbu_ExecSQL(ctx, cmd_create, NULL) != 0) goto err1;
 	if (glite_lbu_Transaction(ctx) != 0) goto err2;
 	if (glite_lbu_ExecSQL(ctx, cmd_insert, NULL) != 1) goto err2;

@@ -50,15 +50,21 @@ COMPILE:=libtool --mode=compile ${CC} ${CFLAGS}
 LINK:=libtool --mode=link ${CC} -rpath ${stagedir}/lib ${LDFLAGS} 
 INSTALL:=libtool --mode=install install
 
+archlib:=lib
+host_cpu:=${shell uname -m}
+ifeq (${host_cpu},x86_64) 
+    archlib:=lib64
+endif
+
 ifneq (${mysql_prefix},/usr)
 	ifeq ($(shell echo ${mysql_version} | cut -d. -f1,2),4.1)
-		mysqlib := -L${mysql_prefix}/lib/mysql
+		mysqlib := -L${mysql_prefix}/${archlib}/mysql
 	else
-		mysqlib := -L${mysql_prefix}/lib
+		mysqlib := -L${mysql_prefix}/${archlib}
 	endif
 endif
 
-EXT_LIBS:=${mysqlib} -lmysqlclient -lglite_lbu_trio
+EXT_LIBS:=${mysqlib} -lmysqlclient -lz -lglite_lbu_trio
 OBJS:=db.o
 TESTOBJS:=dbtest.o
 HDRS:=db.h
@@ -77,6 +83,9 @@ dbtest.lo dbtest.o: db.c db.h
 db_test: db_test.lo libglite_lbu_dbtest.la
 	${LINK} -o $@ $+ ${EXT_LIBS}
 
+db_expire: db_expire.lo libglite_lbu_dbtest.la
+	${LINK} -o $@ $+ ${EXT_LIBS}
+
 default all: compile
 
 compile: libglite_lbu_db.la
@@ -89,7 +98,7 @@ test_coverage:
 	cd coverage && $(MAKE) -f ../Makefile top_srcdir=../../ COVERAGE_FLAGS="-fprofile-arcs -ftest-coverage" check
 	cd coverage && for i in `echo ${OBJS} | tr ' ' '\012' | sort -u`; do gcov $$i ; done
 
-examples: db_test
+examples: db_test db_expire
 
 doc:
 	doxygen C.dox

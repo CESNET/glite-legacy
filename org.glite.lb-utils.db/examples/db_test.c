@@ -86,7 +86,7 @@ int main(int argn, char *argv[]) {
 		goto failcon;
 	}
 	// caps
-	glite_lbu_DBSetCaps(ctx, caps);
+	glite_lbu_DBSetCaps(ctx, caps || GLITE_LBU_DB_CAP_ERRORS);
 	dprintf(("capabilities: %d\n", caps));
 	// create all needed tables and data
 	dprintf(("creating tables...\n"));
