@@ -43,9 +43,6 @@ gsoap_prefix?=${ext_repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}
 
 VPATH=${top_srcdir}/src:${top_srcdir}/test:${top_srcdir}/examples
 
-TEST_LIBS:=-L${cppunit}/lib -lcppunit
-TEST_INC:=-I${cppunit}/include
-
 default: all
 
 #ifeq ($(GSPLUGIN_DEBUG),yes)
@@ -54,7 +51,8 @@ default: all
 #	DEBUG:=-g -O0 -Wall
 #endif
 
-DEBUG:=-g -O0 -Wall
+DEBUG:=-g -O0 -W -Wall -Wno-unused-parameter
+# not for globus and gsoap: -Werror
 
 #ifeq ($(GSPLUGIN_VERSION_CHECKING),yes)
 #	DEBUG:=${DEBUG} -DCHECK_GSOAP_VERSION
@@ -65,7 +63,6 @@ CFLAGS:= ${DEBUG} \
 	-DWITH_NONAMESPACES \
 	-I. -I${top_srcdir}/interface \
 	-I${stagedir}/include \
-	-I${cares_prefix}/include \
 	-I${gsoap_prefix}/include \
 	${COVERAGE_FLAGS} -D_GNU_SOURCE -DDATAGRID_EXTENSION
 
@@ -80,53 +77,19 @@ LINKXX:=libtool --mode=link  ${CXX} -rpath ${stagedir}/lib ${LDFLAGS}
 GLOBUS_INC:= -I${globus_prefix}/include/${nothrflavour}
 GLOBUS_THR_INC:= -I${globus_prefix}/include/${thrflavour}
 
-GLOBUS_LIBS:= -L${globus_prefix}/lib \
-	-lglobus_common_${nothrflavour} \
-	-lglobus_gssapi_gsi_${nothrflavour} \
-
-GLOBUS_THR_LIBS:= -L${globus_prefix}/lib \
-	-lglobus_common_${thrflavour} \
-	-lglobus_gssapi_gsi_${thrflavour}
-
 GSOAP_LIBS:= -L${gsoap_prefix}/lib -lgsoap
-ARES_LIBS:=-L${cares_prefix}/lib -lcares
 
-EX_LIBS:= ${GLOBUS_LIBS} ${ARES_LIBS}
-EX_THRLIBS := ${GLOBUS_THR_LIBS} ${ARES_LIBS}
+EX_LIBS:=-L${stagedir}/lib -lglite_security_gss_${nothrflavour}
+EX_THRLIBS:=-L${stagedir}/lib -lglite_security_gss_${thrflavour}
 
-HDRS:=glite_gss.h glite_gsplugin.h glite_gscompat.h
-
-GSS_OBJS:=glite_gss.o
-GSS_LOBJS:=${GSS_OBJS:.o=.lo}
-GSS_THROBJS:=${GSS_OBJS:.o=.thr.o}
-GSS_THRLOBJS:=${GSS_OBJS:.o=.thr.lo}
-
-GSS_STATICLIB:=libglite_security_gss_${nothrflavour}.a
-GSS_THRSTATICLIB:=libglite_security_gss_${thrflavour}.a
-GSS_LTLIB:=libglite_security_gss_${nothrflavour}.la
-GSS_THRLTLIB:=libglite_security_gss_${thrflavour}.la
+HDRS:=glite_gsplugin.h glite_gscompat.h
 
 STATICLIB:=libglite_security_gsoap_plugin_${nothrflavour}.a
 THRSTATICLIB:=libglite_security_gsoap_plugin_${thrflavour}.a
 LTLIB:=libglite_security_gsoap_plugin_${nothrflavour}.la
 THRLTLIB:=libglite_security_gsoap_plugin_${thrflavour}.la
 
-${GSS_STATICLIB}: ${GSS_OBJS}
-	ar crv $@ ${GSS_OBJS}
-	ranlib $@
-
-${GSS_THRSTATICLIB}: ${GSS_THROBJS}
-	ar crv $@ ${GSS_THROBJS}
-	ranlib $@
-
-${GSS_LTLIB}: ${GSS_OBJS}
-	${LINK} ${version_info} -o $@ ${GSS_LOBJS} ${EX_LIBS}
-
-${GSS_THRLTLIB}: ${GSS_THROBJS}
-	${LINK} ${version_info} -o $@ ${GSS_THRLOBJS} ${EX_THRLIBS}
-
-
-OBJS:=${GSS_OBJS} glite_gsplugin.o
+OBJS:=glite_gsplugin.o
 LOBJS:=${OBJS:.o=.lo}
 THROBJS:=${OBJS:.o=.thr.o}
 THRLOBJS:=${OBJS:.o=.thr.lo}
@@ -137,7 +100,7 @@ THRSTATICLIB_S:=libglite_security_gsoap_plugin_${dotless_ver}_${thrflavour}.a
 LTLIB_S:=libglite_security_gsoap_plugin_${dotless_ver}_${nothrflavour}.la
 THRLTLIB_S:=libglite_security_gsoap_plugin_${dotless_ver}_${thrflavour}.la
 
-OBJS_S:=${GSS_OBJS} glite_gsplugin.o stdsoap2.o
+OBJS_S:=glite_gsplugin.o stdsoap2.o
 LOBJS_S:=${OBJS_S:.o=.lo}
 THROBJS_S:=${OBJS_S:.o=.thr.o}
 THRLOBJS_S:=${OBJS_S:.o=.thr.lo}
@@ -171,18 +134,10 @@ ${THRLTLIB_S}: ${THROBJS_S}
 	${LINK} ${version_info} -o $@ ${THRLOBJS_S} ${EX_THRLIBS}
 
 all compile: \
-	${GSS_STATICLIB} ${GSS_LTLIB} ${GSS_THRSTATICLIB} ${GSS_THRLTLIB} \
 	${STATICLIB} ${LTLIB} ${THRSTATICLIB} ${THRLTLIB} \
 	all-libs-with-soap examples
 
-check: compile check.gss
-
-check.gss: test_gss
-	# ./test_gss
-	echo test_gss not run automatically util we have got some credentials
-
-test_gss: test_gss.o
-	${LINKXX} -o $@ test_gss.o ${GSS_LTLIB} ${TEST_LIBS} ${GLOBUS_LIBS} ${EX_LIBS}
+check: compile
 
 test_coverage:
 	-mkdir coverage
@@ -271,12 +226,8 @@ install:
 	-mkdir -p ${PREFIX}/lib
 	-mkdir -p ${PREFIX}/share/doc/${package}-${version}
 	-mkdir -p ${PREFIX}/include/glite/security/${package}
-	${INSTALL} -m 755 ${GSS_LTLIB} ${GSS_THRLTLIB} ${PREFIX}/lib
 	${INSTALL} -m 644 ${top_srcdir}/LICENSE ${PREFIX}/share/doc/${package}-${version}
 	cd ${top_srcdir}/interface && ${INSTALL} -m 644 ${HDRS} ${PREFIX}/include/glite/security/
-	if [ x${DOSTAGE} = xyes ]; then \
-		install -m 644 ${GSS_STATICLIB} ${GSS_THRSTATICLIB} ${PREFIX}/lib; \
-	fi
 	for v in ${gsoap_versions}; do \
 		(cd `echo $$v | tr -d .` && ${MAKE} -f ../Makefile install-soaplib gsoap_version=$$v PREFIX=${PREFIX} ); \
 	done
@@ -292,14 +243,8 @@ clean:
 %.thr.o: %.c
 	${COMPILE} ${GLOBUS_THR_INC} -o $@ -c $<
 
-test_gss.o: %.o: %.cpp
-	${CXX} -c ${CFLAGS} ${GLOBUS_INC} ${TEST_INC} $<
-
-glite_gsplugin.o, glite_gsplugin.thr.o: soap_version.h
+glite_gsplugin.o glite_gsplugin.thr.o: soap_version.h
 
 soap_version.h: stdsoap2.h
 	head stdsoap2.h | \
 	perl -ne '/^stdsoap2.h\s+([0-9])\.([0-9])\.(\S+)\s.*/ && printf "#define GSOAP_VERSION %d%02d%02d\n#define GSOAP_MIN_VERSION \"$$3\"\n#ident \"soap_version.h $$1.$$2.$$3\"\n",$$1,$$2,$$3' >$@
-
-glite_gsplugin.o: soap_version.h
-

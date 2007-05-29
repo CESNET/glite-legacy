@@ -4,6 +4,7 @@
 #include <stdsoap2.h>
 
 #include "soap_version.h"
+#include "glite_gsplugin-int.h"
 #include "glite_gsplugin.h"
 
 #ifdef GSPLUGIN_DEBUG
@@ -208,8 +209,6 @@ glite_gsplugin_delete(struct soap *soap, struct soap_plugin *p)
 
 	pdprintf(("GSLITE_GSPLUGIN: glite_gsplugin_delete()\n"));
 	if ( d->def ) {
-		OM_uint32	ms;
-
 		glite_gsplugin_close(soap);
 		glite_gsplugin_free_context(d->ctx);
 	}
@@ -301,7 +300,8 @@ glite_gsplugin_close(struct soap *soap)
 			pdprintf(("GSLITE_GSPLUGIN: closing gss connection\n"));
 			ret = edg_wll_gss_close(ctx->connection, ctx->timeout);
 		}
-		ctx->connection->context = GSS_C_NO_CONTEXT;
+		free(ctx->connection);
+		ctx->connection = NULL;
 	}
 
 	return ret;

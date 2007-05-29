@@ -3,27 +3,11 @@
 
 #include <stdsoap2.h>
 
-#include "glite_gss.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define PLUGIN_ID		"GLITE_GSOAP_PLUGIN"
-
-struct _glite_gsplugin_ctx {
-	struct timeval			_timeout, *timeout;
-
-	char				   *error_msg;
-
-	char				   *key_filename;
-	char				   *cert_filename;
-
-	edg_wll_GssConnection  *connection;
-	gss_cred_id_t			cred;
-
-	void				   *user_data;
-};
 
 typedef struct _glite_gsplugin_ctx *glite_gsplugin_Context;
 

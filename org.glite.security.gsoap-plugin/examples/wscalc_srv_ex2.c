@@ -2,6 +2,7 @@
 #include <getopt.h>
 #include <stdsoap2.h>
 #include <glite_gsplugin.h>
+#include <glite_gsplugin-int.h>
 
 #include "GSOAP_H.h"
 #include "CalcService.nsmap"
