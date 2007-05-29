@@ -32,7 +32,8 @@ TEST_INC:=-I${cppunit}/include
 
 default: all
 
-DEBUG:=-g -O0 -W -Wall -Wno-unused-parameter -Werror
+DEBUG:=-g -O0 -W -Wall -Wno-unused-parameter
+# not for globus, gsoap: -Werror
 
 CFLAGS:= ${DEBUG} \
 	-DVERSION=\"${version}\" \
