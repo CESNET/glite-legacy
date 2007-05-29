@@ -11,6 +11,8 @@ main(int argc, char **argv)
 	struct soap		soap;
 	double			a, b, result;
 	int				ret;
+	struct wscalc__addResponse	addresult;
+	struct wscalc__subResponse	subresult;
 
 
 	if (argc < 4) {
@@ -26,10 +28,12 @@ main(int argc, char **argv)
 	b = strtod(argv[3], NULL);
 	switch ( *argv[1] ) {
 	case 'a':
-		ret = soap_call_wscalc__add(&soap, server, "", a, b, &result);
+		ret = soap_call_wscalc__add(&soap, server, "", a, b, &addresult);
+		result = addresult.result;
 		break;
 	case 's':
-		ret = soap_call_wscalc__sub(&soap, server, "", a, b, &result);
+		ret = soap_call_wscalc__sub(&soap, server, "", a, b, &subresult);
+		result = subresult.result;
 		break;
 	default:
 		fprintf(stderr, "Unknown command\n");
