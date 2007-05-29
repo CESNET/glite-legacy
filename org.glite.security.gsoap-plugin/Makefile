@@ -41,7 +41,7 @@ ext_repository:=${shell if [ -d "${repository}/externals" ]; then \
 gsoap_version=${gsoap_default_version}
 gsoap_prefix?=${ext_repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}
 
-VPATH=${top_srcdir}/src:${top_srcdir}/test:${top_srcdir}/examples
+VPATH=${top_srcdir}/src:${top_srcdir}/examples
 
 default: all
 
