@@ -69,10 +69,10 @@ CFLAGS:= ${DEBUG} \
 LDFLAGS:=${COVERAGE_FLAGS}
 
 COMPILE:=libtool --mode=compile ${CC} ${CFLAGS}
+COMPILEXX:=libtool --mode=compile ${CXX} ${CFLAGS}
 LINK:=libtool --mode=link ${CC} -rpath ${stagedir}/lib ${LDFLAGS} 
-LINKXX:=libtool --mode=link ${CXX} ${LDFLAGS} 
+LINKXX:=libtool --mode=link ${CXX} -rpath ${stagedir}/lib ${LDFLAGS}
 INSTALL:=libtool --mode=install install
-LINKXX:=libtool --mode=link  ${CXX} -rpath ${stagedir}/lib ${LDFLAGS}
 
 GLOBUS_INC:= -I${globus_prefix}/include/${nothrflavour}
 GLOBUS_THR_INC:= -I${globus_prefix}/include/${thrflavour}
@@ -148,10 +148,10 @@ ${THRSTATICLIB}: ${THROBJS}
 	ranlib $@
 
 ${LTLIB}: ${OBJS} 
-	${LINK} ${version_info} -o $@ ${LOBJS} ${EX_LIBS}
+	PATH=.:${PATH} ${LINKXX} ${version_info} -o $@ ${LOBJS} ${EX_LIBS}
 
 ${THRLTLIB}: ${THROBJS}
-	${LINK} ${version_info} -o $@ ${THRLOBJS} ${EX_THRLIBS}
+	PATH=.:${PATH} ${LINKXX} ${version_info} -o $@ ${THRLOBJS} ${EX_THRLIBS}
 
 ${STATICLIB_S}: ${OBJS_S}
 	ar crv $@ ${OBJS_S}
@@ -162,15 +162,19 @@ ${THRSTATICLIB_S}: ${THROBJS_S}
 	ranlib $@
 
 ${LTLIB_S}: ${OBJS_S} 
-	${LINK} ${version_info} -o $@ ${LOBJS_S} ${EX_LIBS}
+	PATH=.:${PATH} ${LINKXX} ${version_info} -o $@ ${LOBJS_S} ${EX_LIBS}
 
 ${THRLTLIB_S}: ${THROBJS_S}
-	${LINK} ${version_info} -o $@ ${THRLOBJS_S} ${EX_THRLIBS}
+	PATH=.:${PATH} ${LINKXX} ${version_info} -o $@ ${THRLOBJS_S} ${EX_THRLIBS}
 
-all compile: \
+all compile: libtool-hack \
 	${GSS_STATICLIB} ${GSS_LTLIB} ${GSS_THRSTATICLIB} ${GSS_THRLTLIB} \
 	${STATICLIB} ${LTLIB} ${THRSTATICLIB} ${THRLTLIB} \
 	all-libs-with-soap examples
+
+libtool-hack:
+	echo 'g++ $$@' > gcc
+	chmod +x gcc
 
 check: compile check.gss
 
@@ -179,7 +183,7 @@ check.gss: test_gss
 	echo test_gss not run automatically util we have got some credentials
 
 test_gss: test_gss.o
-	${LINKXX} -o $@ test_gss.o ${GSS_LTLIB} ${TEST_LIBS} ${GLOBUS_LIBS} ${EX_LIBS}
+	PATH=.:${PATH} ${LINKXX} -o $@ test_gss.o ${GSS_LTLIB} ${TEST_LIBS} ${GLOBUS_LIBS} ${EX_LIBS}
 
 test_coverage:
 	-mkdir coverage
@@ -208,6 +212,9 @@ link-gsoap:
 		ln -sf ${ext_repository}/${gsoap_name}/${gsoap_version}/src/stdsoap2.[ch] .; \
 	elif [ -f ${ext_repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}/stdsoap2.c ]; then \
 		ln -sf ${ext_repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}/stdsoap2.[ch] .; \
+	elif [ -f ${ext_repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}/src/stdsoap2.c ]; then \
+		ln -sf ${ext_repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}/src/stdsoap2.c .; \
+		ln -sf ${ext_repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}/include/stdsoap2.h .; \
 	elif [ -f ${ext_repository}/${gsoap_name}/${gsoap_version}/src/stdsoap2.c ]; then \
 		ln -sf ${ext_repository}/${gsoap_name}/${gsoap_version}/src/stdsoap2.[ch] .; \
 	elif [ -f ${ext_repository}/${gsoap_name}/${gsoap_version}/src/${gsoap_srcname}/soapcpp2/stdsoap2.c ]; then \
@@ -275,7 +282,7 @@ install:
 		install -m 644 ${GSS_STATICLIB} ${GSS_THRSTATICLIB} ${PREFIX}/lib; \
 	fi
 	for v in ${gsoap_versions}; do \
-		(cd `echo $$v | tr -d .` && ${MAKE} -f ../Makefile install-soaplib gsoap_version=$$v PREFIX=${PREFIX} ); \
+		(cd `echo $$v | tr -d .` && ${MAKE} -f ../Makefile install-soaplib gsoap_version=$$v PREFIX=${PREFIX} top_srcdir=${top_srcdir}/..); \
 	done
 
 install-soaplib:
@@ -285,6 +292,9 @@ clean:
 
 %.o: %.c
 	${COMPILE} ${GLOBUS_INC} -o $@ -c $<
+
+stdsoap2.o: stdsoap2.c
+	${COMPILEXX} ${GLOBUS_INC} -o $@ -c $<
 
 %.thr.o: %.c
 	${COMPILE} ${GLOBUS_THR_INC} -o $@ -c $<
