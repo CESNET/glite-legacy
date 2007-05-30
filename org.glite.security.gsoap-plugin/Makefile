@@ -226,7 +226,6 @@ distbin:
 install:
 	-mkdir -p ${PREFIX}/lib
 	-mkdir -p ${PREFIX}/share/doc/${package}-${version}
-	-mkdir -p ${PREFIX}/include/glite/security/${package}
 	${INSTALL} -m 644 ${top_srcdir}/LICENSE ${PREFIX}/share/doc/${package}-${version}
 	cd ${top_srcdir}/interface && ${INSTALL} -m 644 ${HDRS} ${PREFIX}/include/glite/security/
 	for v in ${gsoap_versions}; do \
