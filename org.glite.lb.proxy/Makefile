@@ -23,7 +23,6 @@ CC=gcc
 YACC=bison -y
 
 VPATH=${top_srcdir}/src:${top_srcdir}/test:${top_srcdir}/examples:${top_srcdir}/project
-AT3=perl -I${top_srcdir}/project ${top_srcdir}/project/at3
 
 TEST_LIBS:=-L${cppunit_prefix}/lib -lcppunit
 TEST_INC:=-I${cppunit_prefix}/include
@@ -165,19 +164,9 @@ install:
 clean:
 	rm -rf *.o .libs glite-lb-proxy
 
-%.c: %.c.T
-	rm -f $@
-	${AT3} $< >$@ || rm -f $@
-	chmod -w $@ >/dev/null
-
 %.o: %.y
 	${YACC} -d ${YFLAGS} $<
 	mv y.tab.c $*.c
 	mv y.tab.h $*.h
 	${CC} -c ${CFLAGS} $*.c
 	rm $*.c
-
-%.cpp: %.cpp.T
-	rm -f $@
-	${AT3} $< >$@ || rm -f $@
-	chmod -w $@ >/dev/null
