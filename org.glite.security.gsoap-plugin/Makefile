@@ -52,6 +52,7 @@ default: all
 #endif
 
 DEBUG:=-g -O0 -W -Wall -Wno-unused-parameter
+# gsoap logs: -DDEBUG
 # not for globus and gsoap: -Werror
 
 #ifeq ($(GSPLUGIN_VERSION_CHECKING),yes)
@@ -82,7 +83,7 @@ GSOAP_LIBS:= -L${gsoap_prefix}/lib -lgsoap
 EX_LIBS:=-L${stagedir}/lib -lglite_security_gss_${nothrflavour}
 EX_THRLIBS:=-L${stagedir}/lib -lglite_security_gss_${thrflavour}
 
-HDRS:=glite_gsplugin.h glite_gscompat.h
+HDRS:=glite_gsplugin.h glite_gscompat.h glite_gsplugin-int.h
 
 STATICLIB:=libglite_security_gsoap_plugin_${nothrflavour}.a
 THRSTATICLIB:=libglite_security_gsoap_plugin_${thrflavour}.a
