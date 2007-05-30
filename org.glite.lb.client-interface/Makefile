@@ -18,7 +18,7 @@ version=${module.version}
 SUFFIXES = .T
 
 VPATH=${top_srcdir}/interface
-AT3=perl -I${top_srcdir}/project ${top_srcdir}/project/at3
+AT3=${stagedir}/sbin/glite-lb-at3
 
 STAGETO=include/${globalprefix}/${lbprefix}
 STATIC_H=consumer.h context.h dump.h load.h notification.h notifid.h purge.h \
