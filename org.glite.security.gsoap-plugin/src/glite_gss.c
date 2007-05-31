@@ -366,8 +366,12 @@ recv_token(int sock, void **token, size_t *token_length, struct timeval *to)
 	    goto end;
 	 }
       }
-      if (count == 0 && tl == 0 && errno == 0)
-	 return EDG_WLL_GSS_ERROR_EOF; 
+
+      if (count==0) {
+         if (tl==0) 
+            return EDG_WLL_GSS_ERROR_EOF;
+         else goto end;
+      }
       tmp=realloc(t, tl + count);
       if (tmp == NULL) {
 	 errno = ENOMEM;
@@ -614,6 +618,7 @@ edg_wll_gss_connect(gss_cred_id_t cred, char const *hostname, int port,
    int retry = _EXPIRED_ALERT_RETRY_COUNT;
 
    maj_stat = min_stat = min_stat2 = req_flags = 0;
+   memset(connection, 0, sizeof(*connection));
 
    /* GSI specific */
    req_flags = GSS_C_GLOBUS_SSL_COMPATIBLE;
@@ -708,7 +713,6 @@ edg_wll_gss_connect(gss_cred_id_t cred, char const *hostname, int port,
 
    } while (retry);
 
-   memset(connection, 0, sizeof(*connection));
    connection->sock = sock;
    connection->context = context;
    servername = NULL;
@@ -742,6 +746,7 @@ edg_wll_gss_accept(gss_cred_id_t cred, int sock, struct timeval *timeout,
    int ret;
 
    maj_stat = min_stat = min_stat2 = 0;
+   memset(connection, 0, sizeof(*connection));
 
    /* GSI specific */
    ret_flags = GSS_C_GLOBUS_SSL_COMPATIBLE;
@@ -786,7 +791,6 @@ edg_wll_gss_accept(gss_cred_id_t cred, int sock, struct timeval *timeout,
       goto end;
    }
 
-   memset(connection, 0, sizeof(*connection));
    connection->sock = sock;
    connection->context = context;
    memset(&output_token, 0, sizeof(output_token.value));
@@ -866,6 +870,7 @@ edg_wll_gss_read(edg_wll_GssConnection *connection, void *buf, size_t bufsize,
       if (ret)
 	 /* XXX cleanup */
 	 return ret;
+
 
       maj_stat = gss_unwrap(&min_stat, connection->context, &input_token,
 	  		    &output_token, NULL, NULL);
