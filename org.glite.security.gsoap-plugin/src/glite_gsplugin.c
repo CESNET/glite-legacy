@@ -130,6 +130,14 @@ glite_gsplugin_set_credential(glite_gsplugin_Context ctx,
    return 0;
 }
 
+void
+glite_gsplugin_set_connection(glite_gsplugin_Context ctx, edg_wll_GssConnection *conn)
+{
+	free(ctx->connection);
+	ctx->connection = malloc(sizeof(*ctx->connection));
+	memcpy(ctx->connection, conn, sizeof(*ctx->connection));
+}
+
 int
 glite_gsplugin(struct soap *soap, struct soap_plugin *p, void *arg)
 {
