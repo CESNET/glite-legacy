@@ -148,10 +148,10 @@ ${THRSTATICLIB}: ${THROBJS}
 	ranlib $@
 
 ${LTLIB}: ${OBJS} 
-	PATH=.:${PATH} ${LINKXX} ${version_info} -o $@ ${LOBJS} ${EX_LIBS}
+	PATH=${top_builddir}:${PATH} ${LINKXX} ${version_info} -o $@ ${LOBJS} ${EX_LIBS}
 
 ${THRLTLIB}: ${THROBJS}
-	PATH=.:${PATH} ${LINKXX} ${version_info} -o $@ ${THRLOBJS} ${EX_THRLIBS}
+	PATH=${top_builddir}:${PATH} ${LINKXX} ${version_info} -o $@ ${THRLOBJS} ${EX_THRLIBS}
 
 ${STATICLIB_S}: ${OBJS_S}
 	ar crv $@ ${OBJS_S}
@@ -162,10 +162,10 @@ ${THRSTATICLIB_S}: ${THROBJS_S}
 	ranlib $@
 
 ${LTLIB_S}: ${OBJS_S} 
-	PATH=.:${PATH} ${LINKXX} ${version_info} -o $@ ${LOBJS_S} ${EX_LIBS}
+	PATH=${top_builddir}:${PATH} ${LINKXX} ${version_info} -o $@ ${LOBJS_S} ${EX_LIBS}
 
 ${THRLTLIB_S}: ${THROBJS_S}
-	PATH=.:${PATH} ${LINKXX} ${version_info} -o $@ ${THRLOBJS_S} ${EX_THRLIBS}
+	PATH=${top_builddir}:${PATH} ${LINKXX} ${version_info} -o $@ ${THRLOBJS_S} ${EX_THRLIBS}
 
 all compile: libtool-hack \
 	${GSS_STATICLIB} ${GSS_LTLIB} ${GSS_THRSTATICLIB} ${GSS_THRLTLIB} \
@@ -173,7 +173,8 @@ all compile: libtool-hack \
 	all-libs-with-soap examples
 
 libtool-hack:
-	echo 'g++ $$@' > gcc
+	echo 'set -o xtrace' > gcc
+	echo 'g++ $$@' >> gcc
 	chmod +x gcc
 
 check: compile check.gss
@@ -183,7 +184,7 @@ check.gss: test_gss
 	echo test_gss not run automatically util we have got some credentials
 
 test_gss: test_gss.o
-	PATH=.:${PATH} ${LINKXX} -o $@ test_gss.o ${GSS_LTLIB} ${TEST_LIBS} ${GLOBUS_LIBS} ${EX_LIBS}
+	PATH=${top_builddir}:${PATH} ${LINKXX} -o $@ test_gss.o ${GSS_LTLIB} ${TEST_LIBS} ${GLOBUS_LIBS} ${EX_LIBS}
 
 test_coverage:
 	-mkdir coverage
