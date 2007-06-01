@@ -7,7 +7,9 @@
  *  @version $Revision$
  */
 
-#include "glite/wmsutils/exception/Exception.h"
+#include <stdexcept>
+#include <sstream>
+#include <string>
 
 #include <pthread.h>
 
@@ -23,7 +25,7 @@ EWL_BEGIN_NAMESPACE
  * functionality (printing error message, logging it, printing stack
  * trace) is inherited from the base class glite::wmsutils::exception::Exception.
  */
-class Exception: public glite::wmsutils::exception::Exception {
+class Exception: public std::runtime_error {
 public:
 	
 	/** Constructor for mandatory fields.
@@ -39,14 +41,12 @@ public:
 		  int line_number,
 		  const std::string& method,
 		  int   code,
-		  const std::string& exception) 
-		: glite::wmsutils::exception::Exception(source, 
-							line_number, 
-							method, 
-							code, 
-							"glite::lb::Exception")
-		{ error_message = exception; };
-	
+		  const std::string& exception)
+		: source_file(source), line(line_number), error_code(code),
+		std::runtime_error(formatMessage(exception, method, source, line_number))
+		{}
+		
+		
 	/** Constructor for mandatory fields and the exception chain.
 	 *
 	 * Updates all the mandatory fields, names the exception and
@@ -59,18 +59,48 @@ public:
 	 * \param[in] exception 	Error message describing the exception.
 	 * \param[in] exc 		Originally raised exception.
 	 */
-	Exception(const std::string& source,
-		  int line_number,
-		  const std::string& method,
-		  int   code,
-		  const std::string& exception,
-		  const glite::wmsutils::exception::Exception &exc)
-		: glite::wmsutils::exception::Exception(source, 
-							line_number, 
-							method, 
-							code, 
-							"glite::lb::Exception")
-		{ error_message = exception + ": " + exc.what(); };
+	 Exception(const std::string& source,
+		   int line_number,
+		   const std::string& method,
+		   int   code,
+		   const std::string& exception,
+		   const Exception &exc)
+		 : source_file(source), line(line_number), error_code(code),
+		 std::runtime_error(formatMessage(exception, method, source, line_number) +
+				    exc.what())
+		 { }
+		
+	 virtual ~Exception() throw() 
+		 {}
+protected:
+	/** The name of the file where the exception was raised */
+	std::string          source_file;
+	/**  line number where the exception was raised */
+	int                   line;
+	/** the name of the method where the exception was raised */
+	std::string          method_name ;
+	/**  integer error code representing the cause of the error */
+	int                   error_code;
+
+	/** Format message for this particular exception.
+	 *
+	 * Returns formatted string describing exception.
+	 * \param[in] exception 	Error message describing the exception.
+	 * \param[in] method 		Name of the method that raised the exception.
+	 * \param[in] source 		Source filename where the exception was raised.
+	 * \param[in] line_number 	Line in the source that caused the exception.
+	 */
+	std::string formatMessage(const std::string& exception,
+				  const std::string& method,
+				  const std::string& source, 
+				  int   line) {
+		std::ostringstream o;
+		
+		o << "glite.lb.Exception: " << exception << std::endl
+		  << "\tat " << method << "[" << source << ":" << line << "]" 
+		  << std::endl;
+		return o.str();
+	}
 };
 
 
@@ -118,7 +148,7 @@ public:
 			 const std::string& method,
 			 int   code,
 			 const std::string& exception, 
-			 const glite::wmsutils::exception::Exception &exc)
+			 const Exception &exc)
 		: Exception(source, line_number, method, code, exception)
 		{};
 };
@@ -171,7 +201,7 @@ public:
 		    const std::string& method,
 		    int   code,
 		    const std::string& exception,
-		    const glite::wmsutils::exception::Exception &exc)
+		    const Exception &exc)
 		: Exception(source, 
 			    line_number, 
 			    method, 
