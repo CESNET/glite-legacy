@@ -173,8 +173,7 @@ all compile: libtool-hack \
 	all-libs-with-soap examples
 
 libtool-hack:
-	echo 'set -o xtrace' > gcc
-	echo 'g++ $$@' >> gcc
+	echo 'g++ $$@' > gcc
 	chmod +x gcc
 
 check: compile check.gss
