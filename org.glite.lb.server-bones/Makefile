@@ -90,6 +90,8 @@ install:
 	fi
 
 clean:
+	rm -rvf *.o *.lo .libs lib* srv_example cnt_example
+	rm -rvf log.xml project/ rpmbuild/ RPMS/ tgz/
 
 %.o: %.c
 	${COMPILE} -c $<
