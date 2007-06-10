@@ -3,7 +3,6 @@
 #include <stdio.h>
 
 #include "glite/wmsutils/jobid/cjobid.h"
-#include "glite/lb/producer.h"
 #include "glite/lb/jobstat.h"
 
 char* write2rgma_statline(edg_wll_JobStat *stat)

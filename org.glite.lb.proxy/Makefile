@@ -162,7 +162,8 @@ install:
 
 
 clean:
-	rm -rf *.o .libs glite-lb-proxy
+	rm -rvf *.o .libs glite-lb-proxy
+	rm -rvf log.xml project/ rpmbuild/ RPMS/ tgz/
 
 %.o: %.y
 	${YACC} -d ${YFLAGS} $<
