@@ -8,8 +8,6 @@ package=glite-lb-server-bones
 version=0.0.1
 PREFIX=/opt/glite
 
-glite_location=/opt/glite
-
 CC=gcc
 
 -include Makefile.inc
