@@ -38,6 +38,7 @@ main(int argc, char **argv)
 	char				   *subject = NULL;
 	int						opt,
 							port = 19999;
+	char				*cert_filename = NULL, *key_filename = NULL;
 	int						sock;
 
 
@@ -49,14 +50,14 @@ main(int argc, char **argv)
 	while ((opt = getopt_long(argc, argv, "c:k:p:", long_options, NULL)) != EOF) {
 		switch (opt) {
 		case 'p': port = atoi(optarg); break;
-		case 'c': ctx->cert_filename = strdup(optarg); break;
-		case 'k': ctx->key_filename = strdup(optarg); break;
+		case 'c': cert_filename = strdup(optarg); break;
+		case 'k': key_filename = strdup(optarg); break;
 		case '?':
 		default : usage(name); exit(1);
 		}
 	}
 
-	if ( edg_wll_gss_acquire_cred_gsi(ctx->cert_filename, ctx->key_filename, &ctx->cred, &subject, &gss_code) ) {
+	if ( edg_wll_gss_acquire_cred_gsi(cert_filename, key_filename, &ctx->cred, &subject, &gss_code) ) {
 		edg_wll_gss_get_error(&gss_code, "Failed to read credential", &msg);
 		fprintf(stderr, "%s\n", msg);
 		free(msg);

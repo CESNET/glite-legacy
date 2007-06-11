@@ -31,7 +31,7 @@ main(int argc, char **argv)
 	char				   *name;
 	char				   *cert, *key;
 	int						opt;
-
+	gss_cred_id_t			    cred;
 
 	cert = key = NULL;
 	name = strrchr(argv[0],'/');
@@ -48,10 +48,11 @@ main(int argc, char **argv)
 
 	if ( cert || key ) {
 		if ( glite_gsplugin_init_context(&ctx) ) { perror("init context"); exit(1); }
-		if (glite_gsplugin_set_credential(ctx, cert, key)) {
+		if (edg_wll_gss_acquire_cred_gsi(cert, key, &cred, NULL, NULL) != 0) {
 		   fprintf (stderr, "Failed to set credentials\n");
 		   exit(1);
 		}
+		glite_gsplugin_set_credential(ctx, cred);
 	}
 
 	soap_init(&soap);

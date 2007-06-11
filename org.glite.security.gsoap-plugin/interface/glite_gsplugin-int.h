@@ -12,11 +12,10 @@ struct _glite_gsplugin_ctx {
 
 	char				   *error_msg;
 
-	char				   *key_filename;
-	char				   *cert_filename;
-
 	edg_wll_GssConnection  *connection;
 	gss_cred_id_t			cred;
+	int				internal_connection;
+	int				internal_credentials;
 
 	void				   *user_data;
 };

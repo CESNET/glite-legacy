@@ -53,12 +53,13 @@ glite_gsplugin_init_context(glite_gsplugin_Context *ctx)
 int
 glite_gsplugin_free_context(glite_gsplugin_Context ctx)
 {
-	OM_uint32	ms;
-	
+	OM_uint32       ms;
+
 	if (ctx == NULL)
 	   return 0;
 
-	if ( ctx->cred != GSS_C_NO_CREDENTIAL ) gss_release_cred(&ms, &ctx->cred);
+	if ( ctx->internal_credentials && ctx->cred != GSS_C_NO_CREDENTIAL ) 
+		gss_release_cred(&ms, &ctx->cred);
 	if ( ctx->connection ) {
 		if ( ctx->connection->context != GSS_C_NO_CONTEXT )
 			edg_wll_gss_close(ctx->connection, NULL);
@@ -66,10 +67,6 @@ glite_gsplugin_free_context(glite_gsplugin_Context ctx)
 	}
 	if (ctx->error_msg)
 	   free(ctx->error_msg);
-	if (ctx->key_filename)
-	   free(ctx->key_filename);
-	if (ctx->cert_filename)
-	   free(ctx->cert_filename);
 	free(ctx);
 
 	return 0;
@@ -110,6 +107,7 @@ void glite_gsplugin_set_timeout(glite_gsplugin_Context ctx, struct timeval const
 	else ctx->timeout = NULL;
 }
 
+#if 0
 int
 glite_gsplugin_set_credential(glite_gsplugin_Context ctx,
 			      const char *cert,
@@ -129,13 +127,35 @@ glite_gsplugin_set_credential(glite_gsplugin_Context ctx,
 
    return 0;
 }
+#endif
 
 void
+glite_gsplugin_set_credential(glite_gsplugin_Context ctx,
+				gss_cred_id_t cred)
+{
+	ctx->cred = cred;
+	ctx->internal_credentials = 0;
+}
+
+int
 glite_gsplugin_set_connection(glite_gsplugin_Context ctx, edg_wll_GssConnection *conn)
 {
-	free(ctx->connection);
-	ctx->connection = malloc(sizeof(*ctx->connection));
-	memcpy(ctx->connection, conn, sizeof(*ctx->connection));
+	int						ret = SOAP_OK;
+
+	if ( ctx->connection ) {
+		if ( ctx->internal_connection && ctx->connection->context != GSS_C_NO_CONTEXT) {
+			pdprintf(("GSLITE_GSPLUGIN: closing gss connection\n"));
+			ret = edg_wll_gss_close(ctx->connection, ctx->timeout);
+		}
+		free(ctx->connection);
+	}
+	if (conn) {
+		ctx->connection = malloc(sizeof(edg_wll_GssConnection));
+		memcpy(ctx->connection, conn, sizeof(edg_wll_GssConnection));
+	} else ctx->connection = NULL;
+	ctx->internal_connection = 0;
+
+	return ret;
 }
 
 int
@@ -165,6 +185,7 @@ glite_gsplugin(struct soap *soap, struct soap_plugin *p, void *arg)
 			glite_gsplugin_free_context(pdata->ctx);
 			return EINVAL;
 		}
+		pdata->ctx->internal_credentials = 1;
 		pdprintf(("GSLITE_GSPLUGIN: server running with certificate: %s\n", subject));
 		free(subject);
 		pdata->def = 1;
@@ -250,14 +271,15 @@ glite_gsplugin_connect(
 	ctx = ((int_plugin_data_t *)soap_lookup_plugin(soap, plugin_id))->ctx;
 
 	if ( ctx->cred == GSS_C_NO_CREDENTIAL ) {
-		pdprintf(("GSLITE_GSPLUGIN: loading credentials\n"));
-		ret = edg_wll_gss_acquire_cred_gsi(ctx->cert_filename, ctx->key_filename,
-						&ctx->cred, NULL, &gss_stat);
+		pdprintf(("GSLITE_GSPLUGIN: loading default credentials\n"));
+		ret = edg_wll_gss_acquire_cred_gsi(NULL, NULL,
+                	&ctx->cred, NULL, &gss_stat);
 		if ( ret ) {
 			edg_wll_gss_get_error(&gss_stat, "failed to load GSI credentials",
-						&ctx->error_msg);
+				&ctx->error_msg);
 			goto err;
 		}
+		ctx->internal_credentials = 1;
 	}
 
 	if ( !(ctx->connection = malloc(sizeof(*ctx->connection))) ) return errno;
@@ -271,6 +293,7 @@ glite_gsplugin_connect(
 		edg_wll_gss_get_error(&gss_stat, "edg_wll_gss_connect()", &ctx->error_msg);
 		goto err;
 	}
+	ctx->internal_connection = 1;
 
 	soap->errnum = 0;
 	return 0;
@@ -298,21 +321,10 @@ static int
 glite_gsplugin_close(struct soap *soap)
 {
 	glite_gsplugin_Context	ctx;
-	int						ret = SOAP_OK;
-
 
 	pdprintf(("GSLITE_GSPLUGIN: glite_gsplugin_close()\n"));
 	ctx = ((int_plugin_data_t *)soap_lookup_plugin(soap, plugin_id))->ctx;
-	if ( ctx->connection ) {
-		if ( ctx->connection->context != GSS_C_NO_CONTEXT) {
-			pdprintf(("GSLITE_GSPLUGIN: closing gss connection\n"));
-			ret = edg_wll_gss_close(ctx->connection, ctx->timeout);
-		}
-		free(ctx->connection);
-		ctx->connection = NULL;
-	}
-
-	return ret;
+	return glite_gsplugin_set_connection(ctx, NULL);
 }
 
 
@@ -327,8 +339,10 @@ glite_gsplugin_accept(struct soap *soap, int s, struct sockaddr *a, int *n)
 	pdprintf(("GSLITE_GSPLUGIN: glite_gsplugin_accept()\n"));
 	ctx = ((int_plugin_data_t *)soap_lookup_plugin(soap, plugin_id))->ctx;
 	if ( (conn = accept(s, (struct sockaddr *)&a, n)) < 0 ) return conn;
-	if (   !ctx->connection
-		&& !(ctx->connection = malloc(sizeof(*ctx->connection))) ) return -1;
+	if ( !ctx->connection ) {
+		if ( !(ctx->connection = malloc(sizeof(*ctx->connection))) ) return -1;
+		ctx->internal_connection = 1;
+	}
 	if ( edg_wll_gss_accept(ctx->cred, conn, ctx->timeout, ctx->connection, &gss_code)) {
 		pdprintf(("GSLITE_GSPLUGIN: Client authentication failed, closing.\n"));
 		edg_wll_gss_get_error(&gss_code, "Client authentication failed", &ctx->error_msg);
