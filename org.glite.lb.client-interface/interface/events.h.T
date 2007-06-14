@@ -88,9 +88,10 @@ extern char *edg_wll_EventToString(edg_wll_EventCode event);
  * Predefined ULM key types
  */
 typedef enum _edg_wll_KeyNameCode {
-	UNDEFINED,		/**< undefined */
-	EDG_WLL_EVNT,		/**< event type */
+	UNDEFINED = 0,		/**< undefined */
+	EDG_WLL_EVNT = 1,		/**< event type */
 @@@{
+my $keyno = 2;
 selectType $event '_common_';
 for ($event->getFieldsOrdered) {
 	my $f = selectField $event $_;
@@ -98,10 +99,11 @@ for ($event->getFieldsOrdered) {
 	my $fnu = uc $fn;
 	my $c = $f->{comment};
 	if (hasAlias $f 'ULM') {
-		gen "\tULM\_$fnu,\t\t/**< $c */\n";
+		gen "\tULM\_$fnu = $keyno,\t\t/**< $c */\n";
 	} else {
-		gen "\tEDG_WLL\_COMMON\_$fnu,\t\t/**< $c */\n";
+		gen "\tEDG_WLL\_COMMON\_$fnu = $keyno,\t\t/**< $c */\n";
 	}
+	$keyno++;
 }
 for my $t (sort { $event->{order}->{$a} <=> $event->{order}->{$b} }
 		$event->getTypes) {
@@ -111,7 +113,8 @@ for my $t (sort { $event->{order}->{$a} <=> $event->{order}->{$b} }
 		my $f = selectField $event $_;
 		my $fnu = uc $f->{name};
 		my $c = $f->{comment};
-		gen "\tEDG_WLL\_$tu\_$fnu,\t/**< $c */\n";
+		gen "\tEDG_WLL\_$tu\_$fnu = $keyno,\t/**< $c */\n";
+		$keyno++;
 	}
 }
 @@@}
