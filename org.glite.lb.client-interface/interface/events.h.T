@@ -43,11 +43,22 @@ typedef enum _edg_wll_EventCode {
 /** invalid code, e.g. uninitialized variable */
         EDG_WLL_EVENT_UNDEF = 0,
 @@@{
+my $flesh = 'gLite';	#XXX
+my $fleshno = 0;
+my $eventno = $fleshno;
 for my $e (sort { $event->{order}->{$a} <=> $event->{order}->{$b} }
 		$event->getTypes) {
 	my $u = uc $e;
 	my $c = getTypeComment $event $e;
-	gen "\tEDG_WLL_EVENT_$u,\t/**< $c */\n";
+
+	if ($flesh ne $event->{flesh}->{$e}) {
+		$flesh = $event->{flesh}->{$e};
+		gen "/* new flesh $flesh */\n";
+		$fleshno += 100;
+		$eventno = $fleshno;
+	}
+	$eventno++;
+	gen "\tEDG_WLL_EVENT_$u = $eventno,\t/**< $c */\n";
 }
 @@@}
         EDG_WLL_EVENT__LAST,	/**< last currently supported event code */
