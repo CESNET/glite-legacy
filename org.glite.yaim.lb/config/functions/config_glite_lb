@@ -17,13 +17,10 @@ function config_glite_lb_setenv(){
 
 function config_glite_lb() {
 
-  #return 0
-  #echo "I am not here"
   #############################################
   #   Logging and Bookkeeping configuration   #
   #############################################
 	
-  INSTALL_ROOT=${INSTALL_ROOT:-/opt}
   HOSTNAME=`hostname -f`
 
   # add option  --max_allowed_packet=17M
@@ -68,15 +65,6 @@ function config_glite_lb() {
 
   # do we need bkindex?
 
-  GLITE_USER=${GLITE_USER:-glite}
-  GLITE_USER_HOME=${GLITE_USER_HOME:-/home/glite}
-
-  if ( ! id $GLITE_USER > /dev/null 2>&1 ); then
-    useradd -p "*NP*"  -r -c "gLite User" -m $GLITE_USER
-    chown $GLITE_USER:$GLITE_USER $GLITE_USER_HOME
-  fi
-
-  GLITE_LOCATION_VAR=${GLITE_LOCATION_VAR:-/var/glite}
   chown $GLITE_USER:$GLITE_USER $GLITE_LOCATION_VAR
   chmod 0755 $GLITE_LOCATION_VAR
 
@@ -103,13 +91,8 @@ function config_glite_lb() {
     echo "${GLITE_LOCATION}/etc/init.d/glite-lb-bkserverd" >> ${GLITE_LOCATION}/etc/gLiteservices
   fi
 
-  echo ". /opt/glite/yaim/etc/grid-env-funcs.sh" > /etc/profile.d/aaa.sh # I hate this
-  . /opt/glite/yaim/etc/grid-env-funcs.sh
-
   . /opt/glite/etc/profile.d/grid-env.sh
   ${GLITE_LOCATION}/etc/init.d/glite-lb-bkserverd restart
-
-  rm -f /etc/profile.d/aaa.sh
 
   return 0
 

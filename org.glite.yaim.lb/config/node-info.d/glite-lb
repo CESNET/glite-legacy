@@ -1,4 +1,5 @@
 LB_FUNCTIONS="
+config_add_pool_env
 config_crl
 config_host_certs
 config_edgusers
@@ -11,4 +12,4 @@ config_gip_service
 config_globus
 config_glite_lb
 config_glite_locallogger
-config_add_pool_env"
+config_glite_initd"
