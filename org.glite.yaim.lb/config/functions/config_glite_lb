@@ -21,7 +21,8 @@ function config_glite_lb_setenv(){
   yaimgridenv_set GLITE_HOST_KEY /home/glite/.certs/hostkey.pem
   yaimgridenv_set X509_CERT_DIR /etc/grid-security/certificates
   yaimgridenv_set X509_VOMS_DIR /etc/grid-security/vomsdir
-  
+
+  yaimgridpath_append LD_LIBRARY_PATH /opt/globus/lib  
   yaimgridpath_append LD_LIBRARY_PATH /opt/c-ares/lib
 }
 
