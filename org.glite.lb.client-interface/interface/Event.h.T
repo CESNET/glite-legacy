@@ -48,10 +48,10 @@ public:
 	for my $e ($event->getTypesOrdered) {
 		my $u = uc $e;
 		my $c = getTypeComment $event $e;
-		gen "\t\t$u,\t/**< $c */\n";
+		gen "\t\t$u = EDG_WLL_EVENT_$u,\t/**< $c */\n";
 	}
 @@@}
-		TYPE_MAX /**< Limit for checking type validity. */
+		TYPE_MAX = EDG_WLL_EVENT__LAST /**< Limit for checking type validity. */
 	};
 
 	/** Event attribute symbolic identifier. 
@@ -268,6 +268,7 @@ public:
 	static const std::string getEventName(Type type);
 
 private:
+	std::string	my_name;
 	static void	destroyFlesh(void *);
 	CountRef<Event>	*flesh;
 };
