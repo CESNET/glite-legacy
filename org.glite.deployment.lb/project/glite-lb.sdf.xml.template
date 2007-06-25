@@ -111,7 +111,8 @@
 					build="@org.gridsite.core.info.build@"
                     arch="i386"/>
 			
-				<component name="glite-yaim"/>
+			<component name="glite-version"/>
+			<component name="glite-yaim-core"/>
 
 			</components>
 			<dependencies>
