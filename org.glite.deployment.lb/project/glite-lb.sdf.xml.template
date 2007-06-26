@@ -9,12 +9,13 @@
 	<services>
 		<service name="glite-lb-service">
 			<components>
-			    <component name="glite-config"
-			    		version="@org.glite.deployment.config.info.version@"
-			    		age="@org.glite.deployment.config.info.age@"
-			    		build="@org.glite.deployment.config.info.build@"
-			    		arch="noarch"/>
-			    		
+
+				<component name="glite-yaim-core"/>
+
+				<component name="glite-yaim-lb"/>
+
+				<component name="glite-version"/>
+
 				<component name="glite-LB"
 					version="@module.version@"
 					age="@module.age@"
@@ -76,40 +77,40 @@
 					arch="i386"/>
 				
 				<component name="glite-security-voms-api-c"
-                    version="@org.glite.security.voms-api-c.info.version@"
-                    age="@org.glite.security.voms-api-c.info.age@"
-                    build="@org.glite.security.voms-api-c.info.build@"
-                    arch="i386"/>
+		                    version="@org.glite.security.voms-api-c.info.version@"
+		                    age="@org.glite.security.voms-api-c.info.age@"
+		                    build="@org.glite.security.voms-api-c.info.build@"
+		                    arch="i386"/>
 
 				<component name="glite-jp-primary"
-                    version="@org.glite.jp.primary.info.version@"
-                    age="@org.glite.jp.primary.info.age@"
-                    build="@org.glite.jp.primary.info.build@"
-                    arch="i386"/>
+		                    version="@org.glite.jp.primary.info.version@"
+		                    age="@org.glite.jp.primary.info.age@"
+		                    build="@org.glite.jp.primary.info.build@"
+		                    arch="i386"/>
 
 				<component name="glite-jp-common"
-                    version="@org.glite.jp.common.info.version@"
-                    age="@org.glite.jp.common.info.age@"
-                    build="@org.glite.jp.common.info.build@"
-                    arch="i386"/>
+		                    version="@org.glite.jp.common.info.version@"
+		                    age="@org.glite.jp.common.info.age@"
+		                    build="@org.glite.jp.common.info.build@"
+		                    arch="i386"/>
 
 				<component name="glite-jp-server-common"
-                    version="@org.glite.jp.server-common.info.version@"
-                    age="@org.glite.jp.server-common.info.age@"
-                    build="@org.glite.jp.server-common.info.build@"
-                    arch="i386"/>
+		                    version="@org.glite.jp.server-common.info.version@"
+		                    age="@org.glite.jp.server-common.info.age@"
+		                    build="@org.glite.jp.server-common.info.build@"
+                		    arch="i386"/>
 
 				<component name="glite-jp-ws-interface"
-                    version="@org.glite.jp.ws-interface.info.version@"
-                    age="@org.glite.jp.ws-interface.info.age@"
-                    build="@org.glite.jp.ws-interface.info.build@"
-                    arch="i386"/>
+		                    version="@org.glite.jp.ws-interface.info.version@"
+		                    age="@org.glite.jp.ws-interface.info.age@"
+		                    build="@org.glite.jp.ws-interface.info.build@"
+		                    arch="i386"/>
 
-                <component name="gridsite-shared"
-                    version="@org.gridsite.core.info.version@"
-                    age="@org.gridsite.core.info.age@"
-					build="@org.gridsite.core.info.build@"
-                    arch="i386"/>
+                		<component name="gridsite-shared"
+		                    version="@org.gridsite.core.info.version@"
+		                    age="@org.gridsite.core.info.age@"
+				    build="@org.gridsite.core.info.build@"
+                		    arch="i386"/>
 			</components>
 			
 			<dependencies>
@@ -145,14 +146,6 @@
 			</dependencies>
 		</service>
 
-		<!-- Security Utilities -->
-        <service name="glite-security-utils">
-                <subservice name="glite-security-utils"/>
-        </service>
-		<!-- RGMA servicetool -->
-        <service name="glite-rgma-servicetool">
-                <subservice name="glite-rgma-servicetool"/>
-        </service>
 	</services>
 	<dependencies>
 	</dependencies>
