@@ -10,6 +10,8 @@
 		<service name="glite-lb-service">
 			<components>
 
+				<component name="glite-config"/>
+				
 				<component name="glite-yaim-core"/>
 
 				<component name="glite-yaim-lb"/>
@@ -145,6 +147,16 @@
 				<external name="j2re"/>
 			</dependencies>
 		</service>
+
+		<!-- Security Utilities --> 	 
+	        <service name="glite-security-utils"> 	 
+                	 <subservice name="glite-security-utils"/> 	 
+         	</service> 	 
+                
+		<!-- RGMA servicetool --> 	 
+         	<service name="glite-rgma-servicetool"> 	 
+                 	<subservice name="glite-rgma-servicetool"/> 	 
+         	</service>
 
 	</services>
 	<dependencies>
