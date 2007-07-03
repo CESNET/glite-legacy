@@ -1,0 +1,17 @@
+BASE1_FUNCTIONS="
+config_ldconf
+config_sysconfig_edg
+config_sysconfig_globus
+config_sysconfig_lcg
+config_crl
+config_rfio"
+
+PX_FUNCTIONS="${BASE1_FUNCTIONS}
+config_host_certs
+config_edgusers
+config_java
+config_rgma_client
+config_gip
+config_globus
+config_proxy_server"
+
