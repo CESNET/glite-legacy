@@ -113,7 +113,6 @@
 			
 			<component name="glite-version"/>
 			<component name="glite-yaim-core"/>
-			<component name="glite-yaim-lb"/>
 
 			</components>
 			<dependencies>
