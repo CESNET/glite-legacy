@@ -4,15 +4,6 @@ function config_glite_lb_check(){
 
 function config_glite_lb_setenv(){
 
-  ### Temporary fix for VDT 1.2 format
-  VDT=`rpm -q --qf %{V} vdt_globus_essentials`
-  VDT_version=`expr substr $VDT 4 3`
-                                                                                                                             
-  if [ $VDT_version = "1.2" ]; then
-    GLOBUS_TCP_PORT_RANGE=`echo ${GLOBUS_TCP_PORT_RANGE/,/' '}`
-  fi
-  ###
-
   yaimgridenv_set GLITE_LOCATION ${INSTALL_ROOT:-opt}/glite
   yaimgridenv_set GLITE_LOCATION_VAR /var/glite
   yaimgridenv_set GLITE_USER ${GLITE_USER:-glite}
@@ -33,6 +24,8 @@ function config_glite_lb() {
   #############################################
 	
   HOSTNAME=`hostname -f`
+
+  chmod og+rx /var/lib/mysql/ 
 
   # add option  --max_allowed_packet=17M
   if [ ! -f /etc/my.cnf ]; then
