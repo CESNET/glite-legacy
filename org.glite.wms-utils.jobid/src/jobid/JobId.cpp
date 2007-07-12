@@ -68,7 +68,7 @@ JobId & JobId::operator=(const edg_wlc_JobId &old)
 
 JobId::~JobId()
 {
-    clear();
+    // clear();
 }
 
 /******************************************************************
