@@ -62,6 +62,14 @@ public:
 	 */
 	enum Attr {
 @@@{
+
+	require "../src/EventAttrNames.pl";
+	my %EventAttrNums;
+	my $evno = 0;
+	for (@main::EventAttrNames) {
+		$EventAttrNums{$_} = $evno++;
+	}
+
 	for (sort {$a cmp $b} getAllFields $event) {
 		my $u = $_;
 # $u =~ s/([a-z])([A-Z])/$1_$2/g;
@@ -76,7 +84,7 @@ public:
 		}
 		$c .= "\t */\n";
 
-		gen "$c\t\t$u,\n";
+		gen "$c\t\t$u = $EventAttrNums{$u},\n";
 	}
 @@@}
 		ATTR_MAX /**< Limit for checking attribute code
