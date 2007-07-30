@@ -327,6 +327,8 @@ for my $t (sort { $event->{order}->{$a} <=> $event->{order}->{$b} }
 	gen $indent."edg_wll_${t}Event\t${tl};\n";
 }
 @@@}
+/* make it big enough for further extensions */
+	char	_pad[sizeof(void *) * 30];
 } edg_wll_Event;
 
 
