@@ -126,7 +126,7 @@ typedef struct _edg_wll_JobStat {
 };
 		if ($f->{pad}) {
 			my $pad = $f->{pad};
-			gen "\n	char	_pad_${padno}[sizeof(void *) * $pad - sizeof(stuct _pad_JobStatus_${padno}_dont_use)];\n\n";
+			gen "\n	char	_pad_${padno}[sizeof(void *) * $pad - sizeof(struct _pad_JobStatus_${padno}_dont_use)];\n\n";
 			$padno++;
 		}
 	}
