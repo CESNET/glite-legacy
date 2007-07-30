@@ -53,7 +53,7 @@ public:
 		HOST = EDG_WLL_QUERY_ATTR_HOST,	        /**< Hostname where the event was generated. */
 		SOURCE = EDG_WLL_QUERY_ATTR_SOURCE,	        /**< Source component that sent the event. */
 		INSTANCE = EDG_WLL_QUERY_ATTR_INSTANCE,	/**< Instance of the source component. */
-		EVENT = EDG_WLL_QUERY_ATTR_EVENT_TYPE,	/**< Event type. */
+		EVENT_TYPE = EDG_WLL_QUERY_ATTR_EVENT_TYPE,	/**< Event type. */
 		CHKPT = EDG_WLL_QUERY_ATTR_CHKPT_TAG,	/**< Checkpoint tag. */
 		RESUBMITTED = EDG_WLL_QUERY_ATTR_RESUBMITTED,	/**< Job was resubmitted */
 		PARENT = EDG_WLL_QUERY_ATTR_PARENT,	        /**< Id of the parent job. */
