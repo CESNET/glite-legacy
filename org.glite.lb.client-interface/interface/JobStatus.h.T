@@ -59,6 +59,13 @@ public:
 	 */
 	enum Attr {
 @@@{
+	require '../src/StatusAttrNames.pl';
+	my %StatusAttrNums;
+	my $stno = 0;
+	for (@main::StatusAttrNames) {
+		$StatusAttrNums{$_} = $stno++;
+	}
+
 	selectType $status '_common_';
 	for my $u (sort {$a cmp $b} getAllFields $status) {
 		selectField $status $u;
@@ -66,7 +73,7 @@ public:
 		$u =~ s/([a-z])([A-Z])/$1_$2/g;
 		$u = uc $u;
 
-		gen "\t/** $f->{comment} */\n\t\t$u,\n";
+		gen "\t/** $f->{comment} */\n\t\t$u = $StatusAttrNums{$u},\n";
 	}
 @@@}
                 ATTR_MAX /**< Limit for range checking. */
