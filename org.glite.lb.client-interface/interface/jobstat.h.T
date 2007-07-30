@@ -32,8 +32,10 @@ extern "C" {
 		my $f = selectField $status $n;
 		if ($f->{codes}) {
 			my $n = ucfirst getName $f;
+			my $un = uc $n;
 			gen qq{
 !enum edg_wll_Stat$n \{
+	EDG_WLL_STAT_${un}_UNDEF,
 };
 			for (@{$f->{codes}}) {
 				my $uc = uc $_->{name};
@@ -41,7 +43,6 @@ extern "C" {
 !	EDG_WLL_STAT_$uc,		/**< $_->{comment} */
 };
 			}
-			my $un = uc $n;
 			gen qq{
 !	EDG_WLL_NUMBER_OF_${un}S	/**< Number of ${n}s */
 };
