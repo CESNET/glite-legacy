@@ -18,6 +18,8 @@
 #include "glite/lb/context.h"
 #include "glite/lb/notifid.h"
 
+#include "glite/lb/padstruct.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -314,7 +316,7 @@ _EDG_WLL_EVENT_COMMON
  * \union edg_wll_Event
  * \brief All event types union
  */
-typedef union _edg_wll_Event {
+glite_lb_padded_union(_edg_wll_Event,30,
         edg_wll_EventCode           type; /* it is probably never used */
         edg_wll_AnyEvent            any;
 @@@{
@@ -327,9 +329,8 @@ for my $t (sort { $event->{order}->{$a} <=> $event->{order}->{$b} }
 	gen $indent."edg_wll_${t}Event\t${tl};\n";
 }
 @@@}
-/* make it big enough for further extensions */
-	char	_pad[sizeof(void *) * 30];
-} edg_wll_Event;
+)
+typedef union _edg_wll_Event edg_wll_Event;
 
 
 /**
