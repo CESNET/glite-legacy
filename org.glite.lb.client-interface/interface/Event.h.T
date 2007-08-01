@@ -84,7 +84,9 @@ public:
 		}
 		$c .= "\t */\n";
 
-		gen "$c\t\t$u = $EventAttrNums{$u},\n";
+		gen defined($EventAttrNums{$u}) ?
+			"$c\t\t$u = $EventAttrNums{$u},\n" :
+			"#error \"$u not defined in EventAttrNames\"\n";
 	}
 @@@}
 		ATTR_MAX /**< Limit for checking attribute code

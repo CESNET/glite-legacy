@@ -73,7 +73,9 @@ public:
 		$u =~ s/([a-z])([A-Z])/$1_$2/g;
 		$u = uc $u;
 
-		gen "\t/** $f->{comment} */\n\t\t$u = $StatusAttrNums{$u},\n";
+		gen defined($StatusAttrNums{$u}) ? 
+			"\t/** $f->{comment} */\n\t\t$u = $StatusAttrNums{$u},\n" :
+			"#error \"$u not defined in StatusAttrNames\"\n";
 	}
 @@@}
                 ATTR_MAX /**< Limit for range checking. */
