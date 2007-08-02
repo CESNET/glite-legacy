@@ -110,6 +110,9 @@ int
 edg_wll_gss_get_name(gss_cred_id_t cred, char **name);
 */
 
+int
+edg_wll_gss_gethostname(char *name, int len);
+
 #ifdef __cplusplus
 } 
 #endif

@@ -15,6 +15,8 @@
 #include <ares.h>
 #include <errno.h>
 
+#include <globus_common.h>
+
 #include "glite_gss.h"
 
 #define tv_sub(a,b) {\
@@ -1054,4 +1056,20 @@ edg_wll_gss_reject(int sock)
 {
    /* XXX is it possible to cut & paste edg_wll_ssl_reject() ? */
    return 0;
+}
+
+int
+edg_wll_gss_gethostname(char *name, int len)
+{
+   int ret;
+
+   ret = globus_module_activate(GLOBUS_COMMON_MODULE);
+   if (ret != GLOBUS_SUCCESS) {
+      ret = gethostname(name, len);
+      return ret;
+   }
+   ret = globus_libc_gethostname(name, len);
+   globus_module_deactivate(GLOBUS_COMMON_MODULE);
+
+   return ret;
 }
