@@ -8,7 +8,6 @@ package=glite-lb-server
 version=0.2.0
 PREFIX=/opt/glite
 
-globus_prefix=/opt/globus
 nothrflavour=gcc32
 thrflavour=gcc32pthr
 expat_prefix=/opt/expat
@@ -47,8 +46,7 @@ CFLAGS:= ${DEBUG} \
 	-I${expat_prefix}/include \
 	${COVERAGE_FLAGS} \
 	-I${mysql_prefix}/include -I${mysql_prefix}/include/mysql \
-	-I${globus_prefix}/include/${nothrflavour} \
-	-I${gridsite_prefix}/include -I${globus_prefix}/include/${nothrflavour}/openssl \
+	-I${gridsite_prefix}/include \
 	-D_GNU_SOURCE ${LB_STANDALONE_FLAGS} ${LB_PERF_FLAGS}
 
 
@@ -56,10 +54,6 @@ LINK:=libtool --mode=link ${CC} ${LDFLAGS}
 LINKXX:=libtool --mode=link ${CXX} ${LDFLAGS} 
 INSTALL:=libtool --mode=install install
 LINKXX:=libtool --mode=link  ${CXX} -rpath ${stagedir}/lib ${LDFLAGS}
-
-GLOBUS_LIBS:= -L${globus_prefix}/lib \
-	-lglobus_common_${nothrflavour} \
-	-lglobus_gssapi_gsi_${nothrflavour} \
 
 archlib:=lib
 host_cpu:=${shell uname -m}
@@ -96,8 +90,7 @@ EXT_LIBS:= \
 	${mysqlib} -lmysqlclient -lz\
 	${expatlib} -lexpat \
 	${GRIDSITE_LIBS} \
-	${VOMS_LIBS} \
-	${GLOBUS_LIBS}
+	${VOMS_LIBS}
 
 
 
