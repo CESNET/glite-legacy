@@ -13,7 +13,7 @@ struct _glite_gsplugin_ctx {
 	char				   *error_msg;
 
 	edg_wll_GssConnection  *connection;
-	gss_cred_id_t			cred;
+	edg_wll_GssCred			cred;
 	int				internal_connection;
 	int				internal_credentials;
 

@@ -38,7 +38,7 @@ glite_gsplugin_init_context(glite_gsplugin_Context *ctx)
 	if (!out) return ENOMEM;
 
 	memset(out, 0, sizeof(*out));
-	out->cred = GSS_C_NO_CREDENTIAL;
+	out->cred = NULL;
 
 	/* XXX: some troubles with glite_gss and blocking calls!
 	out->timeout.tv_sec = 10000;
@@ -53,15 +53,13 @@ glite_gsplugin_init_context(glite_gsplugin_Context *ctx)
 int
 glite_gsplugin_free_context(glite_gsplugin_Context ctx)
 {
-	OM_uint32       ms;
-
 	if (ctx == NULL)
 	   return 0;
 
-	if ( ctx->internal_credentials && ctx->cred != GSS_C_NO_CREDENTIAL ) 
-		gss_release_cred(&ms, &ctx->cred);
+	if ( ctx->internal_credentials && ctx->cred != NULL ) 
+		edg_wll_gss_release_cred(&ctx->cred, NULL);
 	if ( ctx->connection ) {
-		if ( ctx->connection->context != GSS_C_NO_CONTEXT )
+		if ( ctx->connection->context != NULL )
 			edg_wll_gss_close(ctx->connection, NULL);
 		free(ctx->connection);
 	}
@@ -131,7 +129,7 @@ glite_gsplugin_set_credential(glite_gsplugin_Context ctx,
 
 void
 glite_gsplugin_set_credential(glite_gsplugin_Context ctx,
-				gss_cred_id_t cred)
+				edg_wll_GssCred cred)
 {
 	ctx->cred = cred;
 	ctx->internal_credentials = 0;
@@ -143,7 +141,7 @@ glite_gsplugin_set_connection(glite_gsplugin_Context ctx, edg_wll_GssConnection 
 	int						ret = SOAP_OK;
 
 	if ( ctx->connection ) {
-		if ( ctx->internal_connection && ctx->connection->context != GSS_C_NO_CONTEXT) {
+		if ( ctx->internal_connection && ctx->connection->context != NULL) {
 			pdprintf(("GSLITE_GSPLUGIN: closing gss connection\n"));
 			ret = edg_wll_gss_close(ctx->connection, ctx->timeout);
 		}
@@ -270,7 +268,7 @@ glite_gsplugin_connect(
 
 	ctx = ((int_plugin_data_t *)soap_lookup_plugin(soap, plugin_id))->ctx;
 
-	if ( ctx->cred == GSS_C_NO_CREDENTIAL ) {
+	if ( ctx->cred == NULL ) {
 		pdprintf(("GSLITE_GSPLUGIN: loading default credentials\n"));
 		ret = edg_wll_gss_acquire_cred_gsi(NULL, NULL,
                 	&ctx->cred, NULL, &gss_stat);
@@ -364,7 +362,7 @@ glite_gsplugin_recv(struct soap *soap, char *buf, size_t bufsz)
 	ctx = ((int_plugin_data_t *)soap_lookup_plugin(soap, plugin_id))->ctx;
 	if ( ctx->error_msg ) { free(ctx->error_msg); ctx->error_msg = NULL; }
 
-	if ( ctx->connection->context == GSS_C_NO_CONTEXT ) {
+	if ( ctx->connection->context == NULL ) {
 		soap->errnum = ENOTCONN;
 		/* XXX: glite_gsplugin_send() returns SOAP_EOF on errors
 		 */
@@ -420,7 +418,7 @@ glite_gsplugin_send(struct soap *soap, const char *buf, size_t bufsz)
 	 *      i.e. ctx->connection != NULL
 	 */
 	if ( ctx->error_msg ) { free(ctx->error_msg); ctx->error_msg = NULL; }
-	if ( ctx->connection->context == GSS_C_NO_CONTEXT ) {
+	if ( ctx->connection->context == NULL ) {
 		soap->errnum = ENOTCONN;
 		return SOAP_EOF;
 	}
