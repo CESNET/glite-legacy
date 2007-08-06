@@ -3,11 +3,11 @@
 
 #ident "$Header$"
 
-#include <gssapi.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include <stdlib.h>
 
 enum {
   EDG_WLL_GSS_OK		=  0,  /* no GSS errors */
@@ -18,30 +18,56 @@ enum {
   EDG_WLL_GSS_ERROR_HERRNO	= -5   /* Resolver error. See h_errno */
 };
 
+enum {
+  EDG_WLL_GSS_FLAG_DELEG = 1,
+  EDG_WLL_GSS_FLAG_CONF = 16,
+  EDG_WLL_GSS_FLAG_INTEG = 32,
+  EDG_WLL_GSS_FLAG_ANON = 64,
+};
+
+typedef void * edg_wll_GssName;
+typedef void * edg_wll_GssCtx;
+typedef void * edg_wll_GssCred;
+
 typedef struct _edg_wll_GssConnection {
-  gss_ctx_id_t context;
+  edg_wll_GssCtx context;
   int sock;
   char *buffer;
   size_t bufsize;
 } edg_wll_GssConnection;
 
 typedef struct _edg_wll_GssStatus {
-  OM_uint32 major_status;
-  OM_uint32 minor_status;
+  unsigned int major_status;
+  unsigned int minor_status;
 } edg_wll_GssStatus;
 
-/* XXX Support anonymous connections. Are we able/required to support
- * anonymous servers as well. */
+typedef struct _edg_wll_GssPrincipal_data {
+   char *name;
+   unsigned int flags;
+#if 0
+   char **fqans;
+   char **voms_groups; /* needed for legacy LB server authZ mechanism */
+   edg_wll_GssOid authn_mech;
+#endif
+} edg_wll_GssPrincipal_data;
+typedef struct _edg_wll_GssPrincipal_data *edg_wll_GssPrincipal;
+
+int
+edg_wll_gss_initialize(void);
 
 int
 edg_wll_gss_acquire_cred_gsi(const char *cert_file,
 		             const char *key_file,
-		             gss_cred_id_t *cred,
+		             edg_wll_GssCred *cred,
 		             char **name,
 			     edg_wll_GssStatus* gss_code);
 
+int
+edg_wll_gss_release_cred(edg_wll_GssCred cred,
+			 edg_wll_GssStatus* gss_code);
+
 int 
-edg_wll_gss_connect(gss_cred_id_t cred,
+edg_wll_gss_connect(edg_wll_GssCred cred,
 		    char const *hostname,
 		    int port,
 		    struct timeval *timeout,
@@ -49,7 +75,7 @@ edg_wll_gss_connect(gss_cred_id_t cred,
 		    edg_wll_GssStatus* gss_code);
 
 int
-edg_wll_gss_accept(gss_cred_id_t cred,
+edg_wll_gss_accept(edg_wll_GssCred cred,
 		   int sock,
 		   struct timeval *timeout,
 		   edg_wll_GssConnection *connection,
@@ -102,13 +128,12 @@ int
 edg_wll_gss_reject(int sock);
 
 int
-edg_wll_gss_oid_equal(const gss_OID a,
-		      const gss_OID b);
+edg_wll_gss_get_client_conn(edg_wll_GssConnection *connection,
+	  	            edg_wll_GssPrincipal *principal,
+			    edg_wll_GssStatus* gss_code);
 
-/*
-int
-edg_wll_gss_get_name(gss_cred_id_t cred, char **name);
-*/
+void
+edg_wll_gss_free_princ(edg_wll_GssPrincipal principal);
 
 int
 edg_wll_gss_gethostname(char *name, int len);

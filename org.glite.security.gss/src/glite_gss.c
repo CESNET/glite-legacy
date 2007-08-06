@@ -16,6 +16,7 @@
 #include <errno.h>
 
 #include <globus_common.h>
+#include <gssapi.h>
 
 #include "glite_gss.h"
 
@@ -490,7 +491,7 @@ destroy_proxy(char *proxy_file)
 }
 
 int
-edg_wll_gss_acquire_cred_gsi(const char *cert_file, const char *key_file, gss_cred_id_t *cred,
+edg_wll_gss_acquire_cred_gsi(const char *cert_file, const char *key_file, edg_wll_GssCred *cred,
       			     char **name, edg_wll_GssStatus* gss_code)
 {
    OM_uint32 major_status = 0, minor_status, minor_status2;
@@ -605,7 +606,7 @@ end:
 #define _EXPIRED_ALERT_RETRY_DELAY 10   /* ms */
 
 int 
-edg_wll_gss_connect(gss_cred_id_t cred, char const *hostname, int port,
+edg_wll_gss_connect(edg_wll_GssCred cred, char const *hostname, int port,
 		    struct timeval *timeout, edg_wll_GssConnection *connection,
 		    edg_wll_GssStatus* gss_code)
 {
@@ -736,7 +737,7 @@ end:
 }
 
 int
-edg_wll_gss_accept(gss_cred_id_t cred, int sock, struct timeval *timeout,
+edg_wll_gss_accept(edg_wll_GssCred cred, int sock, struct timeval *timeout,
 		   edg_wll_GssConnection *connection, edg_wll_GssStatus* gss_code)
 {
    OM_uint32 maj_stat, min_stat, min_stat2;
@@ -973,7 +974,7 @@ edg_wll_gss_close(edg_wll_GssConnection *con, struct timeval *timeout)
    /* XXX if timeout is NULL use value of 120 secs */
 
    if (con->context != GSS_C_NO_CONTEXT) {
-      gss_delete_sec_context(&min_stat, &con->context, GSS_C_NO_BUFFER);
+      gss_delete_sec_context(&min_stat, con->context, GSS_C_NO_BUFFER);
       /* XXX send the buffer (if any) to the peer. GSSAPI specs doesn't
        * recommend sending it, though */
 
@@ -1056,6 +1057,100 @@ edg_wll_gss_reject(int sock)
 {
    /* XXX is it possible to cut & paste edg_wll_ssl_reject() ? */
    return 0;
+}
+
+
+int
+edg_wll_gss_initialize(void)
+{
+   int ret;
+
+   ret = globus_module_activate(GLOBUS_GSI_GSSAPI_MODULE);
+   if (ret != GLOBUS_SUCCESS) {
+      errno = EINVAL;
+      ret = EDG_WLL_GSS_ERROR_ERRNO;
+   }
+   return ret;
+}
+
+int
+edg_wll_gss_release_cred(edg_wll_GssCred cred, edg_wll_GssStatus* gss_code)
+{
+   OM_uint32 maj_stat, min_stat;
+   int ret = 0;
+
+   maj_stat = gss_release_cred(&min_stat, cred); 
+   if (GSS_ERROR(maj_stat)) {
+      ret = EDG_WLL_GSS_ERROR_GSS;
+      if (gss_code) {
+         gss_code->major_status = maj_stat;
+         gss_code->minor_status = min_stat;
+      }
+   }
+
+   return ret;
+}
+
+int
+edg_wll_gss_get_client_conn(edg_wll_GssConnection *connection,
+                            edg_wll_GssPrincipal *principal,
+			    edg_wll_GssStatus* gss_code)
+{
+   gss_buffer_desc token = GSS_C_EMPTY_BUFFER;
+   OM_uint32 maj_stat, min_stat, ctx_flags;
+   gss_name_t client_name = GSS_C_NO_NAME;
+   edg_wll_GssPrincipal p;
+   int ret;
+
+   maj_stat = gss_inquire_context(&min_stat, connection->context, &client_name,
+                                  NULL, NULL, NULL, &ctx_flags, NULL, NULL);
+   if (GSS_ERROR(maj_stat))
+      goto end;
+
+   maj_stat = gss_display_name(&min_stat, client_name, &token, NULL);
+   if (GSS_ERROR(maj_stat))
+      goto end;
+
+   p = calloc(1, sizeof(*principal));
+   if (p == NULL) {
+      errno = ENOMEM;
+      ret = EDG_WLL_GSS_ERROR_ERRNO;
+      goto end;
+   }
+
+   p->name = strdup(token.value);
+   p->flags = ctx_flags;
+
+   *principal = p;
+   ret = 0;
+
+end:
+   if (GSS_ERROR(maj_stat)) {
+      ret = EDG_WLL_GSS_ERROR_GSS;
+      if (gss_code) {
+         gss_code->major_status = maj_stat;
+         gss_code->minor_status = min_stat;
+      }
+   }
+	
+   if (token.length)
+      gss_release_buffer(&min_stat, &token);
+   if (client_name != GSS_C_NO_NAME)
+      gss_release_name(&min_stat, &client_name);
+
+   return ret;
+}
+
+void
+edg_wll_gss_free_princ(edg_wll_GssPrincipal principal)
+{
+   if (principal == NULL)
+      return;
+
+   if (principal->name)
+      free(principal->name);
+
+   free(principal);
 }
 
 int

@@ -3,6 +3,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <assert.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/CompilerOutputter.h>
@@ -31,7 +33,7 @@ public:
 	void setUp();
 
 private:
-	gss_cred_id_t	my_cred;
+	edg_wll_GssCred	my_cred;
 	char *		my_subject;
 	int		sock, port;
 	struct timeval	timeout;
