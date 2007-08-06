@@ -31,7 +31,7 @@ main(int argc, char **argv)
 	char				   *name;
 	char				   *cert, *key;
 	int						opt;
-	gss_cred_id_t			    cred;
+	edg_wll_GssCred			    cred;
 
 	cert = key = NULL;
 	name = strrchr(argv[0],'/');
