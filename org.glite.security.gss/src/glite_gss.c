@@ -974,7 +974,7 @@ edg_wll_gss_close(edg_wll_GssConnection *con, struct timeval *timeout)
    /* XXX if timeout is NULL use value of 120 secs */
 
    if (con->context != GSS_C_NO_CONTEXT) {
-      gss_delete_sec_context(&min_stat, con->context, GSS_C_NO_BUFFER);
+      gss_delete_sec_context(&min_stat, (gss_ctx_id_t *)&con->context, GSS_C_NO_BUFFER);
       /* XXX send the buffer (if any) to the peer. GSSAPI specs doesn't
        * recommend sending it, though */
 
