@@ -10,7 +10,6 @@ version=1.0.0
 PREFIX=/opt/glite
 
 glite_location=/opt/glite
-globus_prefix=/opt/globus
 nothrflavour=gcc32
 thrflavour=gcc32pthr
 gsoap_prefix=/opt/gsoap
@@ -74,9 +73,6 @@ LINK:=libtool --mode=link ${CC} -rpath ${stagedir}/lib ${LDFLAGS}
 LINKXX:=libtool --mode=link ${CXX} ${LDFLAGS} 
 INSTALL:=libtool --mode=install install
 LINKXX:=libtool --mode=link  ${CXX} -rpath ${stagedir}/lib ${LDFLAGS}
-
-GLOBUS_INC:= -I${globus_prefix}/include/${nothrflavour}
-GLOBUS_THR_INC:= -I${globus_prefix}/include/${thrflavour}
 
 GSOAP_LIBS:= -L${gsoap_prefix}/lib -lgsoap
 
@@ -203,7 +199,7 @@ ${GSOAP_FPREFIX}H.h ${GSOAP_FPREFIX}C.c ${GSOAP_FPREFIX}Server.c ${GSOAP_FPREFIX
 	${soapcpp} -c -p ${GSOAP_FPREFIX} ${top_srcdir}/examples/calc.h.S
 
 wscalc_clt_ex.o: wscalc_clt_ex.c
-	${CC} -c ${CFLAGS} ${GLOBUS_INC} -o $@ $<
+	${CC} -c ${CFLAGS} -o $@ $<
 	
 doc:
 
@@ -239,10 +235,10 @@ install-soaplib:
 clean:
 
 %.o: %.c
-	${COMPILE} ${GLOBUS_INC} -o $@ -c $<
+	${COMPILE} -o $@ -c $<
 
 %.thr.o: %.c
-	${COMPILE} ${GLOBUS_THR_INC} -o $@ -c $<
+	${COMPILE} -o $@ -c $<
 
 glite_gsplugin.o glite_gsplugin.thr.o: soap_version.h
 
