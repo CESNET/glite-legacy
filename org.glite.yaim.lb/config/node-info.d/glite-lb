@@ -1,5 +1,4 @@
 LB_FUNCTIONS="
-config_glite_lb_workarounds
 config_add_pool_env
 config_crl
 config_host_certs
@@ -9,7 +8,7 @@ config_mkgridmap
 config_java
 config_rgma_client
 config_gip_service
-config_globus
+config_globus_clients
 config_glite_lb
 config_glite_locallogger
 config_glite_initd"
