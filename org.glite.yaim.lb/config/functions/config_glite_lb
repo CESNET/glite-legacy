@@ -93,6 +93,27 @@ function config_glite_lb() {
   chmod 0644 $GLITE_USER_HOME/.certs/hostcert.pem
   chmod 0400 $GLITE_USER_HOME/.certs/hostkey.pem
 
+  # Create cron for purging
+  logfile=/var/log/glite/glite-lb-purger.log
+  cat << EOF > /etc/cron.d/glite-lb-purge.cron
+HOME=/
+MAILTO=$SITE_EMAIL
+
+1 1 * * * $GLITE_USER . /opt/glite/etc/profile.d/grid-env.sh ; export GLITE_LB_EXPORT_BKSERVER=$HOSTNAME; export GLITE_LB_EXPORT_ENABLED=false; export GLITE_LB_EXPORT_PURGE_ARGS="--cleared 2d --aborted 15d --cancelled 15d --other 60d"; /opt/glite/sbin/glite-lb-export.sh >> $logfile 2>&1
+EOF
+
+  touch $logfile
+  chown $GLITE_USER:$GLITE_USER $logfile
+
+  cat > /etc/logrotate.d/lb-purger <<EOF
+$logfile {
+    weekly
+    compress
+    rotate 4    missingok
+}
+EOF
+
+
   # Start services
   if [ ! -f ${GLITE_LOCATION}/etc/gLiteservices ] ; then
     touch ${GLITE_LOCATION}/etc/gLiteservices
@@ -107,6 +128,11 @@ function config_glite_lb() {
 
   . /opt/glite/etc/profile.d/grid-env.sh
   ${GLITE_LOCATION}/etc/init.d/glite-lb-bkserverd restart
+
+  if [ ! $? = 0 ] ; then
+    yaimlog ABORT "Service glite-lb-bkserverd failed to start!"
+    return 1
+  fi
 
   return 0
 
