@@ -9,6 +9,7 @@ License: EGEE
 Group: EGEE
 Source: %{name}.src.tgz
 BuildArch: noarch
+Requires: glite-yaim-core
 Prefix: /opt/glite
 BuildRoot: %{_tmppath}/%{name}-%{version}-build
 Packager: EGEE
