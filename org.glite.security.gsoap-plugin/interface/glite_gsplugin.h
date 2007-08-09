@@ -1,5 +1,5 @@
-#ifndef __GLITE_GSOAP_PLUGIN_H__
-#define __GLITE_GSOAP_PLUGIN_H__
+#ifndef GLITE_SECURITY_GSOAP_PLUGIN_H
+#define GLITE_SECURITY_GSOAP_PLUGIN_H
 
 #include <stdsoap2.h>
 
@@ -30,4 +30,4 @@ extern char *glite_gsplugin_errdesc(struct soap *);
 }
 #endif
 
-#endif
+#endif /* GLITE_SECURITY_GSOAP_PLUGIN_H */
