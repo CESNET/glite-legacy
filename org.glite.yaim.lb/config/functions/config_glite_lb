@@ -94,6 +94,7 @@ function config_glite_lb() {
   chmod 0400 $GLITE_USER_HOME/.certs/hostkey.pem
 
   # Create cron for purging
+  mkdir -p /var/log/glite
   logfile=/var/log/glite/glite-lb-purger.log
   cat << EOF > /etc/cron.d/glite-lb-purge.cron
 HOME=/
