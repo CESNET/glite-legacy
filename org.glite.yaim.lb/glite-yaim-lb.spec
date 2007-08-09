@@ -29,7 +29,7 @@ make install prefix=%{buildroot}%{prefix}
 %{prefix}/yaim/functions/config_*
 %{prefix}/yaim/functions/local/config_*
 %{prefix}/yaim/node-info.d/glite-*
-%doc RELEASE-NOTES LICENSE
+%doc LICENSE
 
 %clean
 rm -rf %{buildroot}

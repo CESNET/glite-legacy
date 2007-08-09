@@ -37,7 +37,6 @@ ifneq ("$(tag)","ame:")
 endif
 	@tar --gzip --exclude='*CVS*' -cf rpmbuild/SOURCES/${package}.src.tgz *
 	rpmbuild -ba ${package}.spec
-	cp rpmbuild/RPMS/noarch/*.rpm rpmbuild/SRPMS/*.rpm RPMS/.
 
 
 
