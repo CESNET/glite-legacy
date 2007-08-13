@@ -105,6 +105,7 @@ int glite_srvbones_run(
 	struct sigaction	sa;
 	sigset_t			sset;
 	int					sock_slave[2], i;
+	int		pstat;
 
 
 	assert(service_table);
@@ -174,8 +175,25 @@ int glite_srvbones_run(
 		{
 			int		pid;
 
-			while ( (pid = waitpid(-1, NULL, WNOHANG)) > 0 )
+			while ( (pid = waitpid(-1, &pstat, WNOHANG)) > 0 )
 			{
+				if (WIFEXITED(pstat)) {
+					dprintf(("[master] Slave %d exited with return code %d.\n", pid, WEXITSTATUS(pstat)));
+					if (WEXITSTATUS(pstat)) {
+						syslog(LOG_ERR, "Slave %d exited with return code %d.\n", pid, WEXITSTATUS(pstat));
+					}
+				} 
+				if (WIFSIGNALED(pstat)) {
+					dprintf(("[master] Slave %d terminated with signal %d.\n", pid, WTERMSIG(pstat)));
+					switch (WTERMSIG(pstat)) {
+						case SIGINT:
+						case SIGTERM:
+						case SIGUSR1: if (die) break;
+						default:
+							syslog(LOG_ERR, "Slave %d terminated with signal %d.\n", pid, WTERMSIG(pstat));
+							break;
+					}
+				}
 				if ( !die )
 				{
 					int newpid = slave(slave_data_init, sock_slave[1]);
