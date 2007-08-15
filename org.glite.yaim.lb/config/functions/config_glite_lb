@@ -110,7 +110,8 @@ EOF
 $logfile {
     weekly
     compress
-    rotate 4    missingok
+    rotate 4
+    missingok
 }
 EOF
 
