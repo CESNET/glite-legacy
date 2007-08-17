@@ -1,76 +1,38 @@
-PACKAGE_NAME=glite-yaim-myproxy
-####################################################################
-# Distribution Makefile
-####################################################################
+prefix=/opt/glite
+package=glite-yaim-myproxy
+name="$Name$ "
+tag:=$(shell echo $(name) | sed 's/^[^:]*: //' )
+version:=$(shell echo "$(tag)" | sed 's/^.*R_//' | sed 's/_/\./g')
+release:=$(shell echo "$(version)" | sed 's/.*\.//')
+version:=$(shell echo "$(version)" | sed 's/\.[0-9][0-9]* //')
 
-.PHONY: configure install clean
+.PHONY: configure install clean rpm
 
 all: configure
 
-####################################################################
-# Prepare
-####################################################################
-
-prepare:
-	rm -f *~ functions/*~ scripts/*~ examples/*~ 
-	@mkdir -p $(prefix)/doc/html/web
-	@mkdir -p $(prefix)/doc/man
-
-####################################################################
-# Configure
-####################################################################
-
-configure: 
-	@echo "No configuration required, use either 'make install' or 'make rpm'."
-
-####################################################################
-# Compile
-####################################################################
-
-compile: 
-	@echo "No compiling required, use either 'make install' or 'make rpm'."
-
-####################################################################
-# Install
-####################################################################
-
-install:
+install: 
 	@echo installing ...
 	@mkdir -p $(prefix)/yaim/functions
 	@mkdir -p $(prefix)/yaim/node-info.d
-	@install -m 0644 config/functions/* $(prefix)/yaim/functions
-	@install -m 0644 config/node-info.d/* $(prefix)/yaim/node-info.d
 
-####################################################################
-# Documentation
-####################################################################
+	@install -m 0644 config/functions/config* $(prefix)/yaim/functions
+	@install -m 0644 config/node-info.d/glite* $(prefix)/yaim/node-info.d
 
-doc: man html
-
-man: prepare
-
-html: prepare
-
-web: html
-
-####################################################################
-# Install Doc
-####################################################################
-
-install-doc: doc
-	@echo installing  docs...
-
-####################################################################
-# Build Distribution
-####################################################################
-
-dist: prepare 
-	@tar --gzip --exclude='*CVS*' -cf build/$(PACKAGE_NAME).src.tgz config doc examples src
-
-rpm: dist
-	@rpmbuild -ta build/$(PACKAGE_NAME).src.tgz 
 
 clean::
-	rm -f *~ test/*~ etc/*~ doc/*~ src/*~ $(PACKAGE_NAME).src.tgz 
-	rm -rf build ${prefix}
+	rm -f *~ test/*~ etc/*~ doc/*~ src/*~  
+	rm -rf rpmbuild 
+
+rpm:
+	@mkdir -p  rpmbuild/RPMS/noarch
+	@mkdir -p  rpmbuild/SRPMS/
+	@mkdir -p  rpmbuild/SPECS/
+	@mkdir -p  rpmbuild/SOURCES/
+	@mkdir -p  rpmbuild/BUILD/
+ifneq ("x$(tag)","x")
+	@sed -i 's/^Version:.*/Version: $(version)/' $(package).spec
+	@sed -i 's/^Release:.*/Release: $(release)/' $(package).spec
+endif
+	@tar --gzip --exclude='*CVS*' -cf rpmbuild/SOURCES/${package}.src.tgz *
+	@rpmbuild -ba ${package}.spec
 
