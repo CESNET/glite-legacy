@@ -374,7 +374,7 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 
 
 		FD_ZERO(&fds);
-		FD_SET(sock, &fds);
+		if ( conn < 0 || !first_request) FD_SET(sock, &fds);
 		if ( conn >= 0 ) FD_SET(conn, &fds);
 		if ( conn > sock ) max = conn;
 	
