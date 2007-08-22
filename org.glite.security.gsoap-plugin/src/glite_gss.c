@@ -366,8 +366,12 @@ recv_token(int sock, void **token, size_t *token_length, struct timeval *to)
 	    goto end;
 	 }
       }
-      if (count == 0 && tl == 0 && errno == 0)
-	 return EDG_WLL_GSS_ERROR_EOF; 
+
+      if (count==0) {
+         if (tl==0) 
+            return EDG_WLL_GSS_ERROR_EOF;
+         else goto end;
+      }
       tmp=realloc(t, tl + count);
       if (tmp == NULL) {
 	 errno = ENOMEM;
@@ -867,6 +871,7 @@ edg_wll_gss_read(edg_wll_GssConnection *connection, void *buf, size_t bufsize,
 	 /* XXX cleanup */
 	 return ret;
 
+      ERR_clear_error();
       maj_stat = gss_unwrap(&min_stat, connection->context, &input_token,
 	  		    &output_token, NULL, NULL);
       gss_release_buffer(&min_stat, &input_token);
