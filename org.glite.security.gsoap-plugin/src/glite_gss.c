@@ -944,24 +944,32 @@ edg_wll_gss_write_full(edg_wll_GssConnection *connection, const void *buf,
    return edg_wll_gss_write(connection, buf, bufsize, timeout, gss_code);
 }
 
-/* XXX: I'm afraid the contents of stuct stat is somewhat OS dependent */
+/* Request credential reload each 60 seconds in order to work around
+ * Globus bug (not reloading expired CRLs)
+ */
+#define GSS_CRED_WATCH_LIMIT	60
 int
-edg_wll_gss_watch_creds(const char *proxy_file, time_t *proxy_mtime)
+edg_wll_gss_watch_creds(const char *proxy_file, time_t *last_time)
 {
 	struct stat	pstat;
-	int	reload = 0;
+	time_t	now;
+
+	now = time(NULL);
+
+	if ( now >= (*last_time+GSS_CRED_WATCH_LIMIT) ) {
+		*last_time = now;
+		return 1;
+	}
 
 	if (!proxy_file) return 0;
 	if (stat(proxy_file,&pstat)) return -1;
 
-	if (!*proxy_mtime) *proxy_mtime = pstat.st_mtime;
-
-	if (*proxy_mtime != pstat.st_mtime) {
-		*proxy_mtime = pstat.st_mtime;
-		reload = 1;
+	if ( pstat.st_mtime >= *last_time ) {
+		*last_time = now + 1;
+		return 1;
 	}
 
-	return reload;
+	return 0;
 }
 
 int
