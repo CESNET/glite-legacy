@@ -1064,3 +1064,29 @@ edg_wll_gss_reject(int sock)
    /* XXX is it possible to cut & paste edg_wll_ssl_reject() ? */
    return 0;
 }
+
+char *
+edg_wll_gss_normalize_subj(char *in, int replace_in)
+{
+	char *new, *ptr;
+	size_t len;
+
+	if (in == NULL) return NULL;
+	if (replace_in) 
+		new = in;
+	else
+		new = strdup(in);
+	
+	while ((ptr = strstr(new, "/emailAddress="))) {
+		memcpy(ptr, "/Email=",7);
+		memmove(ptr+7, ptr+14, strlen(ptr+14)+1);
+	}
+	
+	len = strlen(new);
+	while (len > 9 && !strcmp(new+len-9, "/CN=proxy")) {
+		*(new+len-9) = '\0';
+		len -= 9;
+	}
+
+	return new;
+}
