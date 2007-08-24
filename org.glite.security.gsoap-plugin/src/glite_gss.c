@@ -317,12 +317,6 @@ end:
    return ret;
 }
 
-#define SSL_TOKEN_HEADER_LENGTH 5
-static size_t ssl_token_length(char *t, int tl) {
-	unsigned char *b = t;
-	return (((size_t)(b[3]) << 8) | b[4]) + 5;
-}
-
 static int
 recv_token(int sock, void **token, size_t *token_length, struct timeval *to)
 {
@@ -331,7 +325,6 @@ recv_token(int sock, void **token, size_t *token_length, struct timeval *to)
    char *t = NULL;
    char *tmp;
    size_t tl = 0;
-   size_t expect = 0;
    fd_set fds;
    struct timeval timeout,before,after;
    int ret;
@@ -342,7 +335,6 @@ recv_token(int sock, void **token, size_t *token_length, struct timeval *to)
    }
 
    ret = 0;
-   expect = SSL_TOKEN_HEADER_LENGTH;
    do {
       FD_ZERO(&fds);
       FD_SET(sock,&fds);
@@ -357,7 +349,7 @@ recv_token(int sock, void **token, size_t *token_length, struct timeval *to)
 	    break;
       }
       
-      count = read(sock, buf, MIN(expect - tl, sizeof(buf)));
+      count = read(sock, buf, sizeof(buf));
       if (count < 0) {
 	 if (errno == EINTR)
 	    continue;
@@ -381,12 +373,7 @@ recv_token(int sock, void **token, size_t *token_length, struct timeval *to)
       memcpy(t + tl, buf, count);
       tl += count;
 
-      if ((expect == SSL_TOKEN_HEADER_LENGTH) && 
-		(tl >= SSL_TOKEN_HEADER_LENGTH)) {
-	 expect = ssl_token_length(t, tl);
-      }
-
-   } while (count != 0 && tl < expect);
+   } while (count < 0); /* restart on EINTR */
 
 end:
    if (to) {
