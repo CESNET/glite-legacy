@@ -3,8 +3,6 @@ config_add_pool_env
 config_crl
 config_host_certs
 config_edgusers
-config_users
-config_mkgridmap
 config_java
 config_rgma_client
 config_gip_service
