@@ -240,7 +240,7 @@ int main(int argc, char *argv[])
 
 	gethostname(host, sizeof host);
 	host[sizeof host - 1] = 0;
-	asprintf(&port, "%d", GLITE_WMSC_JOBID_DEFAULT_PORT);
+	asprintf(&port, "%d", GLITE_JOBID_DEFAULT_PORT);
 	dprintf(("server address: %s:%s\n", host, port));
 
 	service_table[SRV_SERVE].conn = socket(PF_UNIX, SOCK_STREAM, 0);
