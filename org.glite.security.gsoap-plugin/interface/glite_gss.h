@@ -106,6 +106,12 @@ int
 edg_wll_gss_oid_equal(const gss_OID a,
 		      const gss_OID b);
 
+char *
+edg_wll_gss_normalize_subj(char *, int );
+
+int
+edg_wll_gss_equal_subj(const char *, const char *);
+
 /*
 int
 edg_wll_gss_get_name(gss_cred_id_t cred, char **name);

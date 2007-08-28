@@ -1077,3 +1077,21 @@ edg_wll_gss_normalize_subj(char *in, int replace_in)
 
 	return new;
 }
+
+int
+edg_wll_gss_equal_subj(const char *a, const char *b)
+{
+	char *an,*bn;
+	int res;
+
+	an = edg_wll_gss_normalize_subj((char*)a, 0);
+	bn = edg_wll_gss_normalize_subj((char*)b, 0);
+
+	if (!an || !bn)
+		res = 0;
+	else 
+		res = !strcmp(an,bn);
+	
+	free(an); free(bn);
+	return res;
+}
