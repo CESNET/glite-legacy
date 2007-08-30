@@ -528,8 +528,8 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 			if (   services[srv].on_new_conn_hnd
 				&& (ret = services[srv].on_new_conn_hnd(conn, to.tv_sec >= 0 ? &to : NULL, clnt_data)) )
 			{
-				dprintf(("[%d] Connection not estabilished, err = %d.\n", getpid(),ret));
-				if ( !debug ) syslog(LOG_ERR, "Connection not estabilished, err = %d.\n",ret);
+				dprintf(("[%d] Connection not established, err = %d.\n", getpid(),ret));
+				if ( !debug ) syslog(LOG_ERR, "Connection not established, err = %d.\n",ret);
 				close(conn);
 				conn = srv = -1;
 				if (ret < 0) exit(1);
