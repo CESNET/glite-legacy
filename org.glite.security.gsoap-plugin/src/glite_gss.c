@@ -661,9 +661,12 @@ edg_wll_gss_connect(gss_cred_id_t cred, char const *hostname, int port,
 
       if (GSS_ERROR(maj_stat)) {
 	 if (context != GSS_C_NO_CONTEXT) {
-	    /* XXX send closing token to the friend */
-	    gss_delete_sec_context(&min_stat2, &context, GSS_C_NO_BUFFER);
+	    gss_delete_sec_context(&min_stat2, &context, &output_token);
 	    context = GSS_C_NO_CONTEXT;
+      	    if (output_token.length) {
+		send_token(sock, output_token.value, output_token.length, timeout);
+	 	gss_release_buffer(&min_stat2, &output_token);
+      	    }
 	 }
 	 ret = EDG_WLL_GSS_ERROR_GSS;
 	 goto end;
@@ -763,24 +766,29 @@ edg_wll_gss_accept(gss_cred_id_t cred, int sock, struct timeval *timeout,
 
    if (GSS_ERROR(maj_stat)) {
       if (context != GSS_C_NO_CONTEXT) {
-	 /* XXX send closing token to the friend */
-	 gss_delete_sec_context(&min_stat2, &context, GSS_C_NO_BUFFER);
+	 gss_delete_sec_context(&min_stat2, &context, &output_token);
 	 context = GSS_C_NO_CONTEXT;
+      	 if (output_token.length) {
+		send_token(sock, output_token.value, output_token.length, timeout);
+	 	gss_release_buffer(&min_stat2, &output_token);
+      	 }
       }
       ret = EDG_WLL_GSS_ERROR_GSS;
       goto end;
    }
 
+#if 0
    maj_stat = gss_display_name(&min_stat, client_name, &output_token, NULL);
+   gss_release_buffer(&min_stat2, &output_token);
    if (GSS_ERROR(maj_stat)) {
       /* XXX close context ??? */
       ret = EDG_WLL_GSS_ERROR_GSS;
       goto end;
    }
+#endif
 
    connection->sock = sock;
    connection->context = context;
-   memset(&output_token, 0, sizeof(output_token.value));
    ret = 0;
 
 end:
@@ -963,13 +971,18 @@ int
 edg_wll_gss_close(edg_wll_GssConnection *con, struct timeval *timeout)
 {
    OM_uint32 min_stat;
-
-   /* XXX if timeout is NULL use value of 120 secs */
+   gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
+   struct timeval def_timeout = { 30, 0};
 
    if (con->context != GSS_C_NO_CONTEXT) {
-      gss_delete_sec_context(&min_stat, &con->context, GSS_C_NO_BUFFER);
-      /* XXX send the buffer (if any) to the peer. GSSAPI specs doesn't
-       * recommend sending it, though */
+      gss_delete_sec_context(&min_stat, &con->context, &output_token);
+      /* send the buffer (if any) to the peer. GSSAPI specs doesn't
+       * recommend sending it, but we want SSL compatibility */
+      if (output_token.length && con->sock>=0) {
+		send_token(con->sock, output_token.value, output_token.length,
+				timeout ? timeout : &def_timeout);
+       }
+	gss_release_buffer(&min_stat, &output_token);
 
       /* XXX can socket be open even if context == GSS_C_NO_CONTEXT) ? */
       /* XXX ensure that edg_wll_GssConnection is created with sock set to -1 */
