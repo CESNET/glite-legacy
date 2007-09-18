@@ -121,7 +121,7 @@ public:
 };
 				for (@{$ff->{codes}}) {
 					gen qq{
-!		$ut$_->{name},	/**< $_->{comment} */
+!		$ut$_->{name} = EDG_WLL_$ut$_->{name},	/**< $_->{comment} */
 };
 				}
 				gen qq{
