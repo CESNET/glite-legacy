@@ -837,7 +837,7 @@ int
 edg_wll_gss_read(edg_wll_GssConnection *connection, void *buf, size_t bufsize,
 		 struct timeval *timeout, edg_wll_GssStatus* gss_code)
 {
-   OM_uint32 maj_stat, min_stat;
+   OM_uint32 maj_stat, min_stat, min_stat2;
    gss_buffer_desc input_token;
    gss_buffer_desc output_token;
    int ret, i;
@@ -863,15 +863,17 @@ edg_wll_gss_read(edg_wll_GssConnection *connection, void *buf, size_t bufsize,
       ret = recv_token(connection->sock, &input_token.value, &input_token.length,
 	               timeout);
       if (ret)
-	 /* XXX cleanup */
 	 return ret;
 
       ERR_clear_error();
       maj_stat = gss_unwrap(&min_stat, connection->context, &input_token,
 	  		    &output_token, NULL, NULL);
-      gss_release_buffer(&min_stat, &input_token);
+      gss_release_buffer(&min_stat2, &input_token);
       if (GSS_ERROR(maj_stat)) {
-	 /* XXX cleanup */
+         if (gss_code) {
+	    gss_code->minor_status = min_stat;
+	    gss_code->major_status = maj_stat;
+         }
 	 return EDG_WLL_GSS_ERROR_GSS;
       }
    } while (maj_stat == 0 && output_token.length == 0 && output_token.value == NULL);
