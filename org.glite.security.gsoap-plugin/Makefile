@@ -71,7 +71,7 @@ LDFLAGS:=${COVERAGE_FLAGS}
 COMPILE:=libtool --mode=compile ${CC} ${CFLAGS}
 COMPILEXX:=libtool --mode=compile ${CXX} ${CFLAGS}
 LINK:=libtool --mode=link ${CC} -rpath ${stagedir}/lib ${LDFLAGS} 
-LINKXX:=libtool --mode=link ${CXX} -rpath ${stagedir}/lib ${LDFLAGS}
+LINKXX:=PATH=${top_srcdir}/project/libtoolhack:${PATH} libtool --mode=link ${CXX} -rpath ${stagedir}/lib ${LDFLAGS}
 INSTALL:=libtool --mode=install install
 
 GLOBUS_INC:= -I${globus_prefix}/include/${nothrflavour}
@@ -167,14 +167,10 @@ ${LTLIB_S}: ${OBJS_S}
 ${THRLTLIB_S}: ${THROBJS_S}
 	PATH=${top_builddir}:${PATH} ${LINKXX} ${version_info} -o $@ ${THRLOBJS_S} ${EX_THRLIBS}
 
-all compile: libtool-hack \
+all compile: \
 	${GSS_STATICLIB} ${GSS_LTLIB} ${GSS_THRSTATICLIB} ${GSS_THRLTLIB} \
 	${STATICLIB} ${LTLIB} ${THRSTATICLIB} ${THRLTLIB} \
 	all-libs-with-soap examples
-
-libtool-hack:
-	echo 'g++ $$@' > gcc
-	chmod +x gcc
 
 check: compile check.gss
 
