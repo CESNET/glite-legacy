@@ -38,7 +38,7 @@ return $?
 
 config_proxy_server_setenv () {
 
-yaimgridenv_set MYPROXY_SERVER $PX_HOST
+return 0
 
 }
 
