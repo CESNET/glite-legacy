@@ -64,4 +64,5 @@ sleep 3
 yaimlog DEBUG "Starting MyProxy server"
 /etc/init.d/myproxy start < /dev/null
 
+return 0
 }
