@@ -8,8 +8,8 @@ function config_glite_lb_setenv(){
   yaimgridenv_set GLITE_LOCATION_VAR /var/glite
   yaimgridenv_set GLITE_USER ${GLITE_USER:-glite}
   yaimgridenv_set GLITE_WMS_QUERY_TIMEOUT 300
-  yaimgridenv_set GLITE_HOST_CERT /home/glite/.certs/hostcert.pem
-  yaimgridenv_set GLITE_HOST_KEY /home/glite/.certs/hostkey.pem
+  yaimgridenv_set GLITE_HOST_CERT ${GLITE_USER_HOME:-/home/glite}/.certs/hostcert.pem
+  yaimgridenv_set GLITE_HOST_KEY ${GLITE_USER_HOME:-/home/glite}/.certs/hostkey.pem
   yaimgridenv_set X509_CERT_DIR /etc/grid-security/certificates
   yaimgridenv_set X509_VOMS_DIR /etc/grid-security/vomsdir
 
