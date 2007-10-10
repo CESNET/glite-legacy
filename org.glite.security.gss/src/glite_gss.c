@@ -1111,7 +1111,7 @@ edg_wll_gss_get_client_conn(edg_wll_GssConnection *connection,
    if (GSS_ERROR(maj_stat))
       goto end;
 
-   p = calloc(1, sizeof(*principal));
+   p = calloc(1, sizeof(*p));
    if (p == NULL) {
       errno = ENOMEM;
       ret = EDG_WLL_GSS_ERROR_ERRNO;
