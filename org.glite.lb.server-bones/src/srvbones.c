@@ -105,6 +105,7 @@ int glite_srvbones_run(
 	struct sigaction	sa;
 	sigset_t			sset;
 	int					sock_slave[2], i;
+	int		pstat;
 
 
 	assert(service_table);
@@ -174,8 +175,25 @@ int glite_srvbones_run(
 		{
 			int		pid;
 
-			while ( (pid = waitpid(-1, NULL, WNOHANG)) > 0 )
+			while ( (pid = waitpid(-1, &pstat, WNOHANG)) > 0 )
 			{
+				if (WIFEXITED(pstat)) {
+					dprintf(("[master] Slave %d exited with return code %d.\n", pid, WEXITSTATUS(pstat)));
+					if (WEXITSTATUS(pstat)) {
+						syslog(LOG_ERR, "Slave %d exited with return code %d.\n", pid, WEXITSTATUS(pstat));
+					}
+				} 
+				if (WIFSIGNALED(pstat)) {
+					dprintf(("[master] Slave %d terminated with signal %d.\n", pid, WTERMSIG(pstat)));
+					switch (WTERMSIG(pstat)) {
+						case SIGINT:
+						case SIGTERM:
+						case SIGUSR1: if (die) break;
+						default:
+							syslog(LOG_ERR, "Slave %d terminated with signal %d.\n", pid, WTERMSIG(pstat));
+							break;
+					}
+				}
 				if ( !die )
 				{
 					int newpid = slave(slave_data_init, sock_slave[1]);
@@ -356,7 +374,7 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 
 
 		FD_ZERO(&fds);
-		FD_SET(sock, &fds);
+		if ( conn < 0 || !first_request) FD_SET(sock, &fds);
 		if ( conn >= 0 ) FD_SET(conn, &fds);
 		if ( conn > sock ) max = conn;
 	
@@ -510,8 +528,8 @@ static int slave(slave_data_init_hnd data_init_hnd, int sock)
 			if (   services[srv].on_new_conn_hnd
 				&& (ret = services[srv].on_new_conn_hnd(conn, to.tv_sec >= 0 ? &to : NULL, clnt_data)) )
 			{
-				dprintf(("[%d] Connection not estabilished, err = %d.\n", getpid(),ret));
-				if ( !debug ) syslog(LOG_ERR, "Connection not estabilished, err = %d.\n",ret);
+				dprintf(("[%d] Connection not established, err = %d.\n", getpid(),ret));
+				if ( !debug ) syslog(LOG_ERR, "Connection not established, err = %d.\n",ret);
 				close(conn);
 				conn = srv = -1;
 				if (ret < 0) exit(1);

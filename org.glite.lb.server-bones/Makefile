@@ -2,7 +2,7 @@
 top_srcdir=.
 stagedir=.
 globalprefix=glite
-lbprefix=lb
+lbutilsprefix=lbu
 package=glite-lb-server-bones
 version=0.0.1
 PREFIX=/opt/glite
@@ -29,8 +29,8 @@ COMPILE:=libtool --mode=compile ${CC} ${CFLAGS}
 LINK:=libtool --mode=link ${CC} -rpath ${stagedir}/lib ${LDFLAGS} 
 INSTALL:=libtool --mode=install install
 
-STATICLIB:=libglite_lb_server_bones.a
-LTLIB:=libglite_lb_server_bones.la
+STATICLIB:=libglite_lbu_server_bones.a
+LTLIB:=libglite_lbu_server_bones.la
 
 OBJS:=srvbones.o
 LOBJS:=${OBJS:.o=.lo}
@@ -65,12 +65,12 @@ cnt_example: cnt_example.o
 doc:
 
 install:
-	mkdir -p ${PREFIX}/include/${globalprefix}/${lbprefix}
+	mkdir -p ${PREFIX}/include/${globalprefix}/${lbutilsprefix}
 	mkdir -p ${PREFIX}/lib
 	${INSTALL} -m 644 ${LTLIB} ${PREFIX}/lib
 	if [ x${DOSTAGE} = xyes ]; then \
 		${INSTALL} -m 644 ${STATICLIB} ${PREFIX}/lib ; \
-		cd ${top_srcdir}/interface && install -m 644 ${HDRS} ${PREFIX}/include/${globalprefix}/${lbprefix} ; \
+		cd ${top_srcdir}/interface && install -m 644 ${HDRS} ${PREFIX}/include/${globalprefix}/${lbutilsprefix} ; \
 	fi
 
 clean:
