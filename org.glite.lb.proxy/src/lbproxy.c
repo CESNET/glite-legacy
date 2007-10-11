@@ -81,6 +81,7 @@ static int		slaves = 10,
 static char		host[300];
 static char *		port;
 int			transactions = -1;
+int			use_dbcaps = 0;
 
 
 static struct option opts[] = {
@@ -155,7 +156,8 @@ static struct glite_srvbones_service service_table[] = {
 
 struct clnt_data_t {
 	edg_wll_Context			ctx;
-	void				   *mysql;
+	glite_lbu_DBContext		dbctx;
+	int				dbcaps;
 };
 
 
@@ -173,7 +175,6 @@ int main(int argc, char *argv[])
 	edg_wll_Context		ctx;
 	struct timeval		to;
 	int	silent = 0;
-
 
 
 	name = strrchr(argv[0],'/');
@@ -307,20 +308,31 @@ int main(int argc, char *argv[])
 	memset(ctx, 0, sizeof(*ctx));
 	*/
 	wait_for_open(ctx, dbstring);
-	if (edg_wll_DBCheckVersion(ctx, dbstring)) {
+	if ((ctx->dbcaps = glite_lbu_DBQueryCaps(ctx->dbctx)) == -1)
+	{
 		char	*et,*ed;
-		edg_wll_Error(ctx,&et,&ed);
+		glite_lbu_DBError(ctx->dbctx,&et,&ed);
 
-		fprintf(stderr,"%s: open database: %s (%s)\n",name,et,ed);
+		fprintf(stderr,"%s: open database: %s (%s)\n",argv[0],et,ed);
+		free(et); free(ed);
 		return 1;
 	}
-	if (!ctx->use_transactions && transactions != 0) {
-		fprintf(stderr, "%s: transactions aren't supported!\n", name);
-	}
-	if (transactions >= 0) {
-		fprintf(stderr, "%s: transactions forced from %d to %d\n", name, ctx->use_transactions, transactions);
-	}
 	edg_wll_Close(ctx);
+	ctx->dbctx = NULL;
+	fprintf(stderr, "[%d]: DB '%s'\n", getpid(), dbstring);
+
+	if ((ctx->dbcaps & GLITE_LBU_DB_CAP_INDEX) == 0) {
+		fprintf(stderr,"%s: missing index support in DB layer\n",argv[0]);
+		return 1;
+	}
+	if ((ctx->dbcaps & GLITE_LBU_DB_CAP_TRANSACTIONS) == 0)
+		fprintf(stderr, "[%d]: transactions aren't supported!\n", getpid());
+	if (transactions >= 0) {
+		fprintf(stderr, "[%d]: transactions forced from %d to %d\n", getpid(), ctx->dbcaps & GLITE_LBU_DB_CAP_TRANSACTIONS ? 1 : 0, transactions);
+		ctx->dbcaps &= ~GLITE_LBU_DB_CAP_TRANSACTIONS;
+		ctx->dbcaps |= transactions ? GLITE_LBU_DB_CAP_TRANSACTIONS : 0;
+	}
+	use_dbcaps = ctx->dbcaps;
 	edg_wll_FreeContext(ctx);
 
 	if ( !debug ) {
@@ -371,7 +383,8 @@ int clnt_data_init(void **data)
 
 	dprintf(("[%d] opening database ...\n", getpid()));
 	wait_for_open(ctx, dbstring);
-	cdata->mysql = ctx->mysql;
+	cdata->dbctx = ctx->dbctx;
+	cdata->dbcaps = use_dbcaps;
 	edg_wll_FreeContext(ctx);
 
 #ifdef LB_PERF
@@ -397,7 +410,8 @@ int handle_conn(int conn, struct timeval *timeout, void *data)
 
 	/* Shared structures (pointers)
 	 */
-	ctx->mysql = cdata->mysql;
+	ctx->dbctx = cdata->dbctx;
+	ctx->dbcaps = cdata->dbcaps;
 	
 	/*	set globals
 	 */
@@ -588,7 +602,7 @@ static void wait_for_open(edg_wll_Context ctx, const char *dbstring)
 		char	*errt,*errd;
 
 		if (dbfail_string1) free(dbfail_string1);
-		edg_wll_Error(ctx,&errt,&errd);
+		glite_lbu_DBError(ctx->dbctx,&errt,&errd);
 		asprintf(&dbfail_string1,"%s (%s)\n",errt,errd);
 		if (dbfail_string1 != NULL) {
 			if (dbfail_string2 == NULL || strcmp(dbfail_string1,dbfail_string2)) {
@@ -608,8 +622,6 @@ static void wait_for_open(edg_wll_Context ctx, const char *dbstring)
 		dprintf(("[%d]: DB connection established\n",getpid()));
 		if (!debug) syslog(LOG_INFO,"DB connection established\n");
 	}
-
-	if (transactions >= 0) ctx->use_transactions = transactions;
 }
 
 static int decrement_timeout(struct timeval *timeout, struct timeval before, struct timeval after)

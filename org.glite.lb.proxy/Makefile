@@ -44,7 +44,6 @@ CFLAGS:= ${DEBUG} \
 	-I${stagedir}/include -I${top_srcdir}/src -I. \
 	-I${expat_prefix}/include \
 	${COVERAGE_FLAGS} \
-	-I${mysql_prefix}/include -I${mysql_prefix}/include/mysql \
 	-I${gridsite_prefix}/include \
 	-D_GNU_SOURCE ${LB_STANDALONE_FLAGS} ${LB_PERF_FLAGS}
 
@@ -58,14 +57,6 @@ archlib:=lib
 host_cpu:=${shell uname -m}
 ifeq (${host_cpu},x86_64)
     archlib:=lib64
-endif
-
-ifneq (${mysql_prefix},/usr)
-	ifeq ($(shell echo ${mysql_version} | cut -d. -f1,2),4.1)
-		mysqlib := -L${mysql_prefix}/${archlib}/mysql
-	else
-		mysqlib := -L${mysql_prefix}/${archlib}
-	endif
 endif
 
 ifneq (${expat_prefix},/usr)
@@ -86,7 +77,6 @@ endif
 
 VOMS_LIBS:=-L${voms_prefix}/lib -lvomsc${vomsflavour}
 EXT_LIBS:= \
-	${mysqlib} -lmysqlclient -lz\
 	${expatlib} -lexpat \
 	${GRIDSITE_LIBS} \
 	${VOMS_LIBS}
@@ -97,14 +87,13 @@ LB_PROXY_LIBS:= \
 	${STATIC_LIB_BK} \
 	${SRVBONES_LIB} \
 	-lglite_lb_common_${nothrflavour} \
+	-lglite_lbu_db \
 	-lglite_security_gss_${nothrflavour} \
 	${EXT_LIBS}
 
 
 
 glite-lb-proxy: lbproxy.o fake_write2rgma.o ${STATIC_LIB_BK}
-	@echo DEBUG: mysql_version=${mysql_version} mysql_prefix=${mysql_prefix}
-	@echo DEBUG: shell: x$(shell echo ${mysql_version} | cut -d. -f1,2)x
 	${LINK} -o $@ lbproxy.o fake_write2rgma.o ${LB_PROXY_LIBS}
 
 glite-lb-proxy-perf: lbproxy.o fake_write2rgma.o ${STATIC_LIB_BK}
