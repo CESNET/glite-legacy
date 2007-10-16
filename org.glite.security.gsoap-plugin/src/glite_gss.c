@@ -978,12 +978,15 @@ edg_wll_gss_close(edg_wll_GssConnection *con, struct timeval *timeout)
 
    if (con->context != GSS_C_NO_CONTEXT) {
       gss_delete_sec_context(&min_stat, &con->context, &output_token);
+
+#if 0
       /* send the buffer (if any) to the peer. GSSAPI specs doesn't
        * recommend sending it, but we want SSL compatibility */
       if (output_token.length && con->sock>=0) {
 		send_token(con->sock, output_token.value, output_token.length,
 				timeout ? timeout : &def_timeout);
        }
+#endif
 	gss_release_buffer(&min_stat, &output_token);
 
       /* XXX can socket be open even if context == GSS_C_NO_CONTEXT) ? */
