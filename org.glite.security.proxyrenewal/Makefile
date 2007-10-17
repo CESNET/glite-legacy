@@ -41,6 +41,12 @@ myproxy_prefix=$globus_prefix
 
 -include Makefile.inc
 
+archlib:=lib
+host_cpu:=${shell uname -m}
+ifeq (${host_cpu},x86_64)
+    archlib:=lib64
+endif
+
 VPATH:=${top_srcdir}/src:${top_srcdir}/examples
 
 GLOBUSINC:= -I${globus_prefix}/include/${nothrflavour} \
@@ -95,8 +101,8 @@ THRLIB:=libglite_security_proxyrenewal_${thrflavour}.la
 LIB_CORE_NOTHR := libglite_security_proxyrenewal_core_${nothrflavour}.la
 LIB_CORE_THR := libglite_security_proxyrenewal_core_${thrflavour}.la
 
-VOMS_LIB_NOTHR := -L${glite_location}/lib -lvomsc_${nothrflavour}
-VOMS_LIB_THR := -L${glite_location}/lib -lvomsc_${thrflavour}
+VOMS_LIB_NOTHR := -L${glite_location}/${archlib} -lvomsc_${nothrflavour}
+VOMS_LIB_THR := -L${glite_location}/${archlib} -lvomsc_${thrflavour}
 
 DAEMON:=glite-proxy-renewd
 CLIENT:=glite-proxy-renew
