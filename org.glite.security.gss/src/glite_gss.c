@@ -320,12 +320,6 @@ end:
    return ret;
 }
 
-#define SSL_TOKEN_HEADER_LENGTH 5
-static size_t ssl_token_length(char *t, int tl) {
-	unsigned char *b = t;
-	return (((size_t)(b[3]) << 8) | b[4]) + 5;
-}
-
 static int
 recv_token(int sock, void **token, size_t *token_length, struct timeval *to)
 {
@@ -334,7 +328,6 @@ recv_token(int sock, void **token, size_t *token_length, struct timeval *to)
    char *t = NULL;
    char *tmp;
    size_t tl = 0;
-   size_t expect = 0;
    fd_set fds;
    struct timeval timeout,before,after;
    int ret;
@@ -345,7 +338,6 @@ recv_token(int sock, void **token, size_t *token_length, struct timeval *to)
    }
 
    ret = 0;
-   expect = SSL_TOKEN_HEADER_LENGTH;
    do {
       FD_ZERO(&fds);
       FD_SET(sock,&fds);
@@ -360,7 +352,7 @@ recv_token(int sock, void **token, size_t *token_length, struct timeval *to)
 	    break;
       }
       
-      count = read(sock, buf, MIN(expect - tl, sizeof(buf)));
+      count = read(sock, buf, sizeof(buf));
       if (count < 0) {
 	 if (errno == EINTR)
 	    continue;
@@ -384,12 +376,7 @@ recv_token(int sock, void **token, size_t *token_length, struct timeval *to)
       memcpy(t + tl, buf, count);
       tl += count;
 
-      if ((expect == SSL_TOKEN_HEADER_LENGTH) && 
-		(tl >= SSL_TOKEN_HEADER_LENGTH)) {
-	 expect = ssl_token_length(t, tl);
-      }
-
-   } while (count != 0 && tl < expect);
+   } while (count < 0); /* restart on EINTR */
 
 end:
    if (to) {
@@ -605,6 +592,17 @@ end:
 					                                              are in the bad state */
 #define _EXPIRED_ALERT_RETRY_DELAY 10   /* ms */
 
+/* XXX XXX This is black magic. "Sometimes" server refuses the client with SSL
+ *  * alert "certificate expired" even if it is not true. In this case the server
+ *   * slave terminates (which helps, usually), and we can reconnect transparently.
+ *    */
+
+/* This string appears in the error message in this case */
+#define _EXPIRED_ALERT_MESSAGE "function SSL3_READ_BYTES: sslv3 alert certificate expired"
+#define _EXPIRED_ALERT_RETRY_COUNT 10   /* default number of slaves, hope that not all
+					                                              are in the bad state */
+#define _EXPIRED_ALERT_RETRY_DELAY 10   /* ms */
+
 int 
 edg_wll_gss_connect(edg_wll_GssCred cred, char const *hostname, int port,
 		    struct timeval *timeout, edg_wll_GssConnection *connection,
@@ -654,6 +652,8 @@ edg_wll_gss_connect(edg_wll_GssCred cred, char const *hostname, int port,
 
    do { /* XXX: the black magic above */
 
+   do { /* XXX: the black magic above */
+
    /* XXX prepsat na do {} while (maj_stat == CONT) a osetrit chyby*/
    while (!context_established) {
       /* XXX verify ret_flags match what was requested */
@@ -677,9 +677,12 @@ edg_wll_gss_connect(edg_wll_GssCred cred, char const *hostname, int port,
 
       if (GSS_ERROR(maj_stat)) {
 	 if (context != GSS_C_NO_CONTEXT) {
-	    /* XXX send closing token to the friend */
-	    gss_delete_sec_context(&min_stat2, &context, GSS_C_NO_BUFFER);
+	    gss_delete_sec_context(&min_stat2, &context, &output_token);
 	    context = GSS_C_NO_CONTEXT;
+      	    if (output_token.length) {
+		send_token(sock, output_token.value, output_token.length, timeout);
+	 	gss_release_buffer(&min_stat2, &output_token);
+      	    }
 	 }
 	 ret = EDG_WLL_GSS_ERROR_GSS;
 	 goto end;
@@ -694,6 +697,27 @@ edg_wll_gss_connect(edg_wll_GssCred cred, char const *hostname, int port,
    }
 
    /* XXX check ret_flags matches to what was requested */
+
+   /* retry on false "certificate expired" */
+   if (ret == EDG_WLL_GSS_ERROR_GSS) {
+	   edg_wll_GssStatus	gss_stat;
+	   char	*msg = NULL;
+
+	   gss_stat.major_status = maj_stat;
+	   gss_stat.minor_status = min_stat;
+	   edg_wll_gss_get_error(&gss_stat,"",&msg);
+
+	   if (strstr(msg,_EXPIRED_ALERT_MESSAGE)) {
+		   usleep(_EXPIRED_ALERT_RETRY_DELAY);
+		   retry--;
+	   }
+	   else retry = 0;
+
+	   free(msg);
+   }
+   else retry = 0;
+
+   } while (retry);
 
    /* retry on false "certificate expired" */
    if (ret == EDG_WLL_GSS_ERROR_GSS) {
@@ -779,24 +803,29 @@ edg_wll_gss_accept(edg_wll_GssCred cred, int sock, struct timeval *timeout,
 
    if (GSS_ERROR(maj_stat)) {
       if (context != GSS_C_NO_CONTEXT) {
-	 /* XXX send closing token to the friend */
-	 gss_delete_sec_context(&min_stat2, &context, GSS_C_NO_BUFFER);
+	 gss_delete_sec_context(&min_stat2, &context, &output_token);
 	 context = GSS_C_NO_CONTEXT;
+      	 if (output_token.length) {
+		send_token(sock, output_token.value, output_token.length, timeout);
+	 	gss_release_buffer(&min_stat2, &output_token);
+      	 }
       }
       ret = EDG_WLL_GSS_ERROR_GSS;
       goto end;
    }
 
+#if 0
    maj_stat = gss_display_name(&min_stat, client_name, &output_token, NULL);
+   gss_release_buffer(&min_stat2, &output_token);
    if (GSS_ERROR(maj_stat)) {
       /* XXX close context ??? */
       ret = EDG_WLL_GSS_ERROR_GSS;
       goto end;
    }
+#endif
 
    connection->sock = sock;
    connection->context = context;
-   memset(&output_token, 0, sizeof(output_token.value));
    ret = 0;
 
 end:
@@ -814,7 +843,7 @@ int
 edg_wll_gss_write(edg_wll_GssConnection *connection, const void *buf, size_t bufsize,
 		  struct timeval *timeout, edg_wll_GssStatus* gss_code)
 {
-   OM_uint32  maj_stat, min_stat;
+   OM_uint32 maj_stat, min_stat, min_stat2;
    gss_buffer_desc  input_token;
    gss_buffer_desc  output_token;
    int  ret;
@@ -870,15 +899,17 @@ edg_wll_gss_read(edg_wll_GssConnection *connection, void *buf, size_t bufsize,
       ret = recv_token(connection->sock, &input_token.value, &input_token.length,
 	               timeout);
       if (ret)
-	 /* XXX cleanup */
 	 return ret;
 
-
+      ERR_clear_error();
       maj_stat = gss_unwrap(&min_stat, connection->context, &input_token,
 	  		    &output_token, NULL, NULL);
-      gss_release_buffer(&min_stat, &input_token);
+      gss_release_buffer(&min_stat2, &input_token);
       if (GSS_ERROR(maj_stat)) {
-	 /* XXX cleanup */
+	 if (gss_code) {
+           gss_code->minor_status = min_stat;
+           gss_code->major_status = maj_stat;
+         }
 	 return EDG_WLL_GSS_ERROR_GSS;
       }
    } while (maj_stat == 0 && output_token.length == 0 && output_token.value == NULL);
@@ -946,37 +977,55 @@ edg_wll_gss_write_full(edg_wll_GssConnection *connection, const void *buf,
    return edg_wll_gss_write(connection, buf, bufsize, timeout, gss_code);
 }
 
-/* XXX: I'm afraid the contents of stuct stat is somewhat OS dependent */
+/* Request credential reload each 60 seconds in order to work around
+ * Globus bug (not reloading expired CRLs)
+ */
+#define GSS_CRED_WATCH_LIMIT  60
 int
-edg_wll_gss_watch_creds(const char *proxy_file, time_t *proxy_mtime)
+edg_wll_gss_watch_creds(const char *proxy_file, time_t *last_time)
 {
-	struct stat	pstat;
-	int	reload = 0;
+      struct stat     pstat;
+      time_t  now;
 
-	if (!proxy_file) return 0;
-	if (stat(proxy_file,&pstat)) return -1;
+      now = time(NULL);
 
-	if (!*proxy_mtime) *proxy_mtime = pstat.st_mtime;
+      if ( now >= (*last_time+GSS_CRED_WATCH_LIMIT) ) {
+              *last_time = now;
+              return 1;
+      }
 
-	if (*proxy_mtime != pstat.st_mtime) {
-		*proxy_mtime = pstat.st_mtime;
-		reload = 1;
-	}
+      if (!proxy_file) return 0;
+      if (stat(proxy_file,&pstat)) return -1;
 
-	return reload;
+      if ( pstat.st_mtime >= *last_time ) {
+              *last_time = now + 1;
+              return 1;
+      }
+
+      return 0;
 }
 
 int
 edg_wll_gss_close(edg_wll_GssConnection *con, struct timeval *timeout)
 {
    OM_uint32 min_stat;
-
-   /* XXX if timeout is NULL use value of 120 secs */
+   gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
+   struct timeval def_timeout = { 0, 100000};
 
    if (con->context != GSS_C_NO_CONTEXT) {
-      gss_delete_sec_context(&min_stat, (gss_ctx_id_t *)&con->context, GSS_C_NO_BUFFER);
-      /* XXX send the buffer (if any) to the peer. GSSAPI specs doesn't
-       * recommend sending it, though */
+      gss_delete_sec_context(&min_stat, (gss_ctx_id_t *)&con->context, &output_token);
+
+#if 0
+      /* XXX: commented out till timeout handling in caller is fixed */
+
+      /* send the buffer (if any) to the peer. GSSAPI specs doesn't
+       * recommend sending it, but we want SSL compatibility */
+      if (output_token.length && con->sock>=0) {
+              send_token(con->sock, output_token.value, output_token.length,
+                              timeout ? timeout : &def_timeout);
+      }
+#endif
+      gss_release_buffer(&min_stat, &output_token);
 
       /* XXX can socket be open even if context == GSS_C_NO_CONTEXT) ? */
       /* XXX ensure that edg_wll_GssConnection is created with sock set to -1 */
@@ -1008,7 +1057,6 @@ edg_wll_gss_get_error(edg_wll_GssStatus *gss_err, const char *prefix, char **msg
 				    &msg_ctx, &maj_status_string);
       if (GSS_ERROR(maj_stat))
 	 break;
-
       maj_stat = gss_display_status(&min_stat, gss_err->minor_status,
 	    			    GSS_C_MECH_CODE, GSS_C_NULL_OID,
 				    &msg_ctx, &min_status_string);
@@ -1167,4 +1215,48 @@ edg_wll_gss_gethostname(char *name, int len)
    globus_module_deactivate(GLOBUS_COMMON_MODULE);
 
    return ret;
+}
+
+char *
+edg_wll_gss_normalize_subj(char *in, int replace_in)
+{
+	char *new, *ptr;
+	size_t len;
+
+	if (in == NULL) return NULL;
+	if (replace_in) 
+		new = in;
+	else
+		new = strdup(in);
+	
+	while ((ptr = strstr(new, "/emailAddress="))) {
+		memcpy(ptr, "/Email=",7);
+		memmove(ptr+7, ptr+14, strlen(ptr+14)+1);
+	}
+	
+	len = strlen(new);
+	while (len > 9 && !strcmp(new+len-9, "/CN=proxy")) {
+		*(new+len-9) = '\0';
+		len -= 9;
+	}
+
+	return new;
+}
+
+int
+edg_wll_gss_equal_subj(const char *a, const char *b)
+{
+	char *an,*bn;
+	int res;
+
+	an = edg_wll_gss_normalize_subj((char*)a, 0);
+	bn = edg_wll_gss_normalize_subj((char*)b, 0);
+
+	if (!an || !bn)
+		res = 0;
+	else 
+		res = !strcmp(an,bn);
+	
+	free(an); free(bn);
+	return res;
 }
