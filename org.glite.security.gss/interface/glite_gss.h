@@ -138,6 +138,15 @@ edg_wll_gss_free_princ(edg_wll_GssPrincipal principal);
 int
 edg_wll_gss_gethostname(char *name, int len);
 
+char *
+edg_wll_gss_normalize_subj(char *in, 
+			   int replace_in);
+
+int
+edg_wll_gss_equal_subj(const char *a,
+		       const char *b);
+
+
 #ifdef __cplusplus
 } 
 #endif

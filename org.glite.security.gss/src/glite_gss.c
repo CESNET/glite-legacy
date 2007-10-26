@@ -843,7 +843,7 @@ int
 edg_wll_gss_write(edg_wll_GssConnection *connection, const void *buf, size_t bufsize,
 		  struct timeval *timeout, edg_wll_GssStatus* gss_code)
 {
-   OM_uint32 maj_stat, min_stat, min_stat2;
+   OM_uint32 maj_stat, min_stat;
    gss_buffer_desc  input_token;
    gss_buffer_desc  output_token;
    int  ret;
@@ -874,7 +874,7 @@ int
 edg_wll_gss_read(edg_wll_GssConnection *connection, void *buf, size_t bufsize,
 		 struct timeval *timeout, edg_wll_GssStatus* gss_code)
 {
-   OM_uint32 maj_stat, min_stat;
+   OM_uint32 maj_stat, min_stat, min_stat2;
    gss_buffer_desc input_token;
    gss_buffer_desc output_token;
    size_t i, len;
