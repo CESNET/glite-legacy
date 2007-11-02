@@ -10,6 +10,8 @@
 		<service name="glite-lb-service">
 			<components>
 
+				<component name="glite-lb-client"/>
+				
 				<component name="glite-config"/>
 				
 				<component name="glite-yaim-core"/>
