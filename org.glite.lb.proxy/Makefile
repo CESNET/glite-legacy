@@ -64,7 +64,7 @@ ifneq (${expat_prefix},/usr)
 endif
 
 
-SRVBONES_LIB:= -L${stagedir}/lib -lglite_lb_server_bones
+SRVBONES_LIB:= -L${stagedir}/lib -lglite_lbu_server_bones
 GRIDSITE_LIBS = -lgridsite_globus `xml2-config --libs`
 
 vomsflavour := _${nothrflavour}
