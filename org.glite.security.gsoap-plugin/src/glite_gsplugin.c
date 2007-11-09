@@ -114,7 +114,7 @@ glite_gsplugin_set_credential(glite_gsplugin_Context ctx,
    edg_wll_GssStatus gss_code;
    int ret;
 
-   ret = edg_wll_gss_acquire_cred_gsi(cert, key, &ctx->cred, NULL, &gss_code);
+   ret = edg_wll_gss_acquire_cred_gsi(cert, key, &ctx->cred, &gss_code);
    if (ret) {
       /* XXX propagate error description */
       return EINVAL;
@@ -170,22 +170,21 @@ glite_gsplugin(struct soap *soap, struct soap_plugin *p, void *arg)
 	}
 	else {
 		edg_wll_GssStatus	gss_code;
-		char			   *subject = NULL;
 
 		pdprintf(("GSLITE_GSPLUGIN: Creating default context\n"));
 		if ( glite_gsplugin_init_context((glite_gsplugin_Context*)&(pdata->ctx)) ) {
 			free(pdata);
 			return ENOMEM;
 		}
-		if ( edg_wll_gss_acquire_cred_gsi(NULL, NULL, &pdata->ctx->cred, &subject, &gss_code) ) {
+		if ( edg_wll_gss_acquire_cred_gsi(NULL, NULL, &pdata->ctx->cred, &gss_code) ) {
 			/*	XXX: Let user know, that cred. load failed. Somehow...
 			 */
 			glite_gsplugin_free_context(pdata->ctx);
 			return EINVAL;
 		}
 		pdata->ctx->internal_credentials = 1;
-		pdprintf(("GSLITE_GSPLUGIN: server running with certificate: %s\n", subject));
-		free(subject);
+		pdprintf(("GSLITE_GSPLUGIN: server running with certificate: %s\n",
+                         pdata->ctx->cred->name));
 		pdata->def = 1;
 	}
 
@@ -271,7 +270,7 @@ glite_gsplugin_connect(
 	if ( ctx->cred == NULL ) {
 		pdprintf(("GSLITE_GSPLUGIN: loading default credentials\n"));
 		ret = edg_wll_gss_acquire_cred_gsi(NULL, NULL,
-                	&ctx->cred, NULL, &gss_stat);
+                	&ctx->cred, &gss_stat);
 		if ( ret ) {
 			edg_wll_gss_get_error(&gss_stat, "failed to load GSI credentials",
 				&ctx->error_msg);

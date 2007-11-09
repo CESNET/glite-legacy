@@ -35,7 +35,6 @@ main(int argc, char **argv)
 	struct sockaddr_in		a;
 	int						alen;
 	char				   *name, *msg;
-	char				   *subject = NULL;
 	int						opt,
 							port = 19999;
 	char				*cert_filename = NULL, *key_filename = NULL;
@@ -57,15 +56,14 @@ main(int argc, char **argv)
 		}
 	}
 
-	if ( edg_wll_gss_acquire_cred_gsi(cert_filename, key_filename, &ctx->cred, &subject, &gss_code) ) {
+	if ( edg_wll_gss_acquire_cred_gsi(cert_filename, key_filename, &ctx->cred, &gss_code) ) {
 		edg_wll_gss_get_error(&gss_code, "Failed to read credential", &msg);
 		fprintf(stderr, "%s\n", msg);
 		free(msg);
 		exit(1);
 	}
-	if (subject) {
-		printf("server running with certificate: %s\n", subject);
-		free(subject);
+	if (ctx->cred->name) {
+		printf("server running with certificate: %s\n", ctx->cred->name);
 	}
 
 	soap_init(&soap);

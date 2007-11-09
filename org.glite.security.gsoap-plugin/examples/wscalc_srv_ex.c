@@ -48,7 +48,7 @@ main(int argc, char **argv)
 
 	if ( cert || key ) {
 		if ( glite_gsplugin_init_context(&ctx) ) { perror("init context"); exit(1); }
-		if (edg_wll_gss_acquire_cred_gsi(cert, key, &cred, NULL, NULL) != 0) {
+		if (edg_wll_gss_acquire_cred_gsi(cert, key, &cred, NULL) != 0) {
 		   fprintf (stderr, "Failed to set credentials\n");
 		   exit(1);
 		}
