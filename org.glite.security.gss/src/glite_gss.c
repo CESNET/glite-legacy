@@ -479,14 +479,16 @@ destroy_proxy(char *proxy_file)
 
 int
 edg_wll_gss_acquire_cred_gsi(const char *cert_file, const char *key_file, edg_wll_GssCred *cred,
-      			     char **name, edg_wll_GssStatus* gss_code)
+      			     edg_wll_GssStatus* gss_code)
 {
    OM_uint32 major_status = 0, minor_status, minor_status2;
    gss_cred_id_t gss_cred = GSS_C_NO_CREDENTIAL;
    gss_buffer_desc buffer = GSS_C_EMPTY_BUFFER;
    gss_name_t gss_name = GSS_C_NO_NAME;
+   edg_wll_GssCred tmp_cred = NULL;
    OM_uint32 lifetime;
    char *proxy_file = NULL;
+   char *name = NULL;
    int ret;
 
    if ((cert_file == NULL && key_file != NULL) ||
@@ -526,7 +528,7 @@ edg_wll_gss_acquire_cred_gsi(const char *cert_file, const char *key_file, edg_wl
       }
    }
 
-   /* gss_import_cred() doesn't check validity of credential loaded, so let's
+  /* gss_import_cred() doesn't check validity of credential loaded, so let's
     * verify it now */
     major_status = gss_inquire_cred(&minor_status, gss_cred, &gss_name,
 	  			    &lifetime, NULL, NULL);
@@ -544,18 +546,25 @@ edg_wll_gss_acquire_cred_gsi(const char *cert_file, const char *key_file, edg_wl
        goto end;
     }
 
-    if (name) {
-       major_status = gss_display_name(&minor_status, gss_name, &buffer, NULL);
-       if (GSS_ERROR(major_status)) {
-	  ret = EDG_WLL_GSS_ERROR_GSS;
-	  goto end;
-       }
-       *name = buffer.value;
-       memset(&buffer, 0, sizeof(buffer));
-    }
+   major_status = gss_display_name(&minor_status, gss_name, &buffer, NULL);
+   if (GSS_ERROR(major_status)) {
+      ret = EDG_WLL_GSS_ERROR_GSS;
+      goto end;
+   }
+   name = buffer.value;
+   memset(&buffer, 0, sizeof(buffer));
     
-   *cred = gss_cred;
+   tmp_cred = calloc(1, sizeof(*tmp_cred));
+   if (tmp_cred == NULL) {
+      ret = EDG_WLL_GSS_ERROR_ERRNO;
+      goto end;
+   }
+
+   tmp_cred->gss_cred = gss_cred;
    gss_cred = GSS_C_NO_CREDENTIAL;
+   tmp_cred->lifetime = lifetime;
+   tmp_cred->name = name;
+
    ret = 0;
 
 end:
@@ -657,7 +666,7 @@ edg_wll_gss_connect(edg_wll_GssCred cred, char const *hostname, int port,
    /* XXX prepsat na do {} while (maj_stat == CONT) a osetrit chyby*/
    while (!context_established) {
       /* XXX verify ret_flags match what was requested */
-      maj_stat = gss_init_sec_context(&min_stat, cred, &context,
+      maj_stat = gss_init_sec_context(&min_stat, cred->gss_cred, &context,
 				      GSS_C_NO_NAME, GSS_C_NO_OID,
 				      req_flags | GSS_C_MUTUAL_FLAG,
 				      0, GSS_C_NO_CHANNEL_BINDINGS,
@@ -784,7 +793,7 @@ edg_wll_gss_accept(edg_wll_GssCred cred, int sock, struct timeval *timeout,
 	 goto end;
 
       maj_stat = gss_accept_sec_context(&min_stat, &context,
-	    			        cred, &input_token,
+	    			        cred->gss_cred, &input_token,
 					GSS_C_NO_CHANNEL_BINDINGS,
 					&client_name, NULL, &output_token,
 					&ret_flags, NULL, NULL);
@@ -1127,14 +1136,27 @@ edg_wll_gss_release_cred(edg_wll_GssCred cred, edg_wll_GssStatus* gss_code)
    OM_uint32 maj_stat, min_stat;
    int ret = 0;
 
-   maj_stat = gss_release_cred(&min_stat, cred); 
-   if (GSS_ERROR(maj_stat)) {
-      ret = EDG_WLL_GSS_ERROR_GSS;
-      if (gss_code) {
-         gss_code->major_status = maj_stat;
-         gss_code->minor_status = min_stat;
+   if (gss_code)
+      gss_code->major_status = gss_code->minor_status = 0;
+
+   if (cred == NULL)
+      return ret;
+
+   if (cred->gss_cred) {
+      maj_stat = gss_release_cred(&min_stat, cred->gss_cred); 
+      if (GSS_ERROR(maj_stat)) {
+         ret = EDG_WLL_GSS_ERROR_GSS;
+         if (gss_code) {
+            gss_code->major_status = maj_stat;
+            gss_code->minor_status = min_stat;
+         }
       }
    }
+
+   if (cred->name)
+      free(cred->name);
+
+   free(cred);
 
    return ret;
 }

@@ -25,9 +25,7 @@ enum {
   EDG_WLL_GSS_FLAG_ANON = 64,
 };
 
-typedef void * edg_wll_GssName;
 typedef void * edg_wll_GssCtx;
-typedef void * edg_wll_GssCred;
 
 typedef struct _edg_wll_GssConnection {
   edg_wll_GssCtx context;
@@ -52,6 +50,13 @@ typedef struct _edg_wll_GssPrincipal_data {
 } edg_wll_GssPrincipal_data;
 typedef struct _edg_wll_GssPrincipal_data *edg_wll_GssPrincipal;
 
+typedef struct _edg_wll_GssCred_data {
+   void *gss_cred;
+   time_t lifetime;
+   char *name;
+} _edg_wll_GssCred_data;
+typedef struct _edg_wll_GssCred_data *edg_wll_GssCred;
+
 int
 edg_wll_gss_initialize(void);
 
@@ -59,7 +64,6 @@ int
 edg_wll_gss_acquire_cred_gsi(const char *cert_file,
 		             const char *key_file,
 		             edg_wll_GssCred *cred,
-		             char **name,
 			     edg_wll_GssStatus* gss_code);
 
 int
