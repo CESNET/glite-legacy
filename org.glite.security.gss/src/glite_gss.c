@@ -485,7 +485,6 @@ edg_wll_gss_acquire_cred_gsi(const char *cert_file, const char *key_file, edg_wl
    gss_cred_id_t gss_cred = GSS_C_NO_CREDENTIAL;
    gss_buffer_desc buffer = GSS_C_EMPTY_BUFFER;
    gss_name_t gss_name = GSS_C_NO_NAME;
-   edg_wll_GssCred tmp_cred = NULL;
    OM_uint32 lifetime;
    char *proxy_file = NULL;
    char *name = NULL;
@@ -554,16 +553,17 @@ edg_wll_gss_acquire_cred_gsi(const char *cert_file, const char *key_file, edg_wl
    name = buffer.value;
    memset(&buffer, 0, sizeof(buffer));
     
-   tmp_cred = calloc(1, sizeof(*tmp_cred));
-   if (tmp_cred == NULL) {
+   *cred = calloc(1, sizeof(**cred));
+   if (*cred == NULL) {
       ret = EDG_WLL_GSS_ERROR_ERRNO;
+      free(name);
       goto end;
    }
 
-   tmp_cred->gss_cred = gss_cred;
+   (*cred)->gss_cred = gss_cred;
    gss_cred = GSS_C_NO_CREDENTIAL;
-   tmp_cred->lifetime = lifetime;
-   tmp_cred->name = name;
+   (*cred)->lifetime = lifetime;
+   (*cred)->name = name;
 
    ret = 0;
 
@@ -1131,7 +1131,7 @@ edg_wll_gss_initialize(void)
 }
 
 int
-edg_wll_gss_release_cred(edg_wll_GssCred cred, edg_wll_GssStatus* gss_code)
+edg_wll_gss_release_cred(edg_wll_GssCred *cred, edg_wll_GssStatus* gss_code)
 {
    OM_uint32 maj_stat, min_stat;
    int ret = 0;
@@ -1139,11 +1139,11 @@ edg_wll_gss_release_cred(edg_wll_GssCred cred, edg_wll_GssStatus* gss_code)
    if (gss_code)
       gss_code->major_status = gss_code->minor_status = 0;
 
-   if (cred == NULL)
+   if (cred == NULL || *cred == NULL)
       return ret;
 
-   if (cred->gss_cred) {
-      maj_stat = gss_release_cred(&min_stat, cred->gss_cred); 
+   if ((*cred)->gss_cred) {
+      maj_stat = gss_release_cred(&min_stat, (gss_cred_id_t*)&(*cred)->gss_cred); 
       if (GSS_ERROR(maj_stat)) {
          ret = EDG_WLL_GSS_ERROR_GSS;
          if (gss_code) {
@@ -1153,10 +1153,11 @@ edg_wll_gss_release_cred(edg_wll_GssCred cred, edg_wll_GssStatus* gss_code)
       }
    }
 
-   if (cred->name)
-      free(cred->name);
+   if ((*cred)->name)
+      free((*cred)->name);
 
-   free(cred);
+   free(*cred);
+   *cred = NULL;
 
    return ret;
 }
