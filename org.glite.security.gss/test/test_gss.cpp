@@ -34,7 +34,6 @@ public:
 
 private:
 	edg_wll_GssCred	my_cred;
-	char *		my_subject;
 	int		sock, port;
 	struct timeval	timeout;
 	
@@ -79,7 +78,7 @@ void GSSTest::setUp(void) {
 	key_file = cred_file = getenv("X509_USER_PROXY");
 	CPPUNIT_ASSERT_MESSAGE("credential file", cred_file);
 	
-	if (edg_wll_gss_acquire_cred_gsi(cred_file, key_file, &my_cred, &my_subject, &stat))
+	if (edg_wll_gss_acquire_cred_gsi(cred_file, key_file, &my_cred, &stat))
 		CPPUNIT_ASSERT_MESSAGE("gss_acquire_cred", 0);
 	
         sock = socket(PF_INET,SOCK_STREAM,0);
