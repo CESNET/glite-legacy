@@ -4,7 +4,7 @@ Summary: glite-yaim-lb
 Name: glite-yaim-lb
 Version: 4.0.0
 Vendor: EGEE
-Release:  4
+Release:  5
 License: EGEE
 Group: EGEE
 Source: %{name}.src.tgz
@@ -27,7 +27,6 @@ make install prefix=%{buildroot}%{prefix}
 %files
 %defattr(0644,root,root)
 %{prefix}/yaim/functions/config_*
-%{prefix}/yaim/functions/local/config_*
 %{prefix}/yaim/node-info.d/glite-*
 %doc LICENSE
 
