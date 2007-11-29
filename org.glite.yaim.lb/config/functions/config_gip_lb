@@ -23,7 +23,7 @@ GlueServiceType: ${SERVICE_TYPE}
 GlueServiceVersion: ${SERVICE_VERSION}
 GlueServiceEndpoint: ${SERVICE_ENDPOINT}
 GlueServiceURI: unset
-GlueServiceAccessPointURL: https://${SERVICE_HOST}:${SERVICE_PORT}/lb
+GlueServiceAccessPointURL: ${SERVICE_ENDPOINT}
 GlueServiceStatus: OK
 GlueServiceStatusInfo: No Problems
 GlueServiceWSDL: unset
