@@ -2,9 +2,9 @@
 %define _topdir %{topdir} 
 Summary: glite-yaim-lb
 Name: glite-yaim-lb
-Version: 4.0.0
+Version: 4.0.1
 Vendor: EGEE
-Release:  5
+Release:  1
 License: EGEE
 Group: EGEE
 Source: %{name}.src.tgz
