@@ -15,8 +15,10 @@ install:
 	@mkdir -p $(prefix)/yaim/functions/
 	@mkdir -p $(prefix)/yaim/functions/local
 	@mkdir -p $(prefix)/yaim/node-info.d
+	@mkdir -p $(prefix)/yaim/defaults
 	@install -m 0644 config/functions/config* $(prefix)/yaim/functions
 	@install -m 0644 config/node-info.d/glite* $(prefix)/yaim/node-info.d
+	@install -m 0644 config/defaults/glite* $(prefix)/yaim/defaults
 
 clean::
 	rm -f *~ test/*~ etc/*~ doc/*~ src/*~  
