@@ -40,10 +40,10 @@ function config_glite_lb() {
     fi
   fi
 
-  /sbin/chkconfig mysqld on
+  /sbin/chkconfig mysql on
   ps ax | grep -v grep |grep mysqld_safe > /dev/null 2>&1
   if [ ! $? = 0 ] ; then
-    /etc/init.d/mysqld start
+    /etc/init.d/mysql start
     sleep 1
   fi 
 
