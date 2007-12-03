@@ -129,7 +129,13 @@ EOF
   touch ${GLITE_LOCATION}/etc/LB-super-users
 
   . /opt/glite/etc/profile.d/grid-env.sh
-  ${GLITE_LOCATION}/etc/init.d/glite-lb-bkserverd restart
+  ${GLITE_LOCATION}/etc/init.d/glite-lb-bkserverd stop
+  #Temporary workaround to kill glite-lb-notif-interlogd
+  ps ax | grep -v grep | grep glite-lb-notif-interlogd > /dev/null
+  if [ $? = 0 ]; then
+    killall -9 /opt/glite/bin/glite-lb-notif-interlogd
+  fi  
+  ${GLITE_LOCATION}/etc/init.d/glite-lb-bkserverd start
 
   if [ ! $? = 0 ] ; then
     yaimlog ABORT "Service glite-lb-bkserverd failed to start!"
