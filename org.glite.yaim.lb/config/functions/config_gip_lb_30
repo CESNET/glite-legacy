@@ -37,8 +37,8 @@ EOF
 	  echo "GlueServiceOwner: $VO" >> $conffile
 	done
     
-	$INSTALL_ROOT/glite/sbin/glite-info-static-create -c $conffile -t \
-	$INSTALL_ROOT/glite/etc/GlueService.template > \
+	$INSTALL_ROOT/lcg/sbin/lcg-info-static-create -c $conffile -t \
+	$INSTALL_ROOT/lcg/etc/GlueService.template > \
 	$INSTALL_ROOT/glite/etc/gip/ldif/service-${SERVICE_TYPE}.ldif
 
 }

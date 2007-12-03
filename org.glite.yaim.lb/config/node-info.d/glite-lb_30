@@ -6,7 +6,7 @@ config_edgusers
 config_java
 config_rgma_client
 config_gip_only
-config_gip_lb
+config_gip_lb_30
 config_globus_clients
 config_glite_lb_30
 config_glite_locallogger
