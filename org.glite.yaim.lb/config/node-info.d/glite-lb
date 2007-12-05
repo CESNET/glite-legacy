@@ -10,5 +10,6 @@ config_gip_lb
 config_globus_clients
 config_glite_lb
 config_glite_locallogger
+config_jobmon
 config_bdii_only
 config_glite_initd"
