@@ -1,4 +1,4 @@
-function config_gip_lb_check () {
+function config_gip_lb_30_check () {
 
 	requires $1 SITE_NAME
 	retcode=$?
@@ -6,7 +6,7 @@ function config_gip_lb_check () {
 
 }
 
-function config_gip_lb () {
+function config_gip_lb_30 () {
 
 	SERVICE_HOST=`hostname -f`
 
