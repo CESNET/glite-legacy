@@ -50,6 +50,10 @@ function config_jobmon(){
   mkdir -p `dirname ${GLITE_WMS_LCGMON_FILE}` 
   chown $GLITE_USER:root `dirname ${GLITE_WMS_LCGMON_FILE}`
 
+  if [ ! -d /opt/lcg/etc ]; then
+    mkdir -p /opt/lcg/etc
+  fi
+
   cat > /opt/lcg/etc/lcg-mon-job-status.conf <<EOF
 RGMA_HOME = /opt/glite
 LOG_FILE = $GLITE_WMS_LCGMON_FILE
