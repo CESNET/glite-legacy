@@ -27,6 +27,7 @@ function config_glite_lb() {
   HOSTNAME=`hostname -f`
 
   chmod og+rx /var/lib/mysql/ 
+  chown mysql:mysql /var/run/mysqld/
 
   # add option  --max_allowed_packet=17M
   if [ ! -f /etc/my.cnf ]; then
