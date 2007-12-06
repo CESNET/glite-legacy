@@ -63,10 +63,6 @@ log_level = ERROR
 debug = 0
 EOF
 
-  if [ -f /opt/lcg/etc/lcg-mon-job-status.conf ]; then
-    
-  fi
-
   if [ -f /opt/lcg/etc/init.d/lcg-mon-logfile-daemon ]; then
     ln -sf /opt/lcg/etc/init.d/lcg-mon-logfile-daemon /etc/rc.d/init.d/lcg-mon-job-status
     /sbin/chkconfig lcg-mon-job-status on
