@@ -4,7 +4,7 @@ Summary: glite-yaim-lb
 Name: glite-yaim-lb
 Version: 4.0.1
 Vendor: EGEE
-Release:  1
+Release:  2
 License: EGEE
 Group: EGEE
 Source: %{name}.src.tgz
