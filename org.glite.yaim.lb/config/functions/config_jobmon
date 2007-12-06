@@ -39,7 +39,7 @@ function config_jobmon_check(){
 
 function config_jobmon_setenv(){
 
-  yaimgridenv_set GLITE_LB_BKSERVERD_ADDOPTS "$GLITE_LB_BKSERVERD_ADDOPTS --rgmaexport"
+  yaimgridenv_set GLITE_LB_BKSERVERD_ADDOPTS "--rgmaexport"
   yaimgridenv_set GLITE_WMS_LCGMON_FILE "${GLITE_WMS_LCGMON_FILE}"
 
 }
