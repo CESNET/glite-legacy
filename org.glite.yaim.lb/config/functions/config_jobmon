@@ -29,7 +29,43 @@
 #
 ##############################################################################
 
+function config_jobmon_check(){
+
+  requires $1 GLITE_WMS_LCGMON_FILE GLITE_USER
+  retcode=$?
+  return ${retcode}
+
+}
+
+function config_jobmon_setenv(){
+
+  yaimgridenv_set GLITE_LB_BKSERVERD_ADDOPTS "$GLITE_LB_BKSERVERD_ADDOPTS --rgmaexport"
+  yaimgridenv_set GLITE_WMS_LCGMON_FILE "${GLITE_WMS_LCGMON_FILE}"
+
+}
+  
+
 function config_jobmon(){
+
+  mkdir -p `dirname ${GLITE_WMS_LCGMON_FILE}` 
+  chown $GLITE_USER:root `dirname ${GLITE_WMS_LCGMON_FILE}`
+
+  cat > /opt/lcg/etc/lcg-mon-job-status.conf <<EOF
+RGMA_HOME = /opt/glite
+LOG_FILE = $GLITE_WMS_LCGMON_FILE
+PARSER = jobstatus
+TABLE = JobStatusRaw
+
+# Possible values: CRITICAL,ERROR,WARNING,INFO,DEBUG,NOTSET
+log_level = ERROR
+
+# Possible values: 0, 1
+debug = 0
+EOF
+
+  if [ -f /opt/lcg/etc/lcg-mon-job-status.conf ]; then
+    
+  fi
 
   if [ -f /opt/lcg/etc/init.d/lcg-mon-logfile-daemon ]; then
     ln -sf /opt/lcg/etc/init.d/lcg-mon-logfile-daemon /etc/rc.d/init.d/lcg-mon-job-status
