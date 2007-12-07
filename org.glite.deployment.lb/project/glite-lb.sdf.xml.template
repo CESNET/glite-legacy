@@ -23,7 +23,13 @@
 				<component name="glite-yaim-lb"/>
 
 				<component name="glite-version"/>
-
+				
+				<component name="lcg-mon-job-status"/>
+				
+				<component name="lcg-mon-logfile-common"/>
+				
+				<component name="lcg-service-proxy"/>
+												
 				<component name="glite-LB"
 					version="@module.version@"
 					age="@module.age@"
