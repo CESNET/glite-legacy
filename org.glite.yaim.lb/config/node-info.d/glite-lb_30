@@ -3,7 +3,7 @@ config_add_pool_env
 config_crl
 config_host_certs
 config_edgusers
-config_java
+config_java_30
 config_rgma_client
 config_gip_only
 config_gip_lb_30
