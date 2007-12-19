@@ -307,6 +307,8 @@ int main(int argc, char *argv[])
 	memset(ctx, 0, sizeof(*ctx));
 	*/
 	wait_for_open(ctx, dbstring);
+
+	ctx->use_transactions = transactions;
 	if (edg_wll_DBCheckVersion(ctx, dbstring)) {
 		char	*et,*ed;
 		edg_wll_Error(ctx,&et,&ed);
