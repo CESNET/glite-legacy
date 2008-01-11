@@ -166,7 +166,7 @@ void GSSTest::errorTest()
 	char *			msg = NULL;
 
 
-	err = edg_wll_gss_connect(my_cred, "xxx.porno.net", port, &timeout, &conn, &stat);
+	err = edg_wll_gss_connect(my_cred, "xxx.example.net", port, &timeout, &conn, &stat);
 	if (err) edg_wll_gss_get_error(&stat, "gss_connect()", &msg);
 	CPPUNIT_ASSERT_MESSAGE("edg_wll_gss_get_error()", msg);
 }

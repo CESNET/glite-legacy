@@ -8,6 +8,7 @@ extern "C" {
 #endif
 
 #include <stdlib.h>
+#include <openssl/err.h>
 
 enum {
   EDG_WLL_GSS_OK		=  0,  /* no GSS errors */
