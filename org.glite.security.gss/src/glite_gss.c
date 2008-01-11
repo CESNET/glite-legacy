@@ -17,6 +17,7 @@
 
 #include <globus_common.h>
 #include <gssapi.h>
+#include <openssl/err.h>
 
 #include "glite_gss.h"
 
