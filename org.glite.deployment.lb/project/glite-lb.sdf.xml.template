@@ -13,6 +13,7 @@
 				<component name="glite-lb-client"/>
 				<component name="glite-info-generic"/>
 				<component name="bdii"/>
+				<component name="lcg-schema"/>
 				<component name="lcg-info-templates"/>
 				<component name="glue-schema"/>
 				
