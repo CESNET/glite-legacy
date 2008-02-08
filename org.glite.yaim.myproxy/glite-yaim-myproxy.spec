@@ -1,6 +1,6 @@
 %define topdir %(pwd)/rpmbuild
 %define _topdir %{topdir} 
-Summary: glite-yaim-myproxy module configures 3.0 myproxy server. 
+Summary: This is a pilot rpm to test the new dynamic info provider for myproxy. Please, do not use it in production! 
 Name: glite-yaim-myproxy
 Version: x
 Vendor: EGEE
@@ -15,7 +15,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-build
 Packager: EGEE
 
 %description
-This package contains the yaim functions necessary to configure 3.0 myproxy server.
+This is a pilot rpm to test the new dynamic info provider for myproxy. Please, do not use it in production!
 
 %prep
 
