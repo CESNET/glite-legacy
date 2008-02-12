@@ -1,6 +1,6 @@
 %define topdir %(pwd)/rpmbuild
 %define _topdir %{topdir} 
-Summary: glite-yaim-myproxy module configures 3.0 myproxy server. 
+Summary: glite-yaim-myproxy module configures myproxy server. 
 Name: glite-yaim-myproxy
 Version: x
 Vendor: EGEE
@@ -15,7 +15,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-build
 Packager: EGEE
 
 %description
-This package contains the yaim functions necessary to configure 3.0 myproxy server.
+This package contains the yaim functions necessary to configure myproxy server.
 
 %prep
 
@@ -27,7 +27,9 @@ make install prefix=%{buildroot}%{prefix}
 %files
 %defattr(-,root,root)
 %{prefix}/yaim/functions/config_*
-%{prefix}/yaim/node-info.d/glite-*
+%config(noreplace) %{prefix}/yaim/node-info.d/glite-*
+%{prefix}/yaim/examples/siteinfo/services/glite-*
+/usr/share/man/man1/yaim-myproxy.1
 %doc LICENSE
 
 
