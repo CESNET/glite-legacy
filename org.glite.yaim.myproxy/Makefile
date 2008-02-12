@@ -1,10 +1,10 @@
 prefix=/opt/glite
 package=glite-yaim-myproxy
-name="$Name$ "
+name=$Name$
 tag:=$(shell echo $(name) | sed 's/^[^:]*: //' )
 version:=$(shell echo "$(tag)" | sed 's/^.*R_//' | sed 's/_/\./g')
 release:=$(shell echo "$(version)" | sed 's/.*\.//')
-version:=$(shell echo "$(version)" | sed 's/\.[0-9][0-9]* //')
+version:=$(shell echo "$(version)" | sed 's/\(.*\)\.[0-9]*/\1/')
 
 .PHONY: configure install clean rpm
 
