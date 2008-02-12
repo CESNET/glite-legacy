@@ -30,7 +30,7 @@
 ##############################################################################
 
 config_info_service_px_check () {
-	requires $1 GRID_TRUSTED_BROKERS SITE_NAME INSTALL_ROOT
+	requires $1 SITE_NAME INSTALL_ROOT
 }
 
 config_info_service_px_setenv () {
