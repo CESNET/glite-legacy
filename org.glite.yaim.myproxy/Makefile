@@ -14,9 +14,16 @@ install:
 	@echo installing ...
 	@mkdir -p $(prefix)/yaim/functions
 	@mkdir -p $(prefix)/yaim/node-info.d
+	@mkdir -p $(prefix)/yaim/examples
+	@mkdir -p $(prefix)/yaim/examples/siteinfo
+	@mkdir -p $(prefix)/yaim/examples/siteinfo/services
+	@mkdir -p ${RPM_BUILD_ROOT}/usr/share/man/man1
+
 
 	@install -m 0644 config/functions/config* $(prefix)/yaim/functions
 	@install -m 0644 config/node-info.d/glite* $(prefix)/yaim/node-info.d
+	@install -m 0644 config/services/glite* $(prefix)/yaim/examples/siteinfo/services/.
+	@install -m 0644 config/man/yaim-myproxy.1 ${RPM_BUILD_ROOT}/usr/share/man/man1/
 
 
 clean::
