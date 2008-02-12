@@ -38,6 +38,7 @@ config_gip_px
 config_globus_clients
 config_proxy_server
 config_bdii_only
+config_info_service_px
 "
 
 
