@@ -55,19 +55,11 @@ if [ ! -f ${INFO_SERVICE_SCRIPT}/glite-info-service ]; then
 fi
 
 rm -rf ${INFO_SERVICE_CONFIG}/glite-info-service-${SERVICE}.conf
+cp ${INFO_SERVICE_CONFIG}/glite-info-service-${SERVICE}.conf.template ${INFO_SERVICE_CONFIG}/glite-info-service-${SERVICE}.conf
 
-grid_trusted_brokers=""
-while read x; do
-  grid_trusted_brokers="${x}\\\n${grid_trusted_brokers}"
-done < <(split_quoted_variable $GRID_TRUSTED_BROKERS)
-
-cat ${INFO_SERVICE_CONFIG}/glite-info-service-${SERVICE}.conf.template | sed \
-	-e "s#^get_acbr =.*#get_acbr = echo -e \"${grid_trusted_brokers}\"#" \
-> ${INFO_SERVICE_CONFIG}/glite-info-service-${SERVICE}.conf
-
-grep -q glite-info-service-${SERVICE}.conf ${INFO_PROVIDER_PATH}/glite-info-provider-service-wrapper >> /dev/null
-res=$?
 if [ -f ${INFO_PROVIDER_PATH}/glite-info-provider-service-wrapper ]; then 
+  grep -q glite-info-service-${SERVICE}.conf ${INFO_PROVIDER_PATH}/glite-info-provider-service-wrapper >> /dev/null
+  res=$?
   if [ $res -eq 1 ]; then  
     cat << EOF > ${INFO_PROVIDER_PATH}/glite-info-provider-service-wrapper
 #!/bin/sh
