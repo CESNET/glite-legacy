@@ -35,6 +35,7 @@ config_host_certs
 config_edgusers
 config_gip_only
 config_gip_px
+config_gip_service_release
 config_globus_clients
 config_proxy_server
 config_bdii_only
