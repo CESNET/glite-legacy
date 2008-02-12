@@ -44,8 +44,6 @@ INFO_SERVICE_CONFIG=${INFO_SERVICE_CONFIG:-${INSTALL_ROOT}/glite/etc}
 INFO_PROVIDER_PATH=${INFO_PROVIDER_PATH:-${INSTALL_ROOT}/glite/etc/gip/provider}
 SERVICE=myproxy
 
-rm -rf ${INFO_SERVICE_CONFIG_FILE}
-
 if [ ! -f ${INFO_SERVICE_CONFIG}/glite-info-service-${SERVICE}.conf.template ]; then
   yaimlog ERROR "The template file for glite-info-service-${SERVICE}.conf.template was not found in ${INFO_SERVICE_CONFIG}."
   exit 1
@@ -56,7 +54,7 @@ if [ ! -f ${INFO_SERVICE_SCRIPT}/glite-info-service ]; then
   exit 1
 fi
 
-rm -rf ${INFO_SERVICE_CONFIG_FILE}
+rm -rf ${INFO_SERVICE_CONFIG}/glite-info-service-${SERVICE}.conf
 
 grid_trusted_brokers=""
 while read x; do
