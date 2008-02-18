@@ -5,3 +5,6 @@
 1.5.2-1 (lb-1.7.2-1)
 - really detect transaction support 
 - follow fixes in server-1.8.2-1
+
+1.5.2-2 (lb-1.7.4-1)
+- foloow fix in server-1.8.3-1
