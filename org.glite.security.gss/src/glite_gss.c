@@ -18,6 +18,11 @@
 #include <globus_common.h>
 #include <gssapi.h>
 #include <openssl/err.h>
+#include <openssl/ssl.h>
+#include <openssl/stack.h>
+#include <openssl/x509.h>
+#include <openssl/pem.h>
+#include <openssl/bio.h>
 
 #include "glite_gss.h"
 
@@ -1209,6 +1214,189 @@ end:
       gss_release_buffer(&min_stat, &token);
    if (client_name != GSS_C_NO_NAME)
       gss_release_name(&min_stat, &client_name);
+
+   return ret;
+}
+
+/* Beware, this call manipulates with environment variables and is not
+   thread-safe */
+static int
+get_peer_cred(edg_wll_GssConnection *gss, const char *my_cert_file,
+              const char *my_key_file, STACK_OF(X509) **chain,
+              edg_wll_GssStatus* gss_code)
+{
+   OM_uint32 maj_stat, min_stat;
+   gss_buffer_desc buffer = GSS_C_EMPTY_BUFFER;
+   BIO *bio = NULL;
+   SSL_SESSION *session = NULL;
+   unsigned char int_buffer[4];
+   long length;
+   int ret, index;
+   STACK_OF(X509) *cert_chain = NULL;
+   X509 *p_cert;
+   char *orig_cert = NULL, *orig_key = NULL;
+
+   maj_stat = gss_export_sec_context(&min_stat, (gss_ctx_id_t *) &gss->context,
+				     &buffer);
+   if (GSS_ERROR(maj_stat)) {
+      if (gss_code) {
+         gss_code->major_status = maj_stat;
+         gss_code->minor_status = min_stat;
+      }
+      return EDG_WLL_GSS_ERROR_GSS;
+   }
+
+   /* The GSSAPI specs requires gss_export_sec_context() to destroy the
+    * context after exporting. So we have to resurrect the context here by
+    * importing from just generated buffer. gss_import_sec_context() must be
+    * able to read valid credential before it loads the exported context
+    * so we set the environment temporarily to point to the ones used by
+    * the server.
+    * */
+
+   orig_cert = getenv("X509_USER_CERT");
+   orig_key = getenv("X509_USER_KEY");
+
+   if (my_cert_file)
+      setenv("X509_USER_CERT", my_cert_file, 1);
+   if (my_key_file)
+      setenv("X509_USER_KEY", my_key_file, 1);
+   
+   maj_stat = gss_import_sec_context(&min_stat, &buffer,
+				     (gss_ctx_id_t *)&gss->context);
+
+   if (orig_cert)
+       setenv("X509_USER_CERT", orig_cert, 1);
+   else
+       unsetenv("X509_USER_CERT");
+
+   if (orig_key) 
+       setenv("X509_USER_KEY", orig_key, 1);
+   else 
+       unsetenv("X509_USER_KEY");
+
+   if (GSS_ERROR(maj_stat)) {
+      if (gss_code) {
+         gss_code->major_status = maj_stat;
+         gss_code->minor_status = min_stat;
+      }
+      ret = EDG_WLL_GSS_ERROR_GSS;
+      goto end;
+   }
+
+   bio = BIO_new(BIO_s_mem());
+   if (bio == NULL) {
+      ret = ENOMEM;
+      goto end;
+   }
+   
+   /* Store exported context to memory, skipping the version number and and cred_usage fields */
+   BIO_write(bio, buffer.value + 8 , buffer.length - 8);
+
+   /* decode the session data in order to skip at the start of the cert chain */
+   session = d2i_SSL_SESSION_bio(bio, NULL);
+   if (session == NULL) {
+      ret = EINVAL;
+      goto end;
+   }
+   SSL_SESSION_free(session);
+
+   cert_chain = sk_X509_new_null();
+
+   BIO_read(bio, (char *) int_buffer, 4);
+   length  = (((size_t) int_buffer[0]) << 24) & 0xffff;
+   length |= (((size_t) int_buffer[1]) << 16) & 0xffff;
+   length |= (((size_t) int_buffer[2]) <<  8) & 0xffff;
+   length |= (((size_t) int_buffer[3])      ) & 0xffff;
+
+   if (length == 0) {
+      ret = EINVAL;
+      goto end;
+   }
+
+   for(index = 0; index < length; index++) {
+      p_cert = d2i_X509_bio(bio, NULL);
+      if (p_cert == NULL) {
+	 ret = EINVAL;
+	 sk_X509_pop_free(cert_chain, X509_free);
+	 goto end;
+      }
+
+      sk_X509_push(cert_chain, p_cert);
+   }
+
+   *chain = cert_chain;
+   ret = 0;
+
+end:
+   gss_release_buffer(&min_stat, &buffer);
+
+   return ret;
+}
+
+int
+edg_wll_gss_get_client_pem(edg_wll_GssConnection *connection,
+                           const char *my_cert_file, const char *my_key_file,
+                           char **pem_string)
+{
+   char *tmp = NULL;
+   STACK_OF(X509) *chain = NULL;
+   BIO *bio = NULL;
+   int ret, i;
+   size_t total_len, l;
+
+   ret = get_peer_cred(connection, my_cert_file, my_key_file, &chain, NULL);
+   if (ret)
+      return ret;
+
+   bio = BIO_new(BIO_s_mem());
+   if (bio == NULL) {
+      ret = ENOMEM;
+      goto end;
+   }
+
+   for (i = 0; i < sk_X509_num(chain); i++) {
+      ret = PEM_write_bio_X509(bio, sk_X509_value(chain, i));
+      if (ret <= 0) {
+	 ret = EINVAL;
+	 goto end;
+      }
+   }
+
+   total_len = BIO_pending(bio);
+   if (total_len <= 0) {
+      ret = EINVAL;
+      goto end;
+   }
+
+   tmp = malloc(total_len + 1);
+   if (tmp == NULL) {
+      ret = ENOMEM;
+      goto end;
+   }
+
+   l = 0;
+   while (l < total_len) {
+      ret = BIO_read(bio, tmp+l, total_len-l);
+      if (ret <= 0) {
+	 ret = EINVAL;
+	 goto end;
+      }
+      l += ret;
+   }
+
+   tmp[total_len] = '\0';
+   *pem_string = tmp;
+   tmp = NULL;
+
+   ret = 0;
+
+end:
+   sk_X509_pop_free(chain, X509_free);
+   if (bio)
+      BIO_free(bio);
+   if (tmp)
+      free(tmp);
 
    return ret;
 }

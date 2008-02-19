@@ -136,6 +136,11 @@ edg_wll_gss_get_client_conn(edg_wll_GssConnection *connection,
 	  	            edg_wll_GssPrincipal *principal,
 			    edg_wll_GssStatus* gss_code);
 
+int
+edg_wll_gss_get_client_pem(edg_wll_GssConnection *connection,
+			   const char *my_cert_file, const char *my_key_file,
+                           char **pem_string);
+
 void
 edg_wll_gss_free_princ(edg_wll_GssPrincipal principal);
 
