@@ -18,7 +18,7 @@ CC=gcc
 -include Makefile.inc
 -include ../Makefile.inc
 
-offset=1
+offset=0
 version_info:=-version-info ${shell \
 	perl -e '$$,=":"; @F=split "\\.","${version}"; print $$F[0]+$$F[1]+${offset},$$F[2],$$F[1]' }
 
