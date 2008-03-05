@@ -5,3 +5,6 @@
 3.1.1-1 (lb-1.7.1-1)
 - follow changes in lb.build (1.6.0-1 -> 1.6.1-1)
 - fix ATTR_MAX computation
+
+3.1.1-2 (lb-1.7.5-1)
+- install *AttrNames.pl (to be used in lb.client)
