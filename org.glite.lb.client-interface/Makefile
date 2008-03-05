@@ -20,6 +20,8 @@ SUFFIXES = .T
 VPATH=${top_srcdir}/interface
 AT3=perl -I${top_srcdir}/project ${top_srcdir}/project/at3
 
+T_DEST=${stagedir}/share/${lbprefix}/at3
+
 STAGETO=include/${globalprefix}/${lbprefix}
 STATIC_H=consumer.h context.h dump.h load.h notification.h notifid.h purge.h \
 	Notification.h CountRef.h Job.h LoggingExceptions.h ServerConnection.h \
@@ -77,6 +79,7 @@ install: generate doc
 endif
 	-mkdir -p ${PREFIX}/${STAGETO}
 	-mkdir -p ${PREFIX}/share/doc/${package}-${version}
+	-mkdir -p ${T_DEST}
 	install -m 644 ${GEN_H} ${PREFIX}/${STAGETO}
 	install -m 644 ${top_srcdir}/LICENSE ${PREFIX}/share/doc/${package}-${version}
 	cd ${top_srcdir}/interface && install -m 644 ${STATIC_H} ${PREFIX}/${STAGETO}
@@ -87,6 +90,8 @@ endif
 	if [ x${DOSTAGE} = xyes ]; then \
 		cd ${top_srcdir}/interface && install -m 644 ${FAKE_H} ${PREFIX}/${STAGETO} ; \
 	fi
+	install -m 644 ${top_srcdir}/src/EventAttrNames.pl ${T_DEST}
+	install -m 644 ${top_srcdir}/src/StatusAttrNames.pl ${T_DEST}
 
 clean:
 	rm -rf *.h *.dox C/ CPP/
