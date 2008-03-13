@@ -74,7 +74,7 @@ daily
 rotate 9
 missingok
 }
-EOF 
+EOF
 
   if [ -f /opt/lcg/etc/init.d/lcg-mon-logfile-daemon ]; then
     ln -sf /opt/lcg/etc/init.d/lcg-mon-logfile-daemon /etc/rc.d/init.d/lcg-mon-job-status
