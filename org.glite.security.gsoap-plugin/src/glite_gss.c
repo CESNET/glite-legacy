@@ -643,7 +643,7 @@ edg_wll_gss_connect(gss_cred_id_t cred, char const *hostname, int port,
       /* XXX verify ret_flags match what was requested */
       maj_stat = gss_init_sec_context(&min_stat, cred, &context,
 				      GSS_C_NO_NAME, GSS_C_NO_OID,
-				      req_flags | GSS_C_MUTUAL_FLAG,
+				      req_flags | GSS_C_MUTUAL_FLAG | GSS_C_CONF_FLAG,
 				      0, GSS_C_NO_CHANNEL_BINDINGS,
 				      &input_token, NULL, &output_token,
 				      NULL, NULL);
