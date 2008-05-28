@@ -417,7 +417,7 @@ glite_gsplugin_send(struct soap *soap, const char *buf, size_t bufsz)
 	 *      i.e. ctx->connection != NULL
 	 */
 	if ( ctx->error_msg ) { free(ctx->error_msg); ctx->error_msg = NULL; }
-	if ( ctx->connection->context == NULL ) {
+	if ( ctx->connection == NULL || ctx->connection->context == NULL ) {
 		soap->errnum = ENOTCONN;
 		return SOAP_EOF;
 	}

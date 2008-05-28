@@ -15,7 +15,7 @@ gsoap_prefix=/opt/gsoap
 
 CC=gcc
 
-gsoap_versions?=2.6.2 2.7.0f 2.7.6b 2.7.9b 2.7.9d
+gsoap_versions?=2.6.2 2.7.0f 2.7.6b 2.7.9b 2.7.9d 2.7.10
 gsoap_versions:=${shell if ! echo $gsoap_versions | grep "\<${gsoap_default_version}\>" >/dev/null; then echo "${gsoap_default_version} "; else echo ne; fi} ${gsoap_versions}
 
 -include Makefile.inc
@@ -227,7 +227,7 @@ clean:
 	${COMPILE} -o $@ -c $<
 
 stdsoap2.o: stdsoap2.c
-	${COMPILEXX} ${GLOBUS_INC} -o $@ -c $<
+	${COMPILE} ${GLOBUS_INC} -o $@ -c $<
 
 %.thr.o: %.c
 	${COMPILE} -o $@ -c $<
@@ -236,4 +236,4 @@ glite_gsplugin.o glite_gsplugin.thr.o: soap_version.h
 
 soap_version.h: stdsoap2.h
 	head stdsoap2.h | \
-	perl -ne '/^stdsoap2.h\s+([0-9])\.([0-9])\.(\S+)\s.*/ && printf "#define GSOAP_VERSION %d%02d%02d\n#define GSOAP_MIN_VERSION \"$$3\"\n#ident \"soap_version.h $$1.$$2.$$3\"\n",$$1,$$2,$$3' >$@
+	perl -ne '/^\s*stdsoap2.h\s+([0-9])\.([0-9])\.(\S+)\s.*/ && printf "#define GSOAP_VERSION %d%02d%02d\n#define GSOAP_MIN_VERSION \"$$3\"\n#ident \"soap_version.h $$1.$$2.$$3\"\n",$$1,$$2,$$3' >$@
