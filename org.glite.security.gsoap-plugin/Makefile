@@ -43,15 +43,15 @@ VPATH=${top_srcdir}/src:${top_srcdir}/examples
 
 default: all
 
-#ifeq ($(GSPLUGIN_DEBUG),yes)
-#	DEBUG:=-g -O0 -Wall -DGSPLUGIN_DEBUG
-#else
-#	DEBUG:=-g -O0 -Wall
-#endif
-
 DEBUG:=-g -O0 -W -Wall -Wno-unused-parameter
-# gsoap logs: -DDEBUG
 # not for globus and gsoap: -Werror
+ifeq ($(GSPLUGIN_DEBUG),yes)
+	DEBUG:=${DEBUG} -DGSPLUGIN_DEBUG=1
+endif
+# gsoap logs: -DDEBUG
+ifeq ($(GSOAP_DEBUG),yes)
+	DEBUG:=${DEBUG} -DDEBUG=1
+endif
 
 #ifeq ($(GSPLUGIN_VERSION_CHECKING),yes)
 #	DEBUG:=${DEBUG} -DCHECK_GSOAP_VERSION

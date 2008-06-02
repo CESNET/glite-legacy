@@ -1,3 +1,8 @@
+#include <sys/select.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 #include <stdio.h>
 #include <assert.h>
 #include <signal.h>
@@ -27,6 +32,7 @@ static size_t glite_gsplugin_recv(struct soap *, char *, size_t);
 static int glite_gsplugin_send(struct soap *, const char *, size_t);
 static int glite_gsplugin_connect(struct soap *, const char *, const char *, int);
 static int glite_gsplugin_close(struct soap *);
+static int glite_gsplugin_poll(struct soap *);
 static int glite_gsplugin_accept(struct soap *, int, struct sockaddr *, int *);
 static int glite_gsplugin_posthdr(struct soap *soap, const char *key, const char *val);
 
@@ -193,11 +199,13 @@ glite_gsplugin(struct soap *soap, struct soap_plugin *p, void *arg)
 	p->fdelete		= glite_gsplugin_delete;
 	p->fcopy		= glite_gsplugin_copy;
 
-	soap->fconnect		= glite_gsplugin_connect;
+	soap->fopen		= glite_gsplugin_connect;
+	soap->fconnect		= NULL;
 	soap->fclose		= glite_gsplugin_close;
 #if GSOAP_VERSION >= 20700
 	soap->fclosesocket	= NULL;
 #endif
+	soap->fpoll		= glite_gsplugin_poll;
 	soap->faccept		= glite_gsplugin_accept;
 	soap->fsend			= glite_gsplugin_send;
 	soap->frecv			= glite_gsplugin_recv;
@@ -266,6 +274,10 @@ glite_gsplugin_connect(
 #endif
 
 	ctx = ((int_plugin_data_t *)soap_lookup_plugin(soap, plugin_id))->ctx;
+	if (ctx->connection) {
+		pdprintf(("GSLITE_GSPLUGIN: Warning: connection dropped, new to %s:%d\n", host, port));
+	}
+	printf("gsoap-plugin: connection to %s:%d will be established\n", host, port);
 
 	if ( ctx->cred == NULL ) {
 		pdprintf(("GSLITE_GSPLUGIN: loading default credentials\n"));
@@ -293,21 +305,33 @@ glite_gsplugin_connect(
 	ctx->internal_connection = 1;
 
 	soap->errnum = 0;
-	return 0;
+	return ctx->connection->sock;
 
 err:
 	pdprintf(("GSLITE_GSPLUGIN: glite_gsplugin_connect() error!\n"));
 	switch ( ret ) {
-	case EDG_WLL_GSS_ERROR_GSS: ret = SOAP_CLI_FAULT; break;
-	case EDG_WLL_GSS_ERROR_HERRNO: 
-	case EDG_WLL_GSS_ERROR_ERRNO: ret = errno; break;
-	case EDG_WLL_GSS_ERROR_EOF: ret = ECONNREFUSED; break;
-	case EDG_WLL_GSS_ERROR_TIMEOUT: ret = ETIMEDOUT; break;
-	default: break;
+	case EDG_WLL_GSS_ERROR_GSS:
+		ret = SOAP_INVALID_SOCKET;
+ 	  	soap_set_sender_error(soap, "SSL error", "SSL authentication failed in tcp_connect(): check password, key file, and ca file.", SOAP_SSL_ERROR);
+		break;
+	case EDG_WLL_GSS_ERROR_HERRNO:
+	case EDG_WLL_GSS_ERROR_ERRNO:
+		ret = errno;
+		soap_set_sender_error(soap, "connection error", strerror(ret), SOAP_CLI_FAULT);
+		break;
+	case EDG_WLL_GSS_ERROR_EOF: ret = ECONNREFUSED;
+		soap_set_sender_error(soap, "connection error", strerror(ret), SOAP_CLI_FAULT);
+		break;
+	case EDG_WLL_GSS_ERROR_TIMEOUT: ret = ETIMEDOUT;
+		soap_set_sender_error(soap, "connection error", strerror(ret), SOAP_CLI_FAULT);
+		break;
+	default:
+		soap_set_sender_error(soap, "unknown error", "", SOAP_CLI_FAULT);
+		break;
 	}
 
 	soap->errnum = ret;
-	return ret;
+	return SOAP_INVALID_SOCKET;
 }
 
 /**	It is called in soap_closesocket() 
@@ -463,6 +487,36 @@ glite_gsplugin_send(struct soap *soap, const char *buf, size_t bufsz)
 	}
 
 	return SOAP_OK;
+}
+
+
+static int
+glite_gsplugin_poll(struct soap *soap)
+{
+	glite_gsplugin_Context	ctx;
+	fd_set readfds;
+	struct timeval timeout = {tv_sec: 0, tv_usec: 0};
+	int ret;
+
+	ctx = ((int_plugin_data_t *)soap_lookup_plugin(soap, plugin_id))->ctx;
+	if (!ctx->connection || !ctx->connection->context) {
+		pdprintf(("GSLITE_GSPLUGIN: glite_gsplugin_poll, no connection\n"));
+		return SOAP_EOF;
+	}
+
+	FD_ZERO(&readfds);
+	FD_SET(ctx->connection->sock, &readfds);
+	ret = select(ctx->connection->sock + 1, &readfds, NULL, NULL, &timeout);
+	if (ret < 0) {
+		pdprintf(("GSLITE_GSPLUGIN: glite_gsplugin_poll, select(%d) failed\n", ctx->connection->sock));
+		return SOAP_TCP_ERROR;
+	} else if (ret == 0) {
+		/* has been OK but server can disconnect anytime */
+		return SOAP_OK;
+	} else {
+		pdprintf(("GSLITE_GSPLUGIN: glite_gsplugin_poll, select(%d) = %d\n", ctx->connection->sock, ret));
+		return SOAP_EOF;
+	}
 }
 
 
