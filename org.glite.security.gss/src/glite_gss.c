@@ -798,6 +798,9 @@ edg_wll_gss_accept(edg_wll_GssCred cred, int sock, struct timeval *timeout,
       if (ret)
 	 goto end;
 
+      if (client_name != GSS_C_NO_NAME)
+        gss_release_name(&min_stat2, &client_name);
+
       maj_stat = gss_accept_sec_context(&min_stat, &context,
 	    			        cred->gss_cred, &input_token,
 					GSS_C_NO_CHANNEL_BINDINGS,
