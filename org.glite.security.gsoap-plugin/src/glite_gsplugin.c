@@ -275,12 +275,24 @@ glite_gsplugin_connect(
 err:
 	pdprintf(("GSLITE_GSPLUGIN: glite_gsplugin_connect() error!\n"));
 	switch ( ret ) {
-	case EDG_WLL_GSS_ERROR_GSS: ret = SOAP_CLI_FAULT; break;
-	case EDG_WLL_GSS_ERROR_HERRNO: 
-	case EDG_WLL_GSS_ERROR_ERRNO: ret = errno; break;
-	case EDG_WLL_GSS_ERROR_EOF: ret = ECONNREFUSED; break;
-	case EDG_WLL_GSS_ERROR_TIMEOUT: ret = ETIMEDOUT; break;
-	default: break;
+	case EDG_WLL_GSS_ERROR_GSS:
+		ret = SOAP_INVALID_SOCKET;
+		soap_set_sender_error(soap, "SSL error", "SSL authentication failed in tcp_connect(): check password, key file, and ca file.", SOAP_SSL_ERROR);
+		break;
+	case EDG_WLL_GSS_ERROR_HERRNO:
+	case EDG_WLL_GSS_ERROR_ERRNO:
+		ret = errno;
+		soap_set_sender_error(soap, "connection error", strerror(ret), SOAP_CLI_FAULT);
+		break;
+	case EDG_WLL_GSS_ERROR_EOF: ret = ECONNREFUSED;
+		soap_set_sender_error(soap, "connection error", strerror(ret), SOAP_CLI_FAULT);
+		break;
+	case EDG_WLL_GSS_ERROR_TIMEOUT: ret = ETIMEDOUT;
+		soap_set_sender_error(soap, "connection error", strerror(ret), SOAP_CLI_FAULT);
+		break;
+	default:
+		soap_set_sender_error(soap, "unknown error", "", SOAP_CLI_FAULT);
+		break;
 	}
 
 	soap->errnum = ret;
@@ -324,12 +336,16 @@ glite_gsplugin_accept(struct soap *soap, int s, struct sockaddr *a, int *n)
 	ctx = ((int_plugin_data_t *)soap_lookup_plugin(soap, plugin_id))->ctx;
 	if ( (conn = accept(s, (struct sockaddr *)&a, n)) < 0 ) return conn;
 	if (   !ctx->connection
-		&& !(ctx->connection = malloc(sizeof(*ctx->connection))) ) return -1;
+		&& !(ctx->connection = malloc(sizeof(*ctx->connection))) ) {
+		soap_set_receiver_error(soap, "malloc error", strerror(ENOMEM), ENOMEM);
+		return SOAP_INVALID_SOCKET;
+	}
 	if ( edg_wll_gss_accept(ctx->cred, conn, ctx->timeout, ctx->connection, &gss_code)) {
 		pdprintf(("GSLITE_GSPLUGIN: Client authentication failed, closing.\n"));
 		edg_wll_gss_get_error(&gss_code, "Client authentication failed", &ctx->error_msg);
 		soap->errnum = SOAP_SVR_FAULT;
-		return -1;
+		soap_set_receiver_error(soap, "SSL error", "SSL authentication failed in tcp_connect(): check password, key file, and ca file.", SOAP_SSL_ERROR);
+		return SOAP_INVALID_SOCKET;
 	}
 
 	return conn;
