@@ -12,7 +12,7 @@ function config_gip_lb () {
 
 	SERVICE_TYPE=org.glite.lb.Server
 	SERVICE_PORT=9003
-	SERVICE_VERSION=1.6.2
+	SERVICE_VERSION=1.9.0
 	SERVICE_ENDPOINT="https://${SERVICE_HOST}:${SERVICE_PORT}/lb"
  
 	conffile=$INSTALL_ROOT/glite/var/tmp/gip/service-${SERVICE_TYPE}.conf
