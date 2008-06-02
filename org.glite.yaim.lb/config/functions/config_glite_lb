@@ -5,7 +5,7 @@ function config_glite_lb_check(){
 function config_glite_lb_setenv(){
 
   yaimgridenv_set GLITE_LOCATION ${INSTALL_ROOT:-opt}/glite
-  yaimgridenv_set GLITE_LOCATION_VAR /var/glite
+  yaimgridenv_set GLITE_LOCATION_VAR ${GLITE_LOCATION_VAR:-/var/glite}
   yaimgridenv_set GLITE_USER ${GLITE_USER:-glite}
   yaimgridenv_set GLITE_WMS_QUERY_TIMEOUT 300
   yaimgridenv_set GLITE_HOST_CERT ${GLITE_USER_HOME:-/home/glite}/.certs/hostcert.pem
