@@ -280,6 +280,9 @@ err:
 		soap_set_sender_error(soap, "SSL error", "SSL authentication failed in tcp_connect(): check password, key file, and ca file.", SOAP_SSL_ERROR);
 		break;
 	case EDG_WLL_GSS_ERROR_HERRNO:
+		ret = h_errno;
+		soap_set_sender_error(soap, "connection error", hstrerror(ret), SOAP_CLI_FAULT);
+		break;
 	case EDG_WLL_GSS_ERROR_ERRNO:
 		ret = errno;
 		soap_set_sender_error(soap, "connection error", strerror(ret), SOAP_CLI_FAULT);
