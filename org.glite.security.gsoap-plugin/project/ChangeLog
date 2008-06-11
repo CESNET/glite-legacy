@@ -2,3 +2,7 @@
 - avoid memleak in gsoap
 - fix #32059
 - support gsoap 2.7.10
+
+1.5.4-1
+- handle client connection errors in gsoap (generate faults)
+- don't define gsoap.platformName in configuration confusingly
