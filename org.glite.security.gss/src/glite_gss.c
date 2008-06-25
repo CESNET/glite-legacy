@@ -327,7 +327,7 @@ end:
 }
 
 static int
-recv_token(int sock, void **token, size_t *token_length, struct timeval *to)
+recv_token(int sock, void **token, size_t *token_length, size_t max_length, struct timeval *to)
 {
    ssize_t count;
    char buf[4098];
@@ -357,8 +357,9 @@ recv_token(int sock, void **token, size_t *token_length, struct timeval *to)
 	    goto end;
 	    break;
       }
-      
-      count = read(sock, buf, sizeof(buf));
+
+      tl = (max_length > 0) ? MIN((sizeof(buf), max_length) : sizeof(buf);
+      count = read(sock, buf, tl));
       if (count < 0) {
 	 if (errno == EINTR)
 	    continue;
@@ -367,20 +368,16 @@ recv_token(int sock, void **token, size_t *token_length, struct timeval *to)
 	    goto end;
 	 }
       }
+      if (count==0)
+         return EDG_WLL_GSS_ERROR_EOF;
 
-      if (count==0) {
-         if (tl==0) 
-            return EDG_WLL_GSS_ERROR_EOF;
-         else goto end;
-      }
-      tmp=realloc(t, tl + count);
+      tmp=malloc(count);
       if (tmp == NULL) {
 	 errno = ENOMEM;
 	 return EDG_WLL_GSS_ERROR_ERRNO;
       }
       t = tmp;
-      memcpy(t + tl, buf, count);
-      tl += count;
+      memcpy(t, buf, count);
 
    } while (count < 0); /* restart on EINTR */
 
@@ -397,11 +394,20 @@ end:
 
    if (ret == 0) {
       *token = t;
-      *token_length = tl;
+      *token_length = count;
    } else
-      free(t);
+      if (t) free(t);
 
    return ret;
+}
+
+static int
+recv_gss_token(int sock, void **token, size_t *token_length, struct timeval *to){
+}
+
+static int
+send_gss_token(int sock, void *token, size_t token_length, struct timeval *to)
+{
 }
 
 static int
@@ -684,7 +690,7 @@ edg_wll_gss_connect(edg_wll_GssCred cred, char const *hostname, int port,
       }
 
       if (output_token.length != 0) {
-	 ret = send_token(sock, output_token.value, output_token.length, timeout);
+	 ret = send_gss_token(sock, output_token.value, output_token.length, timeout);
 	 gss_release_buffer(&min_stat2, &output_token);
 	 if (ret)
 	    goto end;
@@ -695,7 +701,7 @@ edg_wll_gss_connect(edg_wll_GssCred cred, char const *hostname, int port,
 	    gss_delete_sec_context(&min_stat2, &context, &output_token);
 	    context = GSS_C_NO_CONTEXT;
       	    if (output_token.length) {
-		send_token(sock, output_token.value, output_token.length, timeout);
+		send_gss_token(sock, output_token.value, output_token.length, timeout);
 	 	gss_release_buffer(&min_stat2, &output_token);
       	    }
 	 }
@@ -704,7 +710,7 @@ edg_wll_gss_connect(edg_wll_GssCred cred, char const *hostname, int port,
       }
 
       if(maj_stat & GSS_S_CONTINUE_NEEDED) {
-	 ret = recv_token(sock, &input_token.value, &input_token.length, timeout);
+	 ret = recv_gss_token(sock, &input_token.value, &input_token.length, timeout);
 	 if (ret)
 	    goto end;
       } else
@@ -794,7 +800,7 @@ edg_wll_gss_accept(edg_wll_GssCred cred, int sock, struct timeval *timeout,
    ret_flags = GSS_C_GLOBUS_SSL_COMPATIBLE;
 
    do {
-      ret = recv_token(sock, &input_token.value, &input_token.length, timeout);
+      ret = recv_gss_token(sock, &input_token.value, &input_token.length, timeout);
       if (ret)
 	 goto end;
 
@@ -812,7 +818,7 @@ edg_wll_gss_accept(edg_wll_GssCred cred, int sock, struct timeval *timeout,
       }
 
       if (output_token.length) {
-	 ret = send_token(sock, output_token.value, output_token.length, timeout);
+	 ret = send_gss_token(sock, output_token.value, output_token.length, timeout);
 	 gss_release_buffer(&min_stat2, &output_token);
 	 if (ret)
 	    goto end;
@@ -824,7 +830,7 @@ edg_wll_gss_accept(edg_wll_GssCred cred, int sock, struct timeval *timeout,
 	 gss_delete_sec_context(&min_stat2, &context, &output_token);
 	 context = GSS_C_NO_CONTEXT;
       	 if (output_token.length) {
-		send_token(sock, output_token.value, output_token.length, timeout);
+		send_gss_token(sock, output_token.value, output_token.length, timeout);
 	 	gss_release_buffer(&min_stat2, &output_token);
       	 }
       }
@@ -880,7 +886,7 @@ edg_wll_gss_write(edg_wll_GssConnection *connection, const void *buf, size_t buf
       return EDG_WLL_GSS_ERROR_GSS;
    }
 
-   ret = send_token(connection->sock, output_token.value, output_token.length,
+   ret = send_gss_token(connection->sock, output_token.value, output_token.length,
 	            timeout);
    gss_release_buffer(&min_stat, &output_token);
 
@@ -914,7 +920,7 @@ edg_wll_gss_read(edg_wll_GssConnection *connection, void *buf, size_t bufsize,
    }
 
    do {
-      ret = recv_token(connection->sock, &input_token.value, &input_token.length,
+      ret = recv_gss_token(connection->sock, &input_token.value, &input_token.length,
 	               timeout);
       if (ret)
 	 return ret;
@@ -1039,7 +1045,7 @@ edg_wll_gss_close(edg_wll_GssConnection *con, struct timeval *timeout)
       /* send the buffer (if any) to the peer. GSSAPI specs doesn't
        * recommend sending it, but we want SSL compatibility */
       if (output_token.length && con->sock>=0) {
-              send_token(con->sock, output_token.value, output_token.length,
+              send_gss_token(con->sock, output_token.value, output_token.length,
                               timeout ? timeout : &def_timeout);
       }
 #endif
