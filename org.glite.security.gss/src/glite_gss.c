@@ -20,14 +20,14 @@
 
 #ifndef NO_GLOBUS
 #include <globus_common.h>
-#endif
-#include <gssapi.h>
 #include <openssl/err.h>
 #include <openssl/ssl.h>
 #include <openssl/stack.h>
 #include <openssl/x509.h>
 #include <openssl/pem.h>
 #include <openssl/bio.h>
+#endif
+#include <gssapi.h>
 
 #if !defined(MAXHOSTNAMELEN)
 #define MAXHOSTNAMELEN 255
@@ -577,6 +577,7 @@ edg_wll_gss_acquire_cred_gsi(const char *cert_file, const char *key_file, edg_wl
 	 goto end;
       }
    } else {
+#ifndef NO_GLOBUS
       proxy_file = (char *)cert_file;
       if (strcmp(cert_file, key_file) != 0 &&
 	  (ret = create_proxy(cert_file, key_file, &proxy_file))) {
@@ -599,6 +600,11 @@ edg_wll_gss_acquire_cred_gsi(const char *cert_file, const char *key_file, edg_wl
 	 ret = EDG_WLL_GSS_ERROR_GSS;
 	 goto end;
       }
+#else
+      errno = ENOSYS;
+      ret = EDG_WLL_GSS_ERROR_ERRNO;
+      goto end;
+#endif
    }
 
   /* gss_import_cred() doesn't check validity of credential loaded, so let's
@@ -704,8 +710,10 @@ edg_wll_gss_connect(edg_wll_GssCred cred, char const *hostname, int port,
    maj_stat = min_stat = min_stat2 = req_flags = 0;
    memset(connection, 0, sizeof(*connection));
 
+#ifndef NO_GLOBUS
    /* GSI specific */
    req_flags = GSS_C_GLOBUS_SSL_COMPATIBLE;
+#endif
 
    ret = do_connect(&sock, hostname, port, timeout);
    if (ret)
@@ -858,8 +866,10 @@ edg_wll_gss_accept(edg_wll_GssCred cred, int sock, struct timeval *timeout,
    maj_stat = min_stat = min_stat2 = 0;
    memset(connection, 0, sizeof(*connection));
 
+#ifndef NO_GLOBUS
    /* GSI specific */
    ret_flags = GSS_C_GLOBUS_SSL_COMPATIBLE;
+#endif
 
    do {
       ret = recv_gss_token(sock, &input_token.value, &input_token.length, timeout);
@@ -987,7 +997,10 @@ edg_wll_gss_read(edg_wll_GssConnection *connection, void *buf, size_t bufsize,
       if (ret)
 	 return ret;
 
+#ifndef NO_GLOBUS
+      /* workaround for a Globus bug */
       ERR_clear_error();
+#endif
       maj_stat = gss_unwrap(&min_stat, connection->context, &input_token,
 	  		    &output_token, NULL, NULL);
       gss_release_buffer(&min_stat2, &input_token);
@@ -1075,10 +1088,14 @@ edg_wll_gss_watch_creds(const char *proxy_file, time_t *last_time)
 
       now = time(NULL);
 
+#ifndef NO_GLOBUS
+      /* workaround for a Globus bug */
+
       if ( now >= (*last_time+GSS_CRED_WATCH_LIMIT) ) {
               *last_time = now;
               return 1;
       }
+#endif
 
       if (!proxy_file) return 0;
       if (stat(proxy_file,&pstat)) return -1;
@@ -1197,13 +1214,15 @@ edg_wll_gss_reject(int sock)
 int
 edg_wll_gss_initialize(void)
 {
-   int ret;
+   int ret = 0;
 
+#ifndef NO_GLOBUS
    ret = globus_module_activate(GLOBUS_GSI_GSSAPI_MODULE);
    if (ret != GLOBUS_SUCCESS) {
       errno = EINVAL;
       ret = EDG_WLL_GSS_ERROR_ERRNO;
    }
+#endif
    return ret;
 }
 
@@ -1289,6 +1308,7 @@ end:
    return ret;
 }
 
+#ifndef NO_GLOBUS
 /* Beware, this call manipulates with environment variables and is not
    thread-safe */
 static int
@@ -1471,6 +1491,7 @@ end:
 
    return ret;
 }
+#endif
 
 void
 edg_wll_gss_free_princ(edg_wll_GssPrincipal principal)
@@ -1484,20 +1505,47 @@ edg_wll_gss_free_princ(edg_wll_GssPrincipal principal)
    free(principal);
 }
 
-int
-edg_wll_gss_gethostname(char *name, int len)
+static int
+gethostname_globus(char *name, int len)
 {
    int ret;
 
    ret = globus_module_activate(GLOBUS_COMMON_MODULE);
-   if (ret != GLOBUS_SUCCESS) {
-      ret = gethostname(name, len);
+   if (ret != GLOBUS_SUCCESS)
       return ret;
-   }
    ret = globus_libc_gethostname(name, len);
    globus_module_deactivate(GLOBUS_COMMON_MODULE);
 
    return ret;
+
+}
+
+static int
+gethostname_sys(char *name, int len)
+{
+   int ret;
+
+   ret = gethostname(name, len);
+   if (ret)
+      return ret;
+
+   /* Check if hostname is fqdn */
+   if (strchr(name, '.') != NULL)
+      return ret;
+
+   ret = getdomainname(name + strlen(name), len - strlen(name));
+
+   return ret;
+}
+
+int
+edg_wll_gss_gethostname(char *name, int len)
+{
+#ifndef NO_GLOBUS
+   return gethostname_globus(name, len);
+#else
+   return gethostname_sys(name, len);
+#endif
 }
 
 char *
