@@ -15,7 +15,12 @@
 #include <ares.h>
 #include <errno.h>
 
+/* until openssl dependency is removed: */
+#define OPENSSL_NO_KRB5
+
+#ifndef NO_GLOBUS
 #include <globus_common.h>
+#endif
 #include <gssapi.h>
 #include <openssl/err.h>
 #include <openssl/ssl.h>
@@ -23,6 +28,10 @@
 #include <openssl/x509.h>
 #include <openssl/pem.h>
 #include <openssl/bio.h>
+
+#if !defined(MAXHOSTNAMELEN)
+#define MAXHOSTNAMELEN 255
+#endif
 
 #include "glite_gss.h"
 
@@ -327,13 +336,9 @@ end:
 }
 
 static int
-recv_token(int sock, void **token, size_t *token_length, size_t max_length, struct timeval *to)
+recv_token(int sock, void *token, size_t token_length, struct timeval *to);
 {
    ssize_t count;
-   char buf[4098];
-   char *t = NULL;
-   char *tmp;
-   size_t tl = 0;
    fd_set fds;
    struct timeval timeout,before,after;
    int ret;
@@ -343,7 +348,6 @@ recv_token(int sock, void **token, size_t *token_length, size_t max_length, stru
       gettimeofday(&before,NULL);
    }
 
-   ret = 0;
    do {
       FD_ZERO(&fds);
       FD_SET(sock,&fds);
@@ -358,8 +362,7 @@ recv_token(int sock, void **token, size_t *token_length, size_t max_length, stru
 	    break;
       }
 
-      tl = (max_length > 0) ? MIN((sizeof(buf), max_length) : sizeof(buf);
-      count = read(sock, buf, tl));
+      count = read(sock, token, token_length));
       if (count < 0) {
 	 if (errno == EINTR)
 	    continue;
@@ -368,18 +371,14 @@ recv_token(int sock, void **token, size_t *token_length, size_t max_length, stru
 	    goto end;
 	 }
       }
-      if (count==0)
-         return EDG_WLL_GSS_ERROR_EOF;
-
-      tmp=malloc(count);
-      if (tmp == NULL) {
-	 errno = ENOMEM;
-	 return EDG_WLL_GSS_ERROR_ERRNO;
+      if (count==0) {
+         ret = EDG_WLL_GSS_ERROR_EOF;
+         goto end;
       }
-      t = tmp;
-      memcpy(t, buf, count);
 
    } while (count < 0); /* restart on EINTR */
+
+   ret = count;
 
 end:
    if (to) {
@@ -392,22 +391,85 @@ end:
       }
    }
 
-   if (ret == 0) {
-      *token = t;
-      *token_length = count;
-   } else
-      if (t) free(t);
-
    return ret;
 }
 
+/* similar to recv_token() but never returns partial data */
 static int
-recv_gss_token(int sock, void **token, size_t *token_length, struct timeval *to){
+read_token(int sock, void *token, size_t length, struct timeval *to)
+{
+   size_t remain = length;
+   char *buf = token;
+
+   while (remain > 0) {
+       count = recv_token(sock, buf, remain, to);
+       if (count < 0)
+          return count;
+       buf += count;
+       remain -= count;
+   }
+
+   return length;
+}
+
+static int
+recv_gss_token(int sock, void **token, size_t *token_length, struct timeval *to)
+{
+#ifdef NO_GLOBUS
+   uint32_t len, net_len;
+   int ret;
+   char *buf = NULL;
+
+   ret = read_token(socket, &net_len, 4, to);
+   if (ret < 0)
+      return ret;
+   len =  ntohl(net_len);
+
+   buf = malloc(len);
+   if (buf == NULL)
+      return EDG_WLL_GSS_ERROR_ERRNO;
+
+   ret = read_token(socket, buf, len, to);
+   if (ret < 0) {
+      free(buf);
+      return ret;
+   }
+
+   *token = buf;
+   *token_length = len;
+      
+   return 0;
+#else
+   char buf[4096];
+   int ret;
+
+   ret = recv_token(sock, buf, sizeof(buf), to);
+   if (ret < 0)
+      return ret;
+
+   *token = malloc(ret);
+   if (*token == NULL)
+      return EDG_WLL_GSS_ERROR_ERRNO;
+
+   memcpy(*token, buf, ret);
+   *token_length = ret;
+
+   return 0;
+#endif
 }
 
 static int
 send_gss_token(int sock, void *token, size_t token_length, struct timeval *to)
 {
+#ifdef NO_GLOBUS
+   uint32_t net_len = htonl(token_length);
+
+   ret = send_token(sock, &net_len, 4, to);
+   if (ret)
+      return ret;
+#endif
+
+   return send_token(sock, token, token_length, to);
 }
 
 static int
