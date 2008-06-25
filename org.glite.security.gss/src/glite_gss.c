@@ -336,7 +336,7 @@ end:
 }
 
 static int
-recv_token(int sock, void *token, size_t token_length, struct timeval *to);
+recv_token(int sock, void *token, size_t token_length, struct timeval *to)
 {
    ssize_t count;
    fd_set fds;
@@ -362,7 +362,7 @@ recv_token(int sock, void *token, size_t token_length, struct timeval *to);
 	    break;
       }
 
-      count = read(sock, token, token_length));
+      count = read(sock, token, token_length);
       if (count < 0) {
 	 if (errno == EINTR)
 	    continue;
@@ -400,6 +400,7 @@ read_token(int sock, void *token, size_t length, struct timeval *to)
 {
    size_t remain = length;
    char *buf = token;
+   int count;
 
    while (remain > 0) {
        count = recv_token(sock, buf, remain, to);
@@ -420,7 +421,7 @@ recv_gss_token(int sock, void **token, size_t *token_length, struct timeval *to)
    int ret;
    char *buf = NULL;
 
-   ret = read_token(socket, &net_len, 4, to);
+   ret = read_token(sock, &net_len, 4, to);
    if (ret < 0)
       return ret;
    len =  ntohl(net_len);
@@ -429,7 +430,7 @@ recv_gss_token(int sock, void **token, size_t *token_length, struct timeval *to)
    if (buf == NULL)
       return EDG_WLL_GSS_ERROR_ERRNO;
 
-   ret = read_token(socket, buf, len, to);
+   ret = read_token(sock, buf, len, to);
    if (ret < 0) {
       free(buf);
       return ret;
@@ -462,6 +463,7 @@ static int
 send_gss_token(int sock, void *token, size_t token_length, struct timeval *to)
 {
 #ifdef NO_GLOBUS
+   int ret;
    uint32_t net_len = htonl(token_length);
 
    ret = send_token(sock, &net_len, 4, to);
@@ -704,7 +706,7 @@ edg_wll_gss_connect(edg_wll_GssCred cred, char const *hostname, int port,
    gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
    gss_name_t server = GSS_C_NO_NAME;
    gss_ctx_id_t context = GSS_C_NO_CONTEXT;
-   char *servername = NULL;
+   char *servername = NULL, *princ_prefix = NULL;
    int retry = _EXPIRED_ALERT_RETRY_COUNT;
 
    maj_stat = min_stat = min_stat2 = req_flags = 0;
@@ -1508,6 +1510,7 @@ edg_wll_gss_free_princ(edg_wll_GssPrincipal principal)
    free(principal);
 }
 
+#ifndef NO_GLOBUS
 static int
 gethostname_globus(char *name, int len)
 {
@@ -1522,6 +1525,7 @@ gethostname_globus(char *name, int len)
    return ret;
 
 }
+#endif
 
 static int
 gethostname_sys(char *name, int len)
