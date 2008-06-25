@@ -719,25 +719,31 @@ edg_wll_gss_connect(edg_wll_GssCred cred, char const *hostname, int port,
    if (ret)
       return ret;
 
-   /* XXX find appropriate fqdn */
-   asprintf (&servername, "host@%s", hostname);
+#ifdef NO_GLOBUS
+   princ_prefix = getenv("EDG_WL_SERVER_PRINCIPAL_PREFIX");
+   if (princ_prefix == NULL)
+      princ_prefix = "host";
+
+   asprintf(&servername, "%s@%s", princ_prefix, hostname);
    if (servername == NULL) {
       errno = ENOMEM;
       ret = EDG_WLL_GSS_ERROR_ERRNO;
       goto end;
    }
    input_token.value = servername;
-   input_token.length = strlen(servername) + 1;
+   input_token.length = strlen(servername);
 
    maj_stat = gss_import_name(&min_stat, &input_token,
 	 		      GSS_C_NT_HOSTBASED_SERVICE, &server);
+   free(servername);
+   memset(&input_token, 0, sizeof(input_token));
    if (GSS_ERROR(maj_stat)) {
       ret = EDG_WLL_GSS_ERROR_GSS;
       goto end;
    }
-
-   free(servername);
-   memset(&input_token, 0, sizeof(input_token));
+#else
+   server = GSS_C_NO_NAME;
+#endif
 
    /* XXX if cred == GSS_C_NO_CREDENTIAL set the ANONYMOUS flag */
 
@@ -749,7 +755,7 @@ edg_wll_gss_connect(edg_wll_GssCred cred, char const *hostname, int port,
    while (!context_established) {
       /* XXX verify ret_flags match what was requested */
       maj_stat = gss_init_sec_context(&min_stat, cred->gss_cred, &context,
-				      GSS_C_NO_NAME, GSS_C_NO_OID,
+				      server, GSS_C_NO_OID,
 				      req_flags | GSS_C_MUTUAL_FLAG,
 				      0, GSS_C_NO_CHANNEL_BINDINGS,
 				      &input_token, NULL, &output_token,
@@ -833,7 +839,6 @@ edg_wll_gss_connect(edg_wll_GssCred cred, char const *hostname, int port,
 
    connection->sock = sock;
    connection->context = context;
-   servername = NULL;
    ret = 0;
 
 end:
@@ -843,8 +848,6 @@ end:
    }
    if (server != GSS_C_NO_NAME)
       gss_release_name(&min_stat2, &server);
-   if (servername == NULL)
-      free(servername);
    if (ret)
       close(sock);
 
