@@ -561,19 +561,52 @@ edg_wll_gss_acquire_cred_gsi(const char *cert_file, const char *key_file, edg_wl
    gss_cred_id_t gss_cred = GSS_C_NO_CREDENTIAL;
    gss_buffer_desc buffer = GSS_C_EMPTY_BUFFER;
    gss_name_t gss_name = GSS_C_NO_NAME;
+   gss_buffer_desc input_name_buffer;
    OM_uint32 lifetime;
+   gss_cred_usage_t cred_usage = GSS_C_INITIATE;
    char *proxy_file = NULL;
-   char *name = NULL;
+   char *name = NULL,  *pname = NULL, *princ_prefix = NULL;
    int ret;
 
+#ifndef NO_GLOBUS
    if ((cert_file == NULL && key_file != NULL) ||
        (cert_file != NULL && key_file == NULL))
+#else
+   if  (cert_file != NULL && key_file == NULL)
+#endif
       return EINVAL;
 
    if (cert_file == NULL) {
-      major_status = gss_acquire_cred(&minor_status, GSS_C_NO_NAME, 0,
-	    			      GSS_C_NO_OID_SET, GSS_C_BOTH,
+#ifdef NO_GLOBUS
+      if ((princ_prefix = getenv("EDG_WL_HOST_PRINCIPAL_PREFIX")) != NULL) {
+         char lname[MAXHOSTNAMELEN];
+
+         cred_usage = GSS_C_ACCEPT;
+         if (edg_wll_gss_gethostname(lname, MAXHOSTNAMELEN)) {
+            ret = EDG_WLL_GSS_ERROR_ERRNO;
+            goto end;
+         }
+
+         asprintf(&pname, "%s@%s", princ_prefix , lname);
+         input_name_buffer.value = (void*) pname;
+         input_name_buffer.length = strlen(pname) + 1;
+
+         major_status = gss_import_name(&minor_status, &input_name_buffer,
+                                        GSS_C_NT_HOSTBASED_SERVICE, &gss_name);
+         free(pname);
+         if (GSS_ERROR(major_status)) {
+            ret = EDG_WLL_GSS_ERROR_GSS;
+            goto end;
+         }
+      }
+#endif
+      major_status = gss_acquire_cred(&minor_status, gss_name, 0,
+	    			      GSS_C_NO_OID_SET, cred_usage,
 				      &gss_cred, NULL, NULL);
+
+      if (gss_name != GSS_C_NO_NAME)
+         gss_release_name(&minor_status, &gss_name);
+
       if (GSS_ERROR(major_status)) {
 	 ret = EDG_WLL_GSS_ERROR_GSS;
 	 goto end;
