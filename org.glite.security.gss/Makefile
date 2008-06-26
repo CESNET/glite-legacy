@@ -18,6 +18,8 @@ CC=gcc
 -include Makefile.inc
 -include ../Makefile.inc
 
+globus_prefix=/home/michalp/heimdal-1.1-build
+
 offset=0
 version_info:=-version-info ${shell \
 	perl -e '$$,=":"; @F=split "\\.","${version}"; print $$F[0]+$$F[1]+${offset},$$F[2],$$F[1]' }
@@ -39,7 +41,7 @@ CFLAGS:= ${DEBUG} \
 	-I. -I${top_srcdir}/interface \
 	-I${stagedir}/include \
 	-I${cares_prefix}/include \
-	${COVERAGE_FLAGS} -D_GNU_SOURCE -DDATAGRID_EXTENSION
+	${COVERAGE_FLAGS} -D_GNU_SOURCE -DDATAGRID_EXTENSION -DNO_GLOBUS
 
 LDFLAGS:=${COVERAGE_FLAGS}
 
@@ -48,16 +50,22 @@ LINK:=libtool --mode=link ${CC} -rpath ${stagedir}/lib ${LDFLAGS}
 LINKXX:=libtool --mode=link  ${CXX} -rpath ${stagedir}/lib ${LDFLAGS}
 INSTALL:=libtool --mode=install install
 
-GLOBUS_INC:= -I${globus_prefix}/include/${nothrflavour}
-GLOBUS_THR_INC:= -I${globus_prefix}/include/${thrflavour}
+#GLOBUS_INC:= -I${globus_prefix}/include/${nothrflavour}
+#GLOBUS_THR_INC:= -I${globus_prefix}/include/${thrflavour}
+#
+#GLOBUS_LIBS:= -L${globus_prefix}/lib \
+#	-lglobus_common_${nothrflavour} \
+#	-lglobus_gssapi_gsi_${nothrflavour} \
+#
+#GLOBUS_THR_LIBS:= -L${globus_prefix}/lib \
+#	-lglobus_common_${thrflavour} \
+#	-lglobus_gssapi_gsi_${thrflavour}
 
-GLOBUS_LIBS:= -L${globus_prefix}/lib \
-	-lglobus_common_${nothrflavour} \
-	-lglobus_gssapi_gsi_${nothrflavour} \
+GLOBUS_INC := -I${globus_prefix}/include
+GLOBUS_THR_INC := -I${globus_prefix}/include
 
-GLOBUS_THR_LIBS:= -L${globus_prefix}/lib \
-	-lglobus_common_${thrflavour} \
-	-lglobus_gssapi_gsi_${thrflavour}
+GLOBUS_LIBS:=-L${globus_prefix}/lib -lgssapi
+GLOBUS_THR_LIBS:=-L${globus_prefix}/lib -lgssapi
 
 ARES_LIBS:=-L${cares_prefix}/lib -lcares
 
