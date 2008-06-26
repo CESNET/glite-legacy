@@ -12,6 +12,7 @@
 #include <sys/stat.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <ares.h>
 #include <errno.h>
 
@@ -184,9 +185,13 @@ do_connect(int *s, char const *hostname, int port, struct timeval *timeout)
    socklen_t err_len;
    char *addr;
    int h_errno;
+   int	opt;
 
    sock = socket(AF_INET, SOCK_STREAM, 0);
    if (sock < 0) return EDG_WLL_GSS_ERROR_ERRNO;
+
+   opt = 1;
+   setsockopt(sock,IPPROTO_TCP,TCP_NODELAY,&opt,sizeof opt);
 
    if (timeout) {
 	     int	flags = fcntl(sock, F_GETFL, 0);
@@ -674,7 +679,7 @@ edg_wll_gss_connect(edg_wll_GssCred cred, char const *hostname, int port,
       /* XXX verify ret_flags match what was requested */
       maj_stat = gss_init_sec_context(&min_stat, cred->gss_cred, &context,
 				      GSS_C_NO_NAME, GSS_C_NO_OID,
-				      req_flags | GSS_C_MUTUAL_FLAG,
+				      req_flags | GSS_C_MUTUAL_FLAG | GSS_C_CONF_FLAG,
 				      0, GSS_C_NO_CHANNEL_BINDINGS,
 				      &input_token, NULL, &output_token,
 				      NULL, NULL);

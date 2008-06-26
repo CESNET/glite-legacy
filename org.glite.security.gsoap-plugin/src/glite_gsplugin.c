@@ -126,6 +126,9 @@ glite_gsplugin_set_credential(glite_gsplugin_Context ctx,
       return EINVAL;
    }
 
+   free(ctx->cert_filename);
+   free(ctx->key_filename);
+
    ctx->cert_filename = strdup(cert);
    ctx->key_filename = strdup(key);
 
