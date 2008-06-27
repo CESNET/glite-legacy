@@ -651,9 +651,16 @@ edg_wll_gss_acquire_cred_gsi(const char *cert_file, const char *key_file, edg_wl
        goto end;
     }
 
+#ifndef NO_GLOBUS
+    /* globus gssapi seems to return negative values, casting doesn't detect
+       the GSS_C_INDEFINITE value */
+
     /* Must cast to time_t since OM_uint32 is unsinged and hence we couldn't
      * detect negative values. */
     if ((time_t) lifetime <= 0) {
+#else
+    if (lifetime == 0) {
+#endif
        major_status = GSS_S_CREDENTIALS_EXPIRED;
        minor_status = 0; /* XXX */
        ret = EDG_WLL_GSS_ERROR_GSS;
@@ -1563,19 +1570,28 @@ gethostname_globus(char *name, int len)
 static int
 gethostname_sys(char *name, int len)
 {
-   int ret;
+   int ret, l;
 
-   ret = gethostname(name, len);
+   ret = gethostname(name, len - 1);
    if (ret)
       return ret;
 
+   name[len] = '\0';
+
+   return ret;
+
+#if 0
    /* Check if hostname is fqdn */
    if (strchr(name, '.') != NULL)
       return ret;
 
-   ret = getdomainname(name + strlen(name), len - strlen(name));
+   l = strlen(name);
+   *(name+l) = '.';
+
+   ret = getdomainname(name + l + 1, len - l - 2);
 
    return ret;
+#endif
 }
 
 int
