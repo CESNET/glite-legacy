@@ -61,8 +61,8 @@ INSTALL:=libtool --mode=install install
 #	-lglobus_common_${thrflavour} \
 #	-lglobus_gssapi_gsi_${thrflavour}
 
-GLOBUS_INC := -I${globus_prefix}/include
-GLOBUS_THR_INC := -I${globus_prefix}/include
+GLOBUS_INC := -I${globus_prefix}/include -I${globus_prefix}/include/gssapi
+GLOBUS_THR_INC := -I${globus_prefix}/include -I${globus_prefix}/include/gssapi
 
 GLOBUS_LIBS:=-L${globus_prefix}/lib -lgssapi
 GLOBUS_THR_LIBS:=-L${globus_prefix}/lib -lgssapi
