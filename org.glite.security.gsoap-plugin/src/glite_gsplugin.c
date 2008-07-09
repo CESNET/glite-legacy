@@ -117,7 +117,7 @@ glite_gsplugin_set_credential(glite_gsplugin_Context ctx,
    edg_wll_GssStatus gss_code;
    int ret;
 
-   ret = edg_wll_gss_acquire_cred_gsi(cert, key, &ctx->cred, NULL, &gss_code);
+   ret = edg_wll_gss_acquire_cred_gsi((char *)cert, (char *)key, &ctx->cred, NULL, &gss_code);
    if (ret) {
       /* XXX propagate error description */
       return EINVAL;
@@ -135,13 +135,13 @@ glite_gsplugin_set_credential(glite_gsplugin_Context ctx,
 int
 glite_gsplugin(struct soap *soap, struct soap_plugin *p, void *arg)
 {
-	int_plugin_data_t *pdata = malloc(sizeof(int_plugin_data_t)); 
+	int_plugin_data_t *pdata = (int_plugin_data_t *)malloc(sizeof(int_plugin_data_t)); 
 
 	pdprintf(("GSLITE_GSPLUGIN: initializing gSOAP plugin\n"));
 	if ( !pdata ) return ENOMEM;
 	if ( arg ) {
 		pdprintf(("GSLITE_GSPLUGIN: Context is given\n"));
-		pdata->ctx = arg;
+		pdata->ctx = (glite_gsplugin_Context)arg;
 		pdata->def = 0;
 	}
 	else {
@@ -257,7 +257,7 @@ glite_gsplugin_connect(
 		}
 	}
 
-	if ( !(ctx->connection = malloc(sizeof(*ctx->connection))) ) return errno;
+	if ( !(ctx->connection = (edg_wll_GssConnection  *)malloc(sizeof(*ctx->connection))) ) return errno;
 	ret = edg_wll_gss_connect(ctx->cred,
 				host, port,
 				ctx->timeout,
@@ -337,9 +337,9 @@ glite_gsplugin_accept(struct soap *soap, int s, struct sockaddr *a, int *n)
 	soap->errnum = 0;
 	pdprintf(("GSLITE_GSPLUGIN: glite_gsplugin_accept()\n"));
 	ctx = ((int_plugin_data_t *)soap_lookup_plugin(soap, plugin_id))->ctx;
-	if ( (conn = accept(s, (struct sockaddr *)&a, n)) < 0 ) return conn;
+	if ( (conn = accept(s, (struct sockaddr *)&a, (socklen_t *)n)) < 0 ) return conn;
 	if (   !ctx->connection
-		&& !(ctx->connection = malloc(sizeof(*ctx->connection))) ) {
+		&& !(ctx->connection = (edg_wll_GssConnection *)malloc(sizeof(*ctx->connection))) ) {
 		soap_set_receiver_error(soap, "malloc error", strerror(ENOMEM), ENOMEM);
 		return SOAP_INVALID_SOCKET;
 	}
