@@ -6,3 +6,7 @@
 1.5.4-1
 - handle client connection errors in gsoap (generate faults)
 - don't define gsoap.platformName in configuration confusingly
+
+1.5.4-2
+- disctinct c and c++ builds (concerns gsoap 2.7.10 only)
+
