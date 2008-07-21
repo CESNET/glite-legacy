@@ -222,6 +222,14 @@ install-soaplib:
 	${INSTALL} -m 755 ${LTLIB_S} ${THRLTLIB_S} ${PREFIX}/lib
 
 clean:
+	rm -rvf ${STATICLIB} ${LTLIB} ${THRSTATICLIB} ${THRLTLIB}
+	rm -rvf ${LTLIB_S} ${THRLTLIB_S} ${STATICLIB_S} ${THRSTATICLIB_S}
+	rm -rvf *.o *.lo .libs lib* *.c *.h *.xml *.nsmap *.wsdl glite_gsplugin* wscalc* GSOAP_*
+	for v in ${gsoap_versions}; do	\
+		dir=`echo $$v | tr -d .`; \
+		rm -rvf $$dir; \
+	done
+	rm -rvf log.xml project/ rpmbuild/ RPMS/ tgz/
 
 %.o: %.c
 	${COMPILE} -o $@ -c $<
