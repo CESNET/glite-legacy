@@ -15,15 +15,16 @@ gsoap_prefix=/opt/gsoap
 
 CC=gcc
 
-gsoap_versions?=2.6.2 2.7.0f 2.7.6b 2.7.9b 2.7.9d 2.7.10
-gsoap_versions:=${shell if ! echo $gsoap_versions | grep "\<${gsoap_default_version}\>" >/dev/null; then echo "${gsoap_default_version} "; else echo ne; fi} ${gsoap_versions}
+gsoap_versions_noflavours?=2.6.2 2.7.0f 2.7.6b 2.7.9d 2.7.9b
+gsoap_versions_flavours?=2.7.10
+gsoap_versions_flavours:=${shell if ! echo $gsoap_versions_flavours | grep "\<${gsoap_default_version}\>" >/dev/null; then echo "${gsoap_default_version} "; else echo ne; fi} ${gsoap_versions_flavours}
 
 -include Makefile.inc
 -include ../Makefile.inc
 
 GSPLUGIN_DEBUG?=no
 GSPLUGIN_VERSION_CHECKING?=yes
-
+CC=gcc
 
 offset=0
 version_info:=-version-info ${shell \
@@ -38,6 +39,10 @@ ext_repository:=${shell if [ -d "${repository}/externals" ]; then \
 
 gsoap_version=${gsoap_default_version}
 gsoap_prefix?=${ext_repository}/${gsoap_name}/${gsoap_version}/${gsoap_platform}
+ifdef lang
+langflavour:=_${lang}
+langsuffix:=.${lang}
+endif
 
 VPATH=${top_srcdir}/src:${top_srcdir}/examples
 
@@ -69,34 +74,43 @@ LDFLAGS:=${COVERAGE_FLAGS}
 
 COMPILE:=libtool --mode=compile ${CC} ${CFLAGS}
 COMPILEXX:=libtool --mode=compile ${CXX} ${CFLAGS}
-LINK:=libtool --mode=link ${CC} -rpath ${stagedir}/lib ${LDFLAGS} 
-LINKXX:=PATH=${top_srcdir}/project/libtoolhack:${PATH} libtool --mode=link ${CXX} -rpath ${stagedir}/lib ${LDFLAGS}
+LINK:=libtool --mode=link ${CC} -rpath ${stagedir}/lib ${LDFLAGS}
+LINKXX:=libtool --mode=link ${CXX} -rpath ${stagedir}/lib ${LDFLAGS}
 INSTALL:=libtool --mode=install install
+LINK_lang:=PATH=${top_srcdir}/project/libtoolhack:${PATH} libtool --mode=link ${CXX} -rpath ${stagedir}/lib ${LDFLAGS}
+ifeq (${lang},c)
+LINK_lang:=${LINK}
+endif
+ifeq (${lang},cxx)
+LINK_lang:=${LINKXX}
+endif
 
 GSOAP_LIBS:= -L${gsoap_prefix}/lib -lgsoap
 
 EX_LIBS:=-L${stagedir}/lib -lglite_security_gss_${nothrflavour}
 EX_THRLIBS:=-L${stagedir}/lib -lglite_security_gss_${thrflavour}
-
 HDRS:=glite_gsplugin.h glite_gscompat.h glite_gsplugin-int.h
+EXAMPLES:=wscalc_clt_ex wscalc_srv_ex wscalc_srv_ex2
+TESTS:=test_gss test_coverage test_cxx
 
-STATICLIB:=libglite_security_gsoap_plugin_${nothrflavour}.a
-THRSTATICLIB:=libglite_security_gsoap_plugin_${thrflavour}.a
-LTLIB:=libglite_security_gsoap_plugin_${nothrflavour}.la
-THRLTLIB:=libglite_security_gsoap_plugin_${thrflavour}.la
+STATICLIB:=libglite_security_gsoap_plugin_${nothrflavour}${langflavour}.a
+THRSTATICLIB:=libglite_security_gsoap_plugin_${thrflavour}${langflavour}.a
+LTLIB:=libglite_security_gsoap_plugin_${nothrflavour}${langflavour}.la
+THRLTLIB:=libglite_security_gsoap_plugin_${thrflavour}${langflavour}.la
 
-OBJS:=glite_gsplugin.o
+OBJS:=${GSS_OBJS} glite_gsplugin${langsuffix}.o
 LOBJS:=${OBJS:.o=.lo}
 THROBJS:=${OBJS:.o=.thr.o}
 THRLOBJS:=${OBJS:.o=.thr.lo}
 
 dotless_ver:=${shell echo ${gsoap_version} | tr -d '.'}
-STATICLIB_S:=libglite_security_gsoap_plugin_${dotless_ver}_${nothrflavour}.a
-THRSTATICLIB_S:=libglite_security_gsoap_plugin_${dotless_ver}_${thrflavour}.a
-LTLIB_S:=libglite_security_gsoap_plugin_${dotless_ver}_${nothrflavour}.la
-THRLTLIB_S:=libglite_security_gsoap_plugin_${dotless_ver}_${thrflavour}.la
+STATICLIB_S:=libglite_security_gsoap_plugin_${dotless_ver}_${nothrflavour}${langflavour}.a
+THRSTATICLIB_S:=libglite_security_gsoap_plugin_${dotless_ver}_${thrflavour}${langflavour}.a
+LTLIB_S:=libglite_security_gsoap_plugin_${dotless_ver}_${nothrflavour}${langflavour}.la
+THRLTLIB_S:=libglite_security_gsoap_plugin_${dotless_ver}_${thrflavour}${langflavour}.la
+LTLIB_TEST_S:=libglite_security_gsoap_plugin_${dotless_ver}_${nothrflavour}_cxx.la
 
-OBJS_S:=glite_gsplugin.o stdsoap2.o
+OBJS_S:=glite_gsplugin${langsuffix}.o stdsoap2${langsuffix}.o
 LOBJS_S:=${OBJS_S:.o=.lo}
 THROBJS_S:=${OBJS_S:.o=.thr.o}
 THRLOBJS_S:=${OBJS_S:.o=.thr.lo}
@@ -110,10 +124,10 @@ ${THRSTATICLIB}: ${THROBJS}
 	ranlib $@
 
 ${LTLIB}: ${OBJS} 
-	PATH=${top_builddir}:${PATH} ${LINKXX} ${version_info} -o $@ ${LOBJS} ${EX_LIBS}
+	${LINK_lang} ${version_info} -o $@ ${LOBJS} ${EX_LIBS}
 
 ${THRLTLIB}: ${THROBJS}
-	PATH=${top_builddir}:${PATH} ${LINKXX} ${version_info} -o $@ ${THRLOBJS} ${EX_THRLIBS}
+	${LINK_lang} ${version_info} -o $@ ${THRLOBJS} ${EX_THRLIBS}
 
 ${STATICLIB_S}: ${OBJS_S}
 	ar crv $@ ${OBJS_S}
@@ -124,30 +138,41 @@ ${THRSTATICLIB_S}: ${THROBJS_S}
 	ranlib $@
 
 ${LTLIB_S}: ${OBJS_S} 
-	PATH=${top_builddir}:${PATH} ${LINKXX} ${version_info} -o $@ ${LOBJS_S} ${EX_LIBS}
+	${LINK_lang} ${version_info} -o $@ ${LOBJS_S} ${EX_LIBS}
 
 ${THRLTLIB_S}: ${THROBJS_S}
-	PATH=${top_builddir}:${PATH} ${LINKXX} ${version_info} -o $@ ${THRLOBJS_S} ${EX_THRLIBS}
+	${LINK_lang} ${version_info} -o $@ ${THRLOBJS_S} ${EX_THRLIBS}
 
 all compile: \
 	${STATICLIB} ${LTLIB} ${THRSTATICLIB} ${THRLTLIB} \
 	all-libs-with-soap examples
 
-check: compile
+check: check.cxx
+
+# C/C++ compatibility test
+# (C flavour, gsoap 2.7.10 ==> C++ test fails)
+check.cxx:
+	${MAKE} lang=cxx ${LTLIB_TEST_S} test_cxx
+	./test_cxx
 
 test_coverage:
 	-mkdir coverage
 	cd coverage && $(MAKE) -f ../Makefile top_srcdir=../../ COVERAGE_FLAGS="-fprofile-arcs -ftest-coverage" check
 	cd coverage && for i in ${OBJS}; do gcov -o .libs/ $$i ; done
 
-
-examples: wscalc_clt_ex wscalc_srv_ex wscalc_srv_ex2
+examples: ${EXAMPLES}
 
 all-libs-with-soap:
-	for v in ${gsoap_versions}; do	\
+	for v in ${gsoap_versions_noflavours}; do	\
 		dir=`echo $$v | tr -d .`; \
 		mkdir $$dir; \
-		( cd $$dir && ${MAKE} -f ../Makefile gsoap_version=$$v top_srcdir=../.. libs-with-soap) ; \
+		( cd $$dir && ${MAKE} -f ../Makefile gsoap_version=$$v top_srcdir=../.. lang= libs-with-soap) ; \
+	done
+	for v in ${gsoap_versions_flavours}; do	\
+		dir=`echo $$v | tr -d .`; \
+		mkdir $$dir; \
+		( cd $$dir && ${MAKE} -f ../Makefile gsoap_version=$$v top_srcdir=../.. lang=c libs-with-soap) ; \
+		( cd $$dir && ${MAKE} -f ../Makefile gsoap_version=$$v top_srcdir=../.. lang=cxx libs-with-soap) ; \
 	done
 
 libs-with-soap: ${LTLIB_S} ${THRLTLIB_S} ${STATICLIB_S} ${THRSTATICLIB_S}
@@ -183,26 +208,28 @@ WSCALC_SRV2_OBJS = wscalc_srv_ex2.o ${GSOAP_FPREFIX}C.o ${GSOAP_FPREFIX}Server.o
 wscalc_clt_ex.o wscalc_srv_ex.o wscalc_srv_ex2.o: ${GSOAP_FPREFIX}H.h
 
 wscalc_clt_ex: ${WSCALC_CLT_OBJS} ${LTLIB_S}
-	${LINK} -o $@ ${WSCALC_CLT_OBJS} ${LTLIB_S}
+	${LINK_lang} -o $@ ${WSCALC_CLT_OBJS} ${LTLIB_S}
 
 wscalc_srv_ex: ${WSCALC_SRV_OBJS} ${LTLIB_S}
-	${LINK} -o $@ ${WSCALC_SRV_OBJS} ${LTLIB_S}
+	${LINK_lang} -o $@ ${WSCALC_SRV_OBJS} ${LTLIB_S}
 
 wscalc_srv_ex2: ${WSCALC_SRV2_OBJS} ${LTLIB_S}
-	${LINK} -o $@ ${WSCALC_SRV2_OBJS} ${LTLIB_S}
+	${LINK_lang} -o $@ ${WSCALC_SRV2_OBJS} ${LTLIB_S}
 
+test_cxx: test_gsplugin_cxx.o ${GSOAP_FPREFIX}C.cxx.o
+	${LINKXX} -o $@ $+ ${LTLIB_TEST_S}
 
 soapcpp:=${shell if [ -x ${gsoap_prefix}/bin/soapcpp2 ]; then \
 	echo ${gsoap_prefix}/bin/soapcpp2; \
 	else echo ${gsoap_prefix}/soapcpp2; \
 	fi}
 
-${GSOAP_FPREFIX}H.h ${GSOAP_FPREFIX}C.c ${GSOAP_FPREFIX}Server.c ${GSOAP_FPREFIX}Client.c ${GSOAP_FPREFIX}ServerLib.c ${GSOAP_FPREFIX}ClientLib.c:  calc.h.S
+${GSOAP_FPREFIX}H.h ${GSOAP_FPREFIX}C.c ${GSOAP_FPREFIX}Server.c ${GSOAP_FPREFIX}Client.c ${GSOAP_FPREFIX}ServerLib.c ${GSOAP_FPREFIX}ClientLib.c: calc.h.S
 	${soapcpp} -c -p ${GSOAP_FPREFIX} ${top_srcdir}/examples/calc.h.S
 
 wscalc_clt_ex.o: wscalc_clt_ex.c
 	${CC} -c ${CFLAGS} -o $@ $<
-	
+
 doc:
 
 stage:
@@ -212,10 +239,15 @@ install:
 	-mkdir -p ${PREFIX}/lib
 	-mkdir -p ${PREFIX}/include/glite/security
 	-mkdir -p ${PREFIX}/share/doc/${package}-${version}
+	-mkdir -p ${PREFIX}/include/glite/security/
 	${INSTALL} -m 644 ${top_srcdir}/LICENSE ${PREFIX}/share/doc/${package}-${version}
 	cd ${top_srcdir}/interface && ${INSTALL} -m 644 ${HDRS} ${PREFIX}/include/glite/security/
-	for v in ${gsoap_versions}; do \
-		(cd `echo $$v | tr -d .` && ${MAKE} -f ../Makefile install-soaplib gsoap_version=$$v PREFIX=${PREFIX} top_srcdir=${top_srcdir}/..); \
+	for v in ${gsoap_versions_noflavours}; do \
+		(cd `echo $$v | tr -d .` && ${MAKE} -f ../Makefile install-soaplib gsoap_version=$$v lang= PREFIX=${PREFIX} top_srcdir=${top_srcdir}/..); \
+	done
+	for v in ${gsoap_versions_flavours}; do \
+		(cd `echo $$v | tr -d .` && ${MAKE} -f ../Makefile install-soaplib gsoap_version=$$v lang=c PREFIX=${PREFIX} top_srcdir=${top_srcdir}/..); \
+		(cd `echo $$v | tr -d .` && ${MAKE} -f ../Makefile install-soaplib gsoap_version=$$v lang=cxx PREFIX=${PREFIX} top_srcdir=${top_srcdir}/..); \
 	done
 
 install-soaplib:
@@ -224,23 +256,35 @@ install-soaplib:
 clean:
 	rm -rvf ${STATICLIB} ${LTLIB} ${THRSTATICLIB} ${THRLTLIB}
 	rm -rvf ${LTLIB_S} ${THRLTLIB_S} ${STATICLIB_S} ${THRSTATICLIB_S}
-	rm -rvf *.o *.lo .libs lib* *.c *.h *.xml *.nsmap *.wsdl glite_gsplugin* wscalc* GSOAP_*
-	for v in ${gsoap_versions}; do	\
-		dir=`echo $$v | tr -d .`; \
-		rm -rvf $$dir; \
-	done
+	rm -rvf *.c *.h *.xml *.nsmap *.o *.lo .libs ${EXAMPLES} ${TESTS}
+	rm -rvf CalcService.wsdl wscalc.xsd
 	rm -rvf log.xml project/ rpmbuild/ RPMS/ tgz/
+	for v in ${gsoap_versions_noflavours} ${gsoap_versions_flavours}; do \
+		rm -rvf `echo $$v | tr -d .`; \
+	done
+
+%.c.o: %.c
+	${COMPILE} -o $@ -c $<
+
+%.cxx.o: %.c
+	${COMPILEXX} -o $@ -c $<
 
 %.o: %.c
 	${COMPILE} -o $@ -c $<
 
-stdsoap2.o: stdsoap2.c
-	${COMPILE} ${GLOBUS_INC} -o $@ -c $<
+%.c.thr.o: %.c
+	${COMPILE} -o $@ -c $<
+
+%.cxx.thr.o: %.c
+	${COMPILEXX} -o $@ -c $<
 
 %.thr.o: %.c
 	${COMPILE} -o $@ -c $<
 
-glite_gsplugin.o glite_gsplugin.thr.o: soap_version.h
+test_gsplugin_cxx.o: %.o: %.cpp stdsoap2.h
+	${COMPILEXX} -c ${GLOBUS_INC} $<
+
+glite_gsplugin${langsuffix}.o glite_gsplugin${langsuffix}.thr.o: soap_version.h
 
 soap_version.h: stdsoap2.h
 	head stdsoap2.h | \
