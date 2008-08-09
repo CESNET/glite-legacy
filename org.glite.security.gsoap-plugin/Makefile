@@ -44,7 +44,7 @@ langflavour:=_${lang}
 langsuffix:=.${lang}
 endif
 
-VPATH=${top_srcdir}/src:${top_srcdir}/examples
+VPATH=${top_srcdir}/src:${top_srcdir}/test:${top_srcdir}/examples
 
 default: all
 
@@ -91,7 +91,7 @@ EX_LIBS:=-L${stagedir}/lib -lglite_security_gss_${nothrflavour}
 EX_THRLIBS:=-L${stagedir}/lib -lglite_security_gss_${thrflavour}
 HDRS:=glite_gsplugin.h glite_gscompat.h glite_gsplugin-int.h
 EXAMPLES:=wscalc_clt_ex wscalc_srv_ex wscalc_srv_ex2
-TESTS:=test_gss test_coverage test_cxx
+TESTS:=test_cxx
 
 STATICLIB:=libglite_security_gsoap_plugin_${nothrflavour}${langflavour}.a
 THRSTATICLIB:=libglite_security_gsoap_plugin_${thrflavour}${langflavour}.a
@@ -152,13 +152,8 @@ check: check.cxx
 # C/C++ compatibility test
 # (C flavour, gsoap 2.7.10 ==> C++ test fails)
 check.cxx:
-	${MAKE} lang=cxx ${LTLIB_TEST_S} test_cxx
+	${MAKE} lang=cxx -f ${top_srcdir}/Makefile ${LTLIB_TEST_S} test_cxx
 	./test_cxx
-
-test_coverage:
-	-mkdir coverage
-	cd coverage && $(MAKE) -f ../Makefile top_srcdir=../../ COVERAGE_FLAGS="-fprofile-arcs -ftest-coverage" check
-	cd coverage && for i in ${OBJS}; do gcov -o .libs/ $$i ; done
 
 examples: ${EXAMPLES}
 
@@ -256,6 +251,7 @@ install-soaplib:
 clean:
 	rm -rvf ${STATICLIB} ${LTLIB} ${THRSTATICLIB} ${THRLTLIB}
 	rm -rvf ${LTLIB_S} ${THRLTLIB_S} ${STATICLIB_S} ${THRSTATICLIB_S}
+	rm -rvf ${LTLIB_TEST_S}
 	rm -rvf *.c *.h *.xml *.nsmap *.o *.lo .libs ${EXAMPLES} ${TESTS}
 	rm -rvf CalcService.wsdl wscalc.xsd
 	rm -rvf log.xml project/ rpmbuild/ RPMS/ tgz/
