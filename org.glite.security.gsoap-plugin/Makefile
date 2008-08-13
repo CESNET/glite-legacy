@@ -67,7 +67,6 @@ CFLAGS:= ${DEBUG} \
 	-DWITH_NONAMESPACES \
 	-I. -I${top_srcdir}/interface \
 	-I${stagedir}/include \
-	-I${gsoap_prefix}/include \
 	${COVERAGE_FLAGS} -D_GNU_SOURCE -DDATAGRID_EXTENSION
 
 LDFLAGS:=${COVERAGE_FLAGS}
@@ -84,8 +83,6 @@ endif
 ifeq (${lang},cxx)
 LINK_lang:=${LINKXX}
 endif
-
-GSOAP_LIBS:= -L${gsoap_prefix}/lib -lgsoap
 
 EX_LIBS:=-L${stagedir}/lib -lglite_security_gss_${nothrflavour}
 EX_THRLIBS:=-L${stagedir}/lib -lglite_security_gss_${thrflavour}
@@ -161,13 +158,13 @@ all-libs-with-soap:
 	for v in ${gsoap_versions_noflavours}; do	\
 		dir=`echo $$v | tr -d .`; \
 		mkdir $$dir; \
-		( cd $$dir && ${MAKE} -f ../Makefile gsoap_version=$$v top_srcdir=../.. lang= libs-with-soap) ; \
+		${MAKE} -C $$dir -f ../Makefile gsoap_version=$$v top_srcdir=../.. lang= libs-with-soap || exit $?; \
 	done
 	for v in ${gsoap_versions_flavours}; do	\
 		dir=`echo $$v | tr -d .`; \
 		mkdir $$dir; \
-		( cd $$dir && ${MAKE} -f ../Makefile gsoap_version=$$v top_srcdir=../.. lang=c libs-with-soap) ; \
-		( cd $$dir && ${MAKE} -f ../Makefile gsoap_version=$$v top_srcdir=../.. lang=cxx libs-with-soap) ; \
+		${MAKE} -C $$dir -f ../Makefile gsoap_version=$$v top_srcdir=../.. lang=c libs-with-soap || exit $?; \
+		${MAKE} -C $$dir -f ../Makefile gsoap_version=$$v top_srcdir=../.. lang=cxx libs-with-soap || exit $?; \
 	done
 
 libs-with-soap: ${LTLIB_S} ${THRLTLIB_S} ${STATICLIB_S} ${THRSTATICLIB_S}
@@ -238,11 +235,11 @@ install:
 	${INSTALL} -m 644 ${top_srcdir}/LICENSE ${PREFIX}/share/doc/${package}-${version}
 	cd ${top_srcdir}/interface && ${INSTALL} -m 644 ${HDRS} ${PREFIX}/include/glite/security/
 	for v in ${gsoap_versions_noflavours}; do \
-		(cd `echo $$v | tr -d .` && ${MAKE} -f ../Makefile install-soaplib gsoap_version=$$v lang= PREFIX=${PREFIX} top_srcdir=${top_srcdir}/..); \
+		${MAKE} -C `echo $$v | tr -d .` -f ../Makefile install-soaplib gsoap_version=$$v lang= PREFIX=${PREFIX} top_srcdir=${top_srcdir}/.. || exit $?; \
 	done
 	for v in ${gsoap_versions_flavours}; do \
-		(cd `echo $$v | tr -d .` && ${MAKE} -f ../Makefile install-soaplib gsoap_version=$$v lang=c PREFIX=${PREFIX} top_srcdir=${top_srcdir}/..); \
-		(cd `echo $$v | tr -d .` && ${MAKE} -f ../Makefile install-soaplib gsoap_version=$$v lang=cxx PREFIX=${PREFIX} top_srcdir=${top_srcdir}/..); \
+		${MAKE} -C `echo $$v | tr -d .` -f ../Makefile install-soaplib gsoap_version=$$v lang=c PREFIX=${PREFIX} top_srcdir=${top_srcdir}/.. || exit $?; \
+		${MAKE} -C `echo $$v | tr -d .` -f ../Makefile install-soaplib gsoap_version=$$v lang=cxx PREFIX=${PREFIX} top_srcdir=${top_srcdir}/.. || exit $?; \
 	done
 
 install-soaplib:

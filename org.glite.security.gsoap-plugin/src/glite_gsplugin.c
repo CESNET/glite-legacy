@@ -32,7 +32,9 @@ static size_t glite_gsplugin_recv(struct soap *, char *, size_t);
 static int glite_gsplugin_send(struct soap *, const char *, size_t);
 static int glite_gsplugin_connect(struct soap *, const char *, const char *, int);
 static int glite_gsplugin_close(struct soap *);
+#if GSOAP_VERSION >= 20700
 static int glite_gsplugin_poll(struct soap *);
+#endif
 static int glite_gsplugin_accept(struct soap *, int, struct sockaddr *, int *);
 static int glite_gsplugin_posthdr(struct soap *soap, const char *key, const char *val);
 
@@ -207,8 +209,8 @@ glite_gsplugin(struct soap *soap, struct soap_plugin *p, void *arg)
 	soap->fclose		= glite_gsplugin_close;
 #if GSOAP_VERSION >= 20700
 	soap->fclosesocket	= NULL;
-#endif
 	soap->fpoll		= glite_gsplugin_poll;
+#endif
 	soap->faccept		= glite_gsplugin_accept;
 	soap->fsend			= glite_gsplugin_send;
 	soap->frecv			= glite_gsplugin_recv;
@@ -500,6 +502,7 @@ glite_gsplugin_send(struct soap *soap, const char *buf, size_t bufsz)
 }
 
 
+#if GSOAP_VERSION >= 20700
 static int
 glite_gsplugin_poll(struct soap *soap)
 {
@@ -528,6 +531,7 @@ glite_gsplugin_poll(struct soap *soap)
 		return SOAP_EOF;
 	}
 }
+#endif
 
 
 static int http_send_header(struct soap *soap, const char *s) {
