@@ -99,7 +99,7 @@ check_response()
 
 case $1 in
 start)
-    echo "Starting $prog"
+
 
     # the myproxy-server assumes it is started from inetd if its
     # stdin is connected to a socket; by connecting stdin to /dev/null
@@ -110,15 +110,23 @@ start)
 
     for i in 1 2 3
     do
-	daemon sh -c "$server"
-	echo attempt $i - checking server response
+        echo -n  $"Starting $prog, attempt $i of 3 :"
+	      daemon sh -c "$server" 
+        RETVAL=$?
+        [ $RETVAL = "0" ] && touch /var/lock/subsys/myproxy 
+        echo
 
-	for j in 1 2 3 4 5
-	do
-	    sleep 1
-	    check_response && exit 0
-	    echo check $j failed
-	done
+	      for j in 1 2 3 4 5
+	      do
+           echo -n $"Checking myproxy response attempt: "
+	         echo -n "$j of 5 "  
+           sleep 1
+           check_response
+           RETVAL=$?
+           [ $RETVAL = "0" ]  && success && echo  && exit 0
+           failure  
+           echo
+	      done
     done
 
     echo "ERROR: $prog not responsive - check /var/log/messages"
@@ -128,6 +136,7 @@ stop)
     echo -n "Shutting down $prog"
     killproc ${prog}
     rc=$?
+    rm -f /var/lock/subsys/myproxy
     echo
     exit $rc
     ;;
