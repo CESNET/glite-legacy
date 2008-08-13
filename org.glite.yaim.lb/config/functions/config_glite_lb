@@ -13,6 +13,10 @@ function config_glite_lb_setenv(){
   yaimgridenv_set X509_CERT_DIR /etc/grid-security/certificates
   yaimgridenv_set X509_VOMS_DIR /etc/grid-security/vomsdir
 
+  yaimgridenv_set GLITE_LB_EXPORT_ENABLED ${GLITE_LB_EXPORT_ENABLED:-false}
+  yaimgridenv_set GLITE_LB_EXPORT_PURGE_ARGS "${GLITE_LB_EXPORT_PURGE_ARGS:---cleared 2d --aborted 15d --cancelled 15d --other 60d}"
+  yaimgridenv_set GLITE_LB_EXPORT_JPPS ${GLITE_LB_EXPORT_JPPS:-}
+
   yaimgridpath_append LD_LIBRARY_PATH ${INSTALL_ROOT:-opt}/glite/lib  
   yaimgridpath_append LD_LIBRARY_PATH ${INSTALL_ROOT:-opt}/globus/lib  
   yaimgridpath_append LD_LIBRARY_PATH ${INSTALL_ROOT:-opt}/c-ares/lib
@@ -25,6 +29,13 @@ function config_glite_lb() {
   #############################################
 	
   HOSTNAME=`hostname -f`
+
+  # Let Job Provenance Primary Storage as localhost:8901 in LB startup script.
+  # More strict check of GLITE_LB_EXPORT_JPPS variable only here.
+  if [ x"$GLITE_LB_EXPORT_ENABLED" = x"true" -a -z "$GLITE_LB_EXPORT_JPPS" ]; then
+    yaimlog ABORT "Job Provenance Primary Storage for export not set! (GLITE_LB_EXPORT_JPPS)"
+    return 1
+  fi
 
   chmod og+rx /var/lib/mysql/ 
   chown mysql:mysql /var/run/mysqld/
@@ -101,7 +112,7 @@ function config_glite_lb() {
 HOME=/
 MAILTO=$SITE_EMAIL
 
-1 1 * * * $GLITE_USER . /opt/glite/etc/profile.d/grid-env.sh ; export GLITE_LB_EXPORT_BKSERVER=$HOSTNAME; export GLITE_LB_EXPORT_ENABLED=false; export GLITE_LB_EXPORT_PURGE_ARGS="--cleared 2d --aborted 15d --cancelled 15d --other 60d"; /opt/glite/sbin/glite-lb-export.sh >> $logfile 2>&1
+1 1 * * * $GLITE_USER . /opt/glite/etc/profile.d/grid-env.sh ; export GLITE_LB_EXPORT_BKSERVER=$HOSTNAME; /opt/glite/sbin/glite-lb-export.sh >> $logfile 2>&1
 EOF
 
   touch $logfile
