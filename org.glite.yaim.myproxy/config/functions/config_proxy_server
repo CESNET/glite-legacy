@@ -26,12 +26,16 @@
 # NOTES :      
 #
 # YAIM MODULE:  glite-yaim-myproxy
+# UPDATES:      Ulrich.Schwickerath@cern.ch, Steve.Traylen@cern.ch
 #                 
 ##############################################################################
+#
+# 21/05/2008 US,ML  rewrite to support more configuration options
+#
 
 config_proxy_server_check () {
 
-requires $1 GRID_TRUSTED_BROKERS
+requires $1 
 return $?
 
 }
@@ -46,23 +50,62 @@ config_proxy_server () {
 
 INSTALL_ROOT=${INSTALL_ROOT:-/opt}
 
+MYPROXY_CONF=${INSTALL_ROOT}/glite/etc/myproxy-server.conf
+MYPROXY_CONF_NEW=${INSTALL_ROOT}/glite/etc/myproxy-server.conf_NEW
 
-if [ -f ${INSTALL_ROOT}/edg/etc/edg-myproxy.conf ]; then
-    rm -f ${INSTALL_ROOT}/edg/etc/edg-myproxy.conf 
+
+yaimlog DEBUG "Creating Minimal myproxy configuration."
+cat <<EOF > $MYPROXY_CONF_NEW
+# YAIM generated configuration file for MyProxy
+#
+# We allow anyone to use this service. They are checked against the
+# installed CAs anyway.
+# 
+accepted_credentials "*"
+
+EOF
+
+if [ "x$GRID_TRUSTED_BROKERS" != "x" ] ; then
+  yaimlog WARNING "Use of GRID_TRUSTED_BROKERS is deprecated in YAIM, use GRID_AUTHORIZED_RENEWERS"   
+  echo "# Adding GRID_TRUSTED_BROKERS as authorized_renewers - Deprecated" >> $MYPROXY_CONF_NEW
+  split_quoted_variable $GRID_TRUSTED_BROKERS | while read x; do
+      test "x$x" != "x" && echo "authorized_renewers \"$x\"" >> $MYPROXY_CONF_NEW
+  done
+  echo "" >> $MYPROXY_CONF_NEW
 fi
 
-split_quoted_variable $GRID_TRUSTED_BROKERS | while read x; do
-     echo "$x" >> ${INSTALL_ROOT}/edg/etc/edg-myproxy.conf
+for VALUE in GRID_AUTHORIZED_RENEWERS       GRID_DEFAULT_RENEWERS \
+             GRID_AUTHORIZED_RETRIEVERS     GRID_DEFAULT_RETRIEVERS \
+             GRID_AUTHORIZED_KEY_RETRIEVERS GRID_DEFAULT_KEY_RETRIEVERS \
+             GRID_TRUSTED_RETRIEVERS        GRID_DEFAULT_TRUSTED_RETRIEVERS 
+
+do
+    KEY=`echo $VALUE | sed 's/^GRID_//' | tr "[:upper:]" "[:lower:]"`
+    echo "#Adding YAIM value $VALUE if any as $KEY values" >> $MYPROXY_CONF_NEW
+    split_quoted_variable ${!VALUE} | while read x; do
+        test "x$x" != "x" && echo "$KEY \"$x\"" >> $MYPROXY_CONF_NEW
+    done
+    echo "" >> $MYPROXY_CONF_NEW
 done
 
 /sbin/chkconfig --add myproxy 
 
-yaimlog DEBUG "Stopping MyProxy server"
-/etc/init.d/myproxy stop < /dev/null
-yaimlog DEBUG "Waiting 3 second for a complete stop"
-sleep 3
-yaimlog DEBUG "Starting MyProxy server"
-/etc/init.d/myproxy start < /dev/null
+#
+# check if the configuration changed and reload/replace only if necessary
+#
+
+[ -f $MYPROXY_CONF ] && diff $MYPROXY_CONF_NEW $MYPROXY_CONF 2>&1 > /dev/null
+rc=$?
+
+if [ $rc == 0 ]; then
+  yaimlog INFO "MyProxy server configuration unchanged"
+  rm -f  $MYPROXY_CONF_NEW
+else
+  yaimlog INFO "Reloading MyProxy server"
+  mv $MYPROXY_CONF_NEW $MYPROXY_CONF
+  /etc/init.d/myproxy reload < /dev/null
+fi
+
 
 return 0
 }

@@ -33,9 +33,23 @@
 # GRID_TRUSTED_BROKERS: DNs of services (RBs) allowed to renew/retrives
 # credentials from/at the myproxy server. Put single quotes around each trusted DN !!!
 
-GRID_TRUSTED_BROKERS="
-'broker one'
-'broker two'
-"
+# Deprecated
+#GRID_TRUSTED_BROKERS="
+#'broker one'
+#'broker two'
+#"
+
+
+GRID_AUTHORIZED_RENEWERS=${GRID_AUTHORIZED_RENEWERS:-""}
+# WMS has traditionally used this next one.
+GRID_DEFAULT_RENEWERS=${GRID_DEFAULT_RENEWERS:-""}
+GRID_AUTHORIZED_RETRIEVERS=${GRID_AUTHORIZED_RETRIEVERS:-""}
+GRID_DEFAULT_RETRIEVERS =${GRID_DEFAULT_RETRIEVERS:-""}
+GRID_AUTHORIZED_KEY_RETRIEVERS =${GRID_AUTHORIZED_KEY_RETRIEVERS :-""}
+GRID_DEFAULT_KEY_RETRIEVERS =${GRID_DEFAULT_KEY_RETRIEVERS :-""}
+
+# This is what NCG nagios solution  uses this next one.
+GRID_TRUSTED_RETRIEVERS    =${GRID_TRUSTED_RETRIEVERS    :-""}
+GRID_DEFAULT_TRUSTED_RETRIEVERS=${GRID_DEFAULT_TRUSTED_RETRIEVERS:-""}
 
 
