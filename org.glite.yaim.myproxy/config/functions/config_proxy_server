@@ -54,6 +54,15 @@ MYPROXY_CONF=${INSTALL_ROOT}/glite/etc/myproxy-server.conf
 MYPROXY_CONF_NEW=${INSTALL_ROOT}/glite/etc/myproxy-server.conf_NEW
 
 
+# Special case where we are upgrading from the old style configuration.
+# with a configuration file myproxy-server.config file.
+pgrep -lf myproxy-server.config 2>&1 > /dev/null
+if [ $? = "0" ] ; then
+   yaimlog INFO "MyProxy Running with old style configuration, stopping"
+   /sbin/service myproxy stop
+fi
+
+
 yaimlog DEBUG "Creating Minimal myproxy configuration."
 cat <<EOF > $MYPROXY_CONF_NEW
 # YAIM generated configuration file for MyProxy
@@ -105,6 +114,13 @@ else
   mv $MYPROXY_CONF_NEW $MYPROXY_CONF
   /etc/init.d/myproxy reload < /dev/null
 fi
+
+/etc/init.d/myproxy status 2>&1 > /dev/null
+if [ $? != "0" ] ; then
+  yaimlog INFO "MyProxy server not running so starting"
+  /etc/init.d/myproxy start
+fi
+
 
 
 return 0
