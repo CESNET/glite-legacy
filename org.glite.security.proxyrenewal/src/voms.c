@@ -149,36 +149,50 @@ renew_voms_cert(glite_renewal_core_context ctx, struct vomsdata *vd, struct voms
 {
    int voms_error = 0, i, ret, voms_version;
    struct contactdata **voms_contacts = NULL;
+   struct contactdata **c;
    char *command = NULL;
+   char *err_msg;
 
    voms_contacts = VOMS_FindByVO(vd, (*voms_cert)->voname, ctx->voms_conf, NULL, &voms_error);
-
    if (voms_contacts == NULL) {
-      edg_wlpr_Log(ctx, LOG_ERR, "VOMS_FindByVO() failed\n");
+      err_msg = VOMS_ErrorMessage(vd, voms_error, NULL, 0);
+      edg_wlpr_Log(ctx, LOG_ERR, "Can't find configuration for VO %s: %s\n",
+		   (*voms_cert)->voname, err_msg);
+      free(err_msg);
       return 1;
    }
 
    ret = create_voms_command(ctx, vd, voms_cert, &command);
+   if (ret)
+      return ret;
 
    /* XXX the lifetime should be taken from the older proxy */
-   ret = VOMS_SetLifetime(60*60*12, vd, &voms_error);
+   VOMS_SetLifetime(60*60*12, vd, &voms_error);
 
-   /* XXX iterate over all servers on the list on errors */
-   ret = VOMS_ContactRaw(voms_contacts[0]->host, voms_contacts[0]->port,
-	                 voms_contacts[0]->contact, command, 
-			 (void**) buf, buf_len, &voms_version,
-			 vd, &voms_error);
-   if (ret == 0) {
-      edg_wlpr_Log(ctx, LOG_ERR, "VOMS_Contact() failed\n");
-      return 1;
+   ret = 0;
+   for (c = voms_contacts; c && *c; c++) {
+       ret = VOMS_ContactRaw((*c)->host, (*c)->port, (*c)->contact,
+                             command, (void**) buf, buf_len, &voms_version,
+			     vd, &voms_error);
+       if (ret != 0) {
+          /* success, let's finish */
+          break;
+       }
+       err_msg = VOMS_ErrorMessage(vd, voms_error, NULL, 0);
+       edg_wlpr_Log(ctx, LOG_ERR,
+                    "Failed to contact VOMS server %s of VO %s: %s\n",
+                    (*c)->host, (*voms_cert)->voname, err_msg);
+       free(err_msg);
    }
+   ret = (ret == 0) ? -1 : 0;
 
+end:
    VOMS_DeleteContacts(voms_contacts);
 
    if (command)
       free(command);
 
-   return 0;
+   return ret;
 }
 
 static int
