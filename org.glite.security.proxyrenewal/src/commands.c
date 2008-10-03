@@ -64,7 +64,8 @@ record_to_response(glite_renewal_core_context ctx, int status_code, proxy_record
 static int
 filename_to_response(glite_renewal_core_context ctx, char *filename, edg_wlpr_Response *response);
 
-
+static int
+get_voms_cert(glite_renewal_core_context ctx, X509 *cert, STACK_OF(X509) *chain, struct vomsdata **vd);
 
 
 static char *
@@ -139,7 +140,7 @@ copy_file_content(glite_renewal_core_context ctx, FILE *in, FILE *out)
 
 /* return the time interval, after which the renewal should be started */
 static time_t
-get_delta(glite_renewal_core_context ctx, time_t current_time, time_t start_time, time_t end_time)
+get_delta(glite_renewal_core_context ctx, time_t current_time, time_t end_time)
 {
    time_t remaining_life;
    time_t life_to_lose;
@@ -154,15 +155,9 @@ get_delta(glite_renewal_core_context ctx, time_t current_time, time_t start_time
 
    limit += RENEWAL_CLOCK_SKEW;
 
-   if (current_time + limit >= end_time) {
-     /* if the proxy is too short, renew it as soon as possible */
-
-     if (current_time + condor_limit > end_time ) {
-       edg_wlpr_Log(ctx, LOG_ERR, "Remaining proxy lifetime fell below the value of the Condor limit!");
-     }
-
+   /* if the proxy is too short, renew it as soon as possible */
+   if (current_time + limit >= end_time)
      return 0;
-   }
 
    remaining_life = end_time - current_time;
 
@@ -198,38 +193,79 @@ get_delta(glite_renewal_core_context ctx, time_t current_time, time_t start_time
 int
 get_times(glite_renewal_core_context ctx, char *proxy_file, proxy_record *record)
 {
-   FILE *fd;
    X509 *cert = NULL;
-   ASN1_UTCTIME *asn1_time = NULL;
-   int ret;
-   time_t current_time, start_time, end_time;
+   STACK_OF(X509) *chain = NULL;
+   int ret, i;
+   time_t now, end_time, end_time_x509;
+   struct vomsdata *voms_data = NULL;
+   struct voms **voms_cert = NULL;
+   ASN1_UTCTIME *t;
+   time_t delta;
+   char *s, *c;
 
-   assert(record != NULL);
-   assert(proxy_file != NULL);
+   ret = load_proxy(ctx, proxy_file, &cert, NULL, &chain, NULL); 
+   if (ret)
+      return ret;
 
-   fd = fopen(proxy_file, "r");
-   if (fd == NULL) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Opening proxy file %s failed: %s",
-	           proxy_file, strerror(errno));
-      return errno;
-   }
-
-   cert = PEM_read_X509(fd, NULL, NULL, NULL);
-   if (cert == NULL) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Cannot read X.509 certificate from %s",
-	           proxy_file);
-      ret = -1; /* XXX SSL_ERROR */
+   ret = get_voms_cert(ctx, cert, chain, &voms_data);
+   if (ret)
       goto end;
+
+   end_time = 0;
+   if (voms_data != NULL) {
+      for (voms_cert = voms_data->data; voms_cert && *voms_cert; voms_cert++) {
+          t = ASN1_UTCTIME_new();
+          if (t == NULL) {
+             edg_wlpr_Log(ctx, LOG_ERR, "ASN1_UTCTIME_new() failed\n");
+             ret = 1;
+             goto end;
+          }
+
+          /* date2 contains a GENERALIZEDTIME format (YYYYMMDDHHSS[.fff]Z)
+           * value, which must be converted to the UTC (YYMMDDHHSSZ) format */
+          s = strdup((*voms_cert)->date2 + 2);
+          if (s == NULL) {
+             edg_wlpr_Log(ctx, LOG_ERR, "Not enough memory\n");
+             ret = ENOMEM;
+             goto end;
+          }
+          c = strchr(s, '.');
+          if (c) {
+             *c++ = 'Z';
+             *c = '\0';
+          }
+          ret = ASN1_UTCTIME_set_string(t, s);
+          if (ret == 0) {
+             edg_wlpr_Log(ctx, LOG_ERR, "ASN1_UTCTIME_set_string() failed\n");
+             ret = 1;
+             free(s);
+             goto end;
+          }
+
+          if (end_time == 0 || ASN1_UTCTIME_cmp_time_t(t, end_time) < 0)
+             globus_gsi_cert_utils_make_time(t, &end_time);
+
+          ASN1_UTCTIME_free(t);
+          free(s);
+      }
+      s = ctime(&end_time);
+      if ((c = strchr(s, '\n')))
+         *c = '\0';
+      edg_wlpr_Log(ctx, LOG_DEBUG,
+                   "The shortest VOMS cert expires on %s", s);
    }
 
-   asn1_time = ASN1_UTCTIME_new();
-   X509_gmtime_adj(asn1_time,0);
-   globus_gsi_cert_utils_make_time(X509_get_notAfter(cert), &end_time);
-   globus_gsi_cert_utils_make_time(X509_get_notBefore(cert), &start_time);
-   current_time = time(NULL);
-   ASN1_UTCTIME_free(asn1_time);
-   /* if (end_time - RENEWAL_CLOCK_SKEW < current_time) { Too short proxy } */
-   if (end_time + RENEWAL_CLOCK_SKEW < current_time) {
+   globus_gsi_cert_utils_make_time(X509_get_notAfter(cert), &end_time_x509);
+   if (end_time_x509 < end_time || end_time == 0)
+      end_time = end_time_x509;
+
+   s = ctime(&end_time_x509);
+   if ((c = strchr(s, '\n')))
+      *c = '\0';
+   edg_wlpr_Log(ctx, LOG_DEBUG, "X.509 proxy credential expires on %s", s);
+
+   now = time(NULL);
+   if (end_time_x509 + RENEWAL_CLOCK_SKEW < now) {
       edg_wlpr_Log(ctx, LOG_ERR, "Expired proxy in %s", proxy_file);
       ret = EDG_WLPR_PROXY_EXPIRED;
       goto end;
@@ -237,40 +273,35 @@ get_times(glite_renewal_core_context ctx, char *proxy_file, proxy_record *record
 
    /* Myproxy seems not to do check on expiration and return expired proxies
       if credentials in repository are expired */
-   X509_free(cert);
-   cert = NULL;
-   while (1) {
-      time_t tmp_end;
-      /* see http://www.openssl.org/docs/crypto/pem.html section BUGS */
-      cert = PEM_read_X509(fd, NULL, NULL, NULL);
-      if (cert == NULL) {
-	 if (ERR_GET_REASON(ERR_peek_error()) == PEM_R_NO_START_LINE) {
-	    /* End of file reached. no error */
-	    ERR_clear_error();
-	    break;
-	 }
-	 edg_wlpr_Log(ctx, LOG_ERR, "Cannot read additional certificates from %s",
-		      proxy_file);
-	 ret = -1; /* XXX SSL_ERROR */
-	 goto end;
+   for (i = 0; i < sk_X509_num(chain); i++) {
+      t = X509_get_notAfter(sk_X509_value(chain, i));
+      if (ASN1_UTCTIME_cmp_time_t(t, now - RENEWAL_CLOCK_SKEW) < 0) {
+          edg_wlpr_Log(ctx, LOG_ERR, "Expired proxy in %s", proxy_file);
+          ret = EDG_WLPR_PROXY_EXPIRED;
+          goto end;
       }
-      globus_gsi_cert_utils_make_time(X509_get_notAfter(cert), &tmp_end);
-      if (tmp_end + RENEWAL_CLOCK_SKEW < current_time) {
-	 edg_wlpr_Log(ctx, LOG_ERR, "Expired proxy in %s", proxy_file);
-	 ret = EDG_WLPR_PROXY_EXPIRED;
-	 goto end;
-      }
-      X509_free(cert);
-      cert = NULL;
    }
 
-   record->next_renewal = current_time + get_delta(ctx, current_time, start_time,
-	 					   end_time);
-   record->end_time = end_time;
+   if (now + condor_limit > end_time_x509) {
+      edg_wlpr_Log(ctx, LOG_ERR, "Remaining proxy lifetime fell below the value of the Condor limit!");
+      delta = 0;
+   } else
+      delta = get_delta(ctx, now, end_time);
+
+   record->next_renewal = now + delta;
+   record->end_time = end_time_x509;
    ret = 0;
 
+   s = ctime(&record->next_renewal);
+   if ((c = strchr(s, '\n')))
+      *c = '\0';
+   edg_wlpr_Log(ctx, LOG_DEBUG, "Next renewal will be attempted on %s", s);
+
 end:
-   fclose(fd);
+   if (voms_data)
+      VOMS_Destroy(voms_data);
+   if (chain)
+      sk_X509_pop_free(chain, X509_free);
    if (cert)
       X509_free(cert);
 
@@ -852,25 +883,12 @@ find_proxyname(glite_renewal_core_context ctx, char *jobid, char **filename)
    return EDG_WLPR_PROXY_NOT_REGISTERED;
 }
 
-#ifdef NOVOMS
-int
-find_voms_cert(glite_renewal_core_context ctx, char *file, int *present)
-{
-	*present = 0;
-	return 0;
-}
-
-#else
-int
-find_voms_cert(glite_renewal_core_context ctx, char *file, int *present)
+static int
+get_voms_cert(glite_renewal_core_context ctx, X509 *cert,
+              STACK_OF(X509) *chain, struct vomsdata **vd)
 {
    struct vomsdata *voms_info = NULL;
-   STACK_OF(X509) *chain = NULL;
-   EVP_PKEY *privkey = NULL;
-   X509 *cert = NULL;
-   int ret, err;
-   
-   *present = 0;
+   int voms_err, ret, voms_ret;
 
    voms_info = VOMS_Init(vomsdir, cadir);
    if (voms_info == NULL) {
@@ -878,24 +896,57 @@ find_voms_cert(glite_renewal_core_context ctx, char *file, int *present)
       return EDG_WLPR_ERROR_VOMS;
    }
 
-   ret = load_proxy(ctx, file, &cert, &privkey, &chain, NULL);
-   if (ret) {
+   ret = 0;
+   voms_ret = VOMS_Retrieve(cert, chain, RECURSE_CHAIN, voms_info, &voms_err);
+   if (voms_ret == 0) {
+      if (voms_err == VERR_NOEXT) {
+         voms_info = NULL;
+         ret = 0;
+      } else {
+         char *err_msg = VOMS_ErrorMessage(voms_info, voms_err, NULL, 0);
+         edg_wlpr_Log(ctx, LOG_ERR, "Failed to retrieve VOMS attributes: %s\n",
+                      err_msg);
+         free(err_msg);
+         ret = -1; /* XXX */
+      }
+   }
+
+   if (ret == 0 && vd != NULL)
+      *vd = voms_info;
+   else
       VOMS_Destroy(voms_info);
-      return ret;
-   }
 
-   ret = VOMS_Retrieve(cert, chain, RECURSE_CHAIN, voms_info, &err);
-   if (ret == 1) {
-      *present = 1;
-   }
-
-   VOMS_Destroy(voms_info);
-   X509_free(cert);
-   EVP_PKEY_free(privkey);
-   sk_X509_pop_free(chain, X509_free);
-   return 0;
+   return ret;
 }
-#endif
+
+int
+find_voms_cert(glite_renewal_core_context ctx, char *file, int *present)
+{
+   struct vomsdata *voms_info = NULL;
+   STACK_OF(X509) *chain = NULL;
+   X509 *cert = NULL;
+   int ret;
+   
+   *present = 0;
+
+   ret = load_proxy(ctx, file, &cert, NULL, &chain, NULL);
+   if (ret)
+      return ret;
+
+   ret = get_voms_cert(ctx, cert, chain, &voms_info);
+   if (ret) 
+      goto end;
+
+   *present = (voms_info != NULL);
+
+end:
+   if (voms_info)
+      VOMS_Destroy(voms_info);
+   sk_X509_pop_free(chain, X509_free);
+   X509_free(cert);
+
+   return ret;
+}
 
 void
 register_proxy(glite_renewal_core_context ctx, edg_wlpr_Request *request, edg_wlpr_Response *response)
