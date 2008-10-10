@@ -2,7 +2,7 @@
 %define _topdir %{topdir} 
 Summary: Provides an init.d script for MyProxy
 Name: myproxy-config
-Version: 2.0.1
+Version: 2.0.2
 Release: 1
 License: EDG
 Group: EGEE
@@ -38,10 +38,13 @@ make install prefix=%{buildroot}
 
 
 %changelog
+* Fri Oct 10 2008 Steve Traylen <steve.traylen@cern.ch> - 2.0.2-1
+- Fix for DNs with spaces in.
+  https://savannah.cern.ch/bugs/?42604
 * Wed Aug 13 2008 Steve Traylen <steve.traylen@cern.ch>
 Clean up of echo statements from init.d script.
 * Mon Aug 11 2008 Steve Traleen <steve.traylen@cern.ch>
 - Rewrite a little for Makefile and etics.
-* Wed May 21 2008 Ulrich Schwickerath <uschwick@lxadm03.cern.ch> - config-1
+* Wed May 21 2008 Ulrich Schwickerath <uschwick@cern.ch> - config-1
 - Initial build.
 

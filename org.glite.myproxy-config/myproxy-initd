@@ -67,7 +67,7 @@ test=test-`date +%Y%m%d-%H%M%S`-$$
 check_response()
 {
     TIMEOUT=5
-    check="MYPROXY_SERVER_DN=$dn ${GLOBUS_LOCATION}/bin/myproxy-info \
+    check="MYPROXY_SERVER_DN=\"${dn}\" ${GLOBUS_LOCATION}/bin/myproxy-info \
 	-s `hostname` $PORT -l $test 2>&1 | grep -i credential > /dev/null"
 
     (
