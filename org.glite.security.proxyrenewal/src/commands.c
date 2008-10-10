@@ -896,6 +896,8 @@ get_voms_cert(glite_renewal_core_context ctx, X509 *cert,
       return EDG_WLPR_ERROR_VOMS;
    }
 
+   VOMS_SetVerificationType(VERIFY_NONE, voms_info, NULL);
+
    ret = 0;
    voms_ret = VOMS_Retrieve(cert, chain, RECURSE_CHAIN, voms_info, &voms_err);
    if (voms_ret == 0) {
