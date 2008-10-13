@@ -128,6 +128,7 @@ install:
 	fi
 
 clean:
+	rm -rf *.o *.lo *.a *.la .libs test_gss
 
 %.o: %.c
 	${COMPILE} ${GLOBUS_INC} -o $@ -c $<
