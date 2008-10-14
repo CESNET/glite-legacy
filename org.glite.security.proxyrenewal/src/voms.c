@@ -1,3 +1,5 @@
+static const char rcsid[] = "$Id$";
+
 #include "renewal_locl.h"
 #include "renewd_locl.h"
 
@@ -112,7 +114,7 @@ my_VOMS_Export(glite_renewal_core_context ctx, void *buf, int buf_len, X509_EXTE
 static int
 create_voms_command(glite_renewal_core_context ctx, struct vomsdata *vd, struct voms **voms_cert, char **command)
 {
-   int voms_error, ret;
+   int ret;
    struct data **attribs;
 
 #if 0
@@ -138,8 +140,6 @@ create_voms_command(glite_renewal_core_context ctx, struct vomsdata *vd, struct 
    else
       ret = asprintf(command, "B%s:%s", attribs[0]->group, attribs[0]->role);
 
-end:
-
    return 0;
 }
 
@@ -147,20 +147,11 @@ static int
 renew_voms_cert(glite_renewal_core_context ctx, struct vomsdata *vd, struct voms **voms_cert, 
                 char **buf, size_t *buf_len)
 {
-   int voms_error = 0, i, ret, voms_version;
+   int voms_error = 0, ret, voms_version, port = -1;
    struct contactdata **voms_contacts = NULL;
    struct contactdata **c;
    char *command = NULL;
-   char *err_msg;
-
-   voms_contacts = VOMS_FindByVO(vd, (*voms_cert)->voname, ctx->voms_conf, NULL, &voms_error);
-   if (voms_contacts == NULL) {
-      err_msg = VOMS_ErrorMessage(vd, voms_error, NULL, 0);
-      edg_wlpr_Log(ctx, LOG_ERR, "Can't find configuration for VO %s: %s\n",
-		   (*voms_cert)->voname, err_msg);
-      free(err_msg);
-      return 1;
-   }
+   char *err_msg, *voms_server = NULL, *p;
 
    ret = create_voms_command(ctx, vd, voms_cert, &command);
    if (ret)
@@ -168,6 +159,50 @@ renew_voms_cert(glite_renewal_core_context ctx, struct vomsdata *vd, struct voms
 
    /* XXX the lifetime should be taken from the older proxy */
    VOMS_SetLifetime(60*60*12, vd, &voms_error);
+
+   if ((*voms_cert)->uri != NULL) {
+      voms_server = strdup((*voms_cert)->uri);
+      if (voms_server == NULL) {
+         edg_wlpr_Log(ctx, LOG_ERR, "Not enough memory");
+         ret = 1;
+         goto end;
+      }
+
+      p = strchr(voms_server, ':');
+      if (p) {
+         *p++ = '\0';
+         port = atoi(p);
+      }
+   }
+
+   /* first try to contact the VOMS server that issued the original AC */
+   if (voms_server && port != -1 && (*voms_cert)->server != NULL) {
+      ret = VOMS_ContactRaw(voms_server, port, (*voms_cert)->server,
+                            command, (void**) buf, buf_len, &voms_version,
+			    vd, &voms_error);
+      if (ret != 0) {
+         /* success, let's finish */
+         ret = 0;
+         goto end;
+      }
+      err_msg = VOMS_ErrorMessage(vd, voms_error, NULL, 0);
+      edg_wlpr_Log(ctx, LOG_ERR,
+                   "Failed to contact VOMS server %s of VO %s: %s\n",
+                   (*c)->host, (*voms_cert)->voname, err_msg);
+      free(err_msg);
+   }
+
+   /* if the original URI doesn't work, try VOMS servers given in local
+      configuration */
+   voms_contacts = VOMS_FindByVO(vd, (*voms_cert)->voname, ctx->voms_conf, NULL, &voms_error);
+   if (voms_contacts == NULL) {
+      err_msg = VOMS_ErrorMessage(vd, voms_error, NULL, 0);
+      edg_wlpr_Log(ctx, LOG_ERR, "Can't find configuration for VO %s: %s\n",
+		   (*voms_cert)->voname, err_msg);
+      free(err_msg);
+      ret = 1;
+      goto end;
+   }
 
    ret = 0;
    for (c = voms_contacts; c && *c; c++) {
