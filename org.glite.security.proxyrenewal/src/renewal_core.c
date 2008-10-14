@@ -152,7 +152,7 @@ glite_renewal_core_renew(glite_renewal_core_context ctx,
    if (ret)
       goto end;
 
-   voms_exts = check_voms_attrs(ctx, current_proxy);
+   is_voms_cert(ctx, current_proxy, &voms_exts);
 
    client_request->proxy_lifetime = 60 * 60 * DGPR_RETRIEVE_DEFAULT_HOURS;
 

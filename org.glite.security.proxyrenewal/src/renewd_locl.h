@@ -7,6 +7,8 @@
 #include <globus_gsi_proxy.h>
 #include <globus_gsi_cert_utils_constants.h>
 
+#include <glite/security/voms/voms_apic.h>
+
 #include "renewal.h"
 #include "renewal_core.h"
 
@@ -77,6 +79,10 @@ int
 renew_voms_creds(glite_renewal_core_context ctx, const char *cur_file, const char *renewed_file, const char *new_file);
 
 int
-check_voms_attrs(glite_renewal_core_context ctx, const char *proxy);
+is_voms_attrs(glite_renewal_core_context ctx, const char *proxy, int *present);
+
+int
+get_voms_cert(glite_renewal_core_context ctx,
+              X509 *cert, STACK_OF(X509) *chain, struct vomsdata **vd);
 
 #endif /* RENEWALD_LOCL_H */

@@ -11,8 +11,6 @@
 
 extern char *repository;
 extern time_t condor_limit;
-extern char *cadir;
-extern char *vomsdir;
 extern int voms_enabled;
 
 static char *
@@ -63,10 +61,6 @@ record_to_response(glite_renewal_core_context ctx, int status_code, proxy_record
 
 static int
 filename_to_response(glite_renewal_core_context ctx, char *filename, edg_wlpr_Response *response);
-
-static int
-get_voms_cert(glite_renewal_core_context ctx, X509 *cert, STACK_OF(X509) *chain, struct vomsdata **vd);
-
 
 static char *
 strmd5(glite_renewal_core_context ctx, const char *s, unsigned char *digest)
@@ -883,73 +877,6 @@ find_proxyname(glite_renewal_core_context ctx, char *jobid, char **filename)
    return EDG_WLPR_PROXY_NOT_REGISTERED;
 }
 
-static int
-get_voms_cert(glite_renewal_core_context ctx, X509 *cert,
-              STACK_OF(X509) *chain, struct vomsdata **vd)
-{
-   struct vomsdata *voms_info = NULL;
-   int voms_err, ret, voms_ret;
-
-   voms_info = VOMS_Init(vomsdir, cadir);
-   if (voms_info == NULL) {
-      edg_wlpr_Log(ctx, LOG_ERR, "check_voms_cert(): Cannot initialize VOMS context (VOMS_Init() failed, probably voms dir was not specified)");
-      return EDG_WLPR_ERROR_VOMS;
-   }
-
-   VOMS_SetVerificationType(VERIFY_NONE, voms_info, NULL);
-
-   ret = 0;
-   voms_ret = VOMS_Retrieve(cert, chain, RECURSE_CHAIN, voms_info, &voms_err);
-   if (voms_ret == 0) {
-      if (voms_err == VERR_NOEXT) {
-         voms_info = NULL;
-         ret = 0;
-      } else {
-         char *err_msg = VOMS_ErrorMessage(voms_info, voms_err, NULL, 0);
-         edg_wlpr_Log(ctx, LOG_ERR, "Failed to retrieve VOMS attributes: %s\n",
-                      err_msg);
-         free(err_msg);
-         ret = -1; /* XXX */
-      }
-   }
-
-   if (ret == 0 && vd != NULL)
-      *vd = voms_info;
-   else
-      VOMS_Destroy(voms_info);
-
-   return ret;
-}
-
-int
-find_voms_cert(glite_renewal_core_context ctx, char *file, int *present)
-{
-   struct vomsdata *voms_info = NULL;
-   STACK_OF(X509) *chain = NULL;
-   X509 *cert = NULL;
-   int ret;
-   
-   *present = 0;
-
-   ret = load_proxy(ctx, file, &cert, NULL, &chain, NULL);
-   if (ret)
-      return ret;
-
-   ret = get_voms_cert(ctx, cert, chain, &voms_info);
-   if (ret) 
-      goto end;
-
-   *present = (voms_info != NULL);
-
-end:
-   if (voms_info)
-      VOMS_Destroy(voms_info);
-   sk_X509_pop_free(chain, X509_free);
-   X509_free(cert);
-
-   return ret;
-}
-
 void
 register_proxy(glite_renewal_core_context ctx, edg_wlpr_Request *request, edg_wlpr_Response *response)
 {
@@ -982,7 +909,7 @@ register_proxy(glite_renewal_core_context ctx, edg_wlpr_Request *request, edg_wl
       goto end;
 
    if (voms_enabled)
-     ret = find_voms_cert(ctx, request->proxy_filename, &record.voms_exts);
+     ret = is_voms_cert(ctx, request->proxy_filename, &record.voms_exts);
      /* ignore VOMS related error */
 
    /* Find first free record */

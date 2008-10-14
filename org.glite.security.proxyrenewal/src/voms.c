@@ -202,7 +202,7 @@ renew_voms_certs(glite_renewal_core_context ctx, const char *cur_file, const cha
    globus_gsi_cred_handle_t new_proxy = NULL;
    struct vomsdata *vd = NULL;
    struct voms **voms_cert = NULL;
-   int voms_err, ret;
+   int ret;
    X509 *cert = NULL;
    STACK_OF(X509) *chain = NULL;
    char *buf = NULL;
@@ -220,30 +220,10 @@ renew_voms_certs(glite_renewal_core_context ctx, const char *cur_file, const cha
    if (ret)
       goto end;
 
-   vd = VOMS_Init(NULL, NULL);
-   if (vd == NULL) {
-      edg_wlpr_Log(ctx, LOG_ERR, "VOMS_Init() failed\n");
-      return 1;
-   }
+   ret = get_voms_cert(ctx, cert, chain, &vd);
+   if (ret)
+      goto end;
 
-   ret = VOMS_Retrieve(cert, chain, RECURSE_CHAIN, vd, &voms_err);
-   if (ret == 0) {
-      if (voms_err == VERR_NOEXT) {
-	 /* no VOMS cred, no problem; continue */
-	 /* XXX this part shouldn't be reachable, this call is only called
-	  * if the proxy does contain VOMS attributes */
-	 edg_wlpr_Log(ctx, LOG_ERR, "No VOMS attributes found in proxy %s\n", cur_file);
-	 ret = 0;
-	 goto end;
-      } else {
-	 edg_wlpr_Log(ctx, LOG_ERR, "Cannot get VOMS certificate(s) from proxy");
-	 ret = 1;
-	 goto end;
-      }
-   }
-
-   /* XXX make sure this loop can really work for multiple voms certificates
-    * embedded in the proxy */
    for (voms_cert = vd->data; voms_cert && *voms_cert; voms_cert++) {
       char *tmp, *ptr;
       size_t tmp_len;
@@ -308,40 +288,73 @@ renew_voms_creds(glite_renewal_core_context ctx, const char *cur_file, const cha
 }
 
 int
-check_voms_attrs(glite_renewal_core_context ctx, const char *proxy)
+is_voms_cert(glite_renewal_core_context ctx,
+	      const char *file,
+              int *present)
 {
-   int ret, voms_err, present;
-   X509 *cert = NULL;
+   struct vomsdata *voms_info = NULL;
    STACK_OF(X509) *chain = NULL;
-   struct vomsdata *vd = NULL;
+   X509 *cert = NULL;
+   int ret;
+   
+   *present = 0;
 
-   ret = load_proxy(ctx, proxy, &cert, NULL, &chain, NULL);
+   ret = load_proxy(ctx, file, &cert, NULL, &chain, NULL);
    if (ret)
-      return 0;
+      return ret;
 
-   vd = VOMS_Init(NULL, NULL);
-   if (vd == NULL) {
-      present = 0;
+   ret = get_voms_cert(ctx, cert, chain, &voms_info);
+   if (ret) 
       goto end;
-   }
 
-   ret = VOMS_Retrieve(cert, chain, RECURSE_CHAIN, vd, &voms_err);
-   if (ret == 0) {
-      present = 0;
-      goto end;
-   }
-
-   present = 1;
+   *present = (voms_info != NULL);
 
 end:
-   if (cert)
-      X509_free(cert);
-   if (chain)
-      sk_X509_pop_free(chain, X509_free);
-   if (vd)
-      VOMS_Destroy(vd);
+   if (voms_info)
+      VOMS_Destroy(voms_info);
+   sk_X509_pop_free(chain, X509_free);
+   X509_free(cert);
 
-   return present;
+   return ret;
+}
+
+int
+get_voms_cert(glite_renewal_core_context ctx,
+              X509 *cert, STACK_OF(X509) *chain, struct vomsdata **vd)
+{
+   struct vomsdata *voms_info = NULL;
+   int voms_err, ret, voms_ret;
+
+   /* XXX pass the vomsdir and cadir parameters */
+   voms_info = VOMS_Init(NULL, NULL);
+   if (voms_info == NULL) {
+      edg_wlpr_Log(ctx, LOG_ERR, "check_voms_cert(): Cannot initialize VOMS context (VOMS_Init() failed, probably voms dir was not specified)");
+      return EDG_WLPR_ERROR_VOMS;
+   }
+
+   VOMS_SetVerificationType(VERIFY_NONE, voms_info, NULL);
+
+   ret = 0;
+   voms_ret = VOMS_Retrieve(cert, chain, RECURSE_CHAIN, voms_info, &voms_err);
+   if (voms_ret == 0) {
+      if (voms_err == VERR_NOEXT) {
+         voms_info = NULL;
+         ret = 0;
+      } else {
+         char *err_msg = VOMS_ErrorMessage(voms_info, voms_err, NULL, 0);
+         edg_wlpr_Log(ctx, LOG_ERR, "Failed to retrieve VOMS attributes: %s\n",
+                      err_msg);
+         free(err_msg);
+         ret = -1; /* XXX */
+      }
+   }
+
+   if (ret == 0 && vd != NULL)
+      *vd = voms_info;
+   else
+      VOMS_Destroy(voms_info);
+
+   return ret;
 }
 
 #if 0
