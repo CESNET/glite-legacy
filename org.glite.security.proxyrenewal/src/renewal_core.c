@@ -119,7 +119,6 @@ glite_renewal_core_renew(glite_renewal_core_context ctx,
    char tmp_proxy[FILENAME_MAX];
    int tmp_fd;
    int ret = -1;
-   char *p;
    const char *server = NULL;
    myproxy_socket_attrs_t *socket_attrs;
    myproxy_request_t      *client_request;

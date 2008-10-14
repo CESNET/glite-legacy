@@ -79,7 +79,7 @@ int
 renew_voms_creds(glite_renewal_core_context ctx, const char *cur_file, const char *renewed_file, const char *new_file);
 
 int
-is_voms_attrs(glite_renewal_core_context ctx, const char *proxy, int *present);
+is_voms_cert(glite_renewal_core_context ctx, const char *proxy, int *present);
 
 int
 get_voms_cert(glite_renewal_core_context ctx,
