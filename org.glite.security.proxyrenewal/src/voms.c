@@ -188,7 +188,7 @@ renew_voms_cert(glite_renewal_core_context ctx, struct vomsdata *vd, struct voms
       err_msg = VOMS_ErrorMessage(vd, voms_error, NULL, 0);
       edg_wlpr_Log(ctx, LOG_ERR,
                    "Failed to contact VOMS server %s of VO %s: %s\n",
-                   (*c)->host, (*voms_cert)->voname, err_msg);
+                   voms_server, (*voms_cert)->voname, err_msg);
       free(err_msg);
    }
 
