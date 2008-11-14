@@ -1,0 +1,7 @@
+
+14/11/2008 ->
+
+by Maria Alandes
+
+Makefile
+- Fix for bug #44000: RPM_BUILD_ROOT is not used anymore in the Makefile.
