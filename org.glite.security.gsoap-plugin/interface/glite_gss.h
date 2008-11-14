@@ -4,7 +4,6 @@
 #ident "$Header$"
 
 #include <gssapi.h>
-#include <openssl/err.h>
 
 #ifdef __cplusplus
 extern "C" {
