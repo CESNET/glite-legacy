@@ -29,7 +29,8 @@ make install prefix=%{buildroot}%{prefix}
 %{prefix}/yaim/functions/config_*
 %config(noreplace) %{prefix}/yaim/node-info.d/glite-*
 %{prefix}/yaim/examples/siteinfo/services/glite-*
-/usr/share/man/man1/yaim-myproxy.1
+%{prefix}/share/man/man1/yaim-myproxy.1
+%{prefix}/yaim/etc/versions/%{name}
 %doc LICENSE
 
 
