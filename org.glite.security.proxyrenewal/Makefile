@@ -66,8 +66,7 @@ CFLAGS:= ${DEBUG} \
 	-I${glite_location}/include
 
 GLOBUS_LIBS:=-L${globus_prefix}/lib \
-	-lglobus_common_${nothrflavour} \
-	-lssl_${nothrflavour}
+	-lglobus_common_${nothrflavour}
 
 MYPROXY_LIB_NOTHR :=-L${myproxy_prefix}/lib -lmyproxy_${nothrflavour}
 MYPROXY_LIB_THR:=-L${myproxy_prefix}/lib -lmyproxy_${thrflavour}
