@@ -39,6 +39,15 @@ function config_glite_lb() {
     return 1
   fi
 
+  LB_PURGE="$GLITE_LOCATION/bin/glite-lb-purge"
+  if [ ! -x "$LB_PURGE" ]; then
+    LB_PURGE="$GLITE_LOCATION/sbin/glite-lb-purge"
+  fi
+  if [ ! -x "$LB_PURGE" ]; then
+    yaimlog ABORT "Purge utility not found! Install glite-lb-utils (or glite-lb-client in older version)"
+    return 1
+  fi
+
   chmod og+rx /var/lib/mysql/ 
   chown mysql:mysql /var/run/mysqld/
 
@@ -110,11 +119,14 @@ function config_glite_lb() {
   # Create cron for purging
   mkdir -p /var/log/glite
   logfile=/var/log/glite/glite-lb-purger.log
+  if $LB_PURGE --help 2>&1 | grep 'target-runtime' > /dev/null; then
+    purge_target_runtime_cmd='export GLITE_LB_PURGE_TARGET_RUNTIME=84600s; '
+  fi
   cat << EOF > /etc/cron.d/glite-lb-purge.cron
 HOME=/
 MAILTO=$SITE_EMAIL
 
-1 1 * * * $GLITE_USER . /opt/glite/etc/profile.d/grid-env.sh ; export GLITE_LB_EXPORT_BKSERVER=$HOSTNAME; /opt/glite/sbin/glite-lb-export.sh >> $logfile 2>&1
+1 1 * * * $GLITE_USER . /opt/glite/etc/profile.d/grid-env.sh ; export GLITE_LB_EXPORT_BKSERVER=$HOSTNAME; $purge_target_runtime_cmd/opt/glite/sbin/glite-lb-export.sh >> $logfile 2>&1
 EOF
 
   touch $logfile
