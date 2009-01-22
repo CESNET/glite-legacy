@@ -26,8 +26,8 @@ version_info:=-version-info ${shell \
 
 VPATH=${top_srcdir}/src:${top_srcdir}/test
 
-TEST_LIBS:=-L${cppunit}/lib -lcppunit
-TEST_INC:=-I${cppunit}/include
+TEST_LIBS:=-L${cppunit_prefix}/lib -lcppunit
+TEST_INC:=-I${cppunit_prefix}/include
 
 default: all
 
