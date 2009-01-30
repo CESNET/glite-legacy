@@ -3,3 +3,7 @@
 
 2.0.0-2
 - proper reference to cppunit
+
+2.0.0-3
+- globus flavors added to configure
+
