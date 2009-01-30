@@ -13,3 +13,6 @@
 2.0.0-1
 - LB 2.0 release
 
+2.0.0-2
+- configure script update (globus flavors added to configure call)
+
