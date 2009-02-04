@@ -170,8 +170,8 @@ static int asyn_gethostbyname(char **addrOut, char const *name, struct timeval *
 	if (ar.err == NETDB_SUCCESS) {
 		*addrOut = malloc(sizeof(struct in_addr));
 		memcpy(*addrOut,ar.ent->h_addr_list[0], sizeof(struct in_addr));
-		free_hostent(ar.ent);
 	}
+	free_hostent(ar.ent);
 	return(ar.err);
 }
 
@@ -374,14 +374,16 @@ recv_token(int sock, void **token, size_t *token_length, struct timeval *to)
       }
 
       if (count==0) {
-         if (tl==0) 
+         if (tl==0) {
+            free(t);
             return EDG_WLL_GSS_ERROR_EOF;
-         else goto end;
+         } else goto end;
       }
       tmp=realloc(t, tl + count);
       if (tmp == NULL) {
-	 errno = ENOMEM;
-	 return EDG_WLL_GSS_ERROR_ERRNO;
+	errno = ENOMEM;
+	free(t);
+	return EDG_WLL_GSS_ERROR_ERRNO;
       }
       t = tmp;
       memcpy(t + tl, buf, count);
