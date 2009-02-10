@@ -46,21 +46,26 @@ main(int argc, char **argv)
 		}
 	}
 
-	if ( cert || key ) {
-		if ( glite_gsplugin_init_context(&ctx) ) { perror("init context"); exit(1); }
-		if (edg_wll_gss_acquire_cred_gsi(cert, key, &cred, NULL) != 0) {
-		   fprintf (stderr, "Failed to set credentials\n");
-		   exit(1);
-		}
-		glite_gsplugin_set_credential(ctx, cred);
-	}
-
 	soap_init(&soap);
 	soap_set_namespaces(&soap, namespaces);
 
-	if ( soap_register_plugin_arg(&soap, glite_gsplugin, ctx? : NULL) ) {
+	if ( soap_register_plugin_arg(&soap, glite_gsplugin, NULL) ) {
 		fprintf(stderr, "Can't register plugin\n");
 		exit(1);
+	}
+
+	if ( cert || key ) {
+		ctx = glite_gsplugin_get_context(&soap);
+		if (ctx == NULL) {
+			fprintf(stderr, "Can't get context\n");
+			exit(1);
+		}
+
+		if (glite_gsplugin_set_credential(ctx, cert, key) != 0) {
+		    fprintf(stderr, "Can't set credentials: %s\n",
+			    glite_gsplugin_errdesc(&soap));
+ 		    exit(1);
+		}
 	}
 
 	if ( soap_bind(&soap, NULL, 19999, 100) < 0 ) {

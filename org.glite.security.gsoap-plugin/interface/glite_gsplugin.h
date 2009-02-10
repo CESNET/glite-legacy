@@ -20,7 +20,8 @@ extern void *glite_gsplugin_get_udata(struct soap *);
 extern void glite_gsplugin_set_udata(struct soap *, void *);
 
 extern void glite_gsplugin_set_timeout(glite_gsplugin_Context, struct timeval const *);
-extern void glite_gsplugin_set_credential(glite_gsplugin_Context, edg_wll_GssCred);
+extern int glite_gsplugin_set_credential(glite_gsplugin_Context, const char *, const char *);
+extern void glite_gsplugin_use_credential(glite_gsplugin_Context, edg_wll_GssCred);
 extern int glite_gsplugin_set_connection(glite_gsplugin_Context, edg_wll_GssConnection *);
 
 extern int glite_gsplugin(struct soap *, struct soap_plugin *, void *);

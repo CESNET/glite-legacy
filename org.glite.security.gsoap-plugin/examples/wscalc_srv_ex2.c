@@ -31,6 +31,8 @@ main(int argc, char **argv)
 {
 	struct soap				soap;
 	edg_wll_GssStatus		gss_code;
+	edg_wll_GssCred			cred = NULL;
+	edg_wll_GssConnection		connection;
 	glite_gsplugin_Context	ctx;
 	struct sockaddr_in		a;
 	int						alen;
@@ -56,15 +58,17 @@ main(int argc, char **argv)
 		}
 	}
 
-	if ( edg_wll_gss_acquire_cred_gsi(cert_filename, key_filename, &ctx->cred, &gss_code) ) {
+	if ( edg_wll_gss_acquire_cred_gsi(cert_filename, key_filename, &cred, &gss_code) ) {
 		edg_wll_gss_get_error(&gss_code, "Failed to read credential", &msg);
 		fprintf(stderr, "%s\n", msg);
 		free(msg);
 		exit(1);
 	}
-	if (ctx->cred->name) {
-		printf("server running with certificate: %s\n", ctx->cred->name);
+	if (cred->name) {
+		printf("server running with certificate: %s\n", cred->name);
 	}
+
+	glite_gsplugin_use_credential(ctx, cred);
 
 	soap_init(&soap);
 	soap_set_namespaces(&soap, namespaces);
@@ -81,7 +85,6 @@ main(int argc, char **argv)
 	a.sin_addr.s_addr = INADDR_ANY;
 	if ( bind(sock, (struct sockaddr *)&a, sizeof(a)) ) { perror("bind()"); exit(1); }
 	if ( listen(sock, 100) ) { perror("listen()"); exit(1); }
-	if ( !(ctx->connection = malloc(sizeof(*ctx->connection))) ) exit(1);
 
 	bzero((char *) &a, alen);
 
@@ -94,12 +97,14 @@ main(int argc, char **argv)
 			perror("accept");
 			exit(1);
 		}
-		if ( edg_wll_gss_accept(ctx->cred,conn,ctx->timeout,ctx->connection,&gss_code) ){
+		if ( edg_wll_gss_accept(cred,conn,ctx->timeout,&connection,&gss_code) ){
 			edg_wll_gss_get_error(&gss_code, "Failed to read credential", &msg);
 			fprintf(stderr, "%s\n", msg);
 			free(msg);
 			exit(1);
 		}
+
+		glite_gsplugin_set_connection(ctx, &connection); 
 
 		printf("serving connection\n");
 		if ( soap_serve(&soap) ) {
@@ -109,11 +114,13 @@ main(int argc, char **argv)
 
 		soap_destroy(&soap); /* clean up class instances */
 		soap_end(&soap); /* clean up everything and close socket */
+		edg_wll_gss_close(&connection, NULL);
 	}
 
 	soap_done(&soap); /* close master socket */
 
 	glite_gsplugin_free_context(ctx);
+	edg_wll_gss_release_cred(&cred, NULL);
 
 	return 0;
 } 

@@ -113,33 +113,34 @@ void glite_gsplugin_set_timeout(glite_gsplugin_Context ctx, struct timeval const
 	else ctx->timeout = NULL;
 }
 
-#if 0
 int
 glite_gsplugin_set_credential(glite_gsplugin_Context ctx,
 			      const char *cert,
 			      const char *key)
 {
    edg_wll_GssStatus gss_code;
+   edg_wll_GssCred cred = NULL;
+   
    int ret;
 
-   ret = edg_wll_gss_acquire_cred_gsi((char *)cert, (char *)key, &ctx->cred, &gss_code);
+   ret = edg_wll_gss_acquire_cred_gsi((char *)cert, (char *)key, &cred, &gss_code);
    if (ret) {
-      /* XXX propagate error description */
+      edg_wll_gss_get_error(&gss_code, "failed to load GSI credentials",
+                            &ctx->error_msg);
       return EINVAL;
    }
 
-   free(ctx->cert_filename);
-   free(ctx->key_filename);
+   if (ctx->internal_credentials && ctx->cred != NULL)
+      edg_wll_gss_release_cred(&ctx->cred, NULL);
 
-   ctx->cert_filename = strdup(cert);
-   ctx->key_filename = strdup(key);
+   ctx->cred = cred;
+   ctx->internal_credentials = 1;
 
    return 0;
 }
-#endif
 
 void
-glite_gsplugin_set_credential(glite_gsplugin_Context ctx,
+glite_gsplugin_use_credential(glite_gsplugin_Context ctx,
 				edg_wll_GssCred cred)
 {
 	ctx->cred = cred;
