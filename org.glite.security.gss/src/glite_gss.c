@@ -674,8 +674,6 @@ edg_wll_gss_connect(edg_wll_GssCred cred, char const *hostname, int port,
 
    do { /* XXX: the black magic above */
 
-   do { /* XXX: the black magic above */
-
    /* XXX prepsat na do {} while (maj_stat == CONT) a osetrit chyby*/
    while (!context_established) {
       /* XXX verify ret_flags match what was requested */
@@ -719,27 +717,6 @@ edg_wll_gss_connect(edg_wll_GssCred cred, char const *hostname, int port,
    }
 
    /* XXX check ret_flags matches to what was requested */
-
-   /* retry on false "certificate expired" */
-   if (ret == EDG_WLL_GSS_ERROR_GSS) {
-	   edg_wll_GssStatus	gss_stat;
-	   char	*msg = NULL;
-
-	   gss_stat.major_status = maj_stat;
-	   gss_stat.minor_status = min_stat;
-	   edg_wll_gss_get_error(&gss_stat,"",&msg);
-
-	   if (strstr(msg,_EXPIRED_ALERT_MESSAGE)) {
-		   usleep(_EXPIRED_ALERT_RETRY_DELAY);
-		   retry--;
-	   }
-	   else retry = 0;
-
-	   free(msg);
-   }
-   else retry = 0;
-
-   } while (retry);
 
    /* retry on false "certificate expired" */
    if (ret == EDG_WLL_GSS_ERROR_GSS) {
