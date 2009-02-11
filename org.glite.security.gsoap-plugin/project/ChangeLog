@@ -16,3 +16,6 @@
 2.0.0-2
 - configure script update (globus flavors added to configure call)
 
+2.0.1-1
+- API reverted towards backward compatibility
+
