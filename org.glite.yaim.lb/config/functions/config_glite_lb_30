@@ -69,7 +69,7 @@ function config_glite_lb_30() {
     mysql -u root --password="$MYSQL_PASSWORD" -e "ALTER TABLE states MAX_ROWS=9500000;" lbserver20
     mysql -u root --password="$MYSQL_PASSWORD" -e "ALTER TABLE events MAX_ROWS=175000000;" lbserver20
   else
-    yaimlog "Database lbserver20 already exists"
+    yaimlog WARNING "Database lbserver20 already exists"
   fi
 
   # do we need bkindex?
