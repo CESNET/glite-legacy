@@ -7,6 +7,7 @@ config_rgma_client
 config_gip_only
 config_gip_lb
 config_info_service_lb
+config_gip_service_release
 config_globus_clients
 config_jobmon
 config_glite_lb
