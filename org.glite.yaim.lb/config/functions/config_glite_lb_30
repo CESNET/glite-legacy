@@ -1,5 +1,5 @@
 function config_glite_lb_30_check(){
-  requires MYSQL_PASSWORD
+  requires $1 MYSQL_PASSWORD
 }
 
 function config_glite_lb_30_setenv(){
@@ -8,8 +8,8 @@ function config_glite_lb_30_setenv(){
   yaimgridenv_set GLITE_LOCATION_VAR /var/glite
   yaimgridenv_set GLITE_USER ${GLITE_USER:-glite}
   yaimgridenv_set GLITE_WMS_QUERY_TIMEOUT 300
-  yaimgridenv_set GLITE_HOST_CERT ${GLITE_USER_HOME:-/home/glite}/.certs/hostcert.pem
-  yaimgridenv_set GLITE_HOST_KEY ${GLITE_USER_HOME:-/home/glite}/.certs/hostkey.pem
+  yaimgridenv_set GLITE_HOST_CERT ${GLITE_HOME_DIR:-/home/glite}/.certs/hostcert.pem
+  yaimgridenv_set GLITE_HOST_KEY ${GLITE_HOME_DIR:-/home/glite}/.certs/hostkey.pem
   yaimgridenv_set X509_CERT_DIR /etc/grid-security/certificates
   yaimgridenv_set X509_VOMS_DIR /etc/grid-security/vomsdir
 
@@ -80,18 +80,18 @@ function config_glite_lb_30() {
   chown $GLITE_USER:$GLITE_USER $GLITE_LOCATION_VAR
   chmod 0755 $GLITE_LOCATION_VAR
 
-  mkdir -p $GLITE_USER_HOME/.certs
-  chown $GLITE_USER:$GLITE_USER $GLITE_USER_HOME/.certs
-  chmod 0755 $GLITE_USER_HOME/.certs
-  cp -f /etc/grid-security/hostcert.pem /etc/grid-security/hostkey.pem $GLITE_USER_HOME/.certs/
+  mkdir -p $GLITE_HOME_DIR/.certs
+  chown $GLITE_USER:$GLITE_USER $GLITE_HOME_DIR/.certs
+  chmod 0755 $GLITE_HOME_DIR/.certs
+  cp -f /etc/grid-security/hostcert.pem /etc/grid-security/hostkey.pem $GLITE_HOME_DIR/.certs/
   if [ ! $? = 0 ] ; then
     echo "Please copy host certificate and key into /etc/grid-security and"
-    echo "  $GLITE_USER_HOME/.certs/, change the owner of the ones in"
-    echo "  $GLITE_USER_HOME/.certs/ to $GLITE_USER"
+    echo "  $GLITE_HOME_DIR/.certs/, change the owner of the ones in"
+    echo "  $GLITE_HOME_DIR/.certs/ to $GLITE_USER"
   fi
-  chown $GLITE_USER:$GLITE_USER $GLITE_USER_HOME/.certs/hostcert.pem $GLITE_USER_HOME/.certs/hostkey.pem
-  chmod 0644 $GLITE_USER_HOME/.certs/hostcert.pem
-  chmod 0400 $GLITE_USER_HOME/.certs/hostkey.pem
+  chown $GLITE_USER:$GLITE_USER $GLITE_HOME_DIR/.certs/hostcert.pem $GLITE_HOME_DIR/.certs/hostkey.pem
+  chmod 0644 $GLITE_HOME_DIR/.certs/hostcert.pem
+  chmod 0400 $GLITE_HOME_DIR/.certs/hostkey.pem
 
   # Create cron for purging
   mkdir -p /var/log/glite
