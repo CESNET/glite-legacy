@@ -27,9 +27,9 @@ make install prefix=%{buildroot}%{prefix}
 %files
 %defattr(0644,root,root)
 %{prefix}/yaim/functions/config_*
-%{prefix}/yaim/node-info.d/glite-*
 %{prefix}/yaim/defaults/glite-*
 %{prefix}/yaim/etc/versions/%{name}
+%config(noreplace) %{prefix}/yaim/node-info.d/glite-*
 %doc LICENSE
 
 %clean
