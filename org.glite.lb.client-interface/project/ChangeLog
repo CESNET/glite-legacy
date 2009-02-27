@@ -11,3 +11,7 @@
 
 3.2.0-1 (lb-1.8.0-1)
 - added ui_host to jobstatus
+
+3.2.1-1
+- Fix edg_wll_NotifDrop prototype (#34649)
+
