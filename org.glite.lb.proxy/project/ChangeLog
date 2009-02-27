@@ -11,3 +11,7 @@
 
 1.5.2-3 (lb-1.8.0-1)
 - follow changes in server-1.9.0-1
+
+1.5.3-1
+- Support chconfig in startup scripts (#27055)
+
