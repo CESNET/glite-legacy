@@ -640,3 +640,9 @@ static int decrement_timeout(struct timeval *timeout, struct timeval before, str
 	else return(0);
 }
 
+
+int amIroot(const char *subj, char **fqans)
+{
+	/* XXX: fake implementation, should not be called from proxy at all */
+	abort();
+}
