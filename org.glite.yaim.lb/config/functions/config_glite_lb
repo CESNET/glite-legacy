@@ -4,6 +4,7 @@ function config_glite_lb_check(){
 
 function config_glite_lb_setenv(){
 
+  yaimgridenv_set GLITE_USER ${GLITE_USER:-glite}
   yaimgridenv_set GLITE_JP_LOCATION ${GLITE_JP_LOCATION:-}
   yaimgridenv_set GLITE_WMS_QUERY_TIMEOUT ${GLITE_WMS_QUERY_TIMEOUT:-300}
   yaimgridenv_set GLITE_HOST_CERT ${GLITE_HOME_DIR:-/home/glite}/.certs/hostcert.pem
@@ -18,8 +19,18 @@ function config_glite_lb_setenv(){
   yaimgridenv_set GLITE_LB_RTM_DN ${GLITE_LB_RTM_DN:-/C=UK/O=eScience/OU=Imperial/L=Physics/CN=heppc24.hep.ph.ic.ac.uk/Email=janusz.martyniak@imperial.ac.uk}
   yaimgridenv_set GLITE_LB_SUPER_USERS ${GLITE_LB_SUPER_USERS:-}
 
-  yaimgridpath_append LD_LIBRARY_PATH ${INSTALL_ROOT:-opt}/c-ares/lib
-  yaimgridpath_append LD_LIBRARY_PATH ${INSTALL_ROOT:-opt}/classads/lib
+  cares_prefix=${INSTALL_ROOT:-/opt}/c-ares
+  classads_prefix=${INSTALL_ROOT:-/opt}/classads
+  if [ x`uname -m` = xx8664 ]; then
+    if [ -d "$cares_prefix/lib64" ]; then
+      cares_libarch=lib64
+    fi
+    if [ -d "$classads_prefix/lib64" ]; then
+      classads_libarch=lib64
+    fi
+  fi
+  yaimgridpath_append LD_LIBRARY_PATH $cares_prefix/${cares_libarch:-lib}
+  yaimgridpath_append LD_LIBRARY_PATH $classads_prefix/${classads_libarch:-lib}
 }
 
 function config_glite_lb() {
