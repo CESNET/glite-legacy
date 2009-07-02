@@ -66,7 +66,7 @@ glite_gsplugin_free_context(glite_gsplugin_Context ctx)
 
 	if ( ctx->internal_credentials && ctx->cred != NULL ) 
 		edg_wll_gss_release_cred(&ctx->cred, NULL);
-	if ( ctx->connection ) {
+	if ( ctx->internal_connection && ctx->connection ) {
 		if ( ctx->connection->context != NULL )
 			edg_wll_gss_close(ctx->connection, NULL);
 		free(ctx->connection);
@@ -156,13 +156,10 @@ glite_gsplugin_set_connection(glite_gsplugin_Context ctx, edg_wll_GssConnection 
 		if ( ctx->internal_connection && ctx->connection->context != NULL) {
 			pdprintf(("GSLITE_GSPLUGIN: closing gss connection\n"));
 			ret = edg_wll_gss_close(ctx->connection, ctx->timeout);
+			free(ctx->connection);
 		}
-		free(ctx->connection);
 	}
-	if (conn) {
-		ctx->connection = (edg_wll_GssConnection *)malloc(sizeof(edg_wll_GssConnection));
-		memcpy(ctx->connection, conn, sizeof(edg_wll_GssConnection));
-	} else ctx->connection = NULL;
+	ctx->connection = conn;
 	ctx->internal_connection = 0;
 
 	return ret;
