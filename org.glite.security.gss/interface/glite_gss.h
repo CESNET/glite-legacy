@@ -155,6 +155,11 @@ int
 edg_wll_gss_equal_subj(const char *a,
 		       const char *b);
 
+int
+edg_wll_gss_unread(edg_wll_GssConnection *connection,
+                   void *data,
+                   size_t len);
+
 
 #ifdef __cplusplus
 } 

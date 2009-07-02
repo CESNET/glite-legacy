@@ -1459,3 +1459,26 @@ edg_wll_gss_equal_subj(const char *a, const char *b)
 	free(an); free(bn);
 	return res;
 }
+
+int
+edg_wll_gss_unread(edg_wll_GssConnection *con, void *data, size_t len)
+{
+   char *tmp;
+
+   if (len == 0)
+       return 0;
+
+   tmp = malloc(len + con->bufsize);
+   if (tmp == NULL)
+       return ENOMEM;
+
+   memcpy(tmp, data, len);
+   if (con->bufsize > 0)
+       memcpy(tmp + len, con->buffer, con->bufsize);
+
+   free(con->buffer);
+   con->buffer = tmp;
+   con->bufsize += len;
+
+   return 0;
+}
