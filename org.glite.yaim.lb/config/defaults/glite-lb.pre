@@ -1,6 +1,0 @@
-### Default values to some glite-LB variables
-# GLITE_WMS_LCGMON_FILE - location of special log file used 
-#    to export job state information to R-GMA infrastructure through lcgmon
-GLITE_WMS_LCGMON_FILE="/var/glite/logging/status.log"
-# backward compatible default location of GLITE_LOCATION_VAR
-GLITE_LOCATION_VAR=/var/glite
