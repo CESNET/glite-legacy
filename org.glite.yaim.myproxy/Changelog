@@ -4,8 +4,11 @@
 
 by Maria Alandes
 
+glite-yaim-myproxy.spec
+- Force dependency on glite-yaim-core >= 4.0.10
+
 config/node-info.d/glite-px
-- Fix for patch #3077 configuration changes -> new config_myproxy_libs is now added.
+- Fix for bug #i52822 configuration changes -> new config_myproxy_libs is now added.
 
 config/services/glite-px
 - Fix for bug #48440: Extra spaces have been removed
