@@ -40,6 +40,7 @@ config_globus_clients
 config_proxy_server
 config_bdii_only
 config_info_service_px
+config_myproxy_libs
 "
 
 
