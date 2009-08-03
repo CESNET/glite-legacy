@@ -17,20 +17,20 @@ load_proxy(glite_renewal_core_context ctx, const char *cur_file, X509 **cert, EV
 
    result = globus_gsi_cred_handle_init(&proxy, NULL);
    if (result) {
-      fprintf(stderr, "globus_gsi_cred_handle_init() failed\n");
+      glite_renewal_core_set_err(ctx, "globus_gsi_cred_handle_init() failed");
       goto end;
    }
 
    result = globus_gsi_cred_read_proxy(proxy, (char *) cur_file);
    if (result) {
-      fprintf(stderr, "globus_gsi_cred_read_proxy() failed\n");
+      glite_renewal_core_set_err(ctx, "globus_gsi_cred_read_proxy() failed");
       goto end;
    }
 
    if (cert) {
       result = globus_gsi_cred_get_cert(proxy, cert);
       if (result) {
-	 fprintf(stderr, "globus_gsi_cred_get_cert() failed\n");
+	 glite_renewal_core_set_err(ctx, "globus_gsi_cred_get_cert() failed");
 	 goto end;
       }
    }
@@ -38,7 +38,7 @@ load_proxy(glite_renewal_core_context ctx, const char *cur_file, X509 **cert, EV
    if (priv_key) {
       result = globus_gsi_cred_get_key(proxy, priv_key);
       if (result) {
-	 fprintf(stderr, "globus_gsi_cred_get_key() failed\n");
+	 glite_renewal_core_set_err(ctx, "globus_gsi_cred_get_key() failed");
 	 goto end;
       }
    }
@@ -46,7 +46,7 @@ load_proxy(glite_renewal_core_context ctx, const char *cur_file, X509 **cert, EV
    if (chain) {
       result = globus_gsi_cred_get_cert_chain(proxy, chain);
       if (result) {
-	 fprintf(stderr, "globus_gsi_cred_get_cert_chain() failed\n");
+	 glite_renewal_core_set_err(ctx, "globus_gsi_cred_get_cert_chain() failed");
 	 goto end;
       }
    }
@@ -88,7 +88,7 @@ get_proxy_base_name(glite_renewal_core_context ctx, const char *file, char **nam
 
    result = globus_gsi_cert_utils_get_base_name(subject, chain);
    if (result) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Cannot get subject name from proxy %s", file);
+      glite_renewal_core_set_err(ctx, "Cannot get subject name from proxy %s", file);
       ret = EDG_WLPR_ERROR_SSL; /* XXX ??? */
       goto end;
    }
@@ -142,8 +142,8 @@ glite_renewal_core_renew(glite_renewal_core_context ctx,
    snprintf(tmp_proxy, sizeof(tmp_proxy), "%s.myproxy.XXXXXX", current_proxy);
    tmp_fd = mkstemp(tmp_proxy);
    if (tmp_fd == -1) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Cannot create temporary file (%s)",
-                   strerror(errno));
+      glite_renewal_core_set_err(ctx, "Cannot create temporary file (%s)",
+                                 strerror(errno));
       return errno;
    }
 
@@ -157,7 +157,7 @@ glite_renewal_core_renew(glite_renewal_core_context ctx,
 
    server = (myproxy_server) ? myproxy_server : socket_attrs->pshost;
    if (server == NULL) {
-      edg_wlpr_Log(ctx, LOG_ERR, "No myproxy server specified");
+      glite_renewal_core_set_err(ctx, "No myproxy server specified");
       ret = EINVAL;
       goto end;
    }
@@ -170,8 +170,8 @@ glite_renewal_core_renew(glite_renewal_core_context ctx,
 	                        server_response, tmp_proxy);
    if (ret == 1) {
       ret = EDG_WLPR_ERROR_MYPROXY;
-      edg_wlpr_Log(ctx, LOG_ERR, "Error contacting MyProxy server for proxy %s: %s",
-	           current_proxy, verror_get_string());
+      glite_renewal_core_set_err(ctx, "Error contacting MyProxy server for proxy %s: %s",
+	                         current_proxy, verror_get_string());
       verror_clear();
       goto end;
    }
@@ -186,8 +186,8 @@ glite_renewal_core_renew(glite_renewal_core_context ctx,
 	       current_proxy);
       tmp_voms_fd = mkstemp(tmp_voms_proxy);
       if (tmp_voms_fd == -1) {
-	 edg_wlpr_Log(ctx, LOG_ERR, "Cannot create temporary file (%s)",
-	              strerror(errno));
+	 glite_renewal_core_set_err(ctx, "Cannot create temporary file (%s)",
+	                            strerror(errno));
 	 ret = errno;
 	 goto end;
       }
@@ -195,6 +195,8 @@ glite_renewal_core_renew(glite_renewal_core_context ctx,
       ret = renew_voms_creds(ctx, current_proxy, renewed_proxy, tmp_voms_proxy);
       close(tmp_voms_fd);
       if (ret) {
+         glite_renewal_core_update_err(ctx,
+             "Failed to renew VOMS attributes");
 	 unlink(tmp_voms_proxy);
 	 goto end;
       }
@@ -249,34 +251,84 @@ glite_renewal_core_destroy_ctx(glite_renewal_core_context context)
 }
 
 void
+glite_renewal_core_set_err(glite_renewal_core_context ctx, const char *format, ...)
+{
+    va_list ap;
+
+    glite_renewal_core_reset_err(ctx);
+    va_start(ap, format);
+    vasprintf(&ctx->err_message, format, ap);
+    va_end(ap);
+}
+
+void
+glite_renewal_core_update_err(glite_renewal_core_context ctx, const char *format, ...)
+{
+    va_list ap;
+    char *msg, *err;
+
+    va_start(ap, format);
+    vasprintf(&msg, format, ap);
+    va_end(ap);
+
+    if (ctx->err_message == NULL) {
+       ctx->err_message = msg;
+       return;
+    }
+
+    asprintf(&err, "%s; %s", ctx->err_message, msg);
+    free(ctx->err_message);
+    free(msg);
+    ctx->err_message = err;
+}
+
+char *
+glite_renewal_core_get_err(glite_renewal_core_context ctx)
+{
+    return (ctx->err_message) ? ctx->err_message : "No error";
+}
+
+void
+glite_renewal_core_reset_err(glite_renewal_core_context ctx)
+{
+   if (ctx->err_message)
+      free(ctx->err_message);
+   ctx->err_message = NULL;
+}
+
+void
 edg_wlpr_Log(glite_renewal_core_context context, int dbg_level, const char *format, ...)
 {
    va_list ap;
+   char *msg = NULL, *date, *p;
+   time_t now = time(NULL);
 
-   if (context->err_message) {
-      free(context->err_message);
-      context->err_message = NULL;
-   }
-   
-   /* cannot handle the %m format argument specific for syslog() */
-   va_start(ap, format);
-   vasprintf(&context->err_message, format, ap);
-   va_end(ap);
 
    if (dbg_level > context->log_level)
       return;
 
+   /* cannot handle the %m format argument specific for syslog() */
+   va_start(ap, format);
+   /* XXX can hardly log ENOMEM errors */
+   vasprintf(&msg, format, ap);
+   va_end(ap);
+
    switch (context->log_dst) {
       case GLITE_RENEWAL_LOG_STDOUT:
-	 printf("%s\n", context->err_message);
+	 date = ctime(&now);
+	 if ((p = strchr(date, '\n')))
+	     *p = '\0';
+	 printf("%s [renewd %u]: %s\n", date, getpid(), msg);
 	 break;
       case GLITE_RENEWAL_LOG_SYSLOG:
-	 syslog(dbg_level, "%s", context->err_message);
+	 syslog(dbg_level, "%s", msg);
 	 break;
       case GLITE_RENEWAL_LOG_NONE:
       default:
 	 break;
    }
+
+   free(msg);
 
    return;
 }

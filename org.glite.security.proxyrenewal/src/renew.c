@@ -58,9 +58,14 @@ renew_proxy(glite_renewal_core_context ctx, proxy_record *record, char *basename
    }
 
    ret = glite_renewal_core_renew(ctx, server, port, repository_file, new_proxy);
-   if (ret)
+   if (ret) {
+      edg_wlpr_Log(ctx, LOG_ERR, "Failed to renew proxy %s: %s",
+                   repository_file,
+                   glite_renewal_core_get_err(ctx));
       goto end;
+   }
 
+   edg_wlpr_Log(ctx, LOG_DEBUG, "Proxy %s succesfully renewed", repository_file);
    ret = 0;
 
 end:
@@ -115,9 +120,9 @@ check_renewal(glite_renewal_core_context ctx, char *datafile, int force_renew, i
    }
 
    current_time = time(NULL);
-   edg_wlpr_Log(ctx, LOG_DEBUG, "Reading metafile %s", datafile);
 
    while (fgets(line, sizeof(line), meta_fd) != NULL) {
+      glite_renewal_core_reset_err(ctx);
       free_record(ctx, &record);
       p = strchr(line, '\n');
       if (p)
@@ -188,8 +193,6 @@ int renewal(glite_renewal_core_context ctx, int force_renew, int *num_renewed)
    FILE *fd;
    int num = 0;
 
-   edg_wlpr_Log(ctx, LOG_DEBUG, "Starting renewal process");
-
    *num_renewed = 0;
 
    if (chdir(repository)) {
@@ -222,7 +225,8 @@ int renewal(glite_renewal_core_context ctx, int force_renew, int *num_renewed)
       fclose(fd);
    }
    closedir(dir);
-   edg_wlpr_Log(ctx, LOG_DEBUG, "Finishing renewal process");
+   edg_wlpr_Log(ctx, LOG_DEBUG,
+                "Renewal attempt finished, %u proxies renewed", *num_renewed);
    return 0;
 }
 

@@ -144,11 +144,6 @@ proto(glite_renewal_core_context ctx, int sock)
       goto end;
    }
 
-   edg_wlpr_Log(ctx, LOG_INFO, "Received command code %d for proxy %s and jobid %s",
-                request.command,
-		request.proxy_filename ? request.proxy_filename : "(unspecified)",
-		request.jobid ? request.jobid : "(unspecified)");
-
    command->handler(ctx, &request, &response);
 
    ret = encode_response(ctx, &response, &buf);
@@ -179,6 +174,7 @@ doit(glite_renewal_core_context ctx, int sock)
    int flags;
 
    while (!die) {
+      glite_renewal_core_reset_err(ctx);
 
       if (child_died) {
 	 int pid, newpid, ret;
@@ -196,10 +192,9 @@ doit(glite_renewal_core_context ctx, int sock)
       newsock = accept(sock, (struct sockaddr *) &client_addr, &client_addr_len);
       if (newsock == -1) {
 	 if (errno != EINTR)
-	    edg_wlpr_Log(ctx, LOG_ERR, "accept() failed");
+	    edg_wlpr_Log(ctx, LOG_ERR, "accept() failed: %s",  strerror(errno));
          continue;
       }
-      edg_wlpr_Log(ctx, LOG_DEBUG, "Got connection");
 
       flags = fcntl(newsock, F_GETFL, 0);
       if (fcntl(newsock, F_SETFL, flags | O_NONBLOCK) < 0) {
@@ -211,7 +206,6 @@ doit(glite_renewal_core_context ctx, int sock)
 	 
       proto(ctx, newsock);
 
-      edg_wlpr_Log(ctx, LOG_DEBUG, "Connection closed");
       close(newsock);
    }
    edg_wlpr_Log(ctx, LOG_DEBUG, "Terminating on signal %d\n",die);
@@ -448,7 +442,6 @@ do_listen(glite_renewal_core_context ctx, char *socket_name, int *sock)
    my_addr.sun_family = AF_UNIX;
    strncpy(my_addr.sun_path, socket_name, sizeof(my_addr.sun_path));
    unlink(socket_name);
-   umask(0177);
 
    s = socket(AF_UNIX, SOCK_STREAM, 0);
    if (s == -1) {

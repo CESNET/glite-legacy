@@ -55,6 +55,18 @@ glite_renewal_core_renew(glite_renewal_core_context context,
 			 const char *current_proxy,
 			 char **new_proxy);
 
+void
+glite_renewal_core_set_err(glite_renewal_core_context ctx, const char *format, ...);
+
+void
+glite_renewal_core_update_err(glite_renewal_core_context ctx, const char *format, ...);
+
+char *
+glite_renewal_core_get_err(glite_renewal_core_context ctx);
+
+void
+glite_renewal_core_reset_err(glite_renewal_core_context ctx);
+
 #ifdef __cplusplus
 }
 #endif

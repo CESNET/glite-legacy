@@ -27,39 +27,39 @@ generate_proxy(glite_renewal_core_context ctx, globus_gsi_cred_handle_t cur_prox
 
    result = globus_gsi_proxy_handle_init(&proxy_handle, NULL);
    if (result) {
-      edg_wlpr_Log(ctx, LOG_ERR, "globus_gsi_proxy_handle_init() failed\n");
+      glite_renewal_core_set_err(ctx, "globus_gsi_proxy_handle_init() failed");
       goto end;
    }
 
    result = globus_gsi_cred_get_key(cur_proxy, &cur_proxy_priv_key);
    if (result) {
-      edg_wlpr_Log(ctx, LOG_ERR, "globus_gsi_cred_get_key() failed\n");
+      glite_renewal_core_set_err(ctx, "globus_gsi_cred_get_key() failed");
       goto end;
    }
 
    /* Create and sign a new proxy */
    result = globus_gsi_cred_get_cert_type(cur_proxy, &proxy_type);
    if (result) {
-      edg_wlpr_Log(ctx, LOG_ERR, "globus_gsi_cred_get_cert_type() failed\n");
+      glite_renewal_core_set_err(ctx, "globus_gsi_cred_get_cert_type() failed");
       goto end;
    }
 
    result = globus_gsi_proxy_handle_set_type(proxy_handle, proxy_type);
    if (result) {
-      edg_wlpr_Log(ctx, LOG_ERR, "globus_gsi_proxy_handle_set_type() failed\n");
+      glite_renewal_core_set_err(ctx, "globus_gsi_proxy_handle_set_type() failed");
       goto end;
    }
 
    result = globus_gsi_proxy_create_signed(proxy_handle, cur_proxy, &proxy);
    if (result) {
-      edg_wlpr_Log(ctx, LOG_ERR, "globus_gsi_proxy_handle_init() failed\n");
+      glite_renewal_core_set_err(ctx, "globus_gsi_proxy_handle_init() failed");
       goto end;
    }
 
    /* Get the new proxy */
    result = globus_gsi_cred_get_cert(proxy, &new_cert);
    if (result) {
-      edg_wlpr_Log(ctx, LOG_ERR, "globus_gsi_cred_get_cert() failed\n");
+      glite_renewal_core_set_err(ctx, "globus_gsi_cred_get_cert() failed");
       goto end;
    }
 
@@ -79,7 +79,7 @@ generate_proxy(glite_renewal_core_context ctx, globus_gsi_cred_handle_t cur_prox
    /* And put the cert back, older one is unallocated by the function */
    result = globus_gsi_cred_set_cert(proxy, voms_cert);
    if (result) {
-      edg_wlpr_Log(ctx, LOG_ERR, "globus_gsi_cred_set_cert() failed\n");
+      glite_renewal_core_set_err(ctx, "globus_gsi_cred_set_cert() failed");
       goto end;
    }
 
@@ -100,7 +100,7 @@ my_VOMS_Export(glite_renewal_core_context ctx, void *buf, int buf_len, X509_EXTE
    p = pp = buf;
    ac = d2i_AC(NULL, &p, buf_len+1);
    if (ac == NULL) {
-      edg_wlpr_Log(ctx, LOG_ERR, "d2i_AC() failed\n");
+      glite_renewal_core_set_err(ctx, "d2i_AC() failed");
       return 1;
    }
 
@@ -129,7 +129,7 @@ create_voms_command(glite_renewal_core_context ctx, struct vomsdata *vd, struct 
 #endif
 
    if (voms_cert == NULL || *voms_cert == NULL || (*voms_cert)->std == NULL) {
-      edg_wlpr_Log(ctx, LOG_ERR, "Invalid VOMS certificate\n");
+      glite_renewal_core_set_err(ctx, "Invalid VOMS certificate");
       return 1;
    }
 
@@ -163,7 +163,7 @@ renew_voms_cert(glite_renewal_core_context ctx, struct vomsdata *vd, struct voms
    if ((*voms_cert)->uri != NULL) {
       voms_server = strdup((*voms_cert)->uri);
       if (voms_server == NULL) {
-         edg_wlpr_Log(ctx, LOG_ERR, "Not enough memory");
+         glite_renewal_core_set_err(ctx, "Not enough memory");
          ret = 1;
          goto end;
       }
@@ -186,8 +186,8 @@ renew_voms_cert(glite_renewal_core_context ctx, struct vomsdata *vd, struct voms
          goto end;
       }
       err_msg = VOMS_ErrorMessage(vd, voms_error, NULL, 0);
-      edg_wlpr_Log(ctx, LOG_ERR,
-                   "Failed to contact VOMS server %s of VO %s: %s\n",
+      glite_renewal_core_set_err(ctx,
+                   "Failed to contact VOMS server %s of VO %s: %s",
                    voms_server, (*voms_cert)->voname, err_msg);
       free(err_msg);
    }
@@ -197,7 +197,7 @@ renew_voms_cert(glite_renewal_core_context ctx, struct vomsdata *vd, struct voms
    voms_contacts = VOMS_FindByVO(vd, (*voms_cert)->voname, ctx->voms_conf, NULL, &voms_error);
    if (voms_contacts == NULL) {
       err_msg = VOMS_ErrorMessage(vd, voms_error, NULL, 0);
-      edg_wlpr_Log(ctx, LOG_ERR, "Can't find configuration for VO %s: %s\n",
+      glite_renewal_core_set_err(ctx, "Can't find configuration for VO %s: %s",
 		   (*voms_cert)->voname, err_msg);
       free(err_msg);
       ret = 1;
@@ -214,8 +214,8 @@ renew_voms_cert(glite_renewal_core_context ctx, struct vomsdata *vd, struct voms
           break;
        }
        err_msg = VOMS_ErrorMessage(vd, voms_error, NULL, 0);
-       edg_wlpr_Log(ctx, LOG_ERR,
-                    "Failed to contact VOMS server %s of VO %s: %s\n",
+       glite_renewal_core_set_err(ctx,
+                    "Failed to contact VOMS server %s of VO %s: %s",
                     (*c)->host, (*voms_cert)->voname, err_msg);
        free(err_msg);
    }
@@ -363,11 +363,11 @@ get_voms_cert(glite_renewal_core_context ctx,
    /* XXX pass the vomsdir and cadir parameters */
    voms_info = VOMS_Init(NULL, NULL);
    if (voms_info == NULL) {
-      edg_wlpr_Log(ctx, LOG_ERR, "check_voms_cert(): Cannot initialize VOMS context (VOMS_Init() failed, probably voms dir was not specified)");
+      glite_renewal_core_set_err(ctx, "VOMS_Init() failed, probably voms dir was not specified");
       return EDG_WLPR_ERROR_VOMS;
    }
 
-   VOMS_SetVerificationType(VERIFY_NONE, voms_info, NULL);
+   VOMS_SetVerificationType(VERIFY_NONE, voms_info, &voms_err);
 
    ret = 0;
    voms_ret = VOMS_Retrieve(cert, chain, RECURSE_CHAIN, voms_info, &voms_err);
@@ -377,7 +377,7 @@ get_voms_cert(glite_renewal_core_context ctx,
          ret = 0;
       } else {
          char *err_msg = VOMS_ErrorMessage(voms_info, voms_err, NULL, 0);
-         edg_wlpr_Log(ctx, LOG_ERR, "Failed to retrieve VOMS attributes: %s\n",
+         glite_renewal_core_set_err(ctx, "Failed to retrieve VOMS attributes: %s",
                       err_msg);
          free(err_msg);
          ret = -1; /* XXX */
@@ -407,7 +407,7 @@ main(int argc, char *argv[])
 
    if (globus_module_activate(GLOBUS_GSI_PROXY_MODULE) != GLOBUS_SUCCESS ||
        globus_module_activate(GLOBUS_GSI_CERT_UTILS_MODULE) != GLOBUS_SUCCESS) {
-       edg_wlpr_Log(ctx, LOG_ERR, "[%d]: Unable to initialize Globus modules\n", getpid());
+       glite_renewal_core_set_err(ctx, "Unable to initialize Globus modules");
        return 1;
    }
 
