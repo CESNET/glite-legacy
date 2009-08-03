@@ -135,7 +135,8 @@ create_voms_command(glite_renewal_core_context ctx, struct vomsdata *vd, struct 
 
    attribs = (*voms_cert)->std;
 
-   if (attribs[0]->role == NULL || strcmp (attribs[0]->role, "NULL") == 0 )
+   if (attribs[0]->role == NULL || strcmp (attribs[0]->role, "NULL") == 0 ||
+       strcmp(attribs[0]->role, "") == 0)
       ret = asprintf(command, "G%s", attribs[0]->group);
    else
       ret = asprintf(command, "B%s:%s", attribs[0]->group, attribs[0]->role);
