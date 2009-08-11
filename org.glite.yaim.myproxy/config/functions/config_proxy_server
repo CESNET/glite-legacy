@@ -49,7 +49,7 @@ return 0
 config_proxy_server () {
 
 # Fix for bug 54094: BDII_USER needs copies of host cert and key
-mkdir -p ${BDII_HOME_DIR}/.certs
+mkdir -p ${BDII_HOME_DIR}/.globus
 cp ${X509_HOST_CERT} ${BDII_HOME_DIR}/.globus/usercert.pem 
 cp ${X509_HOST_KEY} ${BDII_HOME_DIR}/.globus/userkey.pem 
 chown -R ${BDII_USER}.${BDII_GROUP} ${BDII_HOME_DIR}/.globus 
