@@ -1,3 +1,16 @@
+####################################################################
+############### TAG glite-yaim-myproxy_R_4_0_4_2 ###################
+####################################################################
+
+09/08/2009 ->
+
+by Maria Alandes
+
+config/functions/config_myproxy_server
+- Fix for bug #54094: host cert and key is now copied for the bdii user
+
+config/node-info.d/glite-px
+- config_myproxy_libs is now removed.
 
 ####################################################################
 ############### TAG glite-yaim-myproxy_R_4_0_4_1 ###################
