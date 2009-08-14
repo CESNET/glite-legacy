@@ -15,8 +15,8 @@ gsoap_prefix=/opt/gsoap
 
 CC=gcc
 
-gsoap_versions_noflavours?=2.6.2 2.7.0f 2.7.6b 2.7.6d 2.7.9d 2.7.9b 2.7.9l
-gsoap_versions_flavours?=2.7.10
+gsoap_versions_noflavours?=2.6.2 2.7.0f 2.7.6b 2.7.6d 2.7.9d 2.7.9b
+gsoap_versions_flavours?=2.7.10 2.7.9l
 gsoap_versions_flavours:=${shell if ! echo $gsoap_versions_flavours | grep "\<${gsoap_default_version}\>" >/dev/null; then echo "${gsoap_default_version} "; else echo ne; fi} ${gsoap_versions_flavours}
 
 -include Makefile.inc
@@ -186,8 +186,6 @@ link-gsoap:
 		ln -sf ${ext_repository}/${gsoap_name}/${gsoap_version}/src/stdsoap2.[ch] .; \
 	elif [ -f ${ext_repository}/${gsoap_name}/${gsoap_version}/src/${gsoap_srcname}/soapcpp2/stdsoap2.c ]; then \
 		ln -sf ${ext_repository}/${gsoap_name}/${gsoap_version}/src/${gsoap_srcname}/soapcpp2/stdsoap2.[ch] .; \
-	elif [ -f ${gsoap_prefix}/include/gsoap/stdsoap2.c ]; then \
-	ln -sf ${gsoap_prefix}/include/gsoap/stdsoap2.[ch] .; \
 	else false ; \
 	fi
 
