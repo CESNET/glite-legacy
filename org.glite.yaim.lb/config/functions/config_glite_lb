@@ -19,6 +19,8 @@ function config_glite_lb_setenv(){
   yaimgridenv_set GLITE_LB_RTM_DN ${GLITE_LB_RTM_DN:-/C=UK/O=eScience/OU=Imperial/L=Physics/CN=heppc24.hep.ph.ic.ac.uk/Email=janusz.martyniak@imperial.ac.uk}
   yaimgridenv_set GLITE_LB_SUPER_USERS ${GLITE_LB_SUPER_USERS:-}
 
+  yaimgridenv_set GLITE_LB_TYPE ${GLITE_LB_TYPE:-server}
+
   cares_prefix=${INSTALL_ROOT:-/opt}/c-ares
   classads_prefix=${INSTALL_ROOT:-/opt}/classads
   if [ x`uname -m` = xx8664 ]; then
@@ -180,10 +182,14 @@ EOF
 
   . /opt/glite/etc/profile.d/grid-env.sh
   ${GLITE_LOCATION}/etc/init.d/glite-lb-bkserverd stop
-  #Temporary workaround to kill glite-lb-notif-interlogd
+  #Temporary workaround to kill glite-lb-*-interlogd
   ps ax | grep -v grep | grep glite-lb-notif-interlogd > /dev/null
   if [ $? = 0 ]; then
     killall -9 /opt/glite/bin/glite-lb-notif-interlogd
+  fi  
+  ps ax | grep -v grep | grep glite-lb-interlogd > /dev/null
+  if [ $? = 0 ]; then
+    killall -9 /opt/glite/bin/glite-lb-interlogd
   fi  
   ${GLITE_LOCATION}/etc/init.d/glite-lb-bkserverd start
 
