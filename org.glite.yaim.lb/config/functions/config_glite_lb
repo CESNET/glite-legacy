@@ -23,7 +23,7 @@ function config_glite_lb_setenv(){
 
   cares_prefix=${INSTALL_ROOT:-/opt}/c-ares
   classads_prefix=${INSTALL_ROOT:-/opt}/classads
-  if [ x`uname -m` = xx8664 ]; then
+  if [ x`uname -m` = xx86_64 ]; then
     if [ -d "$cares_prefix/lib64" ]; then
       cares_libarch=lib64
     fi
