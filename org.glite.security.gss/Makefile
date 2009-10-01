@@ -10,7 +10,6 @@ PREFIX=/opt/glite
 
 glite_location=/opt/glite
 globus_prefix=/opt/globus
-cppunit_prefix=/opt/cppunit
 nothrflavour=gcc32
 thrflavour=gcc32pthr
 

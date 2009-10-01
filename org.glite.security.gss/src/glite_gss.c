@@ -170,8 +170,8 @@ static int asyn_gethostbyname(char **addrOut, char const *name, struct timeval *
 	if (ar.err == NETDB_SUCCESS) {
 		*addrOut = malloc(sizeof(struct in_addr));
 		memcpy(*addrOut,ar.ent->h_addr_list[0], sizeof(struct in_addr));
+		free_hostent(ar.ent);
 	}
-	free_hostent(ar.ent);
 	return(ar.err);
 }
 
@@ -374,16 +374,14 @@ recv_token(int sock, void **token, size_t *token_length, struct timeval *to)
       }
 
       if (count==0) {
-         if (tl==0) {
-            free(t);
+         if (tl==0) 
             return EDG_WLL_GSS_ERROR_EOF;
-         } else goto end;
+         else goto end;
       }
       tmp=realloc(t, tl + count);
       if (tmp == NULL) {
-	errno = ENOMEM;
-	free(t);
-	return EDG_WLL_GSS_ERROR_ERRNO;
+	 errno = ENOMEM;
+	 return EDG_WLL_GSS_ERROR_ERRNO;
       }
       t = tmp;
       memcpy(t + tl, buf, count);
@@ -674,6 +672,8 @@ edg_wll_gss_connect(edg_wll_GssCred cred, char const *hostname, int port,
 
    do { /* XXX: the black magic above */
 
+   do { /* XXX: the black magic above */
+
    /* XXX prepsat na do {} while (maj_stat == CONT) a osetrit chyby*/
    while (!context_established) {
       /* XXX verify ret_flags match what was requested */
@@ -717,6 +717,27 @@ edg_wll_gss_connect(edg_wll_GssCred cred, char const *hostname, int port,
    }
 
    /* XXX check ret_flags matches to what was requested */
+
+   /* retry on false "certificate expired" */
+   if (ret == EDG_WLL_GSS_ERROR_GSS) {
+	   edg_wll_GssStatus	gss_stat;
+	   char	*msg = NULL;
+
+	   gss_stat.major_status = maj_stat;
+	   gss_stat.minor_status = min_stat;
+	   edg_wll_gss_get_error(&gss_stat,"",&msg);
+
+	   if (strstr(msg,_EXPIRED_ALERT_MESSAGE)) {
+		   usleep(_EXPIRED_ALERT_RETRY_DELAY);
+		   retry--;
+	   }
+	   else retry = 0;
+
+	   free(msg);
+   }
+   else retry = 0;
+
+   } while (retry);
 
    /* retry on false "certificate expired" */
    if (ret == EDG_WLL_GSS_ERROR_GSS) {
@@ -1458,27 +1479,4 @@ edg_wll_gss_equal_subj(const char *a, const char *b)
 	
 	free(an); free(bn);
 	return res;
-}
-
-int
-edg_wll_gss_unread(edg_wll_GssConnection *con, void *data, size_t len)
-{
-   char *tmp;
-
-   if (len == 0)
-       return 0;
-
-   tmp = malloc(len + con->bufsize);
-   if (tmp == NULL)
-       return ENOMEM;
-
-   memcpy(tmp, data, len);
-   if (con->bufsize > 0)
-       memcpy(tmp + len, con->buffer, con->bufsize);
-
-   free(con->buffer);
-   con->buffer = tmp;
-   con->bufsize += len;
-
-   return 0;
 }

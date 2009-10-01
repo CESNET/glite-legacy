@@ -31,7 +31,6 @@ public:
 	void errorTest();
 
 	void setUp();
-	void tearDown();
 
 private:
 	edg_wll_GssCred	my_cred;
@@ -59,8 +58,6 @@ void GSSTest::replier() {
 	while ( (len = edg_wll_gss_read(&conn, buf, sizeof(buf), &timeout, &stat)) >= 0 ) {
 		if ( edg_wll_gss_write(&conn, buf, len, &timeout, &stat) ) exit(1);
 	}	
-
-	edg_wll_gss_close(&conn, &timeout);
 
 	exit(0);
 }
@@ -106,10 +103,6 @@ void GSSTest::setUp(void) {
 	else close(sock);
 }
 
-
-void GSSTest::tearDown(void) {
-	edg_wll_gss_release_cred(&my_cred, NULL);
-}
 
 
 void GSSTest::echo()
