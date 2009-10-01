@@ -1,3 +1,15 @@
 2.0.0-1
 - LB 2.0 release 
 
+2.0.0-2
+- proper reference to cppunit
+
+2.0.0-3
+- globus flavors added to configure
+
+2.0.0-4
+- Module repacked.
+
+2.0.0-5
+- New age to fix an erroneous lock
+
