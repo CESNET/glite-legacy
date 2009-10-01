@@ -10,3 +10,6 @@
 2.0.0-4
 - Module repacked.
 
+2.0.0-5
+- New age to fix an erroneous lock
+
