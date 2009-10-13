@@ -15,3 +15,9 @@
 1.5.3-1
 - Support chconfig in startup scripts (#27055)
 
+1.5.3-2
+- fake mIroot() implementation
+
+1.5.3-3
+- Module repacked
+
