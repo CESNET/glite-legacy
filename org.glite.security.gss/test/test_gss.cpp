@@ -77,6 +77,7 @@ void GSSTest::setUp(void) {
 
 	timeout.tv_sec = to ? atoi(to) : 10 ;
 	timeout.tv_usec = 0;
+	my_cred = NULL;
 	
 	key_file = cred_file = getenv("X509_USER_PROXY");
 	CPPUNIT_ASSERT_MESSAGE("credential file", cred_file);
@@ -87,6 +88,7 @@ void GSSTest::setUp(void) {
         sock = socket(PF_INET,SOCK_STREAM,0);
 	CPPUNIT_ASSERT_MESSAGE("socket()", sock >= 0);
 
+	memset(&a, 0, sizeof a);
         a.sin_family = AF_INET;
         a.sin_port = 0;
         a.sin_addr.s_addr = INADDR_ANY;

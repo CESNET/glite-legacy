@@ -14,6 +14,7 @@
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <ares.h>
+#include <ares_version.h>
 #include <errno.h>
 
 #include <globus_common.h>
@@ -54,7 +55,12 @@ static int decrement_timeout(struct timeval *timeout, struct timeval before, str
 }
 
 /* ares callback handler for ares_gethostbyname()       */
-static void callback_handler(void *arg, int status, struct hostent *h) {
+#if ARES_VERSION >= 0x010500
+static void callback_handler(void *arg, int status, int timeouts, struct hostent *h)
+#else
+static void callback_handler(void *arg, int status, struct hostent *h)
+#endif
+{
 	struct asyn_result *arp = (struct asyn_result *) arg;
 
 	switch (status) {

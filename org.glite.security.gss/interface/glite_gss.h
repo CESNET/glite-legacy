@@ -7,6 +7,7 @@
 extern "C" {
 #endif
 
+#include <sys/time.h>
 #include <stdlib.h>
 
 enum {

@@ -39,7 +39,6 @@ CFLAGS:= ${DEBUG} \
 	-DVERSION=\"${version}\" \
 	-I. -I${top_srcdir}/interface \
 	-I${stagedir}/include \
-	-I${cares_prefix}/include \
 	${COVERAGE_FLAGS} -D_GNU_SOURCE -DDATAGRID_EXTENSION
 
 LDFLAGS:=${COVERAGE_FLAGS}
@@ -60,6 +59,7 @@ GLOBUS_THR_LIBS:= -L${globus_prefix}/lib \
 	-lglobus_common_${thrflavour} \
 	-lglobus_gssapi_gsi_${thrflavour}
 
+ARES_INC:=-I${cares_prefix}/include
 ARES_LIBS:=-L${cares_prefix}/lib -lcares
 
 EX_LIBS:= ${GLOBUS_LIBS} ${ARES_LIBS}
@@ -132,10 +132,10 @@ clean:
 	rm -rf *.o *.lo *.a *.la .libs test_gss
 
 %.o: %.c
-	${COMPILE} ${GLOBUS_INC} -o $@ -c $<
+	${COMPILE} ${GLOBUS_INC} ${ARES_INC} -o $@ -c $<
 
 %.thr.o: %.c
-	${COMPILE} ${GLOBUS_THR_INC} -o $@ -c $<
+	${COMPILE} ${GLOBUS_THR_INC} ${ARES_INC} -o $@ -c $<
 
 test_gss.o: %.o: %.cpp
 	${CXX} -c ${CFLAGS} ${GLOBUS_INC} ${TEST_INC} -Wno-error $<
