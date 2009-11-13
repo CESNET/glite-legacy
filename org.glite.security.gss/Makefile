@@ -60,7 +60,7 @@ GLOBUS_THR_LIBS:= -L${globus_prefix}/lib \
 	-lglobus_gssapi_gsi_${thrflavour}
 
 ARES_INC:=-I${cares_prefix}/include
-ARES_LIBS:=-L${cares_prefix}/lib -lcares
+ARES_LIBS:=-L${cares_prefix}/${libdir} -L${cares_prefix}/lib -lcares
 
 EX_LIBS:= ${GLOBUS_LIBS} ${ARES_LIBS}
 EX_THRLIBS := ${GLOBUS_THR_LIBS} ${ARES_LIBS}
