@@ -1,3 +1,4 @@
+#include <cstring>
 #include <iostream>
 #include <fstream>
 #include <sys/types.h>
