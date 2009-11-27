@@ -150,7 +150,7 @@ check: check.cxx
 # (C flavour, gsoap 2.7.10 ==> C++ test fails)
 check.cxx:
 	${MAKE} lang=cxx -f ${top_srcdir}/Makefile ${LTLIB_TEST_S} test_cxx
-	./test_cxx
+	LD_LIBRARY_PATH=${cares_prefix}/${libdir}:${LD_LIBRARY_PATH} ./test_cxx
 
 examples: ${EXAMPLES}
 
