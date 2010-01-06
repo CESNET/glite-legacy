@@ -18,6 +18,8 @@ function config_glite_lb_setenv(){
   yaimgridenv_set GLITE_LB_RTM_ENABLED ${GLITE_LB_RTM_ENABLED:-false}
   yaimgridenv_set GLITE_LB_RTM_DN ${GLITE_LB_RTM_DN:-/C=UK/O=eScience/OU=Imperial/L=Physics/CN=heppc24.hep.ph.ic.ac.uk/Email=janusz.martyniak@imperial.ac.uk}
   yaimgridenv_set GLITE_LB_SUPER_USERS ${GLITE_LB_SUPER_USERS:-}
+  yaimgridenv_set GLITE_LB_HARVESTER_ENABLED ${GLITE_LB_HARVESTER_ENABLED:-false}
+  yaimgridenv_set GLITE_LB_HARVESTER_MSG_OPTIONS "${GLITE_LB_HARVESTER_MSG_OPTIONS:---wlcg}"
 
   yaimgridenv_set GLITE_LB_TYPE ${GLITE_LB_TYPE:-server}
 
@@ -103,7 +105,7 @@ function config_glite_lb() {
     mysql -u root --password="$MYSQL_PASSWORD" -e "ALTER TABLE states MAX_ROWS=9500000;" lbserver20
     mysql -u root --password="$MYSQL_PASSWORD" -e "ALTER TABLE events MAX_ROWS=175000000;" lbserver20
 
-    if [ x"$GLITE_LB_RTM_ENABLED" = x"true" ]; then
+    if [ x"$GLITE_LB_RTM_ENABLED" = x"true" -o x"GLITE_LB_HARVESTER_ENABLED" = x"true" ]; then
       # index for querying older jobs by real time monitor
       cat << EOF | $GLITE_LOCATION/bin/glite-lb-bkindex -rv
 [
@@ -179,6 +181,10 @@ EOF
   mv ${GLITE_LOCATION}/etc/LB-super-users ${GLITE_LOCATION}/etc/LB-super-users.prev
   cat ${GLITE_LOCATION}/etc/LB-super-users.prev ${GLITE_LOCATION}/etc/LB-super-users.add | sort | uniq > ${GLITE_LOCATION}/etc/LB-super-users
   rm ${GLITE_LOCATION}/etc/LB-super-users.prev ${GLITE_LOCATION}/etc/LB-super-users.add
+
+  if [ ! -f ${GLITE_LOCATION}/etc/glite-lb-harvester.conf ]; then
+    echo $HOSTNAME > ${GLITE_LOCATION}/etc/glite-lb-harvester.conf
+  fi
 
   . /opt/glite/etc/profile.d/grid-env.sh
   ${GLITE_LOCATION}/etc/init.d/glite-lb-bkserverd stop
