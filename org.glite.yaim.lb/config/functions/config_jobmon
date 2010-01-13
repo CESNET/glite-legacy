@@ -19,7 +19,7 @@
 #
 # NAME :        config_jobmon
 #
-# DESCRIPTION : This function configures the globus clients.
+# DESCRIPTION : Monitoring using RGMA export (deprecated).
 #
 # AUTHORS :     Di.Qing@cern.ch
 #
