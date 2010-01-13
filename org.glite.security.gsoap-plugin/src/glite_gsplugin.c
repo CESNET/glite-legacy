@@ -206,7 +206,6 @@ glite_gsplugin(struct soap *soap, struct soap_plugin *p, void *arg)
 	soap->fconnect		= NULL;
 	soap->fclose		= glite_gsplugin_close;
 #if GSOAP_VERSION >= 20700
-	soap->fclosesocket	= NULL;
 	soap->fpoll		= glite_gsplugin_poll;
 #endif
 	soap->faccept		= glite_gsplugin_accept;
