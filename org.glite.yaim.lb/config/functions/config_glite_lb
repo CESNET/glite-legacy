@@ -16,8 +16,8 @@ function config_glite_lb_setenv(){
   yaimgridenv_set GLITE_LB_EXPORT_PURGE_ARGS "${GLITE_LB_EXPORT_PURGE_ARGS:---cleared 2d --aborted 15d --cancelled 15d --other 60d}"
   yaimgridenv_set GLITE_LB_EXPORT_JPPS ${GLITE_LB_EXPORT_JPPS:-}
   yaimgridenv_set GLITE_LB_RTM_ENABLED ${GLITE_LB_RTM_ENABLED:-false}
-  yaimgridenv_set GLITE_LB_RTM_DN ${GLITE_LB_RTM_DN:-/C=UK/O=eScience/OU=Imperial/L=Physics/CN=heppc24.hep.ph.ic.ac.uk/Email=janusz.martyniak@imperial.ac.uk}
-  yaimgridenv_set GLITE_LB_SUPER_USERS ${GLITE_LB_SUPER_USERS:-}
+  yaimgridenv_set GLITE_LB_RTM_DN "${GLITE_LB_RTM_DN:-/C=UK/O=eScience/OU=Imperial/L=Physics/CN=heppc24.hep.ph.ic.ac.uk/Email=janusz.martyniak@imperial.ac.uk}"
+  yaimgridenv_set GLITE_LB_SUPER_USERS "${GLITE_LB_SUPER_USERS:-}"
   yaimgridenv_set GLITE_LB_HARVESTER_ENABLED ${GLITE_LB_HARVESTER_ENABLED:-false}
   yaimgridenv_set GLITE_LB_HARVESTER_MSG_OPTIONS "${GLITE_LB_HARVESTER_MSG_OPTIONS:---wlcg}"
 
@@ -173,14 +173,14 @@ EOF
     echo "${GLITE_LOCATION}/etc/init.d/glite-lb-bkserverd" >> ${GLITE_LOCATION}/etc/gLiteservices
   fi
 
-  touch ${GLITE_LOCATION}/etc/LB-super-users
-  echo "$GLITE_LB_SUPER_USERS" > ${GLITE_LOCATION}/etc/LB-super-users.add
-  if [ x"$GLITE_LB_RTM_ENABLED" = x"true" ]; then
-    echo "$GLITE_LB_RTM_DN" >> ${GLITE_LOCATION}/etc/LB-super-users.add
+  if [ -z "$GLITE_LB_SUPER_USERS" ]; then
+    touch ${GLITE_LOCATION}/etc/LB-super-users
+  else
+    echo "$GLITE_LB_SUPER_USERS" > ${GLITE_LOCATION}/etc/LB-super-users
   fi
-  mv ${GLITE_LOCATION}/etc/LB-super-users ${GLITE_LOCATION}/etc/LB-super-users.prev
-  cat ${GLITE_LOCATION}/etc/LB-super-users.prev ${GLITE_LOCATION}/etc/LB-super-users.add | sort | uniq > ${GLITE_LOCATION}/etc/LB-super-users
-  rm ${GLITE_LOCATION}/etc/LB-super-users.prev ${GLITE_LOCATION}/etc/LB-super-users.add
+  if [ x"$GLITE_LB_RTM_ENABLED" = x"true" ]; then
+    echo "$GLITE_LB_RTM_DN" >> ${GLITE_LOCATION}/etc/LB-super-users
+  fi
 
   if [ ! -f ${GLITE_LOCATION}/etc/glite-lb-harvester.conf ]; then
     echo $HOSTNAME > ${GLITE_LOCATION}/etc/glite-lb-harvester.conf
