@@ -33,15 +33,18 @@ main(int argc, char **argv)
 	edg_wll_GssStatus		gss_code;
 	edg_wll_GssCred			cred = NULL;
 	edg_wll_GssConnection		connection;
-	glite_gsplugin_Context	ctx;
-	struct sockaddr_in		a;
-	int						alen;
-	char				   *name, *msg;
-	int						opt,
-							port = 19999;
+	glite_gsplugin_Context		ctx;
+	struct sockaddr_storage		a;
+	int				alen;
+	char			 	 *name, *msg;
+	int			 	opt,
+					port = 19999;
 	char				*cert_filename = NULL, *key_filename = NULL;
-	int						sock;
-
+	int				sock;
+	struct addrinfo 		hints;
+	struct addrinfo 		*res;
+	char 				*portname;
+  	int 				error;
 
 	name = strrchr(argv[0],'/');
 	if ( name ) name++; else name = argv[0];
@@ -78,12 +81,21 @@ main(int argc, char **argv)
 		exit(1);
 	}
 
-	alen = sizeof(a);
-	if ( (sock = socket(PF_INET,SOCK_STREAM,0)) < 0 ) { perror("socket()"); exit(1); }
-	a.sin_family = AF_INET;
-	a.sin_port = htons(port);
-	a.sin_addr.s_addr = INADDR_ANY;
-	if ( bind(sock, (struct sockaddr *)&a, sizeof(a)) ) { perror("bind()"); exit(1); }
+	asprintf(&portname, "%d", port);
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = PF_UNSPEC;
+	hints.ai_flags = AI_PASSIVE;
+	hints.ai_socktype = SOCK_STREAM;
+	error = getaddrinfo(NULL, portname , &hints, &res);
+	if (error) {
+		perror(gai_strerror(error));
+		exit(1);
+	}
+	alen = res->ai_addrlen;
+	if ( (sock = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) < 0 )
+		{ perror("socket()"); exit(1); }
+	if ( bind(sock, res->ai_addr, res->ai_addrlen) ) { perror("bind()"); exit(1); }
+	freeaddrinfo(res);
 	if ( listen(sock, 100) ) { perror("listen()"); exit(1); }
 
 	bzero((char *) &a, alen);

@@ -73,15 +73,16 @@ static void callback_handler(void *arg, int status, struct hostent *h)
 				break;
 			}
 			arp->ent->h_addr_list[0] =
-				malloc(sizeof(struct in_addr));
+				malloc(h->h_length);
 			if (arp->ent->h_addr_list[0] == NULL) {
 				free(arp->ent->h_addr_list);
 				arp->err = NETDB_INTERNAL;
 				break;
 			}
 			memcpy(arp->ent->h_addr_list[0], h->h_addr_list[0],
-				sizeof(struct in_addr));
+				h->h_length);
 			arp->ent->h_addr_list[1] = NULL;
+			arp->ent->h_addrtype = h->h_addrtype;
 			arp->err = NETDB_SUCCESS;
 		} else {
 			arp->err = NO_DATA;
@@ -119,7 +120,7 @@ static void free_hostent(struct hostent *h){
         }
 }
 
-static int asyn_gethostbyname(char **addrOut, char const *name, struct timeval *timeout) {
+static int asyn_getservbyname(struct sockaddr_storage *addrOut, socklen_t *a_len,char const *name, int port, struct timeval *timeout) {
 	struct asyn_result ar;
 	ares_channel channel;
 	int nfds;
@@ -135,7 +136,7 @@ static int asyn_gethostbyname(char **addrOut, char const *name, struct timeval *
 	ar.ent = (struct hostent *) calloc (sizeof(*ar.ent),1);
 
 /* query DNS server asynchronously */
-	ares_gethostbyname(channel, name, AF_INET, callback_handler,
+	ares_gethostbyname(channel, name, AF_INET6, callback_handler,
 			   (void *) &ar);
 
 /* wait for result */
@@ -147,7 +148,7 @@ static int asyn_gethostbyname(char **addrOut, char const *name, struct timeval *
 			break;
 
 		gettimeofday(&check_time,0);
-		if (decrement_timeout(timeout, start_time, check_time)) {
+		if (timeout && decrement_timeout(timeout, start_time, check_time)) {
 			ares_destroy(channel);
 			free_hostent(ar.ent);
 			return(TRY_AGAIN);
@@ -174,9 +175,28 @@ static int asyn_gethostbyname(char **addrOut, char const *name, struct timeval *
 	ares_destroy(channel);
 
 	if (ar.err == NETDB_SUCCESS) {
-		*addrOut = malloc(sizeof(struct in_addr));
-		memcpy(*addrOut,ar.ent->h_addr_list[0], sizeof(struct in_addr));
+		struct sockaddr_in *p4 = (struct sockaddr_in *)addrOut;
+		struct sockaddr_in6 *p6 = (struct sockaddr_in6 *)addrOut;
+
+		memset(addrOut, 0, sizeof *addrOut);
+		addrOut->ss_family = ar.ent->h_addrtype;
+		switch (ar.ent->h_addrtype) {
+			case AF_INET:
+				memcpy(&p4->sin_addr,ar.ent->h_addr_list[0], sizeof(struct in_addr));
+				p4->sin_port = htons(port);
+				*a_len = sizeof (struct sockaddr_in);
+				break;
+			case AF_INET6:
+				memcpy(&p6->sin6_addr,ar.ent->h_addr_list[0], sizeof(struct in6_addr));
+				p6->sin6_port = htons(port);
+				*a_len = sizeof (struct sockaddr_in6);
+				break;
+			default:
+				return NETDB_INTERNAL;
+				break;
+		}
 	}
+
 	free_hostent(ar.ent);
 	return(ar.err);
 }
@@ -186,34 +206,16 @@ do_connect(int *s, char const *hostname, int port, struct timeval *timeout)
 {
    int sock;
    struct timeval before,after,to;
-   struct sockaddr_in a;
+   struct sockaddr_storage a;
+   socklen_t a_len;
    int sock_err;
    socklen_t err_len;
-   char *addr;
    int h_errno;
    int	opt;
 
-   sock = socket(AF_INET, SOCK_STREAM, 0);
-   if (sock < 0) return EDG_WLL_GSS_ERROR_ERRNO;
-
-   opt = 1;
-   setsockopt(sock,IPPROTO_TCP,TCP_NODELAY,&opt,sizeof opt);
-
-   if (timeout) {
-	     int	flags = fcntl(sock, F_GETFL, 0);
-	     if (fcntl(sock, F_SETFL, flags | O_NONBLOCK) < 0)
-		     return EDG_WLL_GSS_ERROR_ERRNO;
-	     gettimeofday(&before,NULL);
-   }
-   
-   if (timeout) {
-      switch (h_errno = asyn_gethostbyname(&addr, hostname, timeout)) {
+   /* XXX todo: try multiple addresses */
+      switch (h_errno = asyn_getservbyname(&a, &a_len, hostname, port, timeout)) {
 		case NETDB_SUCCESS:
-			memset(&a,0,sizeof a);
-			a.sin_family = AF_INET;
-			memcpy(&a.sin_addr.s_addr,addr,sizeof a.sin_addr.s_addr);
-			a.sin_port = htons(port);
-			free(addr);
 			break;
 		case TRY_AGAIN:
 			close(sock);
@@ -228,23 +230,21 @@ do_connect(int *s, char const *hostname, int port, struct timeval *timeout)
 			errno = h_errno;
 			return EDG_WLL_GSS_ERROR_HERRNO;
       }
-   } else {
-      struct hostent *hp;
 
-      hp = gethostbyname(hostname);
-      if (hp == NULL) {
-	 close(sock);
-	 errno = h_errno;
-	 return EDG_WLL_GSS_ERROR_HERRNO;
-      }
+   sock = socket(a.ss_family, SOCK_STREAM, 0);
+   if (sock < 0) return EDG_WLL_GSS_ERROR_ERRNO;
 
-      memset(&a,0,sizeof a);
-      a.sin_family = AF_INET;
-      memcpy(&a.sin_addr.s_addr, hp->h_addr_list[0], sizeof(a.sin_addr.s_addr));
-      a.sin_port = htons(port);
+   opt = 1;
+   setsockopt(sock,IPPROTO_TCP,TCP_NODELAY,&opt,sizeof opt);
+
+   if (timeout) {
+	     int	flags = fcntl(sock, F_GETFL, 0);
+	     if (fcntl(sock, F_SETFL, flags | O_NONBLOCK) < 0)
+		     return EDG_WLL_GSS_ERROR_ERRNO;
+	     gettimeofday(&before,NULL);
    }
-
-   if (connect(sock,(struct sockaddr *) &a,sizeof a) < 0) {
+   
+   if (connect(sock,(struct sockaddr *) &a, a_len) < 0) {
 	     if (timeout && errno == EINPROGRESS) {
 		     fd_set	fds;
 		     FD_ZERO(&fds);
