@@ -114,33 +114,49 @@ my_VOMS_Export(glite_renewal_core_context ctx, void *buf, int buf_len, X509_EXTE
 static int
 create_voms_command(glite_renewal_core_context ctx, struct vomsdata *vd, struct voms **voms_cert, char **command)
 {
-   int ret;
+   int ret, voms_err, i;
    struct data **attribs;
-
-#if 0
-   VOMS_ResetOrder(vd, &voms_error);
-   for (i = 2; i < argc; i++) {
-      ret = VOMS_Ordering(argv[i], vd, &voms_error);
-      if (ret == 0) {
-	 edg_wlpr_Log(ctx, LOG_ERR, "VOMS_Ordering() failed\n"); 
-	 return 1;
-      }
-   }
-#endif
+   char *str = NULL;
+   char *role, *cmd = NULL, *tmp  = NULL;
 
    if (voms_cert == NULL || *voms_cert == NULL || (*voms_cert)->std == NULL) {
       glite_renewal_core_set_err(ctx, "Invalid VOMS certificate");
       return 1;
    }
 
+   VOMS_ResetOrder(vd, &voms_err);
    attribs = (*voms_cert)->std;
+   i = 0;
+   while (attribs && attribs[i]) {
+      role = NULL;
+      if ((attribs[i])->role && strcmp ((attribs[i])->role, "NULL") != 0 &&
+          strcmp((attribs[i])->role, "") != 0)
+         role = (attribs[i])->role;
 
-   if (attribs[0]->role == NULL || strcmp (attribs[0]->role, "NULL") == 0 ||
-       strcmp(attribs[0]->role, "") == 0)
-      ret = asprintf(command, "G%s", attribs[0]->group);
-   else
-      ret = asprintf(command, "B%s:%s", attribs[0]->group, attribs[0]->role);
+      asprintf(&str, "%s%s%s",
+               (attribs[i])->group,
+               (role) ? ":" : "",
+               (role) ? role : "");
 
+      /* XXXXXXX */
+      if (i < 5) 
+      {
+         VOMS_Ordering(str, vd, &voms_err);
+      }
+
+      asprintf(&tmp, "%s%s%s%s",
+               (cmd) ? cmd : "",
+               (cmd) ? "," : "",
+               (role) ? "B" : "G",
+               str);
+      cmd = tmp;
+      
+      free(str);
+      str = NULL;
+      i++;
+   }
+
+   *command = cmd;
    return 0;
 }
 
