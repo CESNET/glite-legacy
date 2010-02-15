@@ -138,11 +138,8 @@ create_voms_command(glite_renewal_core_context ctx, struct vomsdata *vd, struct 
                (role) ? ":" : "",
                (role) ? role : "");
 
-      /* XXXXXXX */
-      if (i < 5) 
-      {
+      if (ctx->order_attributes) 
          VOMS_Ordering(str, vd, &voms_err);
-      }
 
       asprintf(&tmp, "%s%s%s%s",
                (cmd) ? cmd : "",

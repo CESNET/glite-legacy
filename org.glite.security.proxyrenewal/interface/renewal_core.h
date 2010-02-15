@@ -20,6 +20,7 @@ typedef struct glite_renewal_core_context_data {
   glite_renewal_log_dst log_dst;
   char *err_message;
   char *voms_conf;
+  int order_attributes;
 } glite_renewal_core_context_data;
 
 typedef struct glite_renewal_core_context_data *glite_renewal_core_context;
