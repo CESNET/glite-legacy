@@ -15,7 +15,6 @@ char *vomsdir = NULL;
 int voms_enabled = 0;
 char *cert = NULL;
 char *key = NULL;
-char *vomsconf = NULL;
 
 static volatile int die = 0, child_died = 0;
 double default_timeout = 0;
@@ -32,6 +31,7 @@ static struct option opts[] = {
    { "voms-config", required_argument, NULL, 'G' },
    { "cert",        required_argument, NULL, 't' },
    { "key",         required_argument, NULL, 'k' },
+   { "order-attributes",  no_argument, NULL, 'O' },
    { NULL, 0, NULL, 0 }
 };
 
@@ -425,7 +425,8 @@ usage(glite_renewal_core_context ctx, char *progname)
 	   "\t-C, --CAdir          trusted certificates directory\n"
 	   "\t-V, --VOMSdir        trusted VOMS servers certificates directory\n"
 	   "\t-A, --enable-voms    renew also VOMS certificates in proxies\n"
-	   "\t-G, --voms-config    location of the vomses configuration file\n",
+	   "\t-G, --voms-config    location of the vomses configuration file\n"
+	   "\t-O, --order-attributes   retain VOMS attributes ordering\n",
 	   progname);
 }
 
@@ -506,10 +507,16 @@ int main(int argc, char *argv[])
    if (progname) progname++; 
    else progname = argv[0];
 
+   ret = glite_renewal_core_init_ctx(&ctx);
+   if (ret) {
+      fprintf(stderr, "Cannot initialize context\n");
+      exit(1);
+   }
+
    repository = EDG_WLPR_REPOSITORY_ROOT;
    debug = 0;
 
-   while ((opt = getopt_long(argc, argv, "hvdr:c:C:V:AG:t:k:", opts, NULL)) != EOF)
+   while ((opt = getopt_long(argc, argv, "hvdr:c:C:V:AG:t:k:O", opts, NULL)) != EOF)
       switch (opt) {
 	 case 'h': usage(ctx, progname); exit(0);
 	 case 'v': fprintf(stdout, "%s:\t%s\n", progname, rcsid); exit(0);
@@ -519,9 +526,10 @@ int main(int argc, char *argv[])
 	 case 'C': cadir = optarg; break;
 	 case 'V': vomsdir = optarg; break;
 	 case 'A': voms_enabled = 1; break;
-	 case 'G': vomsconf = optarg; break;
+	 case 'G': ctx->voms_conf = optarg; break;
 	 case 't': cert = optarg; break;
 	 case 'k': key = optarg; break;
+	 case 'O': ctx->order_attributes = 1; break;
 	 case '?': usage(ctx, progname); return 1;
       }
 
@@ -530,16 +538,10 @@ int main(int argc, char *argv[])
       exit(1);
    }
 
-   ret = glite_renewal_core_init_ctx(&ctx);
-   if (ret) {
-      fprintf(stderr, "Cannot initialize context\n");
-      exit(1);
-   }
    if (debug) {
       ctx->log_level = LOG_DEBUG;
       ctx->log_dst = GLITE_RENEWAL_LOG_STDOUT;
    }
-   ctx->voms_conf = vomsconf;
 
    if (chdir(repository)) {
       edg_wlpr_Log(ctx, LOG_ERR, "Cannot access repository directory %s (%s)",
