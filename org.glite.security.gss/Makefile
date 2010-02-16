@@ -26,7 +26,7 @@ version_info:=-version-info ${shell \
 
 VPATH=${top_srcdir}/src:${top_srcdir}/test
 
-TEST_LIBS:=-L${cppunit_prefix}/lib -lcppunit
+TEST_LIBS:=-L${cppunit_prefix}/${libdir} -lcppunit
 TEST_INC:=-I${cppunit_prefix}/include
 
 default: all
@@ -44,8 +44,8 @@ CFLAGS:= ${DEBUG} \
 LDFLAGS:=${COVERAGE_FLAGS}
 
 COMPILE:=libtool --mode=compile ${CC} ${CFLAGS}
-LINK:=libtool --mode=link ${CC} -rpath ${stagedir}/lib ${LDFLAGS} 
-LINKXX:=libtool --mode=link  ${CXX} -rpath ${stagedir}/lib ${LDFLAGS}
+LINK:=libtool --mode=link ${CC} -rpath ${stagedir}/${libdir} ${LDFLAGS} 
+LINKXX:=libtool --mode=link  ${CXX} -rpath ${stagedir}/${libdir} ${LDFLAGS}
 INSTALL:=libtool --mode=install install
 
 GLOBUS_INC:= -I${globus_prefix}/include/${nothrflavour}
@@ -117,14 +117,14 @@ stage:
 	$(MAKE) install PREFIX=${stagedir} DOSTAGE=yes
 
 install:
-	-mkdir -p ${PREFIX}/lib
+	-mkdir -p ${PREFIX}/${libdir}
 	-mkdir -p ${PREFIX}/share/doc/${package}-${version}
 	-mkdir -p ${PREFIX}/include/glite/security
-	${INSTALL} -m 755 ${GSS_LTLIB} ${GSS_THRLTLIB} ${PREFIX}/lib
+	${INSTALL} -m 755 ${GSS_LTLIB} ${GSS_THRLTLIB} ${PREFIX}/${libdir}
 	${INSTALL} -m 644 ${top_srcdir}/LICENSE ${PREFIX}/share/doc/${package}-${version}
 	cd ${top_srcdir}/interface && ${INSTALL} -m 644 ${HDRS} ${PREFIX}/include/glite/security/
 	if [ x${DOSTAGE} = xyes ]; then \
-		install -m 644 ${GSS_STATICLIB} ${GSS_THRSTATICLIB} ${PREFIX}/lib; \
+		install -m 644 ${GSS_STATICLIB} ${GSS_THRSTATICLIB} ${PREFIX}/${libdir}; \
 	fi
 
 clean:
