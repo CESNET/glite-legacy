@@ -13,3 +13,5 @@
 2.0.0-5
 - New age to fix an erroneous lock
 
+2.0.0-6
+- install libraries into $libdir
