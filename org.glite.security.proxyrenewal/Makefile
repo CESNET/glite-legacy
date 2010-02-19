@@ -25,20 +25,15 @@ lbprefix=lb
 package=glite-security-proxyrenewal
 version=0.0.0
 PREFIX=/opt/glite
+libdir=lib
 
-glite_location=$PREFIX
 globus_prefix=/opt/globus
 nothrflavour=gcc32
 thrflavour=gcc32pthr
 myproxy_prefix=$globus_prefix
+voms_prefix=/opt/glite
 
 -include Makefile.inc
-
-archlib:=lib
-host_cpu:=${shell uname -m}
-ifeq (${host_cpu},x86_64)
-    archlib:=lib64
-endif
 
 VPATH:=${top_srcdir}/src:${top_srcdir}/examples
 
@@ -56,7 +51,7 @@ DEBUG:=-g -O0
 CFLAGS:= ${DEBUG} \
 	${MYPROXYINC} \
 	-I${top_srcdir}/src -I${top_srcdir}/interface \
-	-I${glite_location}/include
+	-I${voms_prefix}/include
 
 GLOBUS_LIBS:=-L${globus_prefix}/lib \
 	-lglobus_common_${nothrflavour}
@@ -71,7 +66,7 @@ version_info:=-version-info ${shell \
 CC:=gcc
 
 COMPILE:=libtool --mode=compile ${CC} ${CFLAGS}
-LINK:=libtool --mode=link ${CC} ${LDFLAGS}
+LINK:=libtool --mode=link ${CC} -rpath ${stagedir}/${libdir} ${LDFLAGS}
 INSTALL:=libtool --mode=install install
 
 DAEMONOBJ:=renewd.o renew.o common.o commands.o api.o voms.o
@@ -93,8 +88,8 @@ THRLIB:=libglite_security_proxyrenewal_${thrflavour}.la
 LIB_CORE_NOTHR := libglite_security_proxyrenewal_core_${nothrflavour}.la
 LIB_CORE_THR := libglite_security_proxyrenewal_core_${thrflavour}.la
 
-VOMS_LIB_NOTHR := -L${glite_location}/${archlib} -lvomsc_${nothrflavour}
-VOMS_LIB_THR := -L${glite_location}/${archlib} -lvomsc_${thrflavour}
+VOMS_LIB_NOTHR := -L${voms_prefix}/${libdir} -lvomsc_${nothrflavour}
+VOMS_LIB_THR := -L${voms_prefix}/${libdir} -lvomsc_${thrflavour}
 
 DAEMON:=glite-proxy-renewd
 CLIENT:=glite-proxy-renew
@@ -104,16 +99,16 @@ default: all
 compile all: ${LIB} ${THRLIB} ${LIB_CORE_NOTHR} ${DAEMON} ${CLIENT} 
 
 ${LIB}: ${LIBOBJ}
-	${LINK} ${version_info} -o $@ ${LIBLOBJ} -rpath ${glite_location}/lib
+	${LINK} ${version_info} -o $@ ${LIBLOBJ}
 
 ${THRLIB}: ${THRLIBOBJ}
-	${LINK} ${version_info} -o $@ ${THRLIBLOBJ} -rpath ${glite_location}/lib
+	${LINK} ${version_info} -o $@ ${THRLIBLOBJ}
 
 ${LIB_CORE_NOTHR}: ${LIB_CORE_NOTHR_OBJS}
-	${LINK} ${version_info} -o $@ ${LIB_CORE_NOTHR_LOBJS} -rpath ${glite_location}/lib ${MYPROXY_LIB_NOTHR} ${VOMS_LIB_NOTHR}
+	${LINK} ${version_info} -o $@ ${LIB_CORE_NOTHR_LOBJS} ${MYPROXY_LIB_NOTHR} ${VOMS_LIB_NOTHR}
 
 ${LIB_CORE_THR}: ${LIB_CORE_THR_OBJS}
-	${LINK} ${version_info} -o $@ ${LIB_CORE_THR_LOBJS} -rpath ${glite_location}/lib ${MYPROXY_LIB_THR} ${VOMS_LIB_THR}
+	${LINK} ${version_info} -o $@ ${LIB_CORE_THR_LOBJS} ${MYPROXY_LIB_THR} ${VOMS_LIB_THR}
 
 ${DAEMON}: ${DAEMONOBJ} ${LIB_CORE_NOTHR}
 	${LINK} -o $@ ${DAEMONOBJ} ${LIB_CORE_NOTHR} 
@@ -152,8 +147,8 @@ distbin:
 	rm -rf tmpbuilddir
 
 install:
-	-mkdir -p ${PREFIX}/bin ${PREFIX}/lib ${PREFIX}/include/glite/security/proxyrenewal ${PREFIX}/share/doc/${package}-${version} ${PREFIX}/etc/init.d
-	${INSTALL} -m 644 ${LIB} ${THRLIB} ${LIB_CORE_NOTHR} ${PREFIX}/lib
+	-mkdir -p ${PREFIX}/bin ${PREFIX}/${libdir} ${PREFIX}/include/glite/security/proxyrenewal ${PREFIX}/share/doc/${package}-${version} ${PREFIX}/etc/init.d
+	${INSTALL} -m 644 ${LIB} ${THRLIB} ${LIB_CORE_NOTHR} ${PREFIX}/${libdir}
 	${INSTALL} -m 755 ${DAEMON} ${CLIENT} ${PREFIX}/bin
 	${INSTALL} -m 644 ${top_srcdir}/LICENSE ${PREFIX}/share/doc/${package}-${version}
 	cd ${top_srcdir}/interface && ${INSTALL} -m 644 renewal.h renewal_core.h ${PREFIX}/include/glite/security/proxyrenewal
