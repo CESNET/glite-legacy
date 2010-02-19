@@ -788,6 +788,10 @@ edg_wll_gss_connect(edg_wll_GssCred cred, char const *hostname, int port,
 #endif
 
    /* XXX if cred == GSS_C_NO_CREDENTIAL set the ANONYMOUS flag */
+   if (cred == GSS_C_NO_CREDENTIAL) {
+	ret = EDG_WLL_GSS_ERROR_GSS;
+        goto end;
+   }
 
    do { /* XXX: the black magic above */
 
