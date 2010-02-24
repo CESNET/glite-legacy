@@ -104,20 +104,51 @@ function config_glite_lb() {
     mysql -u root --password="$MYSQL_PASSWORD" -e "ALTER TABLE long_fields MAX_ROWS=55000000;" lbserver20
     mysql -u root --password="$MYSQL_PASSWORD" -e "ALTER TABLE states MAX_ROWS=9500000;" lbserver20
     mysql -u root --password="$MYSQL_PASSWORD" -e "ALTER TABLE events MAX_ROWS=175000000;" lbserver20
-
-    if [ x"$GLITE_LB_RTM_ENABLED" = x"true" -o x"GLITE_LB_HARVESTER_ENABLED" = x"true" ]; then
-      # index for querying older jobs by real time monitor
-      cat << EOF | $GLITE_LOCATION/bin/glite-lb-bkindex -rv
-[
-	JobIndices = {
-		[ type = "system"; name = "lastUpdateTime" ]
-	}
-]
-EOF
-    fi
   else
     yaimlog WARNING "Database lbserver20 already exists"
   fi
+
+  # adjust indexes
+  # 1) if L&B with local harvester or L&B for Real Time Monitoring ==> lastUpdateTime needed
+  # 2) if GLITE_LB_INDEX_OWNER specified ==> create/destroy owner index
+  need_reindex=0
+  $GLITE_LOCATION/bin/glite-lb-bkindex -d 2>/dev/null | tail -n +3 | head -n -2 | sed 's/\([^,]\)$/\1,/' > /var/tmp/glite-lb-bkindexes.txt
+  if [ x"$GLITE_LB_RTM_ENABLED" = x"true" -o x"GLITE_LB_HARVESTER_ENABLED" = x"true" ]; then
+    # index for querying older jobs by real time monitor
+    grep '\[ type = "system"; name = "lastUpdateTime" \]' /var/tmp/glite-lb-bkindexes.txt >/dev/null
+    if [ $? != 0 ]; then
+	need_reindex=1
+	yaimlog INFO "Index 'lastUpdateTime' will be added"
+	echo '[ type = "system"; name = "lastUpdateTime" ],' >> /var/tmp/glite-lb-bkindexes.txt
+    fi
+  fi
+  if [ x"$GLITE_LB_INDEX_OWNER" = x"true" ]; then
+    grep 'name = "owner"' /var/tmp/glite-lb-bkindexes.txt >/dev/null
+    if [ $? != 0 ]; then
+	need_reindex=1
+	yaimlog INFO "Index 'owner' will be added"
+	echo '[ type = "system"; name = "owner" ],' >> /var/tmp/glite-lb-bkindexes.txt
+    fi
+  elif [ x"$GLITE_LB_INDEX_OWNER" = x"false" ]; then
+    grep 'name = "owner"' /var/tmp/glite-lb-bkindexes.txt >/dev/null
+    if [ $? = 0 ]; then
+	need_reindex=1
+	yaimlog INFO "Index 'owner' will be deleted"
+	mv /var/tmp/glite-lb-bkindexes.txt /var/tmp/glite-lb-bkindexes.txt.2
+	grep -v 'name = "owner"' /var/tmp/glite-lb-bkindexes.txt.2 > /var/tmp/glite-lb-bkindexes.txt
+	rm -f /var/tmp/glite-lb-bkindexes.txt.2
+    fi
+  fi
+  if [ $need_reindex = 1 ]; then
+    cat << EOF | $GLITE_LOCATION/bin/glite-lb-bkindex -rv
+[
+	JobIndices = {
+`cat /var/tmp/glite-lb-bkindexes.txt`
+	}
+]
+EOF
+  fi
+  rm -f /var/tmp/glite-lb-bkindexes.txt
 
   mkdir -p $GLITE_LOCATION_VAR   # Needed to store PID of LB server 
 
