@@ -1,10 +1,16 @@
 function config_glite_lb_check(){
-  requires $1 MYSQL_PASSWORD INSTALL_ROOT GLITE_LOCATION GLITE_LOCATION_VAR GLITE_USER GLITE_HOME_DIR
+  requires $1 MYSQL_PASSWORD INSTALL_ROOT GLITE_LOCATION GLITE_LOCATION_VAR GLITE_USER
 }
 
 function config_glite_lb_setenv(){
 
   yaimgridenv_set GLITE_USER ${GLITE_USER:-glite}
+  # Redefine GLITE_HOME_DIR to make sure we retrieve the correct HOME directory of user glite
+  GLITE_HOME_DIR=`getent passwd ${GLITE_USER} | cut -d: -f6`
+  if [ "x${GLITE_HOME_DIR}" = "x" ]; then
+    yaimlog ERROR "The home directory of ${GLITE_HOME_DIR} doesn't exist. Check whether the user ${GLITE_USER} was properly created"
+    exit ${YEX_NOSUCHFILE}
+  fi
   yaimgridenv_set GLITE_JP_LOCATION ${GLITE_JP_LOCATION:-}
   yaimgridenv_set GLITE_WMS_QUERY_TIMEOUT ${GLITE_WMS_QUERY_TIMEOUT:-300}
   yaimgridenv_set GLITE_HOST_CERT ${GLITE_HOME_DIR:-/home/glite}/.certs/hostcert.pem
@@ -44,6 +50,13 @@ function config_glite_lb() {
   #############################################
 	
   HOSTNAME=`hostname -f`
+
+  # Redefine GLITE_HOME_DIR to make sure we retrieve the correct HOME directory of user glite
+  GLITE_HOME_DIR=`getent passwd ${GLITE_USER} | cut -d: -f6`
+  if [ "x${GLITE_HOME_DIR}" = "x" ]; then
+    yaimlog ERROR "The home directory of ${GLITE_HOME_DIR} doesn't exist. Check whether the user ${GLITE_USER} was properly created"
+    exit ${YEX_NOSUCHFILE}
+  fi
 
   # Let Job Provenance Primary Storage as localhost:8901 in LB startup script.
   # More strict check of GLITE_LB_EXPORT_JPPS variable only here.
@@ -160,9 +173,9 @@ EOF
   chmod 0755 $GLITE_HOME_DIR/.certs
   cp -f /etc/grid-security/hostcert.pem /etc/grid-security/hostkey.pem $GLITE_HOME_DIR/.certs/
   if [ ! $? = 0 ] ; then
-    echo "Please copy host certificate and key into /etc/grid-security and"
-    echo "  $GLITE_HOME_DIR/.certs/, change the owner of the ones in"
-    echo "  $GLITE_HOME_DIR/.certs/ to $GLITE_USER"
+    yaimlog WARNING "Please copy host certificate and key into /etc/grid-security and"
+    yaimlog WARNING  "  $GLITE_HOME_DIR/.certs/, change the owner of the ones in"
+    yaimlog WARNING  "  $GLITE_HOME_DIR/.certs/ to $GLITE_USER"
   fi
   chown $GLITE_USER:$GLITE_USER $GLITE_HOME_DIR/.certs/hostcert.pem $GLITE_HOME_DIR/.certs/hostkey.pem
   chmod 0644 $GLITE_HOME_DIR/.certs/hostcert.pem
