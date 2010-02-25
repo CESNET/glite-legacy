@@ -8,7 +8,7 @@ function config_glite_lb_setenv(){
   # Redefine GLITE_HOME_DIR to make sure we retrieve the correct HOME directory of user glite
   GLITE_HOME_DIR=`getent passwd ${GLITE_USER} | cut -d: -f6`
   if [ "x${GLITE_HOME_DIR}" = "x" ]; then
-    yaimlog ERROR "The home directory of ${GLITE_HOME_DIR} doesn't exist. Check whether the user ${GLITE_USER} was properly created"
+    yaimlog ERROR "The home directory of ${GLITE_USER} doesn't exist. Check whether the user ${GLITE_USER} was properly created"
     exit ${YEX_NOSUCHFILE}
   fi
   yaimgridenv_set GLITE_JP_LOCATION ${GLITE_JP_LOCATION:-}
@@ -54,7 +54,7 @@ function config_glite_lb() {
   # Redefine GLITE_HOME_DIR to make sure we retrieve the correct HOME directory of user glite
   GLITE_HOME_DIR=`getent passwd ${GLITE_USER} | cut -d: -f6`
   if [ "x${GLITE_HOME_DIR}" = "x" ]; then
-    yaimlog ERROR "The home directory of ${GLITE_HOME_DIR} doesn't exist. Check whether the user ${GLITE_USER} was properly created"
+    yaimlog ERROR "The home directory of ${GLITE_USER} doesn't exist. Check whether the user ${GLITE_USER} was properly created"
     exit ${YEX_NOSUCHFILE}
   fi
 
