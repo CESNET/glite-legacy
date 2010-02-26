@@ -73,10 +73,10 @@ LDFLAGS:=${COVERAGE_FLAGS}
 
 COMPILE:=libtool --mode=compile ${CC} ${CFLAGS}
 COMPILEXX:=libtool --mode=compile ${CXX} ${CFLAGS}
-LINK:=libtool --mode=link ${CC} -rpath ${stagedir}/lib ${LDFLAGS}
-LINKXX:=libtool --mode=link ${CXX} -rpath ${stagedir}/lib ${LDFLAGS}
+LINK:=libtool --mode=link ${CC} -rpath ${stagedir}/${libdir} ${LDFLAGS}
+LINKXX:=libtool --mode=link ${CXX} -rpath ${stagedir}/${libdir} ${LDFLAGS}
 INSTALL:=libtool --mode=install install
-LINK_lang:=PATH=${top_srcdir}/project/libtoolhack:${PATH} libtool --mode=link ${CXX} -rpath ${stagedir}/lib ${LDFLAGS}
+LINK_lang:=PATH=${top_srcdir}/project/libtoolhack:${PATH} libtool --mode=link ${CXX} -rpath ${stagedir}/${libdir} ${LDFLAGS}
 ifeq (${lang},c)
 LINK_lang:=${LINK}
 endif
@@ -84,8 +84,8 @@ ifeq (${lang},cxx)
 LINK_lang:=${LINKXX}
 endif
 
-EX_LIBS:=-L${stagedir}/lib -lglite_security_gss_${nothrflavour}
-EX_THRLIBS:=-L${stagedir}/lib -lglite_security_gss_${thrflavour}
+EX_LIBS:=-L${stagedir}/${libdir} -lglite_security_gss_${nothrflavour}
+EX_THRLIBS:=-L${stagedir}/${libdir} -lglite_security_gss_${thrflavour}
 HDRS:=glite_gsplugin.h glite_gscompat.h glite_gsplugin-int.h
 EXAMPLES:=wscalc_clt_ex wscalc_srv_ex wscalc_srv_ex2
 TESTS:=test_cxx
@@ -228,7 +228,7 @@ stage:
 	$(MAKE) install PREFIX=${stagedir} DOSTAGE=yes
 
 install:
-	-mkdir -p ${PREFIX}/lib
+	-mkdir -p ${PREFIX}/${libdir}
 	-mkdir -p ${PREFIX}/include/glite/security
 	-mkdir -p ${PREFIX}/share/doc/${package}-${version}
 	-mkdir -p ${PREFIX}/include/glite/security/
@@ -243,7 +243,7 @@ install:
 	done
 
 install-soaplib:
-	${INSTALL} -m 755 ${LTLIB_S} ${THRLTLIB_S} ${PREFIX}/lib
+	${INSTALL} -m 755 ${LTLIB_S} ${THRLTLIB_S} ${PREFIX}/${libdir}
 
 clean:
 	rm -rvf ${STATICLIB} ${LTLIB} ${THRSTATICLIB} ${THRLTLIB}
