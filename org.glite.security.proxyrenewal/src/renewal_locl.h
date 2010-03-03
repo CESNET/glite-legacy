@@ -29,7 +29,6 @@
 #include <time.h>
 #include <errno.h>
 #include <syslog.h>
-#include <linux/limits.h>
 #include <signal.h>
 #include <assert.h>
 #include <getopt.h>

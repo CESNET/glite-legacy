@@ -571,7 +571,7 @@ int main(int argc, char *argv[])
    globus_module_activate(GLOBUS_GSI_PROXY_MODULE);
 
    if (!debug)
-      for (fd = 3; fd < OPEN_MAX; fd++) close(fd);
+      for (fd = 3; fd < sysconf(_SC_OPEN_MAX); fd++) close(fd);
 
    if (!debug) {
       /* chdir ? */
