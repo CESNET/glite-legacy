@@ -15,3 +15,6 @@
 3.2.1-1
 - Fix edg_wll_NotifDrop prototype (#34649)
 
+3.2.2-1
+- Makefile fix
+
