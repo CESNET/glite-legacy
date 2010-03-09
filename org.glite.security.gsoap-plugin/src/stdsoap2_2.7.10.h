@@ -292,9 +292,9 @@ A commercial use license is available from Genivia, Inc., contact@genivia.com
 #  define HAVE_STRRCHR
 #  define HAVE_STRTOD
 #  define HAVE_SSCANF
-#  define HAVE_STRTOD_L
-#  define HAVE_SSCANF_L
-#  define HAVE_SPRINTF_L
+//#  define HAVE_STRTOD_L
+//#  define HAVE_SSCANF_L
+//#  define HAVE_SPRINTF_L
 #  define HAVE_STRTOL
 #  define HAVE_STRTOUL
 #  define HAVE_STRTOLL
