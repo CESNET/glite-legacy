@@ -367,6 +367,7 @@ glite_gsplugin_accept(struct soap *soap, int s, struct sockaddr *a, int *n)
 	if ( (conn = accept(s, (struct sockaddr *)&a, (socklen_t *)n)) < 0 ) return conn;
 	if ( !ctx->connection ) {
 		if ( !(ctx->connection = (edg_wll_GssConnection *)malloc(sizeof(*ctx->connection))) ) {
+			close(conn);
 			soap_set_receiver_error(soap, "malloc error", strerror(ENOMEM), ENOMEM);
 			return SOAP_INVALID_SOCKET;
 		}
@@ -374,6 +375,7 @@ glite_gsplugin_accept(struct soap *soap, int s, struct sockaddr *a, int *n)
 	}
 	if ( edg_wll_gss_accept(ctx->cred, conn, ctx->timeout, ctx->connection, &gss_code)) {
 		pdprintf(("GSLITE_GSPLUGIN: Client authentication failed, closing.\n"));
+		close(conn);
 		edg_wll_gss_get_error(&gss_code, "Client authentication failed", &ctx->error_msg);
 		soap->errnum = SOAP_SVR_FAULT;
 		soap_set_receiver_error(soap, "SSL error", "SSL authentication failed in tcp_connect(): check password, key file, and ca file.", SOAP_SSL_ERROR);
