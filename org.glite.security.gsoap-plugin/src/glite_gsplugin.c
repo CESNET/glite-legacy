@@ -38,6 +38,7 @@ static int glite_gsplugin_poll(struct soap *);
 static int glite_gsplugin_accept(struct soap *, int, struct sockaddr *, int *);
 static int glite_gsplugin_posthdr(struct soap *soap, const char *key, const char *val);
 
+static int get_error(int err, edg_wll_GssStatus *gss_stat, const char *msg, char **desc);
 
 int
 glite_gsplugin_init_context(glite_gsplugin_Context *ctx)
@@ -124,11 +125,8 @@ glite_gsplugin_set_credential(glite_gsplugin_Context ctx,
    int ret;
 
    ret = edg_wll_gss_acquire_cred_gsi((char *)cert, (char *)key, &cred, &gss_code);
-   if (ret) {
-      edg_wll_gss_get_error(&gss_code, "failed to load GSI credentials",
-                            &ctx->error_msg);
-      return EINVAL;
-   }
+   if (ret)
+	return get_error(ret, &gss_code, "failed to load GSI credentials", &ctx->error_msg);
 
    if (ctx->internal_credentials && ctx->cred != NULL)
       edg_wll_gss_release_cred(&ctx->cred, NULL);
@@ -262,6 +260,7 @@ glite_gsplugin_connect(
 	glite_gsplugin_Context	ctx;
 	edg_wll_GssStatus		gss_stat;
 	int						ret;
+	const char *msg = NULL;
 
 
 	pdprintf(("GSLITE_GSPLUGIN: glite_gsplugin_connect()\n"));
@@ -286,8 +285,7 @@ glite_gsplugin_connect(
 		ret = edg_wll_gss_acquire_cred_gsi(NULL, NULL,
                 	&ctx->cred, &gss_stat);
 		if ( ret ) {
-			edg_wll_gss_get_error(&gss_stat, "failed to load GSI credentials",
-				&ctx->error_msg);
+			msg = "failed to load GSI credentials";
 			goto err;
 		}
 		ctx->internal_credentials = 1;
@@ -301,7 +299,7 @@ glite_gsplugin_connect(
 	if ( ret ) {
 		free(ctx->connection);
 		ctx->connection = NULL;
-		edg_wll_gss_get_error(&gss_stat, "edg_wll_gss_connect()", &ctx->error_msg);
+		msg = "edg_wll_gss_connect() error";
 		goto err;
 	}
 	ctx->internal_connection = 1;
@@ -311,31 +309,29 @@ glite_gsplugin_connect(
 
 err:
 	pdprintf(("GSLITE_GSPLUGIN: glite_gsplugin_connect() error!\n"));
+
+	soap->errnum = get_error(ret, &gss_stat, msg, &ctx->error_msg);
+
 	switch ( ret ) {
 	case EDG_WLL_GSS_ERROR_GSS:
-		ret = SOAP_INVALID_SOCKET;
  	  	soap_set_sender_error(soap, "SSL error", "SSL authentication failed in tcp_connect(): check password, key file, and ca file.", SOAP_SSL_ERROR);
 		break;
 	case EDG_WLL_GSS_ERROR_HERRNO:
-		ret = h_errno;
-		soap_set_sender_error(soap, "connection error", hstrerror(ret), SOAP_CLI_FAULT);
+		soap_set_sender_error(soap, "connection error", hstrerror(soap->errnum), SOAP_CLI_FAULT);
+		break;
+	case EDG_WLL_GSS_ERROR_EOF: 
+		soap->errnum = ECONNREFUSED;
+		soap_set_sender_error(soap, "connection error", strerror(soap->errnum), SOAP_CLI_FAULT);
 		break;
 	case EDG_WLL_GSS_ERROR_ERRNO:
-		ret = errno;
-		soap_set_sender_error(soap, "connection error", strerror(ret), SOAP_CLI_FAULT);
-		break;
-	case EDG_WLL_GSS_ERROR_EOF: ret = ECONNREFUSED;
-		soap_set_sender_error(soap, "connection error", strerror(ret), SOAP_CLI_FAULT);
-		break;
-	case EDG_WLL_GSS_ERROR_TIMEOUT: ret = ETIMEDOUT;
-		soap_set_sender_error(soap, "connection error", strerror(ret), SOAP_CLI_FAULT);
+	case EDG_WLL_GSS_ERROR_TIMEOUT: 
+		soap_set_sender_error(soap, "connection error", strerror(soap->errnum), SOAP_CLI_FAULT);
 		break;
 	default:
 		soap_set_sender_error(soap, "unknown error", "", SOAP_CLI_FAULT);
 		break;
 	}
 
-	soap->errnum = ret;
 	return SOAP_INVALID_SOCKET;
 }
 
@@ -360,6 +356,7 @@ glite_gsplugin_accept(struct soap *soap, int s, struct sockaddr *a, int *n)
 	glite_gsplugin_Context	ctx;
 	edg_wll_GssStatus		gss_code;
 	int						conn;
+	int ret;
 
 	soap->errnum = 0;
 	pdprintf(("GSLITE_GSPLUGIN: glite_gsplugin_accept()\n"));
@@ -373,10 +370,10 @@ glite_gsplugin_accept(struct soap *soap, int s, struct sockaddr *a, int *n)
 		}
 		ctx->internal_connection = 1;
 	}
-	if ( edg_wll_gss_accept(ctx->cred, conn, ctx->timeout, ctx->connection, &gss_code)) {
+	if ( (ret = edg_wll_gss_accept(ctx->cred, conn, ctx->timeout, ctx->connection, &gss_code)) != 0) {
 		pdprintf(("GSLITE_GSPLUGIN: Client authentication failed, closing.\n"));
 		close(conn);
-		edg_wll_gss_get_error(&gss_code, "Client authentication failed", &ctx->error_msg);
+		get_error(ret, &gss_code, "Client authentication failed", &ctx->error_msg);
 		soap->errnum = SOAP_SVR_FAULT;
 		soap_set_receiver_error(soap, "SSL error", "SSL authentication failed in tcp_connect(): check password, key file, and ca file.", SOAP_SSL_ERROR);
 		return SOAP_INVALID_SOCKET;
@@ -410,27 +407,13 @@ glite_gsplugin_recv(struct soap *soap, char *buf, size_t bufsz)
 	switch ( len ) {
 	case EDG_WLL_GSS_OK:
 		break;
-
 	case EDG_WLL_GSS_ERROR_GSS:
-		edg_wll_gss_get_error(&gss_code, "receving WS request",
-		      		      &ctx->error_msg);
-		soap->errnum = ENOTCONN;
-		return 0;
-
 	case EDG_WLL_GSS_ERROR_ERRNO:
-		ctx->error_msg = strdup("edg_wll_gss_read()");
-		soap->errnum = errno;
-		return 0;
-
 	case EDG_WLL_GSS_ERROR_TIMEOUT:
-		soap->errnum = ETIMEDOUT;
-		return 0;
-
 	case EDG_WLL_GSS_ERROR_EOF:
-		soap->errnum = ENOTCONN;
+		soap->errnum = get_error(len, &gss_code, "receiving WS request", &ctx->error_msg);
 		return 0;
-
-		/* default: fallthrough */
+	/* default: fallthrough */
 	}
 	pdprintf(("GSLITE_GSPLUGIN: glite_gsplugin_recv() = %d\n",len));
 
@@ -469,35 +452,22 @@ glite_gsplugin_send(struct soap *soap, const char *buf, size_t bufsz)
 
 	pdprintf(("GSLITE_GSPLUGIN: glite_gsplugin_send(%d) = %d\n",bufsz,ret));
 
+	soap->errnum = get_error(ret, &gss_code, "sending WS request", &ctx->error_msg);
+
 	switch ( ret ) {
 	case EDG_WLL_GSS_OK:
-		break;
-
-	case EDG_WLL_GSS_ERROR_TIMEOUT:
-		ctx->error_msg = strdup("glite_gsplugin_send()");
-		soap->errnum = ETIMEDOUT;
-		return SOAP_EOF;
+		return SOAP_OK;
 
 	case EDG_WLL_GSS_ERROR_ERRNO:
-		if ( errno == EPIPE ) {
-			ctx->error_msg = strdup("glite_gsplugin_send()");
-			soap->errnum = ENOTCONN;
-		}
-		else {
-			ctx->error_msg = strdup("glite_gsplugin_send()");
-			soap->errnum = errno;
-		}
+		if (soap->errnum == EPIPE) soap->errnum = ENOTCONN;
 		return SOAP_EOF;
 
+	case EDG_WLL_GSS_ERROR_TIMEOUT:
 	case EDG_WLL_GSS_ERROR_GSS:
 	case EDG_WLL_GSS_ERROR_EOF:
 	default:
-		ctx->error_msg = strdup("glite_gsplugin_send()");
-		soap->errnum = ENOTCONN;
 		return SOAP_EOF;
 	}
-
-	return SOAP_OK;
 }
 
 
@@ -562,4 +532,46 @@ static int glite_gsplugin_posthdr(struct soap *soap, const char *key, const char
 	}
 
 	return soap_send_raw(soap, "\r\n", 2);
+}
+
+
+static int get_error(int err, edg_wll_GssStatus *gss_stat, const char *msg, char **desc) {
+	int num;
+	const char *s;
+
+	if (desc) {
+		free(*desc);
+		*desc = NULL;
+	}
+
+	switch (err) {
+	case EDG_WLL_GSS_OK:
+		return 0;
+	case EDG_WLL_GSS_ERROR_GSS:
+		if (desc) edg_wll_gss_get_error(gss_stat, msg, desc);
+		return ENOTCONN;
+	case EDG_WLL_GSS_ERROR_HERRNO:
+		num = h_errno;
+		s = hstrerror(num);
+		if (desc) {
+			if (s) asprintf(desc, "%s: %s",  msg, s);
+			else asprintf(desc, "%s: herrno %d", msg, num);
+		}
+		return num;
+	case EDG_WLL_GSS_ERROR_ERRNO:
+		num = errno;
+		break;
+	case EDG_WLL_GSS_ERROR_TIMEOUT:
+		num = ETIMEDOUT;
+		break;
+	case EDG_WLL_GSS_ERROR_EOF:
+		num = ENOTCONN;
+		break;
+	default:
+		if (desc) asprintf(desc, "%s: unknown error type %d from glite_gss", msg, err);
+		return EINVAL;
+	}
+
+	if (desc) asprintf(desc, "%s: %s", msg, strerror(num));
+	return num;
 }
