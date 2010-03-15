@@ -100,4 +100,12 @@ limitations under the License.
 #define GLITE_SECURITY_GSOAP_LIST_CREATE(SOAP, CONTAINER, LIST, TYPE, N) GLITE_SECURITY_GSOAP_LIST_CREATE0(SOAP, (CONTAINER)->LIST, (CONTAINER)->__size##LIST, TYPE, N)
 #define GLITE_SECURITY_GSOAP_LIST_DESTROY(SOAP, CONTAINER, LIST) GLITE_SECURITY_GSOAP_LIST_DESTROY0(SOAP, (CONTAINER)->LIST, (CONTAINER)->__size##LIST)
 
+#if GSOAP_VERSION >= 20710
+  #define GLITE_SECURITY_GSOAP_SET_FIXED(soap,attr,value) \
+	(attr) = soap_strdup((soap),(value))
+#else
+/* XXX unsupported */
+  #define GLITE_SECURITY_GSOAP_SET_FIXED(soap,attr,value)
+#endif
+
 #endif
