@@ -60,8 +60,8 @@ typedef struct _edg_wll_GssStatus {
 typedef struct _edg_wll_GssPrincipal_data {
    char *name;
    unsigned int flags;
-#if 0
    char **fqans;
+#if 0
    char **voms_groups; /* needed for legacy LB server authZ mechanism */
    edg_wll_GssOid authn_mech;
 #endif
@@ -177,7 +177,6 @@ int
 edg_wll_gss_unread(edg_wll_GssConnection *connection,
                    void *data,
                    size_t len);
-
 
 #ifdef __cplusplus
 } 
