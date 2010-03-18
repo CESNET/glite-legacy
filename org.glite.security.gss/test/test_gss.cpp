@@ -63,7 +63,7 @@ private:
 void GSSTest::replier() {
 	edg_wll_GssConnection	conn;
 	edg_wll_GssStatus	stat;
-	struct sockaddr_in      a;
+	struct sockaddr_storage	a;
 	socklen_t		alen = sizeof(a);
 	int                     s, len;
 	char 			buf[8*BUFSIZ];
@@ -87,11 +87,15 @@ void GSSTest::replier() {
 void GSSTest::setUp(void) {
 	pid_t pid;
 	edg_wll_GssStatus stat;
-	struct sockaddr_in      a;
+	struct sockaddr_storage a;
 	socklen_t 		alen = sizeof(a);
 	char *			cred_file = NULL;
 	char *			key_file = NULL;
 	char * 			to = getenv("GSS_TEST_TIMEOUT");
+	struct addrinfo	*ai;
+	struct addrinfo	hints;
+	char		servname[16];
+
 
 	timeout.tv_sec = to ? atoi(to) : 10 ;
 	timeout.tv_usec = 0;
@@ -103,24 +107,28 @@ void GSSTest::setUp(void) {
 	if (edg_wll_gss_acquire_cred_gsi(cred_file, key_file, &my_cred, &stat))
 		CPPUNIT_ASSERT_MESSAGE("gss_acquire_cred", 0);
 	
-        sock = socket(PF_INET,SOCK_STREAM,0);
+	memset (&hints, '\0', sizeof (hints));
+	hints.ai_flags = AI_NUMERICSERV | AI_PASSIVE | AI_ADDRCONFIG;
+	hints.ai_socktype = SOCK_STREAM;
+
+	ret = getaddrinfo (NULL, port, &hints, &ai);
+	CPPUNIT_ASSERT_MESSAGE("getaddrinfo()", ret == 0 && ai != NULL);
+
+	sock = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
 	CPPUNIT_ASSERT_MESSAGE("socket()", sock >= 0);
 
-	memset(&a, 0, sizeof a);
-        a.sin_family = AF_INET;
-        a.sin_port = 0;
-        a.sin_addr.s_addr = INADDR_ANY;
+	ret = bind(sock, ai->ai_addr, ai->ai_addrlen);
+	CPPUNIT_ASSERT_MESSAGE("bind()", ret == 0);
 
-        if (bind(sock,(struct sockaddr *) &a,sizeof(a))) {
-		CPPUNIT_ASSERT_MESSAGE("bind()", 0);
-        }
-
-        if (listen(sock,1)) {
-		CPPUNIT_ASSERT_MESSAGE("listen()", 0);
-	}
+	ret = listen(sock, 1);
+	CPPUNIT_ASSERT_MESSAGE("listen()", ret == 0);
 
 	getsockname(sock,(struct sockaddr *) &a,&alen);
-	port = ntohs(a.sin_port);
+	ret = getnameinfo ((struct sockaddr *) &a, alen,
+                NULL, 0, servname, sizeof(servname), NI_NUMERICSERV);
+        CPPUNIT_ASSERT_MESSAGE("getnameinfo()", ret == 0);
+
+	port = atoi(servname);
 
 	if ( !(pid = fork()) ) replier();
 	else close(sock);
