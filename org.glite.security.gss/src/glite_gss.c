@@ -73,9 +73,9 @@ static int decrement_timeout(struct timeval *timeout, struct timeval before, str
 
 /* ares callback handler for ares_gethostbyname()       */
 #if ARES_VERSION >= 0x010500
-static void callback_handler(void *arg, int status, int timeouts, struct hostent *h)
+static void callback_ares_gethostbyname(void *arg, int status, int timeouts, struct hostent *h)
 #else
-static void callback_handler(void *arg, int status, struct hostent *h)
+static void callback_ares_gethostbyname(void *arg, int status, struct hostent *h)
 #endif
 {
 	struct asyn_result *arp = (struct asyn_result *) arg;
@@ -144,6 +144,7 @@ static int asyn_getservbyname(struct sockaddr_storage *addrOut, socklen_t *a_len
 	fd_set readers, writers;
 	struct timeval tv, *tvp;
 	struct timeval start_time,check_time;
+	int	err = NETDB_INTERNAL;
 
 /* start timer */
 	gettimeofday(&start_time,0);
@@ -153,7 +154,7 @@ static int asyn_getservbyname(struct sockaddr_storage *addrOut, socklen_t *a_len
 	ar.ent = (struct hostent *) calloc (sizeof(*ar.ent),1);
 
 /* query DNS server asynchronously */
-	ares_gethostbyname(channel, name, AF_INET6, callback_handler,
+	ares_gethostbyname(channel, name, AF_INET6, callback_ares_gethostbyname,
 			   (void *) &ar);
 
 /* wait for result */
@@ -189,8 +190,6 @@ static int asyn_getservbyname(struct sockaddr_storage *addrOut, socklen_t *a_len
 		}
 	}
 
-	ares_destroy(channel);
-
 	if (ar.err == NETDB_SUCCESS) {
 		struct sockaddr_in *p4 = (struct sockaddr_in *)addrOut;
 		struct sockaddr_in6 *p6 = (struct sockaddr_in6 *)addrOut;
@@ -213,9 +212,12 @@ static int asyn_getservbyname(struct sockaddr_storage *addrOut, socklen_t *a_len
 				break;
 		}
 	}
+	free_hostent(ar.ent); ar.ent = NULL;
+	err = ar.err;
 
-	free_hostent(ar.ent);
-	return(ar.err);
+	ares_destroy(channel);
+
+	return err;
 }
 
 static int
