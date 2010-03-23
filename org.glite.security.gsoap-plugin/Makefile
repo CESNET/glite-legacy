@@ -21,16 +21,29 @@ gsoap_versions_flavours:=${shell if ! echo $gsoap_versions_flavours | grep "\<${
 
 -include Makefile.inc
 -include ../Makefile.inc
+-include ../project/version.properties
+-include ../../project/version.properties
+
+version=${module.version}
 
 GSPLUGIN_DEBUG?=no
 GSPLUGIN_VERSION_CHECKING?=yes
 CC=gcc
 
-offset=0
+# In order to use libtool versioning correcty, we must have:
+#
+# current = major + minor + offset
+# revision = patch
+# age = minor
+#
+# where offset is a sum of maximal released minor's of all previous major's
+# 
+
+# counted minors: 1.5
+# TODO: bump offset to 5 on next major change
+offset=-1
 version_info:=-version-info ${shell \
 	perl -e '$$,=":"; @F=split "\\.","${version}"; print $$F[0]+$$F[1]+${offset},$$F[2],$$F[1]' }
-
-# version_info=-version-info `echo ${version} | cut -d. -f1,2 | tr . :`
 
 ext_repository:=${shell if [ -d "${repository}/externals" ]; then \
 	echo "${repository}/externals"; \

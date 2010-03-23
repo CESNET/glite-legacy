@@ -17,13 +17,24 @@ thrflavour=gcc32pthr
 CC=gcc
 
 -include Makefile.inc
--include ../Makefile.inc
+-include ../project/version.properties
 
-offset=0
+version=${module.version}
+
+# In order to use libtool versioning correcty, we must have:
+#
+# current = major + minor + offset
+# revision = patch
+# age = minor
+#
+# where offset is a sum of maximal released minor's of all previous major's
+#
+
+# counted minors: gsoap-plugin 1.5
+# TODO: bump offset to 5 on next major change
+offset=-1
 version_info:=-version-info ${shell \
 	perl -e '$$,=":"; @F=split "\\.","${version}"; print $$F[0]+$$F[1]+${offset},$$F[2],$$F[1]' }
-
-# version_info=-version-info `echo ${version} | cut -d. -f1,2 | tr . :`
 
 VPATH=${top_srcdir}/src:${top_srcdir}/test
 
