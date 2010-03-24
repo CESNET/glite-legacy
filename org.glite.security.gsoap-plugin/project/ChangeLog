@@ -28,3 +28,9 @@
 2.0.2-1
 - Updated Makefile & Configure script
 
+2.1.0-1
+- IPv6 fixes
+- Fixed error reporting
+- Attempt to fix compatibility with gsoap 2.7.10
+- Improved portability
+
