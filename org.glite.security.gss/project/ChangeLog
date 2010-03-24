@@ -22,3 +22,6 @@
 - Added edg_wll_gss_unread()
 - Consider arch libdir when linking c-ares
 
+2.1.0-1
+- IPv6 fixes
+
