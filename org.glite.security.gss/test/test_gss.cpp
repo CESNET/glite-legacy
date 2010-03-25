@@ -23,6 +23,7 @@ limitations under the License.
 #include <assert.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netdb.h>
 
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/CompilerOutputter.h>
@@ -95,6 +96,7 @@ void GSSTest::setUp(void) {
 	struct addrinfo	*ai;
 	struct addrinfo	hints;
 	char		servname[16];
+	int		ret;
 
 
 	timeout.tv_sec = to ? atoi(to) : 10 ;
@@ -111,7 +113,8 @@ void GSSTest::setUp(void) {
 	hints.ai_flags = AI_NUMERICSERV | AI_PASSIVE | AI_ADDRCONFIG;
 	hints.ai_socktype = SOCK_STREAM;
 
-	ret = getaddrinfo (NULL, port, &hints, &ai);
+	snprintf(servname, sizeof servname, "%d", port);
+	ret = getaddrinfo (NULL, servname, &hints, &ai);
 	CPPUNIT_ASSERT_MESSAGE("getaddrinfo()", ret == 0 && ai != NULL);
 
 	sock = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
