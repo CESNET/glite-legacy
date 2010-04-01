@@ -34,3 +34,6 @@
 - Attempt to fix compatibility with gsoap 2.7.10
 - Improved portability
 
+2.1.1-1
+- libtool version numbering reintroduced
+
