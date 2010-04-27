@@ -88,8 +88,8 @@ THRLIB:=libglite_security_proxyrenewal_${thrflavour}.la
 LIB_CORE_NOTHR := libglite_security_proxyrenewal_core_${nothrflavour}.la
 LIB_CORE_THR := libglite_security_proxyrenewal_core_${thrflavour}.la
 
-VOMS_LIB_NOTHR := -L${voms_prefix}/${libdir} -lvomsc_${nothrflavour}
-VOMS_LIB_THR := -L${voms_prefix}/${libdir} -lvomsc_${thrflavour}
+VOMS_LIB_NOTHR := -L${voms_prefix}/${libdir} -lvomsapi_${nothrflavour}
+VOMS_LIB_THR := -L${voms_prefix}/${libdir} -lvomsapi_${thrflavour}
 
 DAEMON:=glite-proxy-renewd
 CLIENT:=glite-proxy-renew
