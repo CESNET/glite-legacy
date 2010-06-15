@@ -141,6 +141,7 @@ install:
 
 clean:
 	rm -rf *.o *.lo *.a *.la .libs test_gss
+	rm -rvf log.xml project/ rpmbuild/ RPMS/ tgz/
 
 %.o: %.c
 	${COMPILE} ${GLOBUS_INC} ${ARES_INC} -o $@ -c $<
