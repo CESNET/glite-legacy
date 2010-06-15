@@ -25,5 +25,6 @@ stage:
 check:
 
 clean:
+	rm -rvf log.xml project/ rpmbuild/ RPMS/ tgz/
 
 .PHONY: default all check install stage clean
