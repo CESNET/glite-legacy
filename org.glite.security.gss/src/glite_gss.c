@@ -45,6 +45,12 @@ limitations under the License.
 
 #include "glite_gss.h"
 
+#if ARES_VERSION >= 0x010700
+#define QUERY_AF_ALL AF_UNSPEC
+#else
+#define QUERY_AF_ALL AF_INET6
+#endif
+
 #define tv_sub(a,b) {\
 	(a).tv_usec -= (b).tv_usec;\
 	(a).tv_sec -= (b).tv_sec;\
@@ -154,7 +160,7 @@ static int asyn_getservbyname(struct sockaddr_storage *addrOut, socklen_t *a_len
 	ar.ent = (struct hostent *) calloc (sizeof(*ar.ent),1);
 
 /* query DNS server asynchronously */
-	ares_gethostbyname(channel, name, AF_INET6, callback_ares_gethostbyname,
+	ares_gethostbyname(channel, name, QUERY_AF_ALL, callback_ares_gethostbyname,
 			   (void *) &ar);
 
 /* wait for result */
