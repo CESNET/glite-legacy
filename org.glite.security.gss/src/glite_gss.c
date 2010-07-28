@@ -151,6 +151,18 @@ static int asyn_getservbyname(struct sockaddr_storage *addrOut, socklen_t *a_len
 	struct timeval tv, *tvp;
 	struct timeval start_time,check_time;
 	int	err = NETDB_INTERNAL;
+	char	*name2;
+	size_t	namelen;
+
+	name2 = name;
+	namelen = strlen(name);
+	if (name[0]=='[' && name[namelen-1]==']') {
+		/* IPv6 literal, strip brackets */
+		name2 = strdup(name);
+		if (!name2) return NETDB_INTERNAL;
+		name2[namelen-1] = '\0';
+		name2++;
+	}	
 
 /* start timer */
 	gettimeofday(&start_time,0);
@@ -160,7 +172,7 @@ static int asyn_getservbyname(struct sockaddr_storage *addrOut, socklen_t *a_len
 	ar.ent = (struct hostent *) calloc (sizeof(*ar.ent),1);
 
 /* query DNS server asynchronously */
-	ares_gethostbyname(channel, name, QUERY_AF_ALL, callback_ares_gethostbyname,
+	ares_gethostbyname(channel, name2, QUERY_AF_ALL, callback_ares_gethostbyname,
 			   (void *) &ar);
 
 /* wait for result */
@@ -220,6 +232,9 @@ static int asyn_getservbyname(struct sockaddr_storage *addrOut, socklen_t *a_len
 	}
 	free_hostent(ar.ent); ar.ent = NULL;
 	err = ar.err;
+
+	/* literal conversion should always succeed */
+	if (name2 != name) free(name2-1); 
 
 	ares_destroy(channel);
 
