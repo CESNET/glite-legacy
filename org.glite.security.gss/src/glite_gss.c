@@ -151,7 +151,7 @@ static int asyn_getservbyname(struct sockaddr_storage *addrOut, socklen_t *a_len
 	struct timeval tv, *tvp;
 	struct timeval start_time,check_time;
 	int	err = NETDB_INTERNAL;
-	char	*name2;
+	char	*name2, *p;
 	size_t	namelen;
 
 	name2 = name;
@@ -162,6 +162,9 @@ static int asyn_getservbyname(struct sockaddr_storage *addrOut, socklen_t *a_len
 		if (!name2) return NETDB_INTERNAL;
 		name2[namelen-1] = '\0';
 		name2++;
+		/* Ignore scope identifier, not supported by c-ares */
+		p = strchr(name2, '%'); 
+		if (p) *p = '\0';
 	}	
 
 /* start timer */
