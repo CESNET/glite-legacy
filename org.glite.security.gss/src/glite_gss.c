@@ -45,12 +45,6 @@ limitations under the License.
 
 #include "glite_gss.h"
 
-#if ARES_VERSION >= 0x010700
-#define QUERY_AF_ALL AF_UNSPEC
-#else
-#define QUERY_AF_ALL AF_INET6
-#endif
-
 #define tv_sub(a,b) {\
 	(a).tv_usec -= (b).tv_usec;\
 	(a).tv_sec -= (b).tv_sec;\
@@ -143,7 +137,7 @@ static void free_hostent(struct hostent *h){
         }
 }
 
-static int asyn_getservbyname(struct sockaddr_storage *addrOut, socklen_t *a_len,char const *name, int port, struct timeval *timeout) {
+static int asyn_getservbyname2(int af, struct sockaddr_storage *addrOut, socklen_t *a_len,char const *name, int port, struct timeval *timeout) {
 	struct asyn_result ar;
 	ares_channel channel;
 	int nfds;
@@ -175,7 +169,7 @@ static int asyn_getservbyname(struct sockaddr_storage *addrOut, socklen_t *a_len
 	ar.ent = (struct hostent *) calloc (sizeof(*ar.ent),1);
 
 /* query DNS server asynchronously */
-	ares_gethostbyname(channel, name2, QUERY_AF_ALL, callback_ares_gethostbyname,
+	ares_gethostbyname(channel, name2, af, callback_ares_gethostbyname,
 			   (void *) &ar);
 
 /* wait for result */
@@ -242,6 +236,15 @@ static int asyn_getservbyname(struct sockaddr_storage *addrOut, socklen_t *a_len
 	ares_destroy(channel);
 
 	return err;
+}
+
+static int asyn_getservbyname(struct sockaddr_storage *addrOut, socklen_t *a_len,char const *name, int port, struct timeval *timeout) {
+	int res;
+
+	res = asyn_getservbyname2(AF_INET6, addrOut, a_len, name, port, timeout);
+	if (res != HOST_NOT_FOUND) return res;
+	res = asyn_getservbyname2(AF_INET, addrOut, a_len, name, port, timeout);
+	return res;
 }
 
 static int
