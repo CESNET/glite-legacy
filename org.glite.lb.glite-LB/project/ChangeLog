@@ -2,3 +2,12 @@
 - glite-LB Metapackage module now CVS-based
 - compile and build by make rather than inline commands
 
+3.2.11-1
+- Fixed handling of target 'clean' in Makefile
+ 
+3.2.12-1
+- Fixed target 'clean' in the Makefile to handle debian builds
+
+3.2.12-2
+- Module rebuilt
+
