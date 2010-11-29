@@ -9,8 +9,6 @@ version=1.0.0
 PREFIX=/opt/glite
 
 glite_location=/opt/glite
-nothrflavour=gcc32
-thrflavour=gcc32pthr
 gsoap_prefix=/opt/gsoap
 
 CC=gcc
@@ -97,16 +95,21 @@ ifeq (${lang},cxx)
 LINK_lang:=${LINKXX}
 endif
 
-EX_LIBS:=-L${stagedir}/${libdir} -lglite_security_gss_${nothrflavour}
+GSOAP_LIBS?=-L${gsoap_prefix}/${libdir} -lgsoap
+
+EX_NOTHRLIBS:=-L${stagedir}/${libdir} -lglite_security_gss_${nothrflavour}
 EX_THRLIBS:=-L${stagedir}/${libdir} -lglite_security_gss_${thrflavour}
+EX_LIBS:=-L${stagedir}/${libdir} -lglite_security_gss
 HDRS:=glite_gsplugin.h glite_gscompat.h glite_gsplugin-int.h
 EXAMPLES:=wscalc_clt_ex wscalc_srv_ex wscalc_srv_ex2
 TESTS:=test_cxx
 
-STATICLIB:=libglite_security_gsoap_plugin_${nothrflavour}${langflavour}.a
+NOTHRSTATICLIB:=libglite_security_gsoap_plugin_${nothrflavour}${langflavour}.a
 THRSTATICLIB:=libglite_security_gsoap_plugin_${thrflavour}${langflavour}.a
-LTLIB:=libglite_security_gsoap_plugin_${nothrflavour}${langflavour}.la
+STATICLIB:=libglite_security_gsoap_plugin${langflavour}.a
+NOTHRLTLIB:=libglite_security_gsoap_plugin_${nothrflavour}${langflavour}.la
 THRLTLIB:=libglite_security_gsoap_plugin_${thrflavour}${langflavour}.la
+LTLIB:=libglite_security_gsoap_plugin${langflavour}.la
 
 OBJS:=${GSS_OBJS} glite_gsplugin${langsuffix}.o
 LOBJS:=${OBJS:.o=.lo}
@@ -114,18 +117,52 @@ THROBJS:=${OBJS:.o=.thr.o}
 THRLOBJS:=${OBJS:.o=.thr.lo}
 
 dotless_ver:=${shell echo ${gsoap_version} | tr -d '.'}
-STATICLIB_S:=libglite_security_gsoap_plugin_${dotless_ver}_${nothrflavour}${langflavour}.a
+NOTHRSTATICLIB_S:=libglite_security_gsoap_plugin_${dotless_ver}_${nothrflavour}${langflavour}.a
 THRSTATICLIB_S:=libglite_security_gsoap_plugin_${dotless_ver}_${thrflavour}${langflavour}.a
-LTLIB_S:=libglite_security_gsoap_plugin_${dotless_ver}_${nothrflavour}${langflavour}.la
+STATICLIB_S:=libglite_security_gsoap_plugin_${dotless_ver}${langflavour}.a
+NOTHRLTLIB_S:=libglite_security_gsoap_plugin_${dotless_ver}_${nothrflavour}${langflavour}.la
 THRLTLIB_S:=libglite_security_gsoap_plugin_${dotless_ver}_${thrflavour}${langflavour}.la
-LTLIB_TEST_S:=libglite_security_gsoap_plugin_${dotless_ver}_${nothrflavour}_cxx.la
+LTLIB_S:=libglite_security_gsoap_plugin_${dotless_ver}${langflavour}.la
 
+ifeq (${thrflavour},)
+lib_LTLIBRARIES:=${STATICLIB} ${LTLIB}
+lib_LTLIBRARIES_S:=${LTLIB_S}
+LTLIB_TEST_S:=libglite_security_gsoap_plugin_${dotless_ver}_cxx.la
+default_ltlib_s:=${LTLIB_S}
+else
+lib_LTLIBRARIES:=${NOTHRSTATICLIB} ${NOTHRLTLIB} ${THRSTATICLIB} ${THRLTLIB}
+lib_LTLIBRARIES_S:=${NOTHRLTLIB_S} ${THRLTLIB_S}
+LTLIB_TEST_S:=libglite_security_gsoap_plugin_${dotless_ver}_${nothrflavour}_cxx.la
+default_ltlib_s:=${NOTHRLTLIB_S}
+endif
+
+ifeq (${gsoap_version},${gsoap_default_version})
+OBJS_S:=glite_gsplugin${langsuffix}.o
+GSOAP_DEFAULT_LIBS:=${GSOAP_LIBS}
+else
 OBJS_S:=glite_gsplugin${langsuffix}.o stdsoap2${langsuffix}.o
+GSOAP_DEFAULT_LIBS:=
+endif
 LOBJS_S:=${OBJS_S:.o=.lo}
 THROBJS_S:=${OBJS_S:.o=.thr.o}
 THRLOBJS_S:=${OBJS_S:.o=.thr.lo}
 
+ifeq (${thrflavour},)
 ${STATICLIB}: ${OBJS}
+	ar crv $@ ${OBJS}
+	ranlib $@
+
+${LTLIB}: ${OBJS}
+	${LINK_lang} ${version_info} -o $@ ${LOBJS} ${EX_LIBS}
+
+${STATICLIB_S}: ${OBJS_S}
+	ar crv $@ ${OBJS_S}
+	ranlib $@
+
+${LTLIB_S}: ${OBJS_S}
+	${LINK_lang} ${version_info} -o $@ ${LOBJS_S} ${EX_LIBS} ${GSOAP_DEFAULT_LIBS}
+else
+${NOTHRSTATICLIB}: ${OBJS}
 	ar crv $@ ${OBJS}
 	ranlib $@
 
@@ -133,13 +170,13 @@ ${THRSTATICLIB}: ${THROBJS}
 	ar crv $@ ${THROBJS}
 	ranlib $@
 
-${LTLIB}: ${OBJS} 
-	${LINK_lang} ${version_info} -o $@ ${LOBJS} ${EX_LIBS}
+${NOTHRLTLIB}: ${OBJS} 
+	${LINK_lang} ${version_info} -o $@ ${LOBJS} ${EX_NOTHRLIBS}
 
 ${THRLTLIB}: ${THROBJS}
 	${LINK_lang} ${version_info} -o $@ ${THRLOBJS} ${EX_THRLIBS}
 
-${STATICLIB_S}: ${OBJS_S}
+${NOTHRSTATICLIB_S}: ${OBJS_S}
 	ar crv $@ ${OBJS_S}
 	ranlib $@
 
@@ -147,14 +184,15 @@ ${THRSTATICLIB_S}: ${THROBJS_S}
 	ar crv $@ ${THROBJS_S}
 	ranlib $@
 
-${LTLIB_S}: ${OBJS_S} 
-	${LINK_lang} ${version_info} -o $@ ${LOBJS_S} ${EX_LIBS}
+${NOTHRLTLIB_S}: ${OBJS_S} 
+	${LINK_lang} ${version_info} -o $@ ${LOBJS_S} ${EX_NOTHRLIBS} ${GSOAP_DEFAULT_LIBS}
 
 ${THRLTLIB_S}: ${THROBJS_S}
 	${LINK_lang} ${version_info} -o $@ ${THRLOBJS_S} ${EX_THRLIBS}
+endif
 
 all compile: \
-	${STATICLIB} ${LTLIB} ${THRSTATICLIB} ${THRLTLIB} \
+	${lib_LTLIBRARIES} \
 	all-libs-with-soap examples
 
 check: check.cxx
@@ -180,12 +218,14 @@ all-libs-with-soap:
 		${MAKE} -C $$dir -f ../Makefile gsoap_version=$$v top_srcdir=../.. lang=cxx libs-with-soap || exit $?; \
 	done
 
-libs-with-soap: ${LTLIB_S} ${THRLTLIB_S} ${STATICLIB_S} ${THRSTATICLIB_S}
+libs-with-soap: ${lib_LTLIBRARIES_S}
 
 gsoap_srcname=gsoap-`echo ${gsoap_version} | cut -d. -f1,2`
 
 link-gsoap:
-	if [ -f ${top_srcdir}/src/stdsoap2_${gsoap_version}.c ]; then \
+	if [ ${gsoap_version} = ${gsoap_default_version} ]; then \
+		ln -sf ${gsoap_prefix}/include/stdsoap2.h stdsoap2.h; \
+	elif [ -f ${top_srcdir}/src/stdsoap2_${gsoap_version}.c ]; then \
 		ln -sf ${top_srcdir}/src/stdsoap2_${gsoap_version}.c stdsoap2.c; \
 		ln -sf ${top_srcdir}/src/stdsoap2_${gsoap_version}.h stdsoap2.h; \
 	elif [ -f ${ext_repository}/${gsoap_name}/${gsoap_version}/src/stdsoap2.c ]; then \
@@ -212,14 +252,14 @@ WSCALC_SRV2_OBJS = wscalc_srv_ex2.o ${GSOAP_FPREFIX}C.o ${GSOAP_FPREFIX}Server.o
 
 wscalc_clt_ex.o wscalc_srv_ex.o wscalc_srv_ex2.o: ${GSOAP_FPREFIX}H.h
 
-wscalc_clt_ex: ${WSCALC_CLT_OBJS} ${LTLIB_S}
-	${LINK_lang} -o $@ ${WSCALC_CLT_OBJS} ${LTLIB_S}
+wscalc_clt_ex: ${WSCALC_CLT_OBJS} ${default_ltlib_s}
+	${LINK_lang} -o $@ ${WSCALC_CLT_OBJS} ${default_ltlib_s} ${GSOAP_DEFAULT_LIBS}
 
-wscalc_srv_ex: ${WSCALC_SRV_OBJS} ${LTLIB_S}
-	${LINK_lang} -o $@ ${WSCALC_SRV_OBJS} ${LTLIB_S}
+wscalc_srv_ex: ${WSCALC_SRV_OBJS} ${default_ltlib_s}
+	${LINK_lang} -o $@ ${WSCALC_SRV_OBJS} ${default_ltlib_s} ${GSOAP_DEFAULT_LIBS}
 
-wscalc_srv_ex2: ${WSCALC_SRV2_OBJS} ${LTLIB_S}
-	${LINK_lang} -o $@ ${WSCALC_SRV2_OBJS} ${LTLIB_S}
+wscalc_srv_ex2: ${WSCALC_SRV2_OBJS} ${default_ltlib_s}
+	${LINK_lang} -o $@ ${WSCALC_SRV2_OBJS} ${default_ltlib_s} ${GSOAP_DEFAULT_LIBS}
 
 test_cxx: test_gsplugin_cxx.o ${GSOAP_FPREFIX}C.cxx.o
 	${LINKXX} -o $@ $+ ${LTLIB_TEST_S}
@@ -256,11 +296,11 @@ install:
 	done
 
 install-soaplib:
-	${INSTALL} -m 755 ${LTLIB_S} ${THRLTLIB_S} ${PREFIX}/${libdir}
+	${INSTALL} -m 755 ${lib_LTLIBRARIES_S} ${PREFIX}/${libdir}
 
 clean:
-	rm -rvf ${STATICLIB} ${LTLIB} ${THRSTATICLIB} ${THRLTLIB}
-	rm -rvf ${LTLIB_S} ${THRLTLIB_S} ${STATICLIB_S} ${THRSTATICLIB_S}
+	rm -rvf ${lib_LTLIBRARIES}
+	rm -rvf ${lib_LTLIBRARIES_S}
 	rm -rvf ${LTLIB_TEST_S}
 	rm -rvf *.c *.h *.xml *.nsmap *.o *.lo .libs ${EXAMPLES} ${TESTS}
 	rm -rvf CalcService.wsdl wscalc.xsd
