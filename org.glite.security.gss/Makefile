@@ -98,6 +98,14 @@ default_gss=${GSS_NOTHRLTLIB}
 endif
 
 
+ifeq ($(thrflavour),)
+${GSS_STATICLIB}: ${GSS_OBJS}
+	ar crv $@ ${GSS_OBJS}
+	ranlib $@
+
+${GSS_LTLIB}: ${GSS_OBJS}
+	${LINK} ${version_info} -o $@ ${GSS_LOBJS} ${GLOBUS_GSSAPI_GSI_LIBS} ${LIBCARES_LIBS}
+else
 ${GSS_NOTHRSTATICLIB}: ${GSS_OBJS}
 	ar crv $@ ${GSS_OBJS}
 	ranlib $@
@@ -106,18 +114,12 @@ ${GSS_THRSTATICLIB}: ${GSS_THROBJS}
 	ar crv $@ ${GSS_THROBJS}
 	ranlib $@
 
-${GSS_STATICLIB}: ${GSS_OBJS}
-	ar crv $@ ${GSS_OBJS}
-	ranlib $@
-
 ${GSS_NOTHRLTLIB}: ${GSS_OBJS}
 	${LINK} ${version_info} -o $@ ${GSS_LOBJS} ${GLOBUS_NOTHR_LIBS} ${LIBCARES_LIBS}
 
 ${GSS_THRLTLIB}: ${GSS_THROBJS}
 	${LINK} ${version_info} -o $@ ${GSS_THRLOBJS} ${GLOBUS_THR_LIBS} ${LIBCARES_LIBS}
-
-${GSS_LTLIB}: ${GSS_OBJS}
-	${LINK} ${version_info} -o $@ ${GSS_LOBJS} ${GLOBUS_GSSAPI_GSI_LIBS} ${LIBCARES_LIBS}
+endif
 
 
 all compile: $(lib_LTLIBRARIES) ${lib_LIBRARIES} examples
