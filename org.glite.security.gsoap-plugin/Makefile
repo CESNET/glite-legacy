@@ -14,8 +14,7 @@ gsoap_prefix=/opt/gsoap
 CC=gcc
 
 gsoap_versions_noflavours?=2.6.2 2.7.0f 2.7.6b 2.7.6d 2.7.9d 2.7.9b
-gsoap_versions_flavours?=2.7.10 2.7.9l
-gsoap_versions_flavours:=${shell if ! echo $gsoap_versions_flavours | grep "\<${gsoap_default_version}\>" >/dev/null; then echo "${gsoap_default_version} "; else echo ne; fi} ${gsoap_versions_flavours}
+gsoap_versions_flavours?=2.7.10
 
 -include Makefile.inc
 -include ../Makefile.inc
@@ -23,6 +22,7 @@ gsoap_versions_flavours:=${shell if ! echo $gsoap_versions_flavours | grep "\<${
 -include ../../project/version.properties
 
 version=${module.version}
+gsoap_versions_flavours:=${shell if ! echo ${gsoap_versions_flavours} | grep '\<${gsoap_default_version}\>' >/dev/null; then echo "${gsoap_default_version} "; else echo ''; fi} ${gsoap_versions_flavours}
 
 GSPLUGIN_DEBUG?=no
 GSPLUGIN_VERSION_CHECKING?=yes
