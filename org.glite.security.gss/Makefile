@@ -62,7 +62,7 @@ GLOBUS_THR_INC:= -I${globus_prefix}/include/${thrflavour}
 
 GLOBUS_NOTHR_LIBS:= -L${globus_prefix}/lib \
 	-lglobus_common_${nothrflavour} \
-	-lglobus_gssapi_gsi_${nothrflavour} \
+	-lglobus_gssapi_gsi_${nothrflavour}
 GLOBUS_THR_LIBS:= -L${globus_prefix}/lib \
 	-lglobus_common_${thrflavour} \
 	-lglobus_gssapi_gsi_${thrflavour}
