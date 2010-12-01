@@ -95,7 +95,8 @@ ifeq (${lang},cxx)
 LINK_lang:=${LINKXX}
 endif
 
-GSOAP_LIBS?=-L${gsoap_prefix}/${libdir} -lgsoap
+gsoaplibdir=$(shell if test -d "${gsoap_prefix}/${libdir}"; then echo "${gsoap_prefix}/${libdir}"; else echo "${gsoap_prefix}/lib"; fi)
+GSOAP_LIBS?=-L${gsoaplibdir} -lgsoap
 
 EX_NOTHRLIBS:=-L${stagedir}/${libdir} -lglite_security_gss_${nothrflavour}
 EX_THRLIBS:=-L${stagedir}/${libdir} -lglite_security_gss_${thrflavour}
