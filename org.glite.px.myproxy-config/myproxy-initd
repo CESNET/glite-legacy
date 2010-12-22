@@ -113,7 +113,7 @@ start)
         echo -n  $"Starting $prog, attempt $i of 3 :"
 	      daemon sh -c "$server" 
         RETVAL=$?
-        [ $RETVAL = "0" ] && touch /var/lock/subsys/myproxy 
+        [ $RETVAL = "0" ] && touch /var/lock/subsys/${prog}
         echo
 
 	      for j in 1 2 3 4 5
@@ -136,7 +136,7 @@ stop)
     echo -n "Shutting down $prog"
     killproc ${prog}
     rc=$?
-    rm -f /var/lock/subsys/myproxy
+    rm -f /var/lock/subsys/${prog}
     echo
     exit $rc
     ;;
@@ -157,17 +157,29 @@ restart)
     exit
     ;;
 status)
-    status ${prog}
-    rc=$?
-    test $rc = 0 || exit $rc
+    if test $UID != 0; then
+      /sbin/pidof -o $$ -o %PPID -o $PPID -x ${prog} >/dev/null
+      rc=$?
+      if test $rc = 0; then
+         echo "${prog} is running"
+         exit 0
+      fi
+      echo "${prog} is not running"
+      exit 1
+    else
+      status ${prog}
+      rc=$?
+      test $rc = 0 || exit $rc
 
-    check_response && exit 0
+      check_response && exit 0
 
-    echo "ERROR: $prog not responsive!"
-    exit 1
+      echo "ERROR: $prog not responsive!"
+      exit 1
+    fi
     ;;
+
 *)
-    echo "Usage: $0 {start|stop|reload|restart|status}"
+    echo "Usage: $0 {start|stop|reload|restart|status|bdii-status}"
     exit 2
 esac
 
