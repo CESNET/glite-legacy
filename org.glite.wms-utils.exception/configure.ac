@@ -19,6 +19,9 @@
 #
 #       Revision history:
 #       $Log$
+#       Revision 1.13.2.3  2006/09/22 07:22:12  eronchie
+#       increased version
+#
 #       Revision 1.13.2.2  2006/06/26 21:04:14  eronchie
 #       Increased version
 #
@@ -127,6 +130,7 @@ AC_PREFIX_DEFAULT([/opt/glite])
 AM_CONFIG_HEADER([src/autogen/config.h])
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([src/Makefile])
+AC_CONFIG_FILES([src/jobman-exception.pc])
 AC_CONFIG_FILES([interface/Makefile])
 
 AC_OUTPUT

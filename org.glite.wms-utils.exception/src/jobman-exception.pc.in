@@ -1,0 +1,11 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: jobmanagement exceptions
+Description: Exception library for gLite components
+Version: 3.2.0
+Libs: -L${libdir} -lglite_wmsutils_exception
+Cflags: -I${includedir}
+

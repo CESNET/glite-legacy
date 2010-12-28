@@ -14,4 +14,7 @@ libglite_wmsutils_exception_la_SOURCES = \
 AM_CPPFLAGS = -I$(top_srcdir)/interface \
 	-I$(top_srcdir)/src 
 
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = jobman-exception.pc
+
 MAINTAINERCLEANFILES = Makefile.in *.*~
