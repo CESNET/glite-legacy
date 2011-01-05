@@ -7,6 +7,8 @@ Group: EGEE
 Source0: %{name}.tgz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildArch: noarch
+Requires: myproxy_client
+Obsoletes: myproxy-config
 
 %description
 Provides a startup init.d script for myproxy.
