@@ -11,3 +11,6 @@
 3.2.12-2
 - Module rebuilt
 
+3.3.0-1
+- Fixes for parallel release in EMI & gLite
+
