@@ -3,6 +3,7 @@ stagedir=.
 package=glite-lb-yaim
 version=0.0.0
 PREFIX=/opt/glite
+prefix=
 
 -include Makefile.inc
 -include ../project/version.properties
@@ -16,8 +17,8 @@ default all:
 	echo "NA" > update
 
 install:
-	mkdir -p ${PREFIX}/release/glite-LB
-	cp -fp LICENSE COPYRIGHT node-version arch service update ${PREFIX}/release/glite-LB/
+	mkdir -p ${DESTDIR}${PREFIX}${prefix}/release/glite-LB
+	cp -fp LICENSE COPYRIGHT node-version arch service update ${DESTDIR}${PREFIX}${prefix}/release/glite-LB/
 
 stage:
 	$(MAKE) install PREFIX=${stagedir}
