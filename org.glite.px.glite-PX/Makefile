@@ -9,16 +9,8 @@ prefix=
 -include ../project/version.properties
 
 default all:
-	echo -e "${gLiteCopyrightText}\n\n${gLiteLicenseText}" > LICENSE
-	cp LICENSE COPYRIGHT
-	echo ${module.version}-${module.age} > node-version
-	echo ${platformArch} > arch
-	echo "NA" > service
-	echo "NA" > update
 
 install:
-	mkdir -p ${DESTDIR}${PREFIX}${prefix}/release/glite-PX
-	cp -fp LICENSE COPYRIGHT node-version arch service update ${DESTDIR}${PREFIX}${prefix}/release/glite-PX/
 
 stage:
 	$(MAKE) install PREFIX=${stagedir}
