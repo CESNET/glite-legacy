@@ -19,6 +19,9 @@
 #
 #       Revision history:
 #       $Log$
+#       Revision 1.13.2.3.2.1  2010/12/28 11:16:00  pandreet
+#       Build changes for pkg-config support
+#
 #       Revision 1.13.2.3  2006/09/22 07:22:12  eronchie
 #       increased version
 #
@@ -73,7 +76,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.57)
-AC_INIT([GLite WMS Utils Exception], [3.1.3])
+AC_INIT([GLite WMS Utils Exception], [3.2.2])
 AC_CONFIG_AUX_DIR([./project])
 AM_INIT_AUTOMAKE([1.6.3 subdir-objects])
 AC_CONFIG_SRCDIR([src/Exception.cpp])
