@@ -25,7 +25,6 @@ glite_wmsutils_exception_LDADD =  \
 AM_CPPFLAGS =  \
 	-I$(top_srcdir)/src \
 	-I$(top_srcdir)/test \
-	$(GLITE_CFLAGS) \
 	$(GLOBUS_THR_CFLAGS) \
 	$(CPPUNIT_CFLAGS)
 

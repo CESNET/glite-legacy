@@ -19,6 +19,9 @@
 #
 #       Revision history:
 #       $Log$
+#       Revision 1.13.2.3.2.2  2011/03/04 09:39:40  pandreet
+#       Incremented version number
+#
 #       Revision 1.13.2.3.2.1  2010/12/28 11:16:00  pandreet
 #       Build changes for pkg-config support
 #
@@ -124,7 +127,7 @@ AC_FUNC_STRFTIME
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([bzero endpwent ftruncate getmntent memset mkdir pow strerror strtol])
 
-AC_GLITE
+GLITE_CHECK_LIBDIR
 
 AC_OPTIMIZE
 
