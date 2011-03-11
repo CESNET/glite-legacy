@@ -1,3 +1,0 @@
-### Default values to some glite-LB variables
-GLITE_USER=glite
-GLITE_WMS_LCGMON_FILE="/var/glite/logging/status.log"
