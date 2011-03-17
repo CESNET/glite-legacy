@@ -6,7 +6,7 @@ PREFIX=/opt/glite
 prefix=
 
 -include Makefile.inc
--include ../project/version.properties
+-include ${top_srcdir}/project/version.properties
 
 default all:
 
@@ -18,6 +18,6 @@ stage:
 check:
 
 clean:
-	rm -rvf log.xml project/ rpmbuild/ RPMS/ tgz/ debian/
+	rm -rvf log.xml rpmbuild/ RPMS/ tgz/ debian/
 
 .PHONY: default all check install stage clean
