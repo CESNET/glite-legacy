@@ -4,6 +4,7 @@ Version:
 Release:
 License: Apache License 2.0
 Vendor: EMI
+URL: http://glite.cern.ch/
 Group: System Environment/Libraries
 Packager: ETICS
 BuildArch: x86_64
@@ -42,11 +43,10 @@ rm %{buildroot}/usr/lib64/*.la
 
 %clean
 
-%post
-/sbin/ldconfig
+%post -p /sbin/ldconfig
 
-%postun
-/sbin/ldconfig 
+%postun -p /sbin/ldconfig
+
 
 %files
 %defattr(-,root,root)
