@@ -51,7 +51,7 @@ rm %{buildroot}/usr/lib64/*.la
 %files
 %defattr(-,root,root)
 %dir /usr/share/doc/glite-wms-utils-exception-%{version}/
-/usr/share/doc/glite-wms-utils-exception-%{version}/LICENSE
+%doc /usr/share/doc/glite-wms-utils-exception-%{version}/LICENSE
 /usr/lib64/libglite_wmsutils_exception.so.0
 /usr/lib64/libglite_wmsutils_exception.so.0.0.0
 
