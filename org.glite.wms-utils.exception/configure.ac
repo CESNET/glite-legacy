@@ -19,6 +19,9 @@
 #
 #       Revision history:
 #       $Log$
+#       Revision 1.13.2.3.2.3  2011/03/08 15:32:29  pandreet
+#       Removed with-glite-location
+#
 #       Revision 1.13.2.3.2.2  2011/03/04 09:39:40  pandreet
 #       Incremented version number
 #
@@ -79,7 +82,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.57)
-AC_INIT([GLite WMS Utils Exception], [3.2.2])
+AC_INIT([GLite WMS Utils Exception], [3.3.0])
 AC_CONFIG_AUX_DIR([./project])
 AM_INIT_AUTOMAKE([1.6.3 subdir-objects])
 AC_CONFIG_SRCDIR([src/Exception.cpp])
