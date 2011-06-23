@@ -5,14 +5,13 @@ Release:
 License: Apache License 2.0
 Vendor: EMI
 URL: http://glite.cern.ch/
+Packager: WMS group <wms-support@lists.infn.it>
 Group: System Environment/Libraries
-Packager: ETICS
 BuildArch: x86_64
+BuildRequires: chrpath
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 AutoReqProv: yes
 Source: %{name}-%{version}-%{release}.tar.gz
-
-%define debug_package %{nil}
 
 %description
 C/C++ exception libraries for job management applications
@@ -20,8 +19,6 @@ C/C++ exception libraries for job management applications
 %prep
  
 %setup -c
-rm -rf %{buildroot}
-mkdir -p %{buildroot}
 
 %build
 %{!?extbuilddir:%define extbuilddir "--"}
@@ -31,6 +28,8 @@ if test "x%{extbuilddir}" == "x--" ; then
 fi
 
 %install
+rm -rf %{buildroot}
+mkdir -p %{buildroot}
 %{!?extbuilddir:%define extbuilddir "--"}
 if test "x%{extbuilddir}" == "x--" ; then
   make install
@@ -40,8 +39,10 @@ fi
 sed 's|^prefix=.*|prefix=/usr|g' %{buildroot}/usr/lib64/pkgconfig/jobman-exception.pc > %{buildroot}/usr/lib64/pkgconfig/jobman-exception.pc.new
 mv %{buildroot}/usr/lib64/pkgconfig/jobman-exception.pc.new %{buildroot}/usr/lib64/pkgconfig/jobman-exception.pc
 rm %{buildroot}/usr/lib64/*.la
+chrpath --delete %{buildroot}/usr/lib64/libglite_wmsutils_exception.so.0.0.0
 
 %clean
+rm -rf %{buildroot}
 
 %post -p /sbin/ldconfig
 
