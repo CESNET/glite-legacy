@@ -2,7 +2,7 @@ Summary: C/C++ exception libraries for job management applications
 Name: glite-wms-utils-exception
 Version:
 Release:
-License: Apache License 2.0
+License: Apache Software License
 Vendor: EMI
 URL: http://glite.cern.ch/
 Packager: WMS group <wms-support@lists.infn.it>
