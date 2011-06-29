@@ -18,7 +18,7 @@ C/C++ exception libraries for job management applications
 
 %prep
  
-%setup -c
+%setup -c -q
 
 %build
 %{!?extbuilddir:%define extbuilddir "--"}
@@ -36,10 +36,10 @@ if test "x%{extbuilddir}" == "x--" ; then
 else
   cp -R %{extbuilddir}/* %{buildroot}
 fi
-sed 's|^prefix=.*|prefix=/usr|g' %{buildroot}/usr/lib64/pkgconfig/jobman-exception.pc > %{buildroot}/usr/lib64/pkgconfig/jobman-exception.pc.new
-mv %{buildroot}/usr/lib64/pkgconfig/jobman-exception.pc.new %{buildroot}/usr/lib64/pkgconfig/jobman-exception.pc
-rm %{buildroot}/usr/lib64/*.la
-chrpath --delete %{buildroot}/usr/lib64/libglite_wmsutils_exception.so.0.0.0
+sed 's|^prefix=.*|prefix=/usr|g' %{buildroot}%{_libdir}/pkgconfig/jobman-exception.pc > %{buildroot}%{_libdir}/pkgconfig/jobman-exception.pc.new
+mv %{buildroot}%{_libdir}/pkgconfig/jobman-exception.pc.new %{buildroot}%{_libdir}/pkgconfig/jobman-exception.pc
+rm %{buildroot}%{_libdir}/*.la
+chrpath --delete %{buildroot}%{_libdir}/libglite_wmsutils_exception.so.0.0.0
 
 %clean
 rm -rf %{buildroot}
@@ -53,8 +53,8 @@ rm -rf %{buildroot}
 %defattr(-,root,root)
 %dir /usr/share/doc/glite-wms-utils-exception-%{version}/
 %doc /usr/share/doc/glite-wms-utils-exception-%{version}/LICENSE
-/usr/lib64/libglite_wmsutils_exception.so.0
-/usr/lib64/libglite_wmsutils_exception.so.0.0.0
+%{_libdir}/libglite_wmsutils_exception.so.0
+%{_libdir}/libglite_wmsutils_exception.so.0.0.0
 
 
 %changelog
@@ -62,6 +62,7 @@ rm -rf %{buildroot}
 %package devel
 Summary: C/C++ exception libraries for job management applications (development files)
 Group: System Environment/Libraries
+Requires: %{name}%{?_isa} = %{version}-%{release}
 
 %description devel
 C/C++ exception libraries for job management applications (development files)
@@ -73,7 +74,11 @@ C/C++ exception libraries for job management applications (development files)
 %dir /usr/include/glite/wmsutils/exception/
 /usr/include/glite/wmsutils/exception/exception_codes.h
 /usr/include/glite/wmsutils/exception/Exception.h
-%dir /usr/lib64/pkgconfig/
-/usr/lib64/pkgconfig/jobman-exception.pc
-/usr/lib64/libglite_wmsutils_exception.so
+%dir %{_libdir}/pkgconfig/
+%{_libdir}/pkgconfig/jobman-exception.pc
+%{_libdir}/libglite_wmsutils_exception.so
+
+%post debuginfo -p /sbin/ldconfig
+
+%postun debuginfo -p /sbin/ldconfig
 
