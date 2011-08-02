@@ -7,11 +7,13 @@ Vendor: EMI
 URL: http://glite.cern.ch/
 Packager: WMS group <wms-support@lists.infn.it>
 Group: System Environment/Libraries
-BuildArch: x86_64
-BuildRequires: chrpath
+BuildArch:
+BuildRequires: chrpath, libtool
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 AutoReqProv: yes
 Source: %{name}-%{version}-%{release}.tar.gz
+
+%global debug_package %{nil}
 
 %description
 C/C++ exception libraries for job management applications
@@ -77,8 +79,4 @@ C/C++ exception libraries for job management applications (development files)
 %dir %{_libdir}/pkgconfig/
 %{_libdir}/pkgconfig/jobman-exception.pc
 %{_libdir}/libglite_wmsutils_exception.so
-
-%post debuginfo -p /sbin/ldconfig
-
-%postun debuginfo -p /sbin/ldconfig
 
