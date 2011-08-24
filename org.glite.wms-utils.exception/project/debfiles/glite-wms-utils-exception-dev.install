@@ -1,0 +1,4 @@
+usr/include/glite/wmsutils/exception/*
+usr/lib/lib*.so
+usr/lib/pkgconfig/jobman-exception.pc
+

@@ -1,0 +1,22 @@
+Source:  glite-wms-utils-exception
+Section:  libs
+Priority:  optional
+Maintainer:  WMS group <wms-support@lists.infn.it>
+Build-Depends: debhelper (>= 8.0.0~)
+Standards-Version:  3.9.1
+Homepage: http://glite.cern.ch/
+
+Package:  glite-wms-utils-exception
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: C/C++ exception libraries for job management applications
+ C/C++ exception libraries for job management applications
+
+
+
+Package:  glite-wms-utils-exception-dev
+Section: libdevel
+Architecture: any
+Depends: glite-wms-utils-exception (= ${binary:Version}), ${misc:Depends}
+Description: Development files for C/C++ jobmanagement exception
+ Development files for C/C++ jobmanagement exception
