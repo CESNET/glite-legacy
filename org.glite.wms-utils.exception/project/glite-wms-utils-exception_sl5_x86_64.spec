@@ -1,13 +1,12 @@
 Summary: C/C++ exception libraries for job management applications
 Name: glite-wms-utils-exception
-Version:
-Release:
+Version: %{extversion}
+Release: %{extage}.%{extdist}
 License: Apache Software License
 Vendor: EMI
 URL: http://glite.cern.ch/
-Packager: WMS group <wms-support@lists.infn.it>
 Group: System Environment/Libraries
-BuildArch:
+BuildArch: %{_arch}
 BuildRequires: chrpath, libtool
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 AutoReqProv: yes
@@ -59,8 +58,7 @@ rm -rf %{buildroot}
 %{_libdir}/libglite_wmsutils_exception.so.0.0.0
 
 
-%changelog
- 
+
 %package devel
 Summary: C/C++ exception libraries for job management applications (development files)
 Group: System Environment/Libraries
@@ -79,4 +77,9 @@ C/C++ exception libraries for job management applications (development files)
 %dir %{_libdir}/pkgconfig/
 %{_libdir}/pkgconfig/jobman-exception.pc
 %{_libdir}/libglite_wmsutils_exception.so
+
+
+%changelog
+* %(date +"%%a %%b %%d %%Y") WMS group <wms-support@lists.infn.it> - %{version}-%{release}
+- %{extclog}
 
